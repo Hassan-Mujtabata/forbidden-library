@@ -152,8 +152,33 @@ header .brand span{color:var(--gold)}
   padding:10px 6px;margin:1.5em 0;line-height:1.65}
 #rbody .pull::before,#rbody .pull::after{content:"— ✦ —";display:block;color:var(--tx2);
   font-size:11px;letter-spacing:.45em;font-style:normal;margin:10px 0}
+/* ---------- side illustrations ---------- */
+#rbody figure.sidefig{float:right;width:170px;margin:8px -10px 16px 22px;padding:14px 14px 12px;
+  background:linear-gradient(160deg,rgba(255,255,255,.06),rgba(255,255,255,.02));
+  border:1px solid var(--line);border-radius:16px;text-align:center;box-shadow:0 10px 26px -14px rgba(0,0,0,.7);
+  opacity:0;transform:translateY(12px) scale(.96);transition:opacity .6s ease,transform .6s ease}
+#rbody figure.sidefig.left{float:left;margin:8px 22px 16px -10px}
+#rbody figure.sidefig.vis{opacity:1;transform:none}
+#rbody figure.sidefig svg{width:100%;height:118px;display:block;overflow:visible}
+#rbody figure.sidefig figcaption{font-family:var(--sans);font-size:10.5px;letter-spacing:.22em;
+  text-transform:uppercase;color:var(--tx2);margin-top:10px}
+#rbody figure.sidefig svg [class^="an-"]{transform-box:fill-box;transform-origin:center}
+@keyframes fspin{to{transform:rotate(360deg)}}
+@keyframes fbob{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+@keyframes fbreathe{0%,100%{transform:scale(.82)}50%{transform:scale(1.06)}}
+@keyframes fflick{0%,100%{transform:scaleY(1) rotate(0);opacity:1}50%{transform:scaleY(1.12) rotate(-1deg);opacity:.82}}
+@keyframes fpulse{0%,100%{opacity:.35}50%{opacity:1}}
+@keyframes froll{to{transform:rotate(360deg)}}
+.an-spin{animation:fspin 16s linear infinite}
+.an-bob{animation:fbob 3.6s ease-in-out infinite}
+.an-breathe{animation:fbreathe 5s ease-in-out infinite}
+.an-flick{animation:fflick 1.5s ease-in-out infinite;transform-origin:50% 90%!important}
+.an-pulse{animation:fpulse 2.6s ease-in-out infinite}
+.an-roll{animation:froll 7s linear infinite}
+@media(max-width:560px){#rbody figure.sidefig{float:none!important;width:auto;max-width:230px;margin:18px auto!important}}
 @media (prefers-reduced-motion:reduce){
-  #rbody p,#rbody blockquote{opacity:1;transform:none;transition:none}
+  #rbody p,#rbody blockquote,#rbody figure.sidefig{opacity:1;transform:none;transition:none}
+  #rbody figure.sidefig svg *{animation:none!important}
 }
 
 /* ---------- toasts ---------- */
@@ -402,13 +427,11 @@ function openEp(id,e){
   const pull=pickPull(ep);
   ep.p.forEach((p,i)=>{const el=document.createElement(i===pull?"blockquote":"p");
     if(i===pull)el.className="pull";el.textContent=p;body.appendChild(el)});
-  if("IntersectionObserver"in window){
-    const io=new IntersectionObserver(es=>{for(const x of es)if(x.isIntersecting){x.target.classList.add("vis");io.unobserve(x.target)}},{threshold:.05});
-    body.querySelectorAll("p,blockquote").forEach(el=>io.observe(el));
-  }else body.querySelectorAll("p,blockquote").forEach(el=>el.classList.add("vis"));
+  injectFigures(body,ep,b);
   renderEnd();show("reader");
+  const sv=S.pos[id];window.scrollTo(0,sv&&sv.scroll?sv.scroll:0);
+  revealVisible(1.3);
   drawArt(cv,b,e);
-  const sv=S.pos[id];if(sv&&sv.scroll)requestAnimationFrame(()=>window.scrollTo(0,sv.scroll));
 }
 function renderEnd(){
   const b=bookById(CUR.b),ep=b.episodes[CUR.e],end=$("rend");end.innerHTML="";
@@ -435,9 +458,16 @@ function complete(){
   if(lvl()>before)setTimeout(()=>toast(`⬆ LEVEL ${lvl()} — ${lvlName()}`,true),600);
   checkAch();renderEnd();
 }
+// reveal fade-up elements once they're near the viewport (robust, no IntersectionObserver dependency)
+function revealVisible(factor){
+  const h=window.innerHeight*(factor||1.05);
+  for(const el of document.querySelectorAll("#rbody p:not(.vis),#rbody blockquote:not(.vis),#rbody figure.sidefig:not(.vis)"))
+    if(el.getBoundingClientRect().top<h)el.classList.add("vis");
+}
 // scroll progress + position save
 let scrollT;window.addEventListener("scroll",()=>{
   if(!$("reader").classList.contains("on"))return;
+  revealVisible();
   const h=document.documentElement,max=h.scrollHeight-h.clientHeight;
   $("rprog").style.width=(max>0?h.scrollTop/max*100:0)+"%";
   clearTimeout(scrollT);scrollT=setTimeout(()=>{if(CUR.b){S.pos[CUR.b]={ep:CUR.e,scroll:h.scrollTop};save()}},300);
@@ -521,6 +551,68 @@ function tick(){
 function stopFlow(){F.playing=false;clearTimeout(F.timer)}
 $("f-play").onclick=()=>{if(F.playing){stopFlow();$("f-play").textContent="▶ play"}else startFlow()};
 $("f-wpm").oninput=e=>{S.wpm=+e.target.value;$("f-wpmv").textContent=S.wpm;save()};
+
+/* ---------- side illustrations: concept -> animated SVG ---------- */
+const wrap=(A,inner)=>`<svg viewBox="0 0 100 100" fill="none" stroke="${A}" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">${inner}</svg>`;
+const FIGURES=[
+ {id:"mirror",cap:"Reflection",kw:/mirror|reflect|imitat|\becho|mimic/,svg:A=>wrap(A,`<ellipse cx="50" cy="45" rx="23" ry="31" fill="${A}" fill-opacity=".1"/><ellipse cx="50" cy="45" rx="23" ry="31"/><path class="an-pulse" d="M42 26l-8 32M52 27l-6 18" stroke-opacity=".8"/><path d="M34 82h32M50 76v6"/>`)},
+ {id:"mask",cap:"The Mask",kw:/\bmask|disguise|pretend|facade|persona|conceal|two.faced|hypocri/,svg:A=>wrap(A,`<path d="M30 28c14-6 26-6 40 0 2 22-6 46-20 46S28 50 30 28z" fill="${A}" fill-opacity=".12"/><path d="M30 28c14-6 26-6 40 0 2 22-6 46-20 46S28 50 30 28z"/><circle cx="42" cy="46" r="2.6" fill="${A}" stroke="none"/><circle cx="58" cy="46" r="2.6" fill="${A}" stroke="none"/><path class="an-pulse" d="M42 60q8 6 16 0"/>`)},
+ {id:"crown",cap:"The Crown",kw:/\bking|queen|crown|throne|royal|monarch|majest|ruler|reign|sovereign/,svg:A=>wrap(A,`<path d="M24 66h52l6-32-17 13-15-23-15 23-17-13z" fill="${A}" fill-opacity=".14"/><path d="M24 66h52l6-32-17 13-15-23-15 23-17-13z"/><path d="M24 74h52"/><circle class="an-pulse" cx="50" cy="24" r="2.6" fill="${A}" stroke="none"/>`)},
+ {id:"chess",cap:"The Gambit",kw:/chess|strateg|gambit|checkmate|\bpawn|maneuver|calculat|foresee|outmaneuv/,svg:A=>wrap(A,`<path d="M38 76h30M42 76c-2-12 2-14 2-22-6 4-11 2-13-2 5-3 7-7 15-15 3-3 7-6 13-6 10 0 13 9 13 21 0 11-2 17-4 24z" fill="${A}" fill-opacity=".14"/><path d="M38 76h30M42 76c-2-12 2-14 2-22-6 4-11 2-13-2 5-3 7-7 15-15 3-3 7-6 13-6 10 0 13 9 13 21 0 11-2 17-4 24z"/><circle cx="60" cy="38" r="1.6" fill="${A}" stroke="none"/>`)},
+ {id:"sword",cap:"The Blade",kw:/\bsword|weapon|blade|\bwar\b|battle|combat|conquer|fight|assault|strike\b/,svg:A=>wrap(A,`<path class="an-bob" d="M50 14l6 44-6 8-6-8z" fill="${A}" fill-opacity=".18"/><path class="an-bob" d="M50 14l6 44-6 8-6-8zM34 66h32M50 66v20"/>`)},
+ {id:"shield",cap:"The Shield",kw:/\bshield|defend|defen[cs]e|protect|guard|armou?r|safeguard|ward off/,svg:A=>wrap(A,`<path d="M50 16l28 8v22c0 20-14 30-28 38-14-8-28-18-28-38V24z" fill="${A}" fill-opacity=".12"/><path d="M50 16l28 8v22c0 20-14 30-28 38-14-8-28-18-28-38V24z"/><path class="an-pulse" d="M40 47l7 8 15-17"/>`)},
+ {id:"flame",cap:"The Flame",kw:/\bfire|flame|burn|ember|passion|ignit|spark|blaz|inferno|heat/,svg:A=>wrap(A,`<path class="an-flick" d="M50 20c10 14 18 20 18 34a18 18 0 01-36 0c0-8 4-12 8-18 2 6 6 6 8 2 2-6-2-12 2-18z" fill="${A}" fill-opacity=".2"/><path class="an-flick" d="M50 20c10 14 18 20 18 34a18 18 0 01-36 0c0-8 4-12 8-18 2 6 6 6 8 2 2-6-2-12 2-18z"/>`)},
+ {id:"rose",cap:"The Rose",kw:/\brose|seduc|desire|allure|charm|romance|\blover|passion|entice|irresist/,svg:A=>wrap(A,`<g class="an-bob"><circle cx="50" cy="36" r="15" fill="${A}" fill-opacity=".16"/><path d="M50 36c0-8-10-9-10 1M50 36c8 0 9-8-1-10M50 36c-8 4 0 12 6 3"/><circle cx="50" cy="36" r="15"/></g><path d="M50 51v31M50 68q11-2 13-11M50 74q-11-2-13-9"/>`)},
+ {id:"snake",cap:"The Serpent",kw:/\bsnake|serpent|venom|poison|betray|treacher|cunning|viper|slither/,svg:A=>wrap(A,`<path d="M28 82c18 0 6-24 22-24s6 20 20 13" stroke-width="6" stroke-opacity=".2"/><path d="M28 82c18 0 6-24 22-24s6 20 20 13"/><circle cx="72" cy="70" r="2" fill="${A}" stroke="none"/><path class="an-pulse" d="M74 70l4-2" stroke-opacity=".7"/>`)},
+ {id:"eye",cap:"The Eye",kw:/\beye|watch|observ|\bgaze|vision|awar|noti[cf]|surveil|scrutin|percei/,svg:A=>wrap(A,`<path d="M14 50c14-20 58-20 72 0-14 20-58 20-72 0z" fill="${A}" fill-opacity=".1"/><path d="M14 50c14-20 58-20 72 0-14 20-58 20-72 0z"/><circle class="an-pulse" cx="50" cy="50" r="11" fill="${A}" fill-opacity=".3" stroke="none"/><circle cx="50" cy="50" r="11"/><circle cx="50" cy="50" r="3.4" fill="${A}" stroke="none"/>`)},
+ {id:"web",cap:"The Web",kw:/network|connect|\bweb\b|\blink|relationship|social|all(y|ies|iance)|circle of|contacts?/,svg:A=>wrap(A,`<g class="an-pulse" stroke-opacity=".5"><path d="M30 30L50 52 72 28M30 30 24 66 50 52 74 70 72 28M24 66 74 70"/></g><circle cx="30" cy="30" r="4" fill="${A}" stroke="none"/><circle cx="72" cy="28" r="4" fill="${A}" stroke="none"/><circle cx="50" cy="52" r="5.5" fill="${A}" stroke="none"/><circle cx="24" cy="66" r="4" fill="${A}" stroke="none"/><circle cx="74" cy="70" r="4" fill="${A}" stroke="none"/>`)},
+ {id:"scales",cap:"The Balance",kw:/\bbalance|justice|\bfair|weigh|equal|\bjudg|equit|even.handed/,svg:A=>wrap(A,`<path d="M50 18v56M34 82h32"/><path class="an-bob" d="M24 34h52M24 34l-8 18a10 10 0 0020 0zM76 34l-8 18a10 10 0 0020 0z" fill="${A}" fill-opacity=".12"/><circle cx="50" cy="30" r="3" fill="${A}" stroke="none"/>`)},
+ {id:"lotus",cap:"The Lotus",kw:/lotus|meditat|mindful|enlighten|awaken|\bzen|nirvana|serenity|equanim|dharma|buddh/,svg:A=>wrap(A,`<g class="an-breathe"><path d="M50 44c-4-14 0-26 0-26s4 12 0 26z" fill="${A}" fill-opacity=".22"/><path d="M50 66V44c-9 3-13 15-13 15M50 66V44c9 3 13 15 13 15M50 64c-13-3-24 3-24 3M50 64c13-3 24 3 24 3"/><path d="M50 68c-14-3-24-13-24-13s11-1 24 8c13-9 24-8 24-8s-10 10-24 13z" fill="${A}" fill-opacity=".14"/></g>`)},
+ {id:"candle",cap:"The Light",kw:/candle|\blight\b|illumin|\bglow|clarity|insight|lantern|beacon|radian|luminous/,svg:A=>wrap(A,`<rect x="42" y="46" width="16" height="34" rx="2" fill="${A}" fill-opacity=".12"/><rect x="42" y="46" width="16" height="34" rx="2"/><path d="M42 80h16M50 46v-8"/><path class="an-flick" d="M50 38c5 4 6 9 0 13-6-4-5-9 0-13z" fill="${A}" fill-opacity=".35"/>`)},
+ {id:"mountain",cap:"The Summit",kw:/mountain|summit|\bpeak|climb|\bgoal|patien|endur|persever|long.term|aspir/,svg:A=>wrap(A,`<path d="M12 78h76L58 30 44 54 36 44z" fill="${A}" fill-opacity=".12"/><path d="M12 78h76L58 30 44 54 36 44z"/><path d="M52 40l6-10 6 10-4 3-2-2-3 3z" fill="${A}" fill-opacity=".3" stroke="none"/><circle class="an-pulse" cx="72" cy="26" r="6" fill="${A}" fill-opacity=".4" stroke="none"/>`)},
+ {id:"breath",cap:"Breathe",kw:/\bbreath|inhale|exhale|\blungs|breathing|respir/,svg:A=>wrap(A,`<g class="an-breathe"><circle cx="50" cy="50" r="26" fill="${A}" fill-opacity=".12"/><circle cx="50" cy="50" r="26"/></g><circle cx="50" cy="50" r="4" fill="${A}" stroke="none"/>`)},
+ {id:"brain",cap:"The Mind",kw:/\bmind|brain|thought|thinking|mental|conscious|cognit|\bidea|intellect|reason/,svg:A=>wrap(A,`<path d="M46 24c-11 0-17 6-17 14-6 3-8 11-2 17-4 8 2 16 11 16 2 4 8 4 8-2V27c0-4-4-6-9-3z" fill="${A}" fill-opacity=".12"/><path d="M46 24c-11 0-17 6-17 14-6 3-8 11-2 17-4 8 2 16 11 16 2 4 8 4 8-2V27c0-4-4-6-9-3z"/><path d="M54 24c11 0 17 6 17 14 6 3 8 11 2 17 4 8-2 16-11 16"/><path class="an-pulse" d="M44 40c4 2 4 6 0 8M60 40c-4 2-4 8 0 10" stroke-opacity=".6"/>`)},
+ {id:"heart",cap:"The Heart",kw:/\bheart|emotion|feeling|\blove\b|compassion|empath|affection|tender/,svg:A=>wrap(A,`<path class="an-breathe" d="M50 78C24 60 22 40 33 33c8-6 15-2 17 6 2-8 9-12 17-6 11 7 9 27-17 45z" fill="${A}" fill-opacity=".18"/><path class="an-breathe" d="M50 78C24 60 22 40 33 33c8-6 15-2 17 6 2-8 9-12 17-6 11 7 9 27-17 45z"/>`)},
+ {id:"key",cap:"The Key",kw:/\bkey\b|unlock|\bsecret|solution|access|\bunveil|reveal the/,svg:A=>wrap(A,`<g class="an-bob"><circle cx="36" cy="40" r="14" fill="${A}" fill-opacity=".1"/><circle cx="36" cy="40" r="14"/><circle cx="36" cy="40" r="4" fill="${A}" stroke="none"/><path d="M46 50l26 26M60 64l8-8M68 72l6-6"/></g>`)},
+ {id:"chain",cap:"The Chain",kw:/\bchain|\bbond|\bslave|depend|obligat|leverage|\bdebt|indebt|beholden|control over/,svg:A=>wrap(A,`<g class="an-bob"><rect x="24" y="40" width="26" height="17" rx="8.5"/><rect x="48" y="49" width="26" height="17" rx="8.5"/></g><path d="M18 33l7 7M75 66l7 7" stroke-opacity=".5"/>`)},
+ {id:"coin",cap:"The Coin",kw:/\bmoney|wealth|\bgold|\bcoin|\brich|fortune|\bprice|\bvalue|greed|profit|financ/,svg:A=>wrap(A,`<g class="an-bob"><circle cx="50" cy="52" r="24" fill="${A}" fill-opacity=".14"/><circle cx="50" cy="52" r="24"/><path d="M50 40v24M44 46h9a5 5 0 010 10h-9M44 56h11"/></g>`)},
+ {id:"hourglass",cap:"Time",kw:/\btime\b|patien|\bwait|\bmoment|delay|hourglass|eternal|\bhurry|fleeting|hasten/,svg:A=>wrap(A,`<path d="M30 20h40M30 84h40M33 20c0 20 17 22 17 32 0-10 17-12 17-32M33 84c0-20 17-22 17-32 0 10 17 12 17 32" fill="${A}" fill-opacity=".1"/><path d="M33 20c0 20 17 22 17 32 0-10 17-12 17-32M33 84c0-20 17-22 17-32 0 10 17 12 17 32"/><path class="an-pulse" d="M50 54v18" stroke-opacity=".6"/><circle class="an-pulse" cx="50" cy="76" r="3" fill="${A}" stroke="none"/>`)},
+ {id:"moon",cap:"The Moon",kw:/\bmoon|\bnight|\bshadow|\bdark|\bdream|myster|nocturn|twilight/,svg:A=>wrap(A,`<path class="an-bob" d="M62 22a30 30 0 100 56A24 24 0 0162 22z" fill="${A}" fill-opacity=".16"/><path class="an-bob" d="M62 22a30 30 0 100 56A24 24 0 0162 22z"/><circle class="an-pulse" cx="70" cy="34" r="2" fill="${A}" stroke="none"/>`)},
+ {id:"sun",cap:"The Sun",kw:/\bsun\b|\bday(light|time)?\b|radian|\bshine|warmth|\benergy|vital|brillian/,svg:A=>wrap(A,`<circle class="an-breathe" cx="50" cy="50" r="15" fill="${A}" fill-opacity=".22"/><circle cx="50" cy="50" r="15"/><g class="an-spin"><path d="M50 16v11M50 73v11M16 50h11M73 50h11M27 27l8 8M65 65l8 8M73 27l-8 8M35 65l-8 8"/></g>`)},
+ {id:"star",cap:"The Star",kw:/\bstar|aspire|\bideal|destiny|\bhope|ambitio|greatness|legend|iconic/,svg:A=>wrap(A,`<path class="an-pulse" d="M50 16l9 24 26 1-20 16 7 25-22-15-22 15 7-25-20-16 26-1z" fill="${A}" fill-opacity=".18"/><path class="an-pulse" d="M50 16l9 24 26 1-20 16 7 25-22-15-22 15 7-25-20-16 26-1z"/>`)},
+ {id:"puppet",cap:"The Strings",kw:/puppet|manipulat|\bstring|influenc|coerc|\bsteer|pull(ing)? the|behind the scenes/,svg:A=>wrap(A,`<path d="M28 16v13M50 16v9M72 16v13"/><path class="an-pulse" d="M28 29l10 15M50 25v18M72 29l-10 15" stroke-opacity=".6"/><circle cx="50" cy="55" r="10" fill="${A}" fill-opacity=".14"/><circle cx="50" cy="55" r="10"/><path d="M42 63l-6 19M58 63l6 19M50 65v17"/>`)},
+ {id:"target",cap:"The Target",kw:/\btarget|\baim\b|\bfocus|bullseye|objectiv|\bpurpose|\bmark\b|precis/,svg:A=>wrap(A,`<circle cx="50" cy="50" r="30"/><circle class="an-pulse" cx="50" cy="50" r="20"/><circle cx="50" cy="50" r="10" fill="${A}" fill-opacity=".2"/><circle cx="50" cy="50" r="4" fill="${A}" stroke="none"/>`)},
+ {id:"trap",cap:"The Trap",kw:/\btrap|\bsnare|\bbait|\blure|ambush|deceiv|deception|\btrick|decoy|entrap/,svg:A=>wrap(A,`<path d="M18 66h64"/><path class="an-pulse" d="M28 66l-7-19 13 11 6-13 4 15 6-15 6 13 13-11-7 19" fill="${A}" fill-opacity=".1"/><circle cx="50" cy="70" r="4" fill="${A}" stroke="none"/>`)},
+ {id:"stage",cap:"The Stage",kw:/\bstage|spotlight|attention|audience|perform|spectacle|impress|reputation|acclaim|applaus/,svg:A=>wrap(A,`<path d="M50 18l-30 48h60z" fill="${A}" fill-opacity=".14"/><path d="M50 18l-30 48h60z"/><ellipse cx="50" cy="70" rx="25" ry="6" fill="${A}" fill-opacity=".2" stroke="none"/><circle class="an-pulse" cx="50" cy="16" r="6" fill="${A}" stroke="none"/>`)},
+ {id:"fox",cap:"The Fox",kw:/\bfox|\bclever|cunning|\bsly|\bwit\b|shrewd|craft(y|iness)|guile/,svg:A=>wrap(A,`<path d="M30 34l10 6 10-6 10 6 10-6-4 24c0 13-10 20-16 20s-16-7-16-20z" fill="${A}" fill-opacity=".14"/><path d="M30 34l10 6 10-6 10 6 10-6-4 24c0 13-10 20-16 20s-16-7-16-20z"/><circle cx="44" cy="52" r="2" fill="${A}" stroke="none"/><circle cx="56" cy="52" r="2" fill="${A}" stroke="none"/><path d="M47 63h6l-3 4z" fill="${A}" stroke="none"/>`)},
+ {id:"spider",cap:"The Weaver",kw:/spider|\bweav|entangl|ensnare|\bthread|\bspun|caught in/,svg:A=>wrap(A,`<g class="an-bob"><circle cx="50" cy="53" r="9" fill="${A}" fill-opacity=".2"/><circle cx="50" cy="41" r="5" fill="${A}" fill-opacity=".2"/><path d="M41 49l-16-8M41 55l-18 3M42 61l-14 12M59 49l16-8M59 55l18 3M58 61l14 12"/></g><path d="M50 18v14" stroke-opacity=".5"/>`)},
+ {id:"water",cap:"The Flow",kw:/\bwater|\bflow|\briver|ripple|\badapt|\bfluid|\bocean|\bwave|current|yield/,svg:A=>wrap(A,`<path class="an-pulse" d="M16 40q17-11 34 0t34 0"/><path class="an-pulse" d="M16 54q17-11 34 0t34 0" style="animation-delay:.4s"/><path class="an-pulse" d="M16 68q17-11 34 0t34 0" style="animation-delay:.8s"/>`)},
+ {id:"ladder",cap:"The Ascent",kw:/ladder|\brise\b|ascen|\brank|status|\bclimb|promot|upward|advance/,svg:A=>wrap(A,`<path d="M38 84L46 18M62 84L54 18M40 72h20M42 58h18M44 44h16M46 30h14"/>`)},
+ {id:"maze",cap:"The Labyrinth",kw:/\bmaze|labyrinth|\bcomplex|confus|\blost\b|puzzl|\briddle|intricate|tangl/,svg:A=>wrap(A,`<rect x="22" y="22" width="56" height="56" rx="3" fill="${A}" fill-opacity=".06"/><path d="M22 38h34M78 38H56v16h16M38 78V54H22M56 54V38M38 38v16h10"/><circle class="an-pulse" cx="50" cy="50" r="3" fill="${A}" stroke="none"/>`)},
+ {id:"domino",cap:"Cause & Effect",kw:/domino|cascade|consequence|inevitab|chain reaction|ripple effect|set in motion/,svg:A=>wrap(A,`<g class="an-bob"><rect x="24" y="40" width="13" height="34" rx="2" fill="${A}" fill-opacity=".14"/><rect x="24" y="40" width="13" height="34" rx="2"/><rect x="44" y="40" width="13" height="34" rx="2" transform="rotate(9 50 57)"/><rect x="64" y="40" width="13" height="34" rx="2" transform="rotate(18 70 57)" fill="${A}" fill-opacity=".14"/></g>`)},
+ {id:"ball",cap:"The Ball",kw:/football|soccer|\bball\b|\bsphere|\bround\b/,svg:A=>wrap(A,`<g class="an-roll"><circle cx="50" cy="50" r="26" fill="${A}" fill-opacity=".1"/><circle cx="50" cy="50" r="26"/><path d="M50 33l11 8-4 13H43l-4-13z" fill="${A}" fill-opacity=".85" stroke="none"/><path d="M50 24v9M33 43l8 6M67 43l-8 6M41 71l3-8M59 71l-3-8"/></g>`)},
+];
+FIGURES.forEach(f=>f.kw=new RegExp(f.kw.source,"i"));
+function injectFigures(body,ep,b){
+  const ps=[...body.querySelectorAll("p")];
+  if(ps.length<4)return;
+  let seed=99+ep.p.length;for(const c of b.id)seed=seed*31+c.charCodeAt(0)|0;
+  const rnd=mulberry(seed);
+  const used=new Set();let placed=0,lastIdx=-3;
+  const max=Math.min(4,Math.max(1,Math.floor(ps.length/3)));
+  for(let i=2;i<ps.length-1&&placed<max;i++){
+    if(i-lastIdx<3)continue;
+    const txt=ps[i].textContent;if(txt.length<90)continue;
+    const hits=FIGURES.filter(f=>!used.has(f.id)&&f.kw.test(txt));
+    if(!hits.length)continue;
+    const fig=hits[Math.floor(rnd()*hits.length)];
+    const fc=document.createElement("figure");
+    fc.className="sidefig "+(placed%2?"left":"right");
+    fc.innerHTML=fig.svg(b.accent)+`<figcaption>${fig.cap}</figcaption>`;
+    ps[i].parentNode.insertBefore(fc,ps[i]);
+    used.add(fig.id);placed++;lastIdx=i;
+  }
+}
 
 /* ---------- pull quote pick ---------- */
 function pickPull(ep){
