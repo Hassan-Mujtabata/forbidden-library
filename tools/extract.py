@@ -93,6 +93,11 @@ def extract(meta):
     blocks = [t for t in blocks if not (len(t) < 90 and freq[norm(t)] >= thresh)]
     # strip bare page numbers / roman numerals
     blocks = [t for t in blocks if not re.fullmatch(r"[\divxlc\s.\-–•|]+", t.strip().lower())]
+    # strip front-matter boilerplate
+    junk = re.compile(r"copyright|isbn|library of congress|all rights reserved|penguin\s|viking penguin"
+                      r"|z-lib|pdf room|pdfdrive|www\.|http|printed in the|first published|publishing division",
+                      re.IGNORECASE)
+    blocks = [t for t in blocks if not (len(t) < 400 and junk.search(t))]
 
     paras = [p for p in (clean(t) for t in blocks) if p]
 

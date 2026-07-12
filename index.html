@@ -144,6 +144,18 @@ header .brand span{color:var(--gold)}
 #fprog{width:min(420px,80vw);height:4px;background:var(--card2);border-radius:99px;overflow:hidden}
 #fpfill{height:100%;background:var(--gold);width:0}
 
+/* ---------- generative art & motion ---------- */
+#rbanner{display:block;width:100%;height:150px;margin:16px auto 4px;border-radius:14px;border:1px solid var(--line)}
+#rbody p,#rbody blockquote{opacity:0;transform:translateY(10px);transition:opacity .6s ease,transform .6s ease}
+#rbody p.vis,#rbody blockquote.vis{opacity:1;transform:none}
+#rbody .pull{font-size:1.22em;font-style:italic;text-align:center;color:var(--gold);
+  padding:10px 6px;margin:1.5em 0;line-height:1.65}
+#rbody .pull::before,#rbody .pull::after{content:"— ✦ —";display:block;color:var(--tx2);
+  font-size:11px;letter-spacing:.45em;font-style:normal;margin:10px 0}
+@media (prefers-reduced-motion:reduce){
+  #rbody p,#rbody blockquote{opacity:1;transform:none;transition:none}
+}
+
 /* ---------- toasts ---------- */
 #toasts{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);z-index:100;display:flex;flex-direction:column;gap:8px;align-items:center}
 .toast{background:#1a1608;border:1px solid var(--gold);color:var(--tx);padding:12px 22px;border-radius:99px;
@@ -172,6 +184,7 @@ header .brand span{color:var(--gold)}
   <p>This library opens only for its keyholder. Open the vault through your original link — the key rides inside it. Or paste your key below.</p>
   <input id="keyin" placeholder="paste key…" autocomplete="off">
   <button class="go" id="keygo">UNLOCK</button>
+  <button class="ghostbtn" id="keybio" style="display:none">👁️ Unlock with Windows Hello</button>
   <p id="keyerr" style="color:#e74c3c;font-size:13px"></p>
 </div>
 
@@ -187,6 +200,7 @@ header .brand span{color:var(--gold)}
       <button class="iconbtn" id="btn-search" title="Search">🔍</button>
       <button class="iconbtn" id="btn-hl" title="Highlights">⭐</button>
       <button class="iconbtn" id="btn-ach" title="Achievements">🏆</button>
+      <button class="iconbtn" id="btn-bio" title="Enable face unlock on this device">👁️</button>
     </div>
   </header>
   <button class="bigcard" id="continue" style="display:none"></button>
@@ -290,10 +304,10 @@ async function boot(){
   const hashK=(location.hash.match(/k=([A-Za-z0-9_-]+)/)||[])[1];
   const k=hashK||localStorage.getItem(LS_KEY);
   $("loading").style.display="none";
-  if(!k){show("lock");return}
+  if(!k){showLock();return}
   $("loading").style.display="flex";
   try{DATA=await tryLoad(k);localStorage.setItem(LS_KEY,k)}
-  catch(e){$("loading").style.display="none";show("lock");$("keyerr").textContent=hashK?"That key doesn't fit this lock.":"";return}
+  catch(e){$("loading").style.display="none";showLock();$("keyerr").textContent=hashK?"That key doesn't fit this lock.":"";return}
   $("loading").style.display="none";
   renderHome();show("home");checkAch();
   if("serviceWorker"in navigator)navigator.serviceWorker.register("sw.js").catch(()=>{});
@@ -305,7 +319,9 @@ $("keygo").onclick=async()=>{const k=$("keyin").value.trim();if(!k)return;
 /* ============ views ============ */
 function show(v){for(const el of document.querySelectorAll(".view"))el.classList.remove("on");
   for(const el of document.querySelectorAll(".overlay"))el.classList.remove("on");
+  if(v!=="reader")stopArt();
   $(v).classList.add("on");window.scrollTo(0,0)}
+function showLock(){show("lock");$("keybio").style.display=localStorage.getItem("vault_bio")?"inline-block":"none"}
 document.addEventListener("click",e=>{const c=e.target.closest("[data-close]");if(c){$(c.dataset.close).classList.remove("on");stopFlow()}});
 
 /* ---------- home ---------- */
@@ -378,12 +394,20 @@ function openEp(id,e){
   const ep=b.episodes[e];
   $("r-title").textContent=`${b.glyph} ${b.title} — ${e+1}/${b.episodes.length}`;
   const body=$("rbody");body.innerHTML="";body.style.fontSize=S.font+"px";
+  const cv=document.createElement("canvas");cv.id="rbanner";body.appendChild(cv);
   const h=document.createElement("h1");h.textContent=ep.t;body.appendChild(h);
   const sub=document.createElement("div");sub.className="sub";
   sub.textContent=`${b.title.toUpperCase()} · EPISODE ${e+1} OF ${b.episodes.length} · ${Math.max(1,Math.round(epWords(ep)/230))} MIN · +${epXP(ep)} XP`;
   body.appendChild(sub);
-  for(const p of ep.p){const el=document.createElement("p");el.textContent=p;body.appendChild(el)}
+  const pull=pickPull(ep);
+  ep.p.forEach((p,i)=>{const el=document.createElement(i===pull?"blockquote":"p");
+    if(i===pull)el.className="pull";el.textContent=p;body.appendChild(el)});
+  if("IntersectionObserver"in window){
+    const io=new IntersectionObserver(es=>{for(const x of es)if(x.isIntersecting){x.target.classList.add("vis");io.unobserve(x.target)}},{threshold:.05});
+    body.querySelectorAll("p,blockquote").forEach(el=>io.observe(el));
+  }else body.querySelectorAll("p,blockquote").forEach(el=>el.classList.add("vis"));
   renderEnd();show("reader");
+  drawArt(cv,b,e);
   const sv=S.pos[id];if(sv&&sv.scroll)requestAnimationFrame(()=>window.scrollTo(0,sv.scroll));
 }
 function renderEnd(){
@@ -497,6 +521,126 @@ function tick(){
 function stopFlow(){F.playing=false;clearTimeout(F.timer)}
 $("f-play").onclick=()=>{if(F.playing){stopFlow();$("f-play").textContent="▶ play"}else startFlow()};
 $("f-wpm").oninput=e=>{S.wpm=+e.target.value;$("f-wpmv").textContent=S.wpm;save()};
+
+/* ---------- pull quote pick ---------- */
+function pickPull(ep){
+  let best=-1,dist=1e9;
+  const lo=Math.floor(ep.p.length*.2),hi=Math.ceil(ep.p.length*.85);
+  for(let i=lo;i<hi;i++){const L=ep.p[i].length;
+    if(L>=70&&L<=230&&!/[©®™]|copyright|isbn|all rights/i.test(ep.p[i])){
+      const d=Math.abs(i-ep.p.length/2);if(d<dist){dist=d;best=i}}}
+  return best;
+}
+
+/* ---------- generative episode art ---------- */
+let ART={raf:null};
+function stopArt(){if(ART.raf)cancelAnimationFrame(ART.raf);ART.raf=null}
+function drawArt(canvas,b,e){
+  stopArt();
+  if(!canvas.isConnected)return;
+  const dpr=Math.min(2,window.devicePixelRatio||1);
+  const W=canvas.clientWidth||660,H=canvas.clientHeight||150;
+  canvas.width=W*dpr;canvas.height=H*dpr;
+  const ctx=canvas.getContext("2d");ctx.scale(dpr,dpr);
+  let seed=e+7;for(const c of b.id)seed=seed*31+c.charCodeAt(0)|0;
+  const rnd=mulberry(seed);
+  const shadow=b.wing==="shadow",A=b.accent;
+  const al=(hex,a)=>hex+Math.max(0,Math.min(255,Math.round(a*255))).toString(16).padStart(2,"0");
+  const style=Math.floor(rnd()*3);
+  const P=[];for(let i=0;i<34;i++)P.push({x:rnd()*W,y:rnd()*H,r:1+rnd()*2.4,s:.2+rnd()*.8,ph:rnd()*6.28});
+  const still=matchMedia("(prefers-reduced-motion: reduce)").matches;
+  let t=rnd()*100;
+  function frame(){
+    t+=.016;
+    const g=ctx.createLinearGradient(0,0,W,H);
+    g.addColorStop(0,shadow?"#151019":"#0d1517");g.addColorStop(1,"#0a0c12");
+    ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+    if(style===0){ // embers (shadow) / fireflies (light)
+      for(const p of P){
+        const y=((p.y-t*12*p.s)%H+H)%H, x=p.x+Math.sin(t*p.s+p.ph)*14;
+        const a=.2+.5*Math.abs(Math.sin(t*p.s+p.ph));
+        ctx.beginPath();ctx.arc(x,shadow?H-y:y,p.r,0,7);
+        ctx.shadowColor=A;ctx.shadowBlur=8;ctx.fillStyle=al(A,a);ctx.fill();ctx.shadowBlur=0;}
+    }else if(style===1&&shadow){ // web of influence
+      for(let i=0;i<P.length;i++){const p=P[i];
+        p.x=(p.x+Math.sin(t*.3+p.ph)*.3+W)%W;p.y=(p.y+Math.cos(t*.25+p.ph)*.25+H)%H;
+        for(let j=i+1;j<P.length;j++){const q=P[j],d=Math.hypot(p.x-q.x,p.y-q.y);
+          if(d<85){ctx.strokeStyle=al(A,.14);ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(q.x,q.y);ctx.stroke()}}
+        ctx.fillStyle=al(A,.65);ctx.beginPath();ctx.arc(p.x,p.y,1.6,0,7);ctx.fill();}
+    }else if(style===1){ // ripples
+      for(let i=0;i<5;i++){const r=(t*22+i*40)%210,a=Math.max(0,1-r/210);
+        ctx.strokeStyle=al(A,a*.4);ctx.lineWidth=1.5;
+        ctx.beginPath();ctx.arc(W/2,H/2,r,0,7);ctx.stroke();}
+    }else if(shadow){ // smoke sines
+      for(let k=0;k<4;k++){ctx.beginPath();
+        for(let x=0;x<=W;x+=8){const y=H/2+Math.sin(x*.02+t*(.5+k*.2)+k*2)*(14+k*8);
+          x===0?ctx.moveTo(x,y):ctx.lineTo(x,y)}
+        ctx.strokeStyle=al(A,[.33,.25,.18,.12][k]);ctx.lineWidth=1.4;ctx.stroke();}
+    }else{ // breathing pacer — 8s cycle, follow the circle
+      const ph=(t%8)/8,inhale=ph<.5,x=inhale?ph*2:(ph-.5)*2,ease=.5-.5*Math.cos(Math.PI*x);
+      const r=24+34*(inhale?ease:1-ease);
+      ctx.beginPath();ctx.arc(W/2,H/2-6,r,0,7);ctx.fillStyle=al(A,.13);ctx.fill();
+      ctx.beginPath();ctx.arc(W/2,H/2-6,r,0,7);ctx.strokeStyle=al(A,.8);ctx.lineWidth=2;ctx.stroke();
+      ctx.fillStyle=al(A,.7);ctx.font="11px system-ui";ctx.textAlign="center";
+      ctx.fillText(inhale?"breathe in":"breathe out",W/2,H-12);}
+    ctx.globalAlpha=.15;ctx.font="60px serif";ctx.textAlign="right";ctx.textBaseline="middle";
+    ctx.fillText(b.glyph,W-16,H/2);ctx.globalAlpha=1;
+    if(!still)ART.raf=requestAnimationFrame(frame);
+  }
+  frame();
+}
+
+/* ---------- face unlock (WebAuthn PRF / Windows Hello) ---------- */
+const BIO_SALT=new TextEncoder().encode("vault-prf-salt-v1");
+const b64e=u=>{const b=new Uint8Array(u);let s="";for(const c of b)s+=String.fromCharCode(c);
+  return btoa(s).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"")};
+async function bioSecret(idB64){
+  const a=await navigator.credentials.get({publicKey:{
+    challenge:crypto.getRandomValues(new Uint8Array(32)),
+    allowCredentials:[{type:"public-key",id:b64d(idB64)}],
+    userVerification:"required",timeout:60000,
+    extensions:{prf:{eval:{first:BIO_SALT}}}}});
+  const r=a.getClientExtensionResults().prf?.results?.first;
+  if(!r)throw new Error("no-prf");
+  return r;
+}
+async function enrollBio(){
+  const k=localStorage.getItem(LS_KEY);
+  if(!k){toast("Unlock the vault first");return}
+  if(localStorage.getItem("vault_bio")){toast("👁️ Face unlock already active on this device");return}
+  try{
+    const cred=await navigator.credentials.create({publicKey:{
+      challenge:crypto.getRandomValues(new Uint8Array(32)),
+      rp:{name:"The Vault",id:location.hostname},
+      user:{id:crypto.getRandomValues(new Uint8Array(16)),name:"keyholder",displayName:"Keyholder"},
+      pubKeyCredParams:[{alg:-7,type:"public-key"},{alg:-257,type:"public-key"}],
+      authenticatorSelection:{authenticatorAttachment:"platform",userVerification:"required",residentKey:"preferred"},
+      timeout:60000,extensions:{prf:{}}}});
+    const idB64=b64e(cred.rawId);
+    const secret=await bioSecret(idB64);
+    const wk=await crypto.subtle.importKey("raw",secret,"AES-GCM",false,["encrypt"]);
+    const iv=crypto.getRandomValues(new Uint8Array(12));
+    const ct=await crypto.subtle.encrypt({name:"AES-GCM",iv},wk,b64d(k));
+    localStorage.setItem("vault_bio",JSON.stringify({id:idB64,iv:b64e(iv),ct:b64e(ct)}));
+    toast("👁️ Face unlock enabled on this device",true);
+  }catch(err){
+    toast(err.message==="no-prf"?"This browser can't derive keys from Hello yet":"Face unlock unavailable: "+err.name,true);
+  }
+}
+async function bioUnlock(){
+  try{
+    const rec=JSON.parse(localStorage.getItem("vault_bio"));
+    const secret=await bioSecret(rec.id);
+    const wk=await crypto.subtle.importKey("raw",secret,"AES-GCM",false,["decrypt"]);
+    const kb=await crypto.subtle.decrypt({name:"AES-GCM",iv:b64d(rec.iv)},wk,b64d(rec.ct));
+    const k=b64e(kb);
+    DATA=await tryLoad(k);localStorage.setItem(LS_KEY,k);
+    renderHome();show("home");checkAch();
+  }catch(err){$("keyerr").textContent="Face unlock failed — use your link or key."}
+}
+$("btn-bio").onclick=enrollBio;
+$("keybio").onclick=bioUnlock;
+if(!window.PublicKeyCredential)$("btn-bio").style.display="none";
 
 boot();
 </script>
