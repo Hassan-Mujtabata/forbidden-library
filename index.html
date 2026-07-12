@@ -1,0 +1,504 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0a0c12">
+<title>The Vault</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<style>
+:root{
+  --bg:#0a0c12; --bg2:#10131d; --card:rgba(255,255,255,.045); --card2:rgba(255,255,255,.08);
+  --tx:#e8e6df; --tx2:#9a97a5; --gold:#d4af37; --jade:#4ecdc4; --line:rgba(255,255,255,.09);
+  --serif:Georgia,'Times New Roman',serif; --sans:system-ui,-apple-system,'Segoe UI',sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--tx);font-family:var(--sans);min-height:100vh;
+  background-image:radial-gradient(1200px 600px at 70% -10%,rgba(212,175,55,.07),transparent),
+                   radial-gradient(900px 500px at 0% 100%,rgba(78,205,196,.05),transparent)}
+button{font-family:inherit;color:inherit;background:none;border:none;cursor:pointer}
+.view{display:none;max-width:1060px;margin:0 auto;padding:20px 18px 90px}
+.view.on{display:block}
+.overlay{display:none;position:fixed;inset:0;background:rgba(6,8,12,.92);backdrop-filter:blur(8px);z-index:50;overflow-y:auto}
+.overlay.on{display:block}
+
+/* ---------- lock ---------- */
+#lock{min-height:92vh;display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:18px}
+#lock.on{display:flex}
+#lock .keyhole{font-size:64px;filter:drop-shadow(0 0 24px rgba(212,175,55,.45))}
+#lock h1{font-family:var(--serif);letter-spacing:.35em;font-weight:400;font-size:26px}
+#lock p{color:var(--tx2);max-width:420px;line-height:1.6}
+#lock input{background:var(--card);border:1px solid var(--line);border-radius:10px;color:var(--tx);
+  padding:12px 16px;width:min(420px,86vw);text-align:center;font-size:14px;outline:none}
+#lock input:focus{border-color:var(--gold)}
+#lock .go{background:linear-gradient(135deg,#d4af37,#a8842a);color:#14100a;font-weight:700;
+  padding:11px 34px;border-radius:10px;letter-spacing:.12em}
+
+/* ---------- header ---------- */
+header{display:flex;align-items:center;gap:14px;padding:6px 0 20px;flex-wrap:wrap}
+header .brand{font-family:var(--serif);font-size:20px;letter-spacing:.3em;white-space:nowrap}
+header .brand span{color:var(--gold)}
+.hstat{display:flex;align-items:center;gap:7px;background:var(--card);border:1px solid var(--line);
+  border-radius:999px;padding:7px 14px;font-size:13px;font-weight:600}
+.hstat small{color:var(--tx2);font-weight:400}
+#xpwrap{flex:1;min-width:140px;max-width:260px}
+#xpbar{height:6px;background:var(--card2);border-radius:99px;overflow:hidden;margin-top:5px}
+#xpfill{height:100%;background:linear-gradient(90deg,#8a6d1f,var(--gold));border-radius:99px;transition:width .6s}
+#xpwrap .lbl{display:flex;justify-content:space-between;font-size:11.5px;color:var(--tx2)}
+#xpwrap .lbl b{color:var(--gold);letter-spacing:.06em}
+.iconrow{display:flex;gap:8px;margin-left:auto}
+.iconbtn{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:9px 13px;font-size:16px;transition:.2s}
+.iconbtn:hover{background:var(--card2);transform:translateY(-1px)}
+
+/* ---------- home cards ---------- */
+.bigcard{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:18px 20px;margin-bottom:16px;
+  position:relative;overflow:hidden;transition:.2s}
+.bigcard:hover{border-color:rgba(212,175,55,.4)}
+.bigcard .tag{font-size:11px;letter-spacing:.22em;color:var(--gold);margin-bottom:8px}
+#continue{cursor:pointer;display:block;width:100%;text-align:left}
+#continue .ct{font-family:var(--serif);font-size:20px;margin-bottom:4px}
+#continue .cs{color:var(--tx2);font-size:13.5px}
+#continue .glyphbg{position:absolute;right:14px;top:50%;transform:translateY(-50%);font-size:52px;opacity:.5}
+.mixgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px;margin-top:12px}
+.mixchip{display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--line);
+  border-radius:12px;padding:11px 13px;text-align:left;transition:.2s}
+.mixchip:hover{background:var(--card2)}
+.mixchip.done{opacity:.45}
+.mixchip .g{font-size:22px}
+.mixchip .t{font-size:13px;font-weight:600;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.mixchip .b{font-size:11px;color:var(--tx2)}
+.mixchip .ck{margin-left:auto;color:var(--jade)}
+
+/* ---------- shelves ---------- */
+.wing{margin:26px 0 10px;display:flex;align-items:baseline;gap:10px}
+.wing h2{font-family:var(--serif);font-weight:400;letter-spacing:.24em;font-size:16px}
+.wing small{color:var(--tx2);font-size:12px}
+.shelf{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:14px}
+.book{text-align:left;border-radius:14px;overflow:hidden;background:var(--card);border:1px solid var(--line);transition:.25s;display:flex;flex-direction:column}
+.book:hover{transform:translateY(-4px);border-color:var(--bc,var(--gold));box-shadow:0 12px 30px -12px rgba(0,0,0,.8)}
+.cover{aspect-ratio:2/2.6;display:flex;flex-direction:column;justify-content:space-between;padding:12px;position:relative}
+.cover .g{font-size:30px;filter:drop-shadow(0 2px 6px rgba(0,0,0,.5))}
+.cover .t{font-family:var(--serif);font-size:14.5px;line-height:1.25;text-shadow:0 1px 4px rgba(0,0,0,.6)}
+.bmeta{padding:9px 11px 11px}
+.bmeta .a{font-size:11px;color:var(--tx2);margin-bottom:7px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pbar{height:4px;background:var(--card2);border-radius:99px;overflow:hidden}
+.pfill{height:100%;background:var(--bc,var(--gold));border-radius:99px}
+.bmeta .pct{font-size:10.5px;color:var(--tx2);margin-top:5px;display:flex;justify-content:space-between}
+
+/* ---------- reader ---------- */
+#rtop{position:sticky;top:0;z-index:10;background:rgba(10,12,18,.88);backdrop-filter:blur(10px);
+  display:flex;align-items:center;gap:8px;padding:12px 4px;border-bottom:1px solid var(--line)}
+#rtop .bt{font-size:13px;color:var(--tx2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1}
+#rprog{position:fixed;top:0;left:0;height:3px;background:var(--gold);z-index:60;width:0}
+#rbody{max-width:660px;margin:0 auto;padding:30px 2px 40px;font-family:var(--serif)}
+#rbody h1{font-size:26px;font-weight:400;margin-bottom:6px;line-height:1.3}
+#rbody .sub{font-family:var(--sans);color:var(--tx2);font-size:13px;margin-bottom:30px;letter-spacing:.04em}
+#rbody p{line-height:1.75;margin-bottom:1.15em;color:#ded9cf}
+#rbody p:first-of-type::first-letter{font-size:3.1em;float:left;line-height:.85;padding:4px 8px 0 0;color:var(--gold)}
+#rend{max-width:660px;margin:0 auto;text-align:center;padding-bottom:30px}
+#rend .done-line{color:var(--tx2);font-size:13px;letter-spacing:.2em;margin:18px 0}
+.goldbtn{background:linear-gradient(135deg,#d4af37,#9c7b26);color:#151006;font-weight:800;letter-spacing:.1em;
+  padding:14px 30px;border-radius:12px;font-size:14px;box-shadow:0 8px 24px -8px rgba(212,175,55,.5);transition:.2s}
+.goldbtn:hover{transform:translateY(-2px)}
+.ghostbtn{border:1px solid var(--line);border-radius:12px;padding:13px 26px;color:var(--tx);font-size:13.5px;margin:6px;transition:.2s}
+.ghostbtn:hover{background:var(--card2)}
+#hlbtn{position:absolute;z-index:70;background:var(--gold);color:#151006;font-weight:700;font-size:12.5px;
+  padding:7px 13px;border-radius:99px;display:none;box-shadow:0 6px 18px rgba(0,0,0,.5)}
+
+/* ---------- drawer / panels ---------- */
+.panel{max-width:660px;margin:40px auto;padding:0 18px 60px}
+.panel h2{font-family:var(--serif);font-weight:400;letter-spacing:.2em;margin-bottom:18px;display:flex;align-items:center;gap:10px}
+.panel .x{margin-left:auto;font-size:22px;color:var(--tx2)}
+.eprow{display:flex;gap:10px;align-items:center;width:100%;text-align:left;padding:11px 12px;border-radius:10px;border:1px solid transparent}
+.eprow:hover{background:var(--card)}
+.eprow.cur{border-color:var(--gold)}
+.eprow .n{color:var(--tx2);font-size:12px;min-width:26px}
+.eprow .t{font-size:14px;flex:1}
+.eprow .ck{color:var(--jade)}
+#sinput{width:100%;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px;
+  color:var(--tx);font-size:15px;outline:none;margin-bottom:16px}
+#sinput:focus{border-color:var(--gold)}
+.srow{display:block;width:100%;text-align:left;padding:12px;border-radius:10px;margin-bottom:4px}
+.srow:hover{background:var(--card)}
+.srow .w{font-size:11.5px;color:var(--gold);letter-spacing:.08em}
+.srow .s{font-size:13.5px;color:var(--tx2);line-height:1.5;margin-top:3px}
+.srow .s mark{background:rgba(212,175,55,.3);color:var(--tx);border-radius:3px;padding:0 2px}
+.hlrow{background:var(--card);border-left:3px solid var(--gold);border-radius:8px;padding:13px 15px;margin-bottom:10px}
+.hlrow .q{font-family:var(--serif);font-size:14.5px;line-height:1.6}
+.hlrow .m{font-size:11.5px;color:var(--tx2);margin-top:7px;display:flex;justify-content:space-between}
+.achgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
+.ach{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:15px;text-align:center}
+.ach.no{opacity:.3;filter:grayscale(1)}
+.ach .e{font-size:28px}
+.ach .n{font-weight:700;font-size:13px;margin:7px 0 3px}
+.ach .d{font-size:11px;color:var(--tx2);line-height:1.4}
+
+/* ---------- flow mode ---------- */
+#flow .fwrap{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:30px;padding:20px}
+#fword{font-family:var(--serif);font-size:clamp(34px,7vw,64px);min-height:1.4em;text-align:center}
+#fword b{color:var(--gold)}
+#fctrl{display:flex;align-items:center;gap:16px;color:var(--tx2);font-size:13px;flex-wrap:wrap;justify-content:center}
+#fctrl input[type=range]{accent-color:var(--gold);width:160px}
+#fprog{width:min(420px,80vw);height:4px;background:var(--card2);border-radius:99px;overflow:hidden}
+#fpfill{height:100%;background:var(--gold);width:0}
+
+/* ---------- toasts ---------- */
+#toasts{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);z-index:100;display:flex;flex-direction:column;gap:8px;align-items:center}
+.toast{background:#1a1608;border:1px solid var(--gold);color:var(--tx);padding:12px 22px;border-radius:99px;
+  font-size:13.5px;font-weight:600;box-shadow:0 10px 30px rgba(0,0,0,.6);animation:pop .3s ease-out}
+.toast.big{font-size:16px;padding:16px 30px;border-radius:16px;text-align:center}
+@keyframes pop{from{transform:scale(.8) translateY(14px);opacity:0}to{transform:scale(1);opacity:1}}
+.fadeout{animation:fout .5s forwards}
+@keyframes fout{to{opacity:0;transform:translateY(10px)}}
+#loading{min-height:92vh;display:flex;flex-direction:column;gap:16px;align-items:center;justify-content:center;color:var(--tx2)}
+.spin{width:34px;height:34px;border-radius:50%;border:3px solid var(--card2);border-top-color:var(--gold);animation:sp 1s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+@media(max-width:560px){
+  .shelf{grid-template-columns:repeat(auto-fill,minmax(118px,1fr))}
+  header .brand{font-size:16px}
+  #rbody{font-size:15px}
+}
+</style>
+</head>
+<body>
+
+<div id="loading"><div class="spin"></div><div>Unsealing the vault…</div></div>
+
+<div id="lock" class="view">
+  <div class="keyhole">🗝️</div>
+  <h1>THE VAULT</h1>
+  <p>This library opens only for its keyholder. Open the vault through your original link — the key rides inside it. Or paste your key below.</p>
+  <input id="keyin" placeholder="paste key…" autocomplete="off">
+  <button class="go" id="keygo">UNLOCK</button>
+  <p id="keyerr" style="color:#e74c3c;font-size:13px"></p>
+</div>
+
+<div id="home" class="view">
+  <header>
+    <div class="brand">🗝️ THE <span>VAULT</span></div>
+    <div class="hstat" id="streak">🔥 0 <small>streak</small></div>
+    <div id="xpwrap">
+      <div class="lbl"><b id="lvlname">INITIATE</b><span id="xptext"></span></div>
+      <div id="xpbar"><div id="xpfill"></div></div>
+    </div>
+    <div class="iconrow">
+      <button class="iconbtn" id="btn-search" title="Search">🔍</button>
+      <button class="iconbtn" id="btn-hl" title="Highlights">⭐</button>
+      <button class="iconbtn" id="btn-ach" title="Achievements">🏆</button>
+    </div>
+  </header>
+  <button class="bigcard" id="continue" style="display:none"></button>
+  <div class="bigcard">
+    <div class="tag">⚗️ TODAY'S MIX — <span id="mixsub"></span></div>
+    <div class="mixgrid" id="mixgrid"></div>
+  </div>
+  <div id="shelves"></div>
+</div>
+
+<div id="reader" class="view">
+  <div id="rprog"></div>
+  <div id="rtop">
+    <button class="iconbtn" id="r-back" title="Library">←</button>
+    <div class="bt" id="r-title"></div>
+    <button class="iconbtn" id="r-fminus" title="Smaller text">A−</button>
+    <button class="iconbtn" id="r-fplus" title="Bigger text">A+</button>
+    <button class="iconbtn" id="r-flow" title="Flow mode">⚡</button>
+    <button class="iconbtn" id="r-list" title="Episodes">☰</button>
+  </div>
+  <div id="rbody"></div>
+  <div id="rend"></div>
+</div>
+
+<div class="overlay" id="eplist"><div class="panel"><h2>☰ EPISODES <button class="x" data-close="eplist">✕</button></h2><div id="eprows"></div></div></div>
+<div class="overlay" id="search"><div class="panel"><h2>🔍 SEARCH <button class="x" data-close="search">✕</button></h2><input id="sinput" placeholder="search all books…" autocomplete="off"><div id="sres"></div></div></div>
+<div class="overlay" id="hls"><div class="panel"><h2>⭐ HIGHLIGHTS <button class="x" data-close="hls">✕</button></h2><div id="hlrows"></div></div></div>
+<div class="overlay" id="achs"><div class="panel" style="max-width:820px"><h2>🏆 ACHIEVEMENTS <span id="achcount" style="font-size:13px;color:var(--tx2)"></span> <button class="x" data-close="achs">✕</button></h2><div class="achgrid" id="achgrid"></div></div></div>
+<div class="overlay" id="flow"><div class="fwrap">
+  <div id="fword"></div>
+  <div id="fprog"><div id="fpfill"></div></div>
+  <div id="fctrl">
+    <button class="ghostbtn" id="f-play">⏸ pause</button>
+    <label>speed <input type="range" id="f-wpm" min="150" max="700" step="25"> <span id="f-wpmv"></span> wpm</label>
+    <button class="ghostbtn" data-close="flow">✕ exit</button>
+  </div>
+</div></div>
+
+<button id="hlbtn">⭐ Save highlight</button>
+<div id="toasts"></div>
+
+<script>
+"use strict";
+/* ============ state ============ */
+const LS_KEY="vault_key", LS_ST="vault_state";
+let DATA=null, S=null;
+const today=()=>{const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")};
+const yesterday=()=>{const d=new Date(Date.now()-864e5);return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")};
+function loadS(){try{S=JSON.parse(localStorage.getItem(LS_ST))||{}}catch(e){S={}}
+  S.xp??=0; S.read??={}; S.pos??={}; S.streak??={count:0,day:""}; S.ach??=[]; S.hl??=[];
+  S.font??=17; S.wpm??=350; S.days??={}; S.mix??=null;}
+const save=()=>localStorage.setItem(LS_ST,JSON.stringify(S));
+const $=id=>document.getElementById(id);
+const esc=s=>{const d=document.createElement("div");d.textContent=s;return d.innerHTML};
+const bookById=id=>DATA.books.find(b=>b.id===id);
+const epWords=ep=>ep.p.reduce((n,p)=>n+p.split(" ").length,0);
+const epXP=ep=>Math.max(10,Math.round(epWords(ep)/10));
+const readSet=b=>new Set(S.read[b]||[]);
+const isRead=(b,e)=>readSet(b).has(e);
+const totalRead=()=>Object.values(S.read).reduce((n,a)=>n+a.length,0);
+
+/* ============ gamification ============ */
+const LVLS=["Initiate","Acolyte","Apprentice","Reader","Adept","Scholar","Sage","Strategist","Mentalist","Illuminate","Grandmaster","Keeper of the Vault"];
+const lvl=()=>Math.floor(Math.sqrt(S.xp/150))+1;
+const lvlFloor=l=>150*(l-1)*(l-1), lvlCeil=l=>150*l*l;
+const lvlName=()=>LVLS[Math.min(lvl()-1,LVLS.length-1)].toUpperCase();
+const ACH=[
+ {id:"first",e:"🔑",n:"First Key",d:"Complete your first episode",c:()=>totalRead()>=1},
+ {id:"ep10",e:"📖",n:"Ten Deep",d:"Complete 10 episodes",c:()=>totalRead()>=10},
+ {id:"ep50",e:"🧭",n:"Half Century",d:"Complete 50 episodes",c:()=>totalRead()>=50},
+ {id:"ep100",e:"🏛️",n:"Centurion",d:"Complete 100 episodes",c:()=>totalRead()>=100},
+ {id:"streak3",e:"🔥",n:"Kindling",d:"3-day reading streak",c:()=>S.streak.count>=3},
+ {id:"streak7",e:"🕯️",n:"Eternal Flame",d:"7-day reading streak",c:()=>S.streak.count>=7},
+ {id:"streak30",e:"💥",n:"Obsessed",d:"30-day reading streak",c:()=>S.streak.count>=30},
+ {id:"balance",e:"☯️",n:"Balanced Mind",d:"Read shadow & light in one day",c:()=>{const d=S.days[today()];return d&&d.shadow&&d.light}},
+ {id:"owl",e:"🦉",n:"Night Owl",d:"Finish an episode after midnight",c:()=>S.owlFlag},
+ {id:"bird",e:"🌅",n:"Dawn Reader",d:"Finish an episode before 8 am",c:()=>S.birdFlag},
+ {id:"mix",e:"🎛️",n:"Mixmaster",d:"Clear a full Daily Mix",c:()=>S.mix&&S.mix.day===today()&&S.mix.items.every(i=>isRead(i.b,i.e))},
+ {id:"hl1",e:"⭐",n:"Collector",d:"Save your first highlight",c:()=>S.hl.length>=1},
+ {id:"hl25",e:"🗃️",n:"Archivist",d:"Save 25 highlights",c:()=>S.hl.length>=25},
+ {id:"lvl5",e:"🎖️",n:"Adept",d:"Reach level 5",c:()=>lvl()>=5},
+ {id:"lvl10",e:"👁️",n:"Illuminate",d:"Reach level 10",c:()=>lvl()>=10},
+ {id:"bookdone",e:"📕",n:"The Last Page",d:"Finish an entire book",c:()=>DATA.books.some(b=>readSet(b.id).size>=b.episodes.length)},
+ {id:"vault",e:"🗝️",n:"Keeper of the Vault",d:"Finish every book",c:()=>DATA.books.every(b=>readSet(b.id).size>=b.episodes.length)},
+];
+function checkAch(){for(const a of ACH){if(!S.ach.includes(a.id)&&a.c()){S.ach.push(a.id);toast(`${a.e} Achievement — ${a.n}`,true)}}save()}
+function toast(msg,big){const t=document.createElement("div");t.className="toast"+(big?" big":"");t.textContent=msg;
+ $("toasts").appendChild(t);setTimeout(()=>{t.classList.add("fadeout");setTimeout(()=>t.remove(),500)},big?3400:2300)}
+
+/* ============ crypto load ============ */
+const b64d=s=>{s=s.replace(/-/g,"+").replace(/_/g,"/");while(s.length%4)s+="=";const b=atob(s);const u=new Uint8Array(b.length);for(let i=0;i<b.length;i++)u[i]=b.charCodeAt(i);return u};
+async function tryLoad(k){
+  const raw=await(await fetch("content.enc",{cache:"force-cache"})).arrayBuffer();
+  const key=await crypto.subtle.importKey("raw",b64d(k),"AES-GCM",false,["decrypt"]);
+  const pt=await crypto.subtle.decrypt({name:"AES-GCM",iv:new Uint8Array(raw.slice(0,12))},key,raw.slice(12));
+  const txt=await new Response(new Response(pt).body.pipeThrough(new DecompressionStream("gzip"))).text();
+  return JSON.parse(txt);
+}
+async function boot(){
+  loadS();
+  const hashK=(location.hash.match(/k=([A-Za-z0-9_-]+)/)||[])[1];
+  const k=hashK||localStorage.getItem(LS_KEY);
+  $("loading").style.display="none";
+  if(!k){show("lock");return}
+  $("loading").style.display="flex";
+  try{DATA=await tryLoad(k);localStorage.setItem(LS_KEY,k)}
+  catch(e){$("loading").style.display="none";show("lock");$("keyerr").textContent=hashK?"That key doesn't fit this lock.":"";return}
+  $("loading").style.display="none";
+  renderHome();show("home");checkAch();
+  if("serviceWorker"in navigator)navigator.serviceWorker.register("sw.js").catch(()=>{});
+}
+$("keygo").onclick=async()=>{const k=$("keyin").value.trim();if(!k)return;
+  try{DATA=await tryLoad(k);localStorage.setItem(LS_KEY,k);renderHome();show("home")}
+  catch(e){$("keyerr").textContent="That key doesn't fit this lock."}};
+
+/* ============ views ============ */
+function show(v){for(const el of document.querySelectorAll(".view"))el.classList.remove("on");
+  for(const el of document.querySelectorAll(".overlay"))el.classList.remove("on");
+  $(v).classList.add("on");window.scrollTo(0,0)}
+document.addEventListener("click",e=>{const c=e.target.closest("[data-close]");if(c){$(c.dataset.close).classList.remove("on");stopFlow()}});
+
+/* ---------- home ---------- */
+function renderHome(){
+  $("streak").innerHTML=`🔥 ${S.streak.count} <small>streak</small>`;
+  const l=lvl(),lo=lvlFloor(l),hi=lvlCeil(l);
+  $("lvlname").textContent="LV "+l+" · "+lvlName();
+  $("xptext").textContent=`${S.xp-lo} / ${hi-lo} XP`;
+  $("xpfill").style.width=Math.min(100,(S.xp-lo)/(hi-lo)*100)+"%";
+  // continue card
+  const c=$("continue");
+  if(S.last&&S.pos[S.last]){const b=bookById(S.last);if(b){const ep=b.episodes[S.pos[S.last].ep];
+    c.style.display="block";
+    c.innerHTML=`<div class="tag">▶ CONTINUE READING</div><div class="ct">${esc(ep.t)}</div>
+      <div class="cs">${esc(b.title)} — episode ${S.pos[S.last].ep+1} of ${b.episodes.length}</div>
+      <div class="glyphbg">${b.glyph}</div>`;
+    c.onclick=()=>openEp(b.id,S.pos[S.last].ep);}}
+  renderMix();
+  // shelves
+  const wings=[["shadow","🌑 THE SHADOW WING","power · persuasion · defense against both"],["light","🌕 THE LIGHT WING","stillness · clarity · the mind itself"]];
+  const sh=$("shelves");sh.innerHTML="";
+  for(const[w,label,sub]of wings){
+    const head=document.createElement("div");head.className="wing";head.innerHTML=`<h2>${label}</h2><small>${sub}</small>`;
+    const grid=document.createElement("div");grid.className="shelf";
+    for(const b of DATA.books.filter(x=>x.wing===w)){
+      const done=readSet(b.id).size,pct=Math.round(done/b.episodes.length*100);
+      const el=document.createElement("button");el.className="book";el.style.setProperty("--bc",b.accent);
+      el.innerHTML=`<div class="cover" style="background:linear-gradient(160deg,${b.accent}55,${b.accent}18 55%,rgba(0,0,0,.35))">
+          <div class="g">${b.glyph}</div><div class="t">${esc(b.title)}</div></div>
+        <div class="bmeta"><div class="a">${esc(b.author)}</div>
+          <div class="pbar"><div class="pfill" style="width:${pct}%"></div></div>
+          <div class="pct"><span>${done}/${b.episodes.length} eps</span><span>${pct}%</span></div></div>`;
+      el.onclick=()=>openBook(b.id);grid.appendChild(el);}
+    sh.appendChild(head);sh.appendChild(grid);}
+}
+/* ---------- daily mix ---------- */
+function mulberry(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+function buildMix(){
+  const d=today();
+  if(S.mix&&S.mix.day===d)return;
+  let seed=0;for(const ch of d)seed=seed*31+ch.charCodeAt(0)|0;
+  const rnd=mulberry(seed);
+  const pool={shadow:[],light:[]};
+  for(const b of DATA.books){const rs=readSet(b.id);
+    for(let i=0;i<b.episodes.length;i++)if(!rs.has(i))pool[b.wing].push({b:b.id,e:i});}
+  const items=[];const order=rnd()<.5?["shadow","light","shadow","light"]:["light","shadow","light","shadow"];
+  for(const w of order){const p=pool[w];if(!p.length)continue;
+    const pick=p.splice(Math.floor(rnd()*p.length),1)[0];items.push(pick);}
+  S.mix={day:d,items};save();
+}
+function renderMix(){
+  buildMix();
+  const doneN=S.mix.items.filter(i=>isRead(i.b,i.e)).length;
+  $("mixsub").textContent=doneN>=S.mix.items.length&&S.mix.items.length?"CLEARED ✓":`${doneN}/${S.mix.items.length} — a fresh blend every day`;
+  const g=$("mixgrid");g.innerHTML="";
+  for(const it of S.mix.items){const b=bookById(it.b);if(!b)continue;const ep=b.episodes[it.e];const done=isRead(it.b,it.e);
+    const el=document.createElement("button");el.className="mixchip"+(done?" done":"");
+    el.innerHTML=`<div class="g">${b.glyph}</div><div><div class="t">${esc(ep.t)}</div>
+      <div class="b">${esc(b.title)} · ${Math.max(1,Math.round(epWords(ep)/230))} min</div></div>${done?'<div class="ck">✓</div>':""}`;
+    el.onclick=()=>openEp(it.b,it.e);g.appendChild(el);}
+}
+/* ---------- reader ---------- */
+let CUR={b:null,e:0};
+function openBook(id){const b=bookById(id);const rs=readSet(id);
+  let e=S.pos[id]?S.pos[id].ep:0;
+  if(rs.has(e)){let n=b.episodes.findIndex((_,i)=>!rs.has(i));if(n>=0)e=n}
+  openEp(id,e)}
+function openEp(id,e){
+  const b=bookById(id);if(!b)return;CUR={b:id,e};S.last=id;S.pos[id]={ep:e,scroll:0};save();
+  const ep=b.episodes[e];
+  $("r-title").textContent=`${b.glyph} ${b.title} — ${e+1}/${b.episodes.length}`;
+  const body=$("rbody");body.innerHTML="";body.style.fontSize=S.font+"px";
+  const h=document.createElement("h1");h.textContent=ep.t;body.appendChild(h);
+  const sub=document.createElement("div");sub.className="sub";
+  sub.textContent=`${b.title.toUpperCase()} · EPISODE ${e+1} OF ${b.episodes.length} · ${Math.max(1,Math.round(epWords(ep)/230))} MIN · +${epXP(ep)} XP`;
+  body.appendChild(sub);
+  for(const p of ep.p){const el=document.createElement("p");el.textContent=p;body.appendChild(el)}
+  renderEnd();show("reader");
+  const sv=S.pos[id];if(sv&&sv.scroll)requestAnimationFrame(()=>window.scrollTo(0,sv.scroll));
+}
+function renderEnd(){
+  const b=bookById(CUR.b),ep=b.episodes[CUR.e],end=$("rend");end.innerHTML="";
+  if(isRead(CUR.b,CUR.e)){const d=document.createElement("div");d.className="done-line";d.textContent="— ✓ COMPLETED —";end.appendChild(d)}
+  else{const btn=document.createElement("button");btn.className="goldbtn";btn.textContent=`MARK COMPLETE  +${epXP(ep)} XP`;
+    btn.onclick=()=>complete();end.appendChild(btn)}
+  const nav=document.createElement("div");nav.style.marginTop="14px";
+  if(CUR.e>0){const p=document.createElement("button");p.className="ghostbtn";p.textContent="← prev";p.onclick=()=>openEp(CUR.b,CUR.e-1);nav.appendChild(p)}
+  if(CUR.e<b.episodes.length-1){const n=document.createElement("button");n.className="ghostbtn";
+    n.textContent=`next: ${b.episodes[CUR.e+1].t.slice(0,34)} →`;n.onclick=()=>openEp(CUR.b,CUR.e+1);nav.appendChild(n)}
+  end.appendChild(nav);
+}
+function complete(){
+  const b=bookById(CUR.b),ep=b.episodes[CUR.e];
+  if(isRead(CUR.b,CUR.e))return;
+  (S.read[CUR.b]??=[]).push(CUR.e);
+  const before=lvl();S.xp+=epXP(ep);
+  const d=today();
+  if(S.streak.day!==d){S.streak.count=S.streak.day===yesterday()?S.streak.count+1:1;S.streak.day=d}
+  (S.days[d]??={})[b.wing]=true;
+  const hr=new Date().getHours();if(hr<5)S.owlFlag=true;else if(hr<8)S.birdFlag=true;
+  save();
+  toast(`+${epXP(ep)} XP`);
+  if(lvl()>before)setTimeout(()=>toast(`⬆ LEVEL ${lvl()} — ${lvlName()}`,true),600);
+  checkAch();renderEnd();
+}
+// scroll progress + position save
+let scrollT;window.addEventListener("scroll",()=>{
+  if(!$("reader").classList.contains("on"))return;
+  const h=document.documentElement,max=h.scrollHeight-h.clientHeight;
+  $("rprog").style.width=(max>0?h.scrollTop/max*100:0)+"%";
+  clearTimeout(scrollT);scrollT=setTimeout(()=>{if(CUR.b){S.pos[CUR.b]={ep:CUR.e,scroll:h.scrollTop};save()}},300);
+},{passive:true});
+$("r-back").onclick=()=>{renderHome();show("home")};
+$("r-fminus").onclick=()=>{S.font=Math.max(14,S.font-1);$("rbody").style.fontSize=S.font+"px";save()};
+$("r-fplus").onclick=()=>{S.font=Math.min(24,S.font+1);$("rbody").style.fontSize=S.font+"px";save()};
+$("r-list").onclick=()=>{const b=bookById(CUR.b);const w=$("eprows");w.innerHTML="";
+  b.episodes.forEach((ep,i)=>{const r=document.createElement("button");r.className="eprow"+(i===CUR.e?" cur":"");
+    r.innerHTML=`<span class="n">${i+1}</span><span class="t">${esc(ep.t)}</span>${isRead(b.id,i)?'<span class="ck">✓</span>':""}`;
+    r.onclick=()=>{$("eplist").classList.remove("on");openEp(b.id,i)};w.appendChild(r)});
+  $("eplist").classList.add("on");
+  const cur=w.querySelector(".cur");if(cur)cur.scrollIntoView({block:"center"})};
+
+/* ---------- highlights ---------- */
+const hlBtn=$("hlbtn");
+document.addEventListener("selectionchange",()=>{
+  if(!$("reader").classList.contains("on")){hlBtn.style.display="none";return}
+  const sel=document.getSelection();
+  if(sel.isCollapsed||!$("rbody").contains(sel.anchorNode)){hlBtn.style.display="none";return}
+  const r=sel.getRangeAt(0).getBoundingClientRect();
+  hlBtn.style.display="block";
+  hlBtn.style.left=Math.max(8,Math.min(window.innerWidth-160,r.left+r.width/2-70))+"px";
+  hlBtn.style.top=(r.top+window.scrollY-44)+"px";
+});
+hlBtn.onclick=()=>{const sel=document.getSelection();const t=sel.toString().trim().slice(0,600);
+  if(!t)return;S.hl.unshift({b:CUR.b,e:CUR.e,t});save();sel.removeAllRanges();hlBtn.style.display="none";
+  toast("⭐ Highlight saved");checkAch()};
+$("btn-hl").onclick=()=>{const w=$("hlrows");w.innerHTML="";
+  if(!S.hl.length)w.innerHTML='<p style="color:var(--tx2)">Select any text while reading to collect it here.</p>';
+  for(const h of S.hl){const b=bookById(h.b);const el=document.createElement("div");el.className="hlrow";
+    el.innerHTML=`<div class="q">“${esc(h.t)}”</div><div class="m"><span>${b?esc(b.glyph+" "+b.title):""}</span><button style="color:var(--tx2)" data-del>remove</button></div>`;
+    el.querySelector("[data-del]").onclick=()=>{S.hl=S.hl.filter(x=>x!==h);save();el.remove()};
+    w.appendChild(el)}
+  $("hls").classList.add("on")};
+
+/* ---------- search ---------- */
+$("btn-search").onclick=()=>{$("search").classList.add("on");$("sinput").value="";$("sres").innerHTML="";setTimeout(()=>$("sinput").focus(),50)};
+let sT;$("sinput").addEventListener("input",()=>{clearTimeout(sT);sT=setTimeout(doSearch,250)});
+function doSearch(){
+  const q=$("sinput").value.trim().toLowerCase();const w=$("sres");w.innerHTML="";
+  if(q.length<3)return;let n=0;
+  for(const b of DATA.books){for(let e=0;e<b.episodes.length&&n<50;e++){
+    for(const p of b.episodes[e].p){const i=p.toLowerCase().indexOf(q);
+      if(i>=0){n++;
+        const el=document.createElement("button");el.className="srow";
+        const pre=p.slice(Math.max(0,i-70),i),hit=p.slice(i,i+q.length),post=p.slice(i+q.length,i+q.length+90);
+        el.innerHTML=`<div class="w">${b.glyph} ${esc(b.title)} · ${esc(b.episodes[e].t)}</div>
+          <div class="s">…${esc(pre)}<mark>${esc(hit)}</mark>${esc(post)}…</div>`;
+        el.onclick=()=>{$("search").classList.remove("on");openEp(b.id,e)};
+        w.appendChild(el);break}}}}
+  if(!n)w.innerHTML='<p style="color:var(--tx2)">Nothing in the vault matches that.</p>';
+}
+
+/* ---------- achievements ---------- */
+$("btn-ach").onclick=()=>{const g=$("achgrid");g.innerHTML="";
+  for(const a of ACH){const has=S.ach.includes(a.id);
+    const el=document.createElement("div");el.className="ach"+(has?"":" no");
+    el.innerHTML=`<div class="e">${a.e}</div><div class="n">${a.n}</div><div class="d">${a.d}</div>`;g.appendChild(el)}
+  $("achcount").textContent=`${S.ach.length}/${ACH.length}`;
+  $("achs").classList.add("on")};
+
+/* ---------- flow mode (RSVP) ---------- */
+let F={words:[],i:0,timer:null,playing:false};
+$("r-flow").onclick=()=>{const b=bookById(CUR.b);if(!b)return;
+  F.words=b.episodes[CUR.e].p.join(" ").split(/\s+/).filter(Boolean);F.i=0;
+  $("f-wpm").value=S.wpm;$("f-wpmv").textContent=S.wpm;
+  $("flow").classList.add("on");startFlow()};
+function startFlow(){F.playing=true;$("f-play").textContent="⏸ pause";tick()}
+function tick(){
+  if(!F.playing)return;
+  if(F.i>=F.words.length){$("fword").innerHTML="— <b>fin</b> —";F.playing=false;$("f-play").textContent="↻ replay";F.i=0;return}
+  const w=F.words[F.i++];
+  const mid=Math.max(0,Math.ceil(w.length/2)-1);
+  $("fword").innerHTML=esc(w.slice(0,mid))+"<b>"+esc(w[mid]||"")+"</b>"+esc(w.slice(mid+1));
+  $("fpfill").style.width=(F.i/F.words.length*100)+"%";
+  let ms=60000/S.wpm;
+  if(w.length>8)ms*=1.4;if(/[.!?;:]$/.test(w))ms*=1.8;
+  F.timer=setTimeout(tick,ms);
+}
+function stopFlow(){F.playing=false;clearTimeout(F.timer)}
+$("f-play").onclick=()=>{if(F.playing){stopFlow();$("f-play").textContent="▶ play"}else startFlow()};
+$("f-wpm").oninput=e=>{S.wpm=+e.target.value;$("f-wpmv").textContent=S.wpm;save()};
+
+boot();
+</script>
+</body>
+</html>

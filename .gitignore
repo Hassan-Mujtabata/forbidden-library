@@ -1,0 +1,4 @@
+*.pdf
+tools/books.json
+tools/key.txt
+__pycache__/
