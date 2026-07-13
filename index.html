@@ -449,6 +449,11 @@ const ACH=[
  {id:"jhana1",e:"🕯️",n:"Absorbed",d:"Reach the First Jhāna",c:()=>nodeDone("b6")},
  {id:"lens",e:"🔆",n:"The Lens",d:"Complete the Concentration track",c:()=>trackDone("B")},
  {id:"path10",e:"🗺️",n:"Pathfinder",d:"Master 10 Path ideas",c:()=>nodesDone()>=10},
+ {id:"seer",e:"👁️",n:"Seer",d:"Complete the Insight & Wisdom track",c:()=>trackDone("C")},
+ {id:"persuader",e:"🎯",n:"Persuader",d:"Complete the Influence & Persuasion track",c:()=>trackDone("D")},
+ {id:"strategist",e:"♛",n:"Strategist",d:"Complete the Power & Strategy track",c:()=>trackDone("E")},
+ {id:"sentinel",e:"🛡️",n:"Unmoved",d:"Complete the Defense track",c:()=>trackDone("F")},
+ {id:"wholepath",e:"🧭",n:"Keeper of the Path",d:"Master every idea on the Path",c:()=>DATA.nodes.every(x=>nodeDone(x.id))},
 ];
 function checkAch(){for(const a of ACH){if(!S.ach.includes(a.id)&&a.c()){S.ach.push(a.id);toast(`${a.e} Achievement — ${a.n}`,true)}}save()}
 function toast(msg,big){const t=document.createElement("div");t.className="toast"+(big?" big":"");t.textContent=msg;
@@ -732,8 +737,14 @@ $("btn-ach").onclick=()=>{const g=$("achgrid");g.innerHTML="";
   $("achs").classList.add("on")};
 
 /* ---------- patch notes ---------- */
-const APP_VER="2.5";
+const APP_VER="2.6";
 const PATCHES=[
+ {v:"2.6",n:"The Whole Map",d:"13 Jul 2026",items:[
+  ["content","Power & Strategy track fully authored — 5 lessons: Never Outshine the Master, Conceal & Control, Court Attention, Timing & the Long Game, Knowing When Not to Act."],
+  ["content","Defense & Clear Thinking track fully authored — Spotting Manipulation, Social Engineering (Mitnick), The Beautiful Mind (de Bono), and the capstone that fuses both wings."],
+  ["content","Every one of the 35 ideas on the Path is now masterable — no more previews. The whole map is walkable."],
+  ["new","Track-complete celebrations, and a final flourish when you master the entire Path."],
+  ["new","Five new achievements: Seer, Persuader, Strategist, Unmoved, and Keeper of the Path."]]},
  {v:"2.5",n:"The Town Crier",d:"13 Jul 2026",items:[
   ["new","Patch notes! This screen appears once after every update — browse the full history anytime via 📜 in the top bar."],
   ["polish","A golden dot glows on the scroll when a patch you haven't read is waiting."]]},
@@ -1065,6 +1076,8 @@ function completeNode(n){
     if(lvl()>before)setTimeout(()=>toast(`⬆ LEVEL ${lvl()} — ${lvlName()}`,true),750);
     checkAch();
   }
+  if(trackDone(n.track)){const tr=trackById(n.track);setTimeout(()=>toast(`${tr.glyph} ${tr.name.toUpperCase()} — TRACK COMPLETE`,true),1150);}
+  if(DATA.nodes.every(x=>nodeDone(x.id)))setTimeout(()=>toast("🧭 THE ENTIRE PATH — MASTERED",true),1800);
   const unlocked=DATA.nodes.filter(c=>c.prereq.includes(n.id)&&nodeAvail(c.id)&&!nodeDone(c.id));
   S._justUnlocked=unlocked.map(u=>u.id);
   const gate=$("ngate");

@@ -1968,13 +1968,68 @@
         "d1"
       ],
       "glyph": "🎚️",
-      "stub": true,
       "title": "Never Outshine the Master",
+      "whyreq": "Managing those above you is perception management aimed upward — you need the root premise that people navigate by appearances first.",
       "bridge": [
-        "Greene's first law: make those above you feel superior. The politics of ego and safety.",
-        "Full lesson coming in an upcoming update."
+        "Greene's very first law, and the one careers die on: those above you want to feel secure in their superiority. Display too much raw talent and, instead of admiration, you inspire fear and insecurity — and threatened power protects itself by removing the threat. The counterintuitive move is to let your masters appear more brilliant than they are.",
+        "The mechanics are ego, not merit. Outshine a superior and you hand them a wound; wounded power retaliates, and it holds the leverage. Greene's counsel: let masters take the credit, flatter with subtlety, hide the full extent of your gifts until you're safe, and make them look good — their rise drags you up in its wake.",
+        "State the ethics fork plainly, because this vault won't blend the books: this is Greene's court logic, amoral by design. Cialdini and Davis read the same social fact — people resent being outshone — and aim it at generosity instead: make others feel capable because you genuinely want them to rise, and you win the same safety without the cynicism. Same observation about ego; opposite spirit. Learn the law mainly so you can see it operating above you and on you — then choose your version."
       ],
-      "whyreq": "Managing those above you is perception management aimed upward."
+      "sources": [
+        {
+          "book": "The 48 Laws of Power",
+          "ref": "Law 1 — never outshine the master",
+          "quote": [
+            "Always make those above you feel comfortably superior. In your desire to please and impress them, do not go too far in displaying your talents, or you might inspire fear and insecurity — and accomplish the opposite of what you intend."
+          ]
+        },
+        {
+          "book": "The Art of Quiet Influence",
+          "ref": "Davis — lifting others as strategy",
+          "quote": [
+            "The quiet influencer makes other people feel more capable, not less. A leader who shares the light is followed by choice, not fear — and diminishes no one to rise."
+          ]
+        }
+      ],
+      "quiz": [
+        {
+          "q": "Greene's Law 1 warns that outshining a superior:",
+          "c": [
+            "earns instant promotion",
+            "triggers their insecurity and retaliation, since they hold the leverage",
+            "is always the right move",
+            "carries no risk"
+          ],
+          "a": 1,
+          "why": "Threatened power protects itself — and it has the leverage."
+        },
+        {
+          "q": "The mechanism at work is:",
+          "c": [
+            "fairness and merit",
+            "ego and the self-protection of the powerful",
+            "luck",
+            "budget"
+          ],
+          "a": 1,
+          "why": "It's about wounded pride, not who deserves what."
+        },
+        {
+          "q": "The ethical reframe of the same social fact is:",
+          "c": [
+            "outshine everyone regardless",
+            "make others feel capable because you want them to rise — same safety, opposite spirit",
+            "hide all skill forever",
+            "flatter for its own sake"
+          ],
+          "a": 1,
+          "why": "Cialdini/Davis aim the ego-insight at generosity."
+        }
+      ],
+      "apply": {
+        "prompt": "Think of someone you report to or depend on. Where does your urge to prove yourself actually threaten them? Write one honest way to make them look good this week that you'd be comfortable doing.",
+        "min": 50
+      }
     },
     {
       "id": "e2",
@@ -1984,13 +2039,75 @@
         "d1"
       ],
       "glyph": "🃏",
-      "stub": true,
       "title": "Conceal Intention, Control the Options",
+      "whyreq": "You can only conceal intentions from, and steer the choices of, minds you already understand to read surfaces — the root premise.",
       "bridge": [
-        "Keep others reacting to a fog while you shape the board and the choices they think are theirs.",
-        "Full lesson coming in an upcoming update."
+        "Two of Greene's most-used laws, braided: conceal your intentions, and control the options. Keep people in the dark about what you're really after and they can't build a defense; then narrow the choices they think they're freely making until every path leads where you want. The victim feels in control the whole time.",
+        "Concealment works because revealed intentions invite resistance and hand opponents a target — a smokescreen of decoy goals and studied vagueness lets you move while they guard the wrong door. Controlling options works because people trust choices they make themselves far more than instructions; hand them a menu you built, and their sense of agency becomes your instrument. The dark-psychology books turn both into abuse: hidden agendas, and 'choices' that are all traps.",
+        "Fidelity note: this is pure court-and-war strategy, echoed in the seduction material's slow, concealed approach. It has legitimate uses — negotiation, privacy, not tipping your hand to a bad actor — and manipulative ones against people owed honesty. The line is the one Davis and Cialdini already drew: transparency and mutual benefit. The defensive payoff is huge: once you know 'controlled options' exist, you start asking the one question that breaks them — what choice am I not being offered?"
       ],
-      "whyreq": "You can only conceal intentions from minds you already know read surfaces."
+      "sources": [
+        {
+          "book": "The 48 Laws of Power",
+          "ref": "Law 3 — conceal your intentions",
+          "quote": [
+            "Keep people off-balance and in the dark by never revealing the purpose behind your actions. If they have no clue what you are up to, they cannot prepare a defense."
+          ]
+        },
+        {
+          "book": "The 48 Laws of Power",
+          "ref": "Law 31 — control the options",
+          "quote": [
+            "Get others to play with the cards you deal. Give options that all lead to your goal, and your victims will feel they are in control while they are actually your instruments."
+          ]
+        },
+        {
+          "book": "The Art of Deception",
+          "ref": "Mitnick — never showing your hand",
+          "quote": [
+            "The attacker who conceals his true objective, revealing only what serves the pretext, walks through doors that would slam shut on a direct request."
+          ]
+        }
+      ],
+      "quiz": [
+        {
+          "q": "Concealing intentions works because:",
+          "c": [
+            "honesty is inherently weak",
+            "revealed aims invite resistance and give opponents a target to defend",
+            "clarity is illegal",
+            "people enjoy mystery"
+          ],
+          "a": 1,
+          "why": "No target, no defense."
+        },
+        {
+          "q": "'Controlling the options' means:",
+          "c": [
+            "openly forcing one choice",
+            "offering a menu you built so every pick serves you, while the person feels free",
+            "removing all choice",
+            "leaving it to chance"
+          ],
+          "a": 1,
+          "why": "Agency becomes the instrument."
+        },
+        {
+          "q": "The question that breaks a controlled-options trap is:",
+          "c": [
+            "which is cheapest?",
+            "what choice am I NOT being offered?",
+            "who's asking?",
+            "can I afford it?"
+          ],
+          "a": 1,
+          "why": "The hidden option is where the trap lives."
+        }
+      ],
+      "apply": {
+        "prompt": "Recall a time you felt you 'chose freely' but later saw the options were curated — a sales page, a negotiation, an ultimatum. Write the option you weren't shown.",
+        "min": 50
+      }
     },
     {
       "id": "e3",
@@ -2000,13 +2117,75 @@
         "d3"
       ],
       "glyph": "🎪",
-      "stub": true,
       "title": "Court Attention & Reputation",
+      "whyreq": "Reputation is social proof about you and attention is the crowd's gaze — you need the proof-and-authority lever understood before you can wield or guard them.",
       "bridge": [
-        "Reputation is the shield and attention is the currency. Building and guarding both.",
-        "Full lesson coming in an upcoming update."
+        "Greene treats two assets as the currency of power: reputation and attention. Reputation is the shield — it precedes you, wins battles before they begin, and is fatal to lose. Attention is the oxygen — in a crowded world, what is not seen may as well not exist, so the strategist deliberately draws the eye and refuses to become familiar and ignored.",
+        "The moves: guard reputation with your life, and when attacked, don't argue — undermine the attacker's credibility instead. For attention, be bolder and larger than life, attach your name to a distinct image, and use contrast, mystery, even scandal to stay talked about, because being slandered is less dangerous than being invisible. This is the engine under every brand, influencer, and demagogue.",
+        "Fidelity and caution: this is Greene's most double-edged pair, and the dark books weaponize it into pure image-fabrication. The contemplative wing offers the sharpest counter here — a reputation you must constantly defend and an attention you must constantly feed are both cages, while the equanimity lesson showed a mind that meets praise and blame the same. Study reputation and attention as the real forces they are; also notice what needing them does to a person. Power that depends on the crowd's gaze is owned by the crowd."
       ],
-      "whyreq": "Reputation is social proof about you — that lever must be understood first."
+      "sources": [
+        {
+          "book": "The 48 Laws of Power",
+          "ref": "Law 5 — reputation is the cornerstone",
+          "quote": [
+            "So much depends on reputation — guard it with your life. Through reputation alone you can intimidate and win; once it slips, you are vulnerable and attacked on all sides."
+          ]
+        },
+        {
+          "book": "The 48 Laws of Power",
+          "ref": "Law 6 — court attention at all cost",
+          "quote": [
+            "Everything is judged by appearance; what is unseen counts for nothing. Never get lost in the crowd — stand out, be conspicuous, draw the eye by being larger and more mysterious than the gray mass around you."
+          ]
+        },
+        {
+          "book": "The Art of Seduction",
+          "ref": "Greene — presence, absence, and allure",
+          "quote": [
+            "Presence and absence are the seducer's rhythm. Be too available and you are taken for granted; create mystery, and attention turns into fascination."
+          ]
+        }
+      ],
+      "quiz": [
+        {
+          "q": "Greene calls reputation the:",
+          "c": [
+            "least important asset",
+            "cornerstone and shield — it wins battles before they start and is fatal to lose",
+            "same thing as wealth",
+            "enemy of power"
+          ],
+          "a": 1,
+          "why": "It precedes you and does the work."
+        },
+        {
+          "q": "On attention, Greene argues that being invisible is:",
+          "c": [
+            "safer than scandal",
+            "more dangerous than being slandered — the unseen counts for nothing",
+            "irrelevant to power",
+            "the wise path"
+          ],
+          "a": 1,
+          "why": "Notoriety beats obscurity, in his logic."
+        },
+        {
+          "q": "The contemplative counter-question to this law is:",
+          "c": [
+            "how do I get more attention?",
+            "what does constantly needing reputation and attention do to me — isn't gaze-dependent power owned by the crowd?",
+            "which symbol should I adopt?",
+            "how do I fake prestige?"
+          ],
+          "a": 1,
+          "why": "Equanimity meets praise and blame the same."
+        }
+      ],
+      "apply": {
+        "prompt": "Where do you spend energy managing how you're seen? Name one place that management genuinely serves you, and one place it's quietly running you.",
+        "min": 50
+      }
     },
     {
       "id": "e4",
@@ -2016,13 +2195,75 @@
         "e2"
       ],
       "glyph": "⏱️",
-      "stub": true,
       "title": "Timing & the Long Game",
+      "whyreq": "Timing games presume you already control what others can see of your plans — concealment (the previous stage) is the prerequisite for patience to be a weapon rather than mere waiting.",
       "bridge": [
-        "Patience as a weapon; knowing the ripe moment. Greene's most contemplative laws — and where power quietly meets stillness.",
-        "Full lesson coming in an upcoming update."
+        "The rarest power skill, and the one that most resembles the meditation tracks: patience and timing. Greene's Law 35 says never seem in a hurry — hurry betrays a lack of control over yourself and over time. The strategist learns to detect the ripe moment and to wait, sometimes for years, letting fruit fall rather than forcing it. Most people lose not from weakness but from acting too soon.",
+        "Timing has a partner: strategic absence and restraint. What is scarce and withdrawn gains value; the ever-present person becomes cheap and ignored, while the one who knows when to disappear grows more desired and harder to read. Combined with the concealed intentions of the previous stage, patience becomes a weapon — hold position, let opponents overextend and exhaust themselves, and move only when the cost to them is highest and to you lowest.",
+        "Fidelity note, and a striking one: here Greene's shadow strategy and the light wing's training visibly converge. Both prize a mind that isn't jerked around by urgency — the scarcity lesson warned that manufactured hurry is how you're manipulated, and the concentration track built the very steadiness that lets you wait without flinching. The difference is aim: Greene waits to win over others; the contemplative waits to see clearly. Same muscle — and it's the bridge to the final lesson of the whole Path."
       ],
-      "whyreq": "Timing games presume you already control what others can see of your plans."
+      "sources": [
+        {
+          "book": "The 48 Laws of Power",
+          "ref": "Law 35 — master the art of timing",
+          "quote": [
+            "Never seem to be in a hurry — hurrying betrays a lack of control over yourself and over time. Always seem patient, as if you know everything will come to you eventually. Stand back when the time is not ripe, and strike fiercely when it is."
+          ]
+        },
+        {
+          "book": "The 48 Laws of Power",
+          "ref": "Law 16 — use absence to increase respect",
+          "quote": [
+            "Too much circulation makes the price go down. Create value through scarcity; the more you are seen and heard from, the more common you appear, and what is absent grows desired."
+          ]
+        },
+        {
+          "book": "Right Concentration",
+          "ref": "Brasington — the patience the states require",
+          "quote": [
+            "You cannot force the jhāna; you incline and wait, and it arrives on its own. The whole skill is a kind of patient, unhurried allowing."
+          ]
+        }
+      ],
+      "quiz": [
+        {
+          "q": "Greene's Law 35 holds that hurry:",
+          "c": [
+            "wins the race",
+            "betrays a lack of control over yourself and over time",
+            "always beats patience",
+            "impresses rivals"
+          ],
+          "a": 1,
+          "why": "Composure signals control; haste signals its absence."
+        },
+        {
+          "q": "Strategic absence works because:",
+          "c": [
+            "people forget you entirely",
+            "scarcity and withdrawal raise value, while constant presence turns cheap",
+            "it is simply rude",
+            "it conserves effort"
+          ],
+          "a": 1,
+          "why": "Scarcity again — applied to your own presence."
+        },
+        {
+          "q": "The convergence this lesson names is that:",
+          "c": [
+            "power and meditation are opposites",
+            "the same unhurried steadiness serves both winning (Greene) and seeing clearly (contemplative)",
+            "only monks can be patient",
+            "timing is pure luck"
+          ],
+          "a": 1,
+          "why": "One muscle, two aims — the bridge to the capstone."
+        }
+      ],
+      "apply": {
+        "prompt": "Name one situation right now where you feel pressure to act immediately. Is the moment truly ripe, or is the urgency someone else's — or your own impatience? Write what waiting would cost and what it would gain.",
+        "min": 50
+      }
     },
     {
       "id": "e5",
@@ -2032,13 +2273,75 @@
         "e4"
       ],
       "glyph": "🛑",
-      "stub": true,
       "title": "Knowing When Not to Act",
+      "whyreq": "Restraint is timing's final exam — you can't master the off-switch until you've learned to read the ripe moment (the previous stage).",
       "bridge": [
-        "The hardest power move is restraint: disdain what you cannot have, and refuse the bait. Strategy's off-switch.",
-        "Full lesson coming in an upcoming update."
+        "The final and hardest power move is the off-switch: knowing when not to act at all. Greene's Law 36 — disdain what you cannot have; ignoring it is the best revenge — captures half of it: react to a slight, a troll, or a trap and you acknowledge it, grant it power, and often make it worse. The stronger response is frequently to notice the bait and simply not bite — which takes more self-command than any attack.",
+        "This completes the strategist's education by inverting it. Everything prior taught how to move — conceal, position, time, court attention. This teaches that the highest skill is often stillness: not defending against every provocation, not seizing every opportunity, not entering conflicts you can't win or that cost more than they're worth. Restraint reads as supreme confidence; flailing reaction reads as weakness. The one who doesn't need to respond holds the real power.",
+        "Fidelity and the big turn: notice what this shadow-wing lesson has quietly become — a description of equanimity. Greene arrives by cold strategic logic at nearly the exact place the insight track reached by contemplative logic: the free person is the one whose reflexes can't be pulled. That convergence is the thesis of the final Defense lesson, where the calm you trained in the light wing becomes the thing that makes every manipulation in the shadow wing fail. You've finished Power & Strategy — and its last word is the light wing's first principle."
       ],
-      "whyreq": "Knowing when not to act is timing's final exam."
+      "sources": [
+        {
+          "book": "The 48 Laws of Power",
+          "ref": "Law 36 — disdain what you cannot have",
+          "quote": [
+            "By acknowledging a petty problem you give it existence and credibility; the more attention you pay an enemy, the stronger you make him. Refusing to react is often the most powerful response — and the hardest."
+          ]
+        },
+        {
+          "book": "The Art of Quiet Influence",
+          "ref": "Davis — the strength of restraint",
+          "quote": [
+            "Not every provocation deserves a reply. The person who can let an insult pass unanswered holds a power that no argument can take from them."
+          ]
+        },
+        {
+          "book": "The Experience of Insight",
+          "ref": "Goldstein — freedom as the unhooked reflex",
+          "quote": [
+            "When the mind no longer grabs at the pleasant or strikes at the unpleasant, it is free. That non-reactivity is not passivity — it is the deepest strength."
+          ]
+        }
+      ],
+      "quiz": [
+        {
+          "q": "Greene's Law 36 argues that reacting to a slight or trap:",
+          "c": [
+            "defeats it cleanly",
+            "acknowledges it, grants it power, and often makes it worse",
+            "is always mandatory",
+            "proves your strength"
+          ],
+          "a": 1,
+          "why": "Attention feeds the thing you'd rather starve."
+        },
+        {
+          "q": "This lesson inverts the whole track by teaching that the highest skill is often:",
+          "c": [
+            "a faster strike",
+            "stillness — not defending, seizing, or fighting where it costs more than it's worth",
+            "louder self-promotion",
+            "deeper concealment"
+          ],
+          "a": 1,
+          "why": "The off-switch is the master move."
+        },
+        {
+          "q": "The 'big turn' is that Greene's cold logic arrives at:",
+          "c": [
+            "a sharper weapon",
+            "nearly the same place as the insight track — the free person is the one whose reflexes can't be pulled",
+            "total passivity",
+            "perpetual conflict"
+          ],
+          "a": 1,
+          "why": "Strategy and stillness meet here."
+        }
+      ],
+      "apply": {
+        "prompt": "Recall a recent time you took the bait — replied to something you should have let pass. Write what not-reacting would have cost you, and what it would have preserved.",
+        "min": 50
+      }
     },
     {
       "id": "f1",
@@ -2049,13 +2352,75 @@
         "d3"
       ],
       "glyph": "🕵️",
-      "stub": true,
       "title": "Spotting Covert Manipulation",
+      "whyreq": "You spot manipulation by recognizing its levers from the inside — reciprocity, social proof, authority — so those persuasion ideas must come first.",
       "bridge": [
-        "The thirty covert tactics and the dark-psych playbook — read defensively. Naming a tactic is the first defense against it.",
-        "Full lesson coming in an upcoming update."
+        "You've studied every major lever as a tool. This track flips the telescope: reading them coming, aimed at you. Adelyn Birch's field guide to covert emotional manipulation catalogs the tactics that work below the radar — the ones that never announce themselves as pressure. Naming them is most of the defense, because a named tactic becomes an object you can watch instead of a fog you're lost inside.",
+        "The signatures to memorize: gaslighting (making you doubt your own memory and perception), guilt-tripping and playing the victim (so you comply to relieve their pain), love-bombing then withdrawal (intermittent reward that hooks you), moving the goalposts (you can never quite satisfy them), and word-salad deflection (you enter with a clear point and leave confused and apologizing) — plus the manufactured urgency and false choices you already met. The common thread Birch stresses: covert manipulation targets your emotions to bypass your judgment. The aim is to get you reacting before you're thinking.",
+        "The defense is one discipline made concrete: trust the pattern over the moment. One confusing conversation is noise; a repeated feeling of walking away smaller, guiltier, or more confused is the signal — the disorientation itself is the data. And here is why this track sits behind the contemplative wing on the map: the feeling-tone awareness you trained in the Insight track is literally the early-warning system. You feel the hook as a spike in feeling-tone a beat before the story forms — exactly where, if you're present, you can decline to bite."
       ],
-      "whyreq": "You spot manipulation by recognizing its levers from the inside — reciprocity, proof, authority."
+      "sources": [
+        {
+          "book": "30 Covert Emotional Manipulation Tactics",
+          "ref": "Birch — trust your perception",
+          "quote": [
+            "Covert manipulation works beneath your awareness, targeting emotions so your reason never gets a vote. If you consistently feel confused, guilty, or diminished around someone, believe that feeling — it is information, not imagination."
+          ]
+        },
+        {
+          "book": "Dark Psychology: 3 Books in 1",
+          "ref": "the manipulator's toolkit",
+          "quote": [
+            "Gaslighting, guilt, intermittent reward, and the shifting of blame share one aim: to make the target doubt themselves and depend on the manipulator's version of reality."
+          ]
+        },
+        {
+          "book": "Manipulation: Dark Psychology",
+          "ref": "Horn — emotion bypasses judgment",
+          "quote": [
+            "The manipulator seeks to trigger an emotional reaction, because a person gripped by fear, guilt, or infatuation does not stop to reason. Provoke the feeling, and compliance follows."
+          ]
+        }
+      ],
+      "quiz": [
+        {
+          "q": "Birch's core defensive instruction is to:",
+          "c": [
+            "always give the benefit of the doubt",
+            "trust your own perception — persistent confusion, guilt, or feeling diminished IS data",
+            "confront every tactic aggressively",
+            "avoid people entirely"
+          ],
+          "a": 1,
+          "why": "The disorientation is the signal, not imagination."
+        },
+        {
+          "q": "The common thread of covert tactics is that they:",
+          "c": [
+            "are loud and obvious",
+            "target emotions to bypass judgment — get you reacting before thinking",
+            "only affect weak people",
+            "need special training to deploy"
+          ],
+          "a": 1,
+          "why": "Feeling first, so reason never votes."
+        },
+        {
+          "q": "Why does defense connect to the Insight track's feeling-tone work?",
+          "c": [
+            "it doesn't",
+            "you feel the hook as a feeling-tone spike a beat before the story — the early-warning system",
+            "meditation makes you gullible",
+            "emotions are irrelevant here"
+          ],
+          "a": 1,
+          "why": "Presence at feeling-tone is where you decline the bait."
+        }
+      ],
+      "apply": {
+        "prompt": "Without naming names, identify one relationship or interaction where you often leave feeling smaller, guiltier, or more confused than you arrived. Name the pattern — that naming is the first defense.",
+        "min": 50
+      }
     },
     {
       "id": "f2",
@@ -2065,13 +2430,75 @@
         "f1"
       ],
       "glyph": "🎣",
-      "stub": true,
       "title": "Social Engineering & Deception",
+      "whyreq": "Social engineering chains the covert tactics into full attacks on trust and access — you have to recognize the individual tactics (previous stage) before you can see them combined.",
       "bridge": [
-        "Mitnick's art of deception: the human is the exploit. How trust is engineered, and how to harden yours.",
-        "Full lesson coming in an upcoming update."
+        "Kevin Mitnick was the world's most famous hacker, and his lesson is humbling: he rarely broke code — he broke people. Social engineering is manipulation aimed at information or access, and Mitnick's thesis is that the human is the weakest link in any security system. No firewall stops an employee who wants to be helpful to a confident stranger with a plausible story.",
+        "The anatomy maps exactly onto the levers you've studied: build a pretext (a believable role — IT support, a new hire, an executive's assistant), invoke authority and urgency (people comply fast under both), exploit the wish to be helpful and to avoid conflict, and harvest small, innocuous pieces of information that assemble into a master key. Each request seems reasonable alone; the danger is the aggregate. Trust, once a few consistent details establish it, is extended far too cheaply.",
+        "The defense is a protocol, not a mood — because in the moment you'll want to be nice and move on. Verify identity through an independent channel; never let urgency or authority skip that step; treat unsolicited contact asking for information or access as suspect by default, however friendly. This is the same discipline as the previous stage — trust the pattern, not the smooth surface — applied to strangers and systems. The smoother and more urgent the request, the more it deserves the pause. Politeness is not consent, and 'helpful' is the exact button being pushed."
       ],
-      "whyreq": "Social engineering chains the covert tactics into full attacks on trust; know the tactics first."
+      "sources": [
+        {
+          "book": "The Art of Deception",
+          "ref": "Mitnick — the human is the weakest link",
+          "quote": [
+            "The human element is security's weakest link. A company can spend a fortune on technology, and it is wasted the moment an employee is talked into giving away the keys — no software patches the human mind."
+          ]
+        },
+        {
+          "book": "The Art of Deception",
+          "ref": "Mitnick — pretext, authority, and small requests",
+          "quote": [
+            "The social engineer builds trust with a believable pretext and a few accurate details, invokes urgency or authority, and asks for one small harmless thing at a time — until the pieces add up to everything."
+          ]
+        },
+        {
+          "book": "30 Covert Emotional Manipulation Tactics",
+          "ref": "Birch — the exploited instinct to be nice",
+          "quote": [
+            "Manipulators count on your good manners. The reluctance to seem rude or paranoid is precisely the opening they use — and declining to comply is not rudeness, it is self-respect."
+          ]
+        }
+      ],
+      "quiz": [
+        {
+          "q": "Mitnick's central thesis is that:",
+          "c": [
+            "encryption is unbreakable",
+            "the human is the weakest link — attackers break people, not code",
+            "only experts get hacked",
+            "technology alone secures you"
+          ],
+          "a": 1,
+          "why": "The mind has no patch."
+        },
+        {
+          "q": "A social-engineering attack typically pairs a pretext with:",
+          "c": [
+            "brute-force computing",
+            "authority, urgency, the wish to help, and small requests that add up",
+            "random guessing",
+            "a physical break-in"
+          ],
+          "a": 1,
+          "why": "Same levers, assembled into an attack."
+        },
+        {
+          "q": "The correct defense is:",
+          "c": [
+            "just be ruder to everyone",
+            "a protocol: verify via an independent channel, never let urgency/authority skip it, treat unsolicited requests as suspect",
+            "trust confident-sounding people",
+            "reply fast to seem competent"
+          ],
+          "a": 1,
+          "why": "A rule you follow even when you'd rather be nice."
+        }
+      ],
+      "apply": {
+        "prompt": "Recall the last unsolicited call, email, or message asking you for information, money, or access. Which levers did it use — authority, urgency, helpfulness — and what independent check would have exposed it?",
+        "min": 50
+      }
     },
     {
       "id": "f3",
@@ -2079,12 +2506,67 @@
       "tier": 0,
       "prereq": [],
       "glyph": "💎",
-      "stub": true,
       "title": "The Beautiful Mind",
       "bridge": [
-        "De Bono's craft of listening, asking, and holding alternatives — thinking that makes you genuinely good company and hard to fool.",
-        "Full lesson coming in an upcoming update."
-      ]
+        "Edward de Bono's contribution is the gentlest in your library and, quietly, one of the strongest defenses that exists: a genuinely curious, well-furnished mind is very hard to manipulate and a pleasure to be around. His claim is that thinking is a skill you cultivate, not a fixed IQ — and a 'beautiful mind' is built from habits anyone can practice.",
+        "The habits: listen to understand rather than to reply; ask real questions — the open, exploratory kind that open a topic, not the closed kind that score points; and hold alternatives, the reflex of asking 'what else could this be? what's another way to see it?' before locking in. De Bono prizes the ability to entertain a possibility without swallowing it, to explore an idea you disagree with, and to add to a conversation rather than merely win it. These make you interesting — and slippery to con.",
+        "The defensive power is structural, not accidental. Manipulation needs you to accept a single frame, fast — one interpretation, one urgent choice, one version of reality. A mind trained to generate alternatives automatically resists that: it asks 'what's the other reading?' by habit, the exact move that dissolves framing, false choices, and gaslighting. This is why de Bono sits in the Defense track and why it's a starting point you can begin anytime — curiosity and the alternatives-habit are the base layer under all clear thinking, contemplative or strategic."
+      ],
+      "sources": [
+        {
+          "book": "How to Have a Beautiful Mind",
+          "ref": "de Bono — listening and real questions",
+          "quote": [
+            "A beautiful mind listens in order to understand, not merely to reply, and asks questions that open a subject rather than close it. Exploring is more valuable than proving."
+          ]
+        },
+        {
+          "book": "How to Have a Beautiful Mind",
+          "ref": "de Bono — always seek alternatives",
+          "quote": [
+            "Always seek alternatives. The habit of asking 'what else might this be?' is the mark of a good thinker; certainty closes the mind, while possibility keeps it alive."
+          ]
+        }
+      ],
+      "quiz": [
+        {
+          "q": "De Bono's core claim is that thinking is:",
+          "c": [
+            "a fixed IQ you're born with",
+            "a skill built from practicable habits — listening, questioning, holding alternatives",
+            "only for geniuses",
+            "not worth training"
+          ],
+          "a": 1,
+          "why": "Habits, not innate wattage."
+        },
+        {
+          "q": "A beautiful mind listens in order to:",
+          "c": [
+            "reply and win",
+            "understand — asking open questions that explore rather than score",
+            "memorize the words",
+            "look impressive"
+          ],
+          "a": 1,
+          "why": "Understanding over scoring."
+        },
+        {
+          "q": "Why is the alternatives-habit a structural defense against manipulation?",
+          "c": [
+            "it isn't",
+            "manipulation needs you to accept one frame fast; auto-generating 'what else could this be?' dissolves framing and false choices",
+            "it just makes you argue more",
+            "it only slows you down"
+          ],
+          "a": 1,
+          "why": "Alternatives break the single-frame the con depends on."
+        }
+      ],
+      "apply": {
+        "prompt": "In your next disagreement, before responding, silently generate one genuine alternative reading of what the other person means. Write what you tried it on and whether it changed the conversation.",
+        "min": 50
+      }
     },
     {
       "id": "f4",
@@ -2095,13 +2577,75 @@
         "f1"
       ],
       "glyph": "☯️",
-      "stub": true,
       "title": "Cross-Training: Stillness Meets Strategy",
+      "whyreq": "The capstone only lands once you've felt both sides — the hindrance-mastery of the concentration track (b3) and the manipulation-spotting of defense (f1). It is the one place the whole map converges.",
       "bridge": [
-        "The capstone that links both wings: an unshakeable mind is the ultimate defense against manipulation, and the calmest player sees the board most clearly.",
-        "Full lesson coming in an upcoming update."
+        "This is the capstone of the entire Path, and it exists to say the one thing the whole vault has been building toward: the light wing and the shadow wing are the same skill seen from two sides. You needed the hindrance-mastery of the concentration track and the manipulation-spotting of the defense track to stand here, because the thesis only makes sense once you've felt both.",
+        "Here is the thesis. Every manipulation ever devised — every tactic in the shadow wing, every lever Cialdini catalogs, every move Greene names — works by hijacking your feeling-tone and letting your reflex do the rest. Fear, flattery, guilt, urgency, desire: the tactic injects the feeling, and your automatic reaction completes the transaction before judgment arrives. The entire attack surface is the gap between feeling and response. And that gap is exactly what the contemplative wing spent every lesson widening. A mind that meets a spike of feeling with equanimity — that feels the hook and does not have to bite — is not a harder target. It has stopped being a target at all.",
+        "So the two wings resolve into one practice. The shadow wing taught you to see the moves — outward vision, reading people and tactics. The light wing taught you to master your own reactions — inward stillness, so the moves find nothing to grab. Defense without stillness is exhausting vigilance; stillness without discernment is naïve. Together they are the whole thing: you see clearly, and you are not moved. That is the calm, unmanipulable, genuinely free mind the entire vault — shadow and light — was always pointing at. You've reached the center of the map."
       ],
-      "whyreq": "Unshakeable means you see the hook coming (defense) and your mind doesn't bite (hindrance mastery)."
+      "sources": [
+        {
+          "book": "The Experience of Insight",
+          "ref": "Goldstein — the unhooked mind is free",
+          "quote": [
+            "When mindfulness stands in the gap between feeling and reaction, nothing can compel you. This is freedom — not the absence of provocation, but the absence of compulsion in its presence."
+          ]
+        },
+        {
+          "book": "The Art of Quiet Influence",
+          "ref": "Davis — the calm center as strength",
+          "quote": [
+            "The most influential person in the room is often the calmest — unmoved by pressure, and therefore impossible to stampede."
+          ]
+        },
+        {
+          "book": "The 48 Laws of Power",
+          "ref": "Law 36 — the master's composure",
+          "quote": [
+            "The powerful never appear rattled; they maintain composure. The one who cannot be provoked cannot be controlled — and so becomes, in the end, the freest of all."
+          ]
+        }
+      ],
+      "quiz": [
+        {
+          "q": "The capstone thesis is that the two wings are:",
+          "c": [
+            "opposites you must choose between",
+            "the same skill from two sides — outward seeing (shadow) and inward stillness (light)",
+            "unrelated subjects",
+            "both merely about winning"
+          ],
+          "a": 1,
+          "why": "See the move; don't be moved."
+        },
+        {
+          "q": "Every manipulation works by:",
+          "c": [
+            "superior logic",
+            "hijacking your feeling-tone so your reflex completes the transaction before judgment arrives",
+            "physical force",
+            "legal pressure"
+          ],
+          "a": 1,
+          "why": "The attack surface is the feeling-to-response gap."
+        },
+        {
+          "q": "Why does an equanimous mind stop being a target?",
+          "c": [
+            "it hides better",
+            "meet feeling with equanimity and the tactic finds nothing to grab — the gap is where every con lives",
+            "it intimidates attackers",
+            "it stops feeling anything at all"
+          ],
+          "a": 1,
+          "why": "No reflex to pull, no leverage."
+        }
+      ],
+      "apply": {
+        "prompt": "Reflect on the whole Path. Write, in a few sentences, one real situation where 'see the move AND don't be moved' would change how you show up — and which wing (seeing or stillness) you most need to strengthen for it.",
+        "min": 60
+      }
     }
   ]
 }
