@@ -291,6 +291,18 @@ header .brand span{color:var(--gold)}
 .tag.fix{background:rgba(212,175,55,.16);color:var(--gold)}
 .tag.polish{background:rgba(255,255,255,.08);color:var(--tx2)}
 
+/* ---------- journal ---------- */
+.jsec{font-size:11px;letter-spacing:.24em;color:var(--tx2);margin:24px 0 12px;border-top:1px solid var(--line);padding-top:18px}
+#jstats{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+#jstats .hstat{font-size:12px;padding:6px 12px}
+#jstats .hstat b{color:var(--gold)}
+#jactions{display:flex;gap:8px;flex-wrap:wrap}
+#jactions .ghostbtn{margin:0;padding:10px 16px;font-size:12.5px}
+.jnote{background:var(--card);border-left:3px solid var(--jade);border-radius:8px;padding:13px 15px;margin-bottom:10px}
+.jnote .jq{font-family:var(--sans);font-size:11.5px;color:var(--tx2);margin-bottom:6px;line-height:1.4}
+.jnote .jt{font-family:var(--serif);font-size:14.5px;line-height:1.6}
+.jnote .jm{font-size:11px;color:var(--tx2);margin-top:7px;display:flex;justify-content:space-between;gap:8px}
+
 /* ---------- toasts ---------- */
 #toasts{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);z-index:100;display:flex;flex-direction:column;gap:8px;align-items:center}
 .toast{background:#1a1608;border:1px solid var(--gold);color:var(--tx);padding:12px 22px;border-radius:99px;
@@ -336,7 +348,7 @@ header .brand span{color:var(--gold)}
   </div>
   <div class="iconrow">
     <button class="iconbtn" id="btn-search" title="Search">🔍</button>
-    <button class="iconbtn" id="btn-hl" title="Highlights">⭐</button>
+    <button class="iconbtn" id="btn-hl" title="Journal — notes, highlights, backup">📓</button>
     <button class="iconbtn" id="btn-ach" title="Achievements">🏆</button>
     <button class="iconbtn" id="btn-patch" title="Patch notes">📜</button>
     <button class="iconbtn" id="btn-bio" title="Enable face unlock on this device">👁️</button>
@@ -386,7 +398,14 @@ header .brand span{color:var(--gold)}
 
 <div class="overlay" id="eplist"><div class="panel"><h2>☰ EPISODES <button class="x" data-close="eplist">✕</button></h2><div id="eprows"></div></div></div>
 <div class="overlay" id="search"><div class="panel"><h2>🔍 SEARCH <button class="x" data-close="search">✕</button></h2><input id="sinput" placeholder="search all books…" autocomplete="off"><div id="sres"></div></div></div>
-<div class="overlay" id="hls"><div class="panel"><h2>⭐ HIGHLIGHTS <button class="x" data-close="hls">✕</button></h2><div id="hlrows"></div></div></div>
+<div class="overlay" id="hls"><div class="panel" style="max-width:760px">
+  <h2>📓 JOURNAL <button class="x" data-close="hls">✕</button></h2>
+  <div id="jstats"></div>
+  <div id="jactions"></div>
+  <div class="jsec">✍️ YOUR APPLY NOTES</div><div id="jnotes"></div>
+  <div class="jsec">⭐ HIGHLIGHTS</div><div id="hlrows"></div>
+  <input type="file" id="jfile" accept="application/json" style="display:none">
+</div></div>
 <div class="overlay" id="review"><div class="panel" style="max-width:660px"><h2>🔁 SHARPEN <span id="rvcount" style="font-size:13px;color:var(--tx2)"></span> <button class="x" data-close="review">✕</button></h2><div id="rvbody"></div></div></div>
 <div class="overlay" id="patches"><div class="panel" style="max-width:700px"><h2>📜 PATCH NOTES <span id="patchver" style="font-size:13px;color:var(--tx2)"></span> <button class="x" data-close="patches">✕</button></h2><div id="patchlist"></div></div></div>
 <div class="overlay" id="achs"><div class="panel" style="max-width:820px"><h2>🏆 ACHIEVEMENTS <span id="achcount" style="font-size:13px;color:var(--tx2)"></span> <button class="x" data-close="achs">✕</button></h2><div class="achgrid" id="achgrid"></div></div></div>
@@ -433,9 +452,9 @@ const ACH=[
  {id:"ep10",e:"📖",n:"Ten Deep",d:"Complete 10 episodes",c:()=>totalRead()>=10},
  {id:"ep50",e:"🧭",n:"Half Century",d:"Complete 50 episodes",c:()=>totalRead()>=50},
  {id:"ep100",e:"🏛️",n:"Centurion",d:"Complete 100 episodes",c:()=>totalRead()>=100},
- {id:"streak3",e:"🔥",n:"Kindling",d:"3-day reading streak",c:()=>S.streak.count>=3},
- {id:"streak7",e:"🕯️",n:"Eternal Flame",d:"7-day reading streak",c:()=>S.streak.count>=7},
- {id:"streak30",e:"💥",n:"Obsessed",d:"30-day reading streak",c:()=>S.streak.count>=30},
+ {id:"streak3",e:"🔥",n:"Kindling",d:"3-day reading streak",c:()=>Math.max(S.streak.count,S.bestStreak||0)>=3},
+ {id:"streak7",e:"🕯️",n:"Eternal Flame",d:"7-day reading streak",c:()=>Math.max(S.streak.count,S.bestStreak||0)>=7},
+ {id:"streak30",e:"💥",n:"Obsessed",d:"30-day reading streak",c:()=>Math.max(S.streak.count,S.bestStreak||0)>=30},
  {id:"balance",e:"☯️",n:"Balanced Mind",d:"Read shadow & light in one day",c:()=>{const d=S.days[today()];return d&&d.shadow&&d.light}},
  {id:"owl",e:"🦉",n:"Night Owl",d:"Finish an episode after midnight",c:()=>S.owlFlag},
  {id:"bird",e:"🌅",n:"Dawn Reader",d:"Finish an episode before 8 am",c:()=>S.birdFlag},
@@ -632,7 +651,7 @@ function complete(){
   (S.read[CUR.b]??=[]).push(CUR.e);
   const before=lvl();S.xp+=epXP(ep);
   const d=today();
-  if(S.streak.day!==d){S.streak.count=S.streak.day===yesterday()?S.streak.count+1:1;S.streak.day=d}
+  if(S.streak.day!==d){S.streak.count=S.streak.day===yesterday()?S.streak.count+1:1;S.streak.day=d;S.bestStreak=Math.max(S.bestStreak||0,S.streak.count)}
   (S.days[d]??={})[b.wing]=true;
   const hr=new Date().getHours();if(hr<5)S.owlFlag=true;else if(hr<8)S.birdFlag=true;
   save();
@@ -688,8 +707,74 @@ hlBtn.onclick=()=>{const sel=document.getSelection();const t=sel.toString().trim
   else S.hl.unshift({b:CUR.b,e:CUR.e,t});
   save();sel.removeAllRanges();hlBtn.style.display="none";
   toast("⭐ Highlight saved");checkAch()};
-$("btn-hl").onclick=()=>{const w=$("hlrows");w.innerHTML="";
-  if(!S.hl.length)w.innerHTML='<p style="color:var(--tx2)">Select any text while reading to collect it here.</p>';
+const fmtDate=ts=>new Date(ts).toLocaleDateString(undefined,{day:"numeric",month:"short",year:"numeric"});
+function journalNotes(){return DATA.nodes
+  .filter(x=>S.node[x.id]&&S.node[x.id].applied)
+  .map(x=>({node:x,rec:S.node[x.id]}))
+  .sort((a,b)=>(b.rec.doneAt||0)-(a.rec.doneAt||0));}
+function journalText(){
+  let t="# The Vault — Journal\n\n## Apply notes\n\n";
+  for(const {node,rec} of journalNotes())
+    t+=`### ${node.title} (${trackById(node.track).name}${rec.doneAt?", "+fmtDate(rec.doneAt):""})\n> ${node.apply.prompt}\n\n${rec.applied}\n\n`;
+  t+="## Highlights\n\n";
+  for(const h of S.hl){
+    const src=h.n?(nodeById(h.n)||{}).title:(bookById(h.b)||{}).title;
+    t+=`- “${h.t}” — ${src||"unknown"}\n`;
+  }
+  return t;
+}
+async function copyJournal(){
+  const t=journalText();
+  try{await navigator.clipboard.writeText(t);toast("📋 Journal copied as text")}
+  catch(e){const ta=document.createElement("textarea");ta.value=t;document.body.appendChild(ta);
+    ta.select();document.execCommand("copy");ta.remove();toast("📋 Journal copied as text")}
+}
+function backupVault(){
+  const blob=new Blob([JSON.stringify({vault:1,ver:APP_VER,at:Date.now(),state:S},null,1)],{type:"application/json"});
+  const a=document.createElement("a");a.href=URL.createObjectURL(blob);
+  a.download="vault-backup-"+today()+".json";a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href),4000);
+  toast("💾 Backup downloaded — keep it somewhere safe");
+}
+function restoreVault(file){
+  const rd=new FileReader();
+  rd.onload=()=>{try{
+    const d=JSON.parse(rd.result);
+    if(!d||d.vault!==1||!d.state)throw new Error("not a vault backup");
+    if(!confirm("Replace ALL progress on this device with the backup from "+fmtDate(d.at)+"?"))return;
+    localStorage.setItem(LS_ST,JSON.stringify(d.state));
+    location.reload();
+  }catch(e){toast("⚠️ That file isn't a vault backup")}};
+  rd.readAsText(file);
+}
+function renderJournal(){
+  const stats=$("jstats");
+  const notes=journalNotes();
+  stats.innerHTML=[
+    ["🧭",nodesDone()+"/"+DATA.nodes.length,"ideas"],
+    ["📖",totalRead(),"episodes"],
+    ["🔁",S.rvN||0,"reviews"],
+    ["✍️",notes.length,"notes"],
+    ["⭐",S.hl.length,"highlights"],
+    ["🔥",Math.max(S.streak.count,S.bestStreak||0),"best streak"],
+    ["⚡",S.xp,"XP"],
+  ].map(([e,v,l])=>`<span class="hstat">${e} <b>${v}</b> <small>${l}</small></span>`).join("");
+  $("jactions").innerHTML="";
+  const mk=(txt,fn)=>{const b=document.createElement("button");b.className="ghostbtn";b.textContent=txt;b.onclick=fn;$("jactions").appendChild(b)};
+  mk("📋 Copy all as text",copyJournal);
+  mk("💾 Download backup",backupVault);
+  mk("📥 Restore backup",()=>$("jfile").click());
+  const jn=$("jnotes");jn.innerHTML="";
+  if(!notes.length)jn.innerHTML='<p style="color:var(--tx2);font-size:13px">Master ideas on the Path — everything you write in the “Apply it” step collects here.</p>';
+  for(const {node,rec} of notes){
+    const el=document.createElement("div");el.className="jnote";
+    el.innerHTML=`<div class="jq">${node.glyph} ${esc(node.title)} — ${esc(node.apply.prompt)}</div>
+      <div class="jt">${esc(rec.applied)}</div>
+      <div class="jm"><span>${esc(trackById(node.track).name)}</span><span>${rec.doneAt?fmtDate(rec.doneAt):""}</span></div>`;
+    jn.appendChild(el);
+  }
+  const w=$("hlrows");w.innerHTML="";
+  if(!S.hl.length)w.innerHTML='<p style="color:var(--tx2);font-size:13px">Select any text while reading to collect it here.</p>';
   for(const h of S.hl){
     let label="";
     if(h.n){const nd=nodeById(h.n);label=nd?nd.glyph+" "+nd.title:"";}
@@ -698,7 +783,10 @@ $("btn-hl").onclick=()=>{const w=$("hlrows");w.innerHTML="";
     el.innerHTML=`<div class="q">“${esc(h.t)}”</div><div class="m"><span>${esc(label)}</span><button style="color:var(--tx2)" data-del>remove</button></div>`;
     el.querySelector("[data-del]").onclick=()=>{S.hl=S.hl.filter(x=>x!==h);save();el.remove()};
     w.appendChild(el)}
-  $("hls").classList.add("on")};
+  $("hls").classList.add("on");
+}
+$("btn-hl").onclick=renderJournal;
+$("jfile").onchange=e=>{if(e.target.files[0])restoreVault(e.target.files[0]);e.target.value=""};
 
 /* ---------- search ---------- */
 $("btn-search").onclick=()=>{$("search").classList.add("on");$("sinput").value="";$("sres").innerHTML="";setTimeout(()=>$("sinput").focus(),50)};
@@ -740,8 +828,14 @@ $("btn-ach").onclick=()=>{const g=$("achgrid");g.innerHTML="";
   $("achs").classList.add("on")};
 
 /* ---------- patch notes ---------- */
-const APP_VER="2.7";
+const APP_VER="2.8";
 const PATCHES=[
+ {v:"2.8",n:"The Chronicle",d:"13 Jul 2026",items:[
+  ["new","📓 JOURNAL: every apply-note you've written and every highlight you've saved, in one dated view — your own book, built from the reading. The ⭐ button became 📓."],
+  ["new","Copy the whole journal as text with one tap — paste it into any notes app."],
+  ["new","💾 Backup & restore: download your entire progress (XP, streaks, notes, highlights, reviews) as a file and restore it on any device. Your writing can now survive anything."],
+  ["new","Stats strip: ideas mastered, episodes, reviews, notes, best streak, XP — at a glance."],
+  ["fix","Streak achievements now count your best-ever streak, so a broken chain can't un-earn them."]]},
  {v:"2.7",n:"The Sharpening",d:"13 Jul 2026",items:[
   ["new","SHARPEN: mastered ideas come back for review — 1, 3, 7, 21, then 45 days later. One quick question each; sharp answers earn +15 XP and push the next review further out."],
   ["new","A 🔁 card appears on the Path whenever ideas are due — mastery no longer rusts in silence."],
@@ -1143,7 +1237,7 @@ function completeNode(n){
   if(!rec.doneAt){
     rec.doneAt=Date.now();const before=lvl();S.xp+=NODE_XP;
     const d=today();
-    if(S.streak.day!==d){S.streak.count=S.streak.day===yesterday()?S.streak.count+1:1;S.streak.day=d;}
+    if(S.streak.day!==d){S.streak.count=S.streak.day===yesterday()?S.streak.count+1:1;S.streak.day=d;S.bestStreak=Math.max(S.bestStreak||0,S.streak.count);}
     (S.days[d]=S.days[d]||{})[["A","B","C"].includes(n.track)?"light":"shadow"]=true;
     save();
     toast(`+${NODE_XP} XP · “${n.title}” mastered`,true);
