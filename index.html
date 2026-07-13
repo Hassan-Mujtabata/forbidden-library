@@ -495,7 +495,7 @@ function renderHome(){
       const el=document.createElement("button");el.className="book";el.style.setProperty("--bc",b.accent);
       el.innerHTML=`<div class="cover" style="background:linear-gradient(160deg,${b.accent}55,${b.accent}18 55%,rgba(0,0,0,.35))">
           <div class="g">${b.glyph}</div><div class="t">${esc(b.title)}</div></div>
-        <div class="bmeta"><div class="a">${esc(b.author)}</div>
+        <div class="bmeta">
           <div class="pbar"><div class="pfill" style="width:${pct}%"></div></div>
           <div class="pct"><span>${done}/${b.episodes.length} eps</span><span>${pct}%</span></div></div>`;
       el.onclick=()=>openBook(b.id);grid.appendChild(el);}
