@@ -271,6 +271,26 @@ header .brand span{color:var(--gold)}
 .stubnote .e{font-size:32px}
 @media(max-width:560px){.track{min-width:82vw;max-width:82vw}}
 
+/* ---------- patch notes ---------- */
+.iconbtn{position:relative}
+.iconbtn.hasnew::after{content:"";position:absolute;top:6px;right:7px;width:8px;height:8px;border-radius:50%;
+  background:var(--gold);box-shadow:0 0 8px 2px rgba(212,175,55,.7);animation:fpulse 1.6s ease-in-out infinite}
+.patch{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 20px;margin-bottom:14px}
+.patch.latest{border-color:rgba(212,175,55,.5);box-shadow:0 0 24px -12px rgba(212,175,55,.6)}
+.patch .phead{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:4px}
+.patch .pv{font-size:11px;font-weight:800;letter-spacing:.12em;color:#151006;background:linear-gradient(135deg,#d4af37,#9c7b26);
+  padding:3px 10px;border-radius:99px}
+.patch.latest .pv::after{content:" · NEW"}
+.patch .pn{font-family:var(--serif);font-size:18px}
+.patch .pd{margin-left:auto;font-size:11px;color:var(--tx2)}
+.patch ul{list-style:none;margin-top:10px}
+.patch li{display:flex;gap:9px;align-items:baseline;font-size:13.5px;line-height:1.55;margin-bottom:7px;color:#d8d4cb}
+.patch .tag{flex:0 0 auto;font-size:9.5px;font-weight:800;letter-spacing:.1em;padding:2px 7px;border-radius:5px;transform:translateY(-1px)}
+.tag.new{background:rgba(78,205,196,.16);color:var(--jade)}
+.tag.content{background:rgba(192,132,252,.16);color:#c084fc}
+.tag.fix{background:rgba(212,175,55,.16);color:var(--gold)}
+.tag.polish{background:rgba(255,255,255,.08);color:var(--tx2)}
+
 /* ---------- toasts ---------- */
 #toasts{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);z-index:100;display:flex;flex-direction:column;gap:8px;align-items:center}
 .toast{background:#1a1608;border:1px solid var(--gold);color:var(--tx);padding:12px 22px;border-radius:99px;
@@ -318,6 +338,7 @@ header .brand span{color:var(--gold)}
     <button class="iconbtn" id="btn-search" title="Search">🔍</button>
     <button class="iconbtn" id="btn-hl" title="Highlights">⭐</button>
     <button class="iconbtn" id="btn-ach" title="Achievements">🏆</button>
+    <button class="iconbtn" id="btn-patch" title="Patch notes">📜</button>
     <button class="iconbtn" id="btn-bio" title="Enable face unlock on this device">👁️</button>
   </div>
 </div>
@@ -365,6 +386,7 @@ header .brand span{color:var(--gold)}
 <div class="overlay" id="eplist"><div class="panel"><h2>☰ EPISODES <button class="x" data-close="eplist">✕</button></h2><div id="eprows"></div></div></div>
 <div class="overlay" id="search"><div class="panel"><h2>🔍 SEARCH <button class="x" data-close="search">✕</button></h2><input id="sinput" placeholder="search all books…" autocomplete="off"><div id="sres"></div></div></div>
 <div class="overlay" id="hls"><div class="panel"><h2>⭐ HIGHLIGHTS <button class="x" data-close="hls">✕</button></h2><div id="hlrows"></div></div></div>
+<div class="overlay" id="patches"><div class="panel" style="max-width:700px"><h2>📜 PATCH NOTES <span id="patchver" style="font-size:13px;color:var(--tx2)"></span> <button class="x" data-close="patches">✕</button></h2><div id="patchlist"></div></div></div>
 <div class="overlay" id="achs"><div class="panel" style="max-width:820px"><h2>🏆 ACHIEVEMENTS <span id="achcount" style="font-size:13px;color:var(--tx2)"></span> <button class="x" data-close="achs">✕</button></h2><div class="achgrid" id="achgrid"></div></div></div>
 <div class="overlay" id="flow"><div class="fwrap">
   <div id="fword"></div>
@@ -454,7 +476,7 @@ async function boot(){
   landing();checkAch();
   if("serviceWorker"in navigator)navigator.serviceWorker.register("sw.js").catch(()=>{});
 }
-function landing(){ if(DATA.nodes&&DATA.nodes.length){renderPath();show("path")} else {renderHome();show("home")} }
+function landing(){ if(DATA.nodes&&DATA.nodes.length){renderPath();show("path")} else {renderHome();show("home")} patchCheck(); }
 $("keygo").onclick=async()=>{const k=$("keyin").value.trim();if(!k)return;
   try{DATA=await tryLoad(k);localStorage.setItem(LS_KEY,k);landing()}
   catch(e){$("keyerr").textContent="That key doesn't fit this lock."}};
@@ -708,6 +730,68 @@ $("btn-ach").onclick=()=>{const g=$("achgrid");g.innerHTML="";
     el.innerHTML=`<div class="e">${a.e}</div><div class="n">${a.n}</div><div class="d">${a.d}</div>`;g.appendChild(el)}
   $("achcount").textContent=`${S.ach.length}/${ACH.length}`;
   $("achs").classList.add("on")};
+
+/* ---------- patch notes ---------- */
+const APP_VER="2.5";
+const PATCHES=[
+ {v:"2.5",n:"The Town Crier",d:"13 Jul 2026",items:[
+  ["new","Patch notes! This screen appears once after every update — browse the full history anytime via 📜 in the top bar."],
+  ["polish","A golden dot glows on the scroll when a patch you haven't read is waiting."]]},
+ {v:"2.4",n:"The Smoothing",d:"13 Jul 2026",items:[
+  ["new","Daily Mix now leads with up to two unlocked Path ideas before the book episodes."],
+  ["new","Search reaches inside Path lessons — results show 🔒/✓ status and jump straight in."],
+  ["new","Highlights can be saved inside lessons, labeled with the idea they came from."],
+  ["new","Apply-notes autosave as drafts — close mid-thought and your words are waiting."],
+  ["new","RESUME LESSON: the Path remembers your exact scroll spot and offers to drop you back."],
+  ["fix","Lessons now have the reading polish episodes always had: progress bar, fade-in paragraphs, saved position."],
+  ["fix","Phone back button exits a lesson to the map instead of quitting the app."],
+  ["polish","Streak flame shows “today ✓” once you've banked reading for the day."]]},
+ {v:"2.3",n:"The Persuasion Engine",d:"13 Jul 2026",items:[
+  ["content","Influence & Persuasion track fully authored — 6 lessons: Perception, Reciprocity, Proof & Authority, Liking & Consistency, Scarcity & Framing, Ethical Influence."],
+  ["content","Every lever shown from both sides: the science, the weaponized form, and the defense — books never blended."]]},
+ {v:"2.2",n:"The Insight Update",d:"13 Jul 2026",items:[
+  ["content","Insight & Wisdom track fully authored — Three Characteristics through Equanimity, including the bliss-trap warning and the hard-stretch map."],
+  ["new","STAGE numbers on every idea; lessons show “Stage n of m”."],
+  ["new","Locked ideas explain WHY the lock is real — the actual dependency, not decoration."],
+  ["fix","Quiz answers shuffle every attempt, so position can't be memorized."],
+  ["new","Proper app install on phone & laptop (real icons, fullscreen, offline)."]]},
+ {v:"2.1",n:"The Quiet Librarian",d:"13 Jul 2026",items:[
+  ["polish","Author names removed from covers and citations — it's your private library."],
+  ["fix","Updates now actually reach your device instead of being pinned by an old cache."]]},
+ {v:"2.0",n:"The Path",d:"13 Jul 2026",items:[
+  ["new","THE PATH: your books rebuilt as a dependency-locked skill tree — 6 tracks, 35 ideas, organized by concept and deduped across books."],
+  ["new","Mastering an idea = read → pass the quiz → write how you'll apply it. Only mastery unlocks what depends on it."],
+  ["content","Right Concentration added; Path of Purification quarried into lessons with its missing prerequisites written for you."],
+  ["new","Guide notes: connective knowledge the dense old texts assume, clearly marked apart from book excerpts."]]},
+ {v:"1.2",n:"The Illustrated Edition",d:"12 Jul 2026",items:[
+  ["new","36 hand-drawn animated illustrations float beside the text, matched to what each passage is about."],
+  ["new","Pull-quotes and gentle scroll animations pace every episode."]]},
+ {v:"1.1",n:"The Watchful Eye",d:"12 Jul 2026",items:[
+  ["new","Windows Hello face unlock — your face opens the vault on this device."],
+  ["new","Generative art banners open every episode: embers, influence-webs, ripples, and a working breath pacer."],
+  ["polish","Copyright pages and front-matter junk swept out of the books."]]},
+ {v:"1.0",n:"The Vault Opens",d:"12 Jul 2026",items:[
+  ["new","12 books, encrypted end-to-end — only your link opens them, anywhere."],
+  ["new","Episodes, XP, levels, streaks, achievements, Daily Mix, search, highlights, flow-mode speed reader."],
+  ["new","Full offline support — the vault lives on your device after first visit."]]}
+];
+function renderPatches(){
+  const w=$("patchlist");w.innerHTML="";
+  PATCHES.forEach((p,i)=>{const d=document.createElement("div");d.className="patch"+(i===0?" latest":"");
+    d.innerHTML=`<div class="phead"><span class="pv">PATCH ${p.v}</span><span class="pn">${p.n}</span><span class="pd">${p.d}</span></div>
+      <ul>${p.items.map(([t,x])=>`<li><span class="tag ${t}">${t.toUpperCase()}</span><span>${x}</span></li>`).join("")}</ul>`;
+    w.appendChild(d);});
+  $("patchver").textContent="current "+APP_VER;
+}
+function openPatches(){renderPatches();$("patches").classList.add("on");
+  S.seenPatch=APP_VER;save();$("btn-patch").classList.remove("hasnew");}
+$("btn-patch").onclick=openPatches;
+function patchCheck(){
+  if(S.seenPatch===APP_VER)return;
+  if(!S.seenPatch){S.seenPatch=APP_VER;save();return}  // first-ever visit: no popup, just mark
+  $("btn-patch").classList.add("hasnew");
+  setTimeout(openPatches,900);                          // game-style login popup, once per patch
+}
 
 /* ---------- flow mode (RSVP) ---------- */
 let F={words:[],i:0,timer:null,playing:false};
