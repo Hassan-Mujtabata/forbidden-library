@@ -291,6 +291,12 @@ header .brand span{color:var(--gold)}
 .tag.fix{background:rgba(212,175,55,.16);color:var(--gold)}
 .tag.polish{background:rgba(255,255,255,.08);color:var(--tx2)}
 
+/* ---------- lesson → book crossings ---------- */
+.srcgo{display:inline-block;margin-top:10px;font-size:12px;color:var(--jade);border:1px solid rgba(78,205,196,.35);
+  border-radius:8px;padding:6px 12px;transition:.2s}
+.srcgo:hover{background:rgba(78,205,196,.12)}
+.srcquarry{margin-top:10px;font-size:11px;color:var(--tx2);font-style:italic}
+
 /* ---------- journal ---------- */
 .jsec{font-size:11px;letter-spacing:.24em;color:var(--tx2);margin:24px 0 12px;border-top:1px solid var(--line);padding-top:18px}
 #jstats{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
@@ -391,6 +397,7 @@ header .brand span{color:var(--gold)}
     <div class="bt" id="n-title"></div>
     <button class="iconbtn" id="n-fminus" title="Smaller text">A−</button>
     <button class="iconbtn" id="n-fplus" title="Bigger text">A+</button>
+    <button class="iconbtn" id="n-flow" title="Flow mode">⚡</button>
   </div>
   <div id="nbody" class="rdbody"></div>
   <div id="ngate"></div>
@@ -510,19 +517,23 @@ $("keygo").onclick=async()=>{const k=$("keyin").value.trim();if(!k)return;
   catch(e){$("keyerr").textContent="That key doesn't fit this lock."}};
 
 /* ============ views ============ */
+let LAST_ROOT="path";
 function show(v,nopush){for(const el of document.querySelectorAll(".view"))el.classList.remove("on");
   for(const el of document.querySelectorAll(".overlay"))el.classList.remove("on");
   if(v!=="reader")stopArt();
   $("topbar").style.display=(v==="home"||v==="path")?"flex":"none";
-  if(v==="home"||v==="path")setNav(v);
+  if(v==="home"||v==="path"){setNav(v);LAST_ROOT=v;}
   // one history entry while inside a lesson/episode so the phone back button exits to the map, not the app
   if((v==="reader"||v==="node")&&!nopush){
     const st={v};(history.state&&history.state.v)?history.replaceState(st,""):history.pushState(st,"");
   }else if(!nopush&&history.state&&history.state.v)history.replaceState({},"");
   $(v).classList.add("on");window.scrollTo(0,0)}
+function goRoot(nopush){
+  if(LAST_ROOT==="home"){renderHome();show("home",nopush)}
+  else{renderPath();show("path",nopush)}
+}
 window.addEventListener("popstate",()=>{
-  if($("node").classList.contains("on")){renderPath();show("path",true)}
-  else if($("reader").classList.contains("on")){renderHome();show("home",true)}
+  if($("node").classList.contains("on")||$("reader").classList.contains("on"))goRoot(true);
 });
 function setNav(v){$("nav-path").classList.toggle("on",v==="path");$("nav-lib").classList.toggle("on",v==="home")}
 function renderTopbar(){
@@ -678,7 +689,7 @@ let scrollT;window.addEventListener("scroll",()=>{
     else if(inNode&&CURN){S.nodePos={id:CURN,scroll:h.scrollTop};save()}
   },300);
 },{passive:true});
-$("r-back").onclick=()=>{renderHome();show("home")};
+$("r-back").onclick=()=>goRoot();
 $("r-fminus").onclick=()=>{S.font=Math.max(14,S.font-1);$("rbody").style.fontSize=S.font+"px";save()};
 $("r-fplus").onclick=()=>{S.font=Math.min(24,S.font+1);$("rbody").style.fontSize=S.font+"px";save()};
 $("r-list").onclick=()=>{const b=bookById(CUR.b);const w=$("eprows");w.innerHTML="";
@@ -828,8 +839,13 @@ $("btn-ach").onclick=()=>{const g=$("achgrid");g.innerHTML="";
   $("achs").classList.add("on")};
 
 /* ---------- patch notes ---------- */
-const APP_VER="2.8";
+const APP_VER="2.9";
 const PATCHES=[
+ {v:"2.9",n:"The Crossroads",d:"13 Jul 2026",items:[
+  ["new","Lessons now open into the books: every source card has a “📖 Continue in the book →” button that drops you into the full text in the Library."],
+  ["new","⚡ Flow mode works inside lessons — speed-read a whole idea, guide note and quotes included."],
+  ["fix","Back navigation remembers where you came from: leave a book you opened from the Path and you return to the Path, not the Library."],
+  ["polish","Quarried texts (Path of Purification) are labeled honestly on their source cards — their excerpts live only on the Path."]]},
  {v:"2.8",n:"The Chronicle",d:"13 Jul 2026",items:[
   ["new","📓 JOURNAL: every apply-note you've written and every highlight you've saved, in one dated view — your own book, built from the reading. The ⭐ button became 📓."],
   ["new","Copy the whole journal as text with one tap — paste it into any notes app."],
@@ -973,10 +989,17 @@ function reviewStep(idx,gained){
 
 /* ---------- flow mode (RSVP) ---------- */
 let F={words:[],i:0,timer:null,playing:false};
-$("r-flow").onclick=()=>{const b=bookById(CUR.b);if(!b)return;
-  F.words=b.episodes[CUR.e].p.join(" ").split(/\s+/).filter(Boolean);F.i=0;
+function launchFlow(words){
+  if(!words.length)return;
+  F.words=words;F.i=0;
   $("f-wpm").value=S.wpm;$("f-wpmv").textContent=S.wpm;
-  $("flow").classList.add("on");startFlow()};
+  $("flow").classList.add("on");startFlow();
+}
+$("r-flow").onclick=()=>{const b=bookById(CUR.b);if(!b)return;
+  launchFlow(b.episodes[CUR.e].p.join(" ").split(/\s+/).filter(Boolean))};
+$("n-flow").onclick=()=>{const n=nodeById(CURN);if(!n)return;
+  const txt=[...(n.bridge||[]),...(n.sources||[]).flatMap(s=>s.quote)].join(" ");
+  launchFlow(txt.split(/\s+/).filter(Boolean))};
 function startFlow(){F.playing=true;$("f-play").textContent="⏸ pause";tick()}
 function tick(){
   if(!F.playing)return;
@@ -1150,6 +1173,11 @@ function openNode(id){
     const sh=document.createElement("div");sh.className="lblrow books";sh.textContent="📖 From the books";body.appendChild(sh);
     for(const s of n.sources){const d=document.createElement("div");d.className="src";
       d.innerHTML=`<div class="attr">${esc(s.book)} — ${esc(s.ref)}</div>`+s.quote.map(q=>`<p>“${esc(q)}”</p>`).join("");
+      const lib=DATA.books.find(b=>b.title===s.book);
+      if(lib){const go=document.createElement("button");go.className="srcgo";
+        go.textContent="📖 Continue in the book →";
+        go.onclick=()=>openBook(lib.id);d.appendChild(go);}
+      else{const qn=document.createElement("div");qn.className="srcquarry";qn.textContent="quarried text — excerpts live only on the Path";d.appendChild(qn);}
       body.appendChild(d);}
   }
   nodeFigure(body,tr.accent,n.id);
@@ -1257,7 +1285,7 @@ function completeNode(n){
   $("gnext").onclick=()=>{const nx=nextAvailNode();if(nx)openNode(nx.id);else{renderPath();show("path")}};
   if(unlocked.length)setTimeout(()=>toast(`🔓 Unlocked ${unlocked.length} new idea${unlocked.length>1?"s":""}`),400);
 }
-$("n-back").onclick=()=>{renderPath();show("path")};
+$("n-back").onclick=()=>{renderPath();show("path")};   // lessons always live on the Path
 $("n-fminus").onclick=()=>{S.font=Math.max(14,S.font-1);$("nbody").style.fontSize=S.font+"px";save()};
 $("n-fplus").onclick=()=>{S.font=Math.min(24,S.font+1);$("nbody").style.fontSize=S.font+"px";save()};
 
