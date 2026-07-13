@@ -345,15 +345,16 @@ header .brand span{color:var(--gold)}
 
 <div id="path" class="view">
   <button class="bigcard" id="pathcont" style="display:none"></button>
+  <button class="bigcard" id="sharpen" style="display:none"></button>
+  <div class="bigcard">
+    <div class="tag">⚗️ TODAY'S MIX — <span id="mixsub"></span></div>
+    <div class="mixgrid" id="mixgrid"></div>
+  </div>
   <div id="tree"></div>
 </div>
 
 <div id="home" class="view">
   <button class="bigcard" id="continue" style="display:none"></button>
-  <div class="bigcard">
-    <div class="tag">⚗️ TODAY'S MIX — <span id="mixsub"></span></div>
-    <div class="mixgrid" id="mixgrid"></div>
-  </div>
   <div id="shelves"></div>
 </div>
 
@@ -386,6 +387,7 @@ header .brand span{color:var(--gold)}
 <div class="overlay" id="eplist"><div class="panel"><h2>☰ EPISODES <button class="x" data-close="eplist">✕</button></h2><div id="eprows"></div></div></div>
 <div class="overlay" id="search"><div class="panel"><h2>🔍 SEARCH <button class="x" data-close="search">✕</button></h2><input id="sinput" placeholder="search all books…" autocomplete="off"><div id="sres"></div></div></div>
 <div class="overlay" id="hls"><div class="panel"><h2>⭐ HIGHLIGHTS <button class="x" data-close="hls">✕</button></h2><div id="hlrows"></div></div></div>
+<div class="overlay" id="review"><div class="panel" style="max-width:660px"><h2>🔁 SHARPEN <span id="rvcount" style="font-size:13px;color:var(--tx2)"></span> <button class="x" data-close="review">✕</button></h2><div id="rvbody"></div></div></div>
 <div class="overlay" id="patches"><div class="panel" style="max-width:700px"><h2>📜 PATCH NOTES <span id="patchver" style="font-size:13px;color:var(--tx2)"></span> <button class="x" data-close="patches">✕</button></h2><div id="patchlist"></div></div></div>
 <div class="overlay" id="achs"><div class="panel" style="max-width:820px"><h2>🏆 ACHIEVEMENTS <span id="achcount" style="font-size:13px;color:var(--tx2)"></span> <button class="x" data-close="achs">✕</button></h2><div class="achgrid" id="achgrid"></div></div></div>
 <div class="overlay" id="flow"><div class="fwrap">
@@ -454,6 +456,8 @@ const ACH=[
  {id:"strategist",e:"♛",n:"Strategist",d:"Complete the Power & Strategy track",c:()=>trackDone("E")},
  {id:"sentinel",e:"🛡️",n:"Unmoved",d:"Complete the Defense track",c:()=>trackDone("F")},
  {id:"wholepath",e:"🧭",n:"Keeper of the Path",d:"Master every idea on the Path",c:()=>DATA.nodes.every(x=>nodeDone(x.id))},
+ {id:"whet",e:"🔁",n:"Whetstone",d:"Answer 10 review questions right",c:()=>(S.rvN||0)>=10},
+ {id:"razor",e:"🪒",n:"Razor",d:"Answer 50 review questions right",c:()=>(S.rvN||0)>=50},
 ];
 function checkAch(){for(const a of ACH){if(!S.ach.includes(a.id)&&a.c()){S.ach.push(a.id);toast(`${a.e} Achievement — ${a.n}`,true)}}save()}
 function toast(msg,big){const t=document.createElement("div");t.className="toast"+(big?" big":"");t.textContent=msg;
@@ -525,7 +529,6 @@ function renderHome(){
       <div class="cs">${esc(b.title)} — episode ${S.pos[S.last].ep+1} of ${b.episodes.length}</div>
       <div class="glyphbg">${b.glyph}</div>`;
     c.onclick=()=>openEp(b.id,S.pos[S.last].ep);}}
-  renderMix();
   // shelves
   const wings=[["shadow","🌑 THE SHADOW WING","power · persuasion · defense against both"],["light","🌕 THE LIGHT WING","stillness · clarity · the mind itself"]];
   const sh=$("shelves");sh.innerHTML="";
@@ -737,8 +740,13 @@ $("btn-ach").onclick=()=>{const g=$("achgrid");g.innerHTML="";
   $("achs").classList.add("on")};
 
 /* ---------- patch notes ---------- */
-const APP_VER="2.6";
+const APP_VER="2.7";
 const PATCHES=[
+ {v:"2.7",n:"The Sharpening",d:"13 Jul 2026",items:[
+  ["new","SHARPEN: mastered ideas come back for review — 1, 3, 7, 21, then 45 days later. One quick question each; sharp answers earn +15 XP and push the next review further out."],
+  ["new","A 🔁 card appears on the Path whenever ideas are due — mastery no longer rusts in silence."],
+  ["fix","The Daily Mix now lives on the Path screen where you actually land, instead of hiding in the Library tab."],
+  ["new","Two review achievements: Whetstone (10 sharp answers) and Razor (50)."]]},
  {v:"2.6",n:"The Whole Map",d:"13 Jul 2026",items:[
   ["content","Power & Strategy track fully authored — 5 lessons: Never Outshine the Master, Conceal & Control, Court Attention, Timing & the Long Game, Knowing When Not to Act."],
   ["content","Defense & Clear Thinking track fully authored — Spotting Manipulation, Social Engineering (Mitnick), The Beautiful Mind (de Bono), and the capstone that fuses both wings."],
@@ -802,6 +810,71 @@ function patchCheck(){
   if(!S.seenPatch){S.seenPatch=APP_VER;save();return}  // first-ever visit: no popup, just mark
   $("btn-patch").classList.add("hasnew");
   setTimeout(openPatches,900);                          // game-style login popup, once per patch
+}
+
+/* ---------- spaced review ("Sharpen") ---------- */
+const RV_DAYS=[1,3,7,21,45], RV_XP=15;
+function rvState(id){const r=S.node[id];if(!r||!r.doneAt)return null;
+  r.rv??={due:r.doneAt+864e5,k:0};return r.rv}
+function reviewDue(){if(!DATA.nodes)return[];const now=Date.now();
+  return DATA.nodes.filter(x=>{const rv=rvState(x.id);return rv&&rv.due<=now})}
+function renderSharpen(){
+  const due=reviewDue(),c=$("sharpen");
+  if(!due.length){c.style.display="none";return}
+  c.style.display="block";
+  c.innerHTML=`<div class="tag" style="color:var(--jade)">🔁 SHARPEN</div>
+    <div style="font-family:var(--serif);font-size:20px;margin:2px 0 4px">${due.length} mastered idea${due.length>1?"s":""} due for review</div>
+    <div style="color:var(--tx2);font-size:13px">one question each · +${RV_XP} XP per sharp answer · keeps mastery from rusting</div>
+    <div class="glyphbg">🔁</div>`;
+  c.onclick=startReview;
+}
+let RQ=[];
+function startReview(){
+  RQ=reviewDue().map(n=>n.id);
+  if(!RQ.length)return;
+  $("review").classList.add("on");
+  reviewStep(0,0);
+}
+function reviewStep(idx,gained){
+  $("rvcount").textContent=`${idx+1} / ${RQ.length}`;
+  const body=$("rvbody");body.innerHTML="";
+  if(idx>=RQ.length){
+    body.innerHTML=`<div class="gatecard" style="text-align:center"><h3>🔁 Sharpened</h3>
+      <div class="gsub">${RQ.length} idea${RQ.length>1?"s":""} reviewed · +${gained} XP</div>
+      <button class="goldbtn" data-close="review">Done</button></div>`;
+    $("rvcount").textContent="";renderPath();return;
+  }
+  const n=nodeById(RQ[idx]),rv=rvState(n.id),tr=trackById(n.track);
+  const q=n.quiz[Math.floor(Math.random()*n.quiz.length)];
+  const card=document.createElement("div");card.className="gatecard";
+  card.innerHTML=`<div style="font-size:11px;letter-spacing:.2em;color:${tr.accent};margin-bottom:6px">${tr.glyph} ${esc(tr.name.toUpperCase())}</div>
+    <h3>${n.glyph} ${esc(n.title)}</h3><div class="gsub">${esc(q.q)}</div>`;
+  const order=q.c.map((_,i)=>i);
+  for(let i=order.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[order[i],order[j]]=[order[j],order[i]];}
+  let answered=false;
+  order.forEach(oi=>{
+    const b=document.createElement("button");b.className="choice";b.textContent=q.c[oi];
+    b.onclick=()=>{
+      if(answered)return;answered=true;
+      const right=oi===q.a;
+      b.classList.add(right?"right":"wrong");
+      if(!right)[...card.querySelectorAll(".choice")][order.indexOf(q.a)].classList.add("right");
+      const why=document.createElement("div");why.className="qwhy on";why.innerHTML=`<b>Why:</b> ${esc(q.why)}`;
+      card.appendChild(why);
+      if(right){rv.k=Math.min(rv.k+1,RV_DAYS.length-1);rv.due=Date.now()+RV_DAYS[rv.k]*864e5;
+        S.xp+=RV_XP;S.rvN=(S.rvN||0)+1;gained+=RV_XP;
+        why.insertAdjacentHTML("beforeend",`<br><b style="color:var(--jade)">+${RV_XP} XP</b> · next review in ${RV_DAYS[rv.k]} day${RV_DAYS[rv.k]>1?"s":""}`);}
+      else{rv.k=Math.max(0,rv.k-1);rv.due=Date.now()+864e5;
+        why.insertAdjacentHTML("beforeend",`<br><b style="color:#e8b0b0">back tomorrow</b> — worth a re-read of the idea`);}
+      save();checkAch();
+      const nx=document.createElement("button");nx.className="goldbtn";nx.style.marginTop="12px";
+      nx.textContent=idx+1<RQ.length?"Next →":"Finish";
+      nx.onclick=()=>reviewStep(idx+1,gained);
+      card.appendChild(nx);
+    };
+    card.appendChild(b);
+  });
+  body.appendChild(card);
 }
 
 /* ---------- flow mode (RSVP) ---------- */
@@ -911,6 +984,7 @@ function renderPath(){
       <div class="glyphbg">${tr.glyph}</div>`;
     c.onclick=()=>openNode(nx.id);
   } else c.style.display="none";
+  renderMix();renderSharpen();
   const tree=$("tree");tree.innerHTML="";
   for(const tr of DATA.tracks){
     const col=document.createElement("div");col.className="track";col.style.setProperty("--tacc",tr.accent);
