@@ -180,7 +180,8 @@
       "apply": {
         "prompt": "Pick one recurring frustration from the last few days. Name as precisely as you can the craving underneath it — the wanting-it-to-be-otherwise. One sentence.",
         "min": 40
-      }
+      },
+      "whyreq": "Until you accept the mind is trainable, the Truths read as philosophy instead of a training diagnosis."
     },
     {
       "id": "a3",
@@ -250,7 +251,8 @@
       "apply": {
         "prompt": "For a few minutes today, when something bugs you, try to catch the raw feeling-tone (pleasant / unpleasant / neutral) a beat before the story about it. Write what you noticed.",
         "min": 40
-      }
+      },
+      "whyreq": "The aggregates answer the question the Truths raise: what exactly is this 'self' that suffers?"
     },
     {
       "id": "a4",
@@ -320,7 +322,8 @@
       "apply": {
         "prompt": "Name one small ongoing thing — a half-truth, an avoidance, a habit — that reliably churns in your mind. What is one concrete step to reduce that churn this week?",
         "min": 50
-      }
+      },
+      "whyreq": "Sīla only makes sense once you see the mind as trainable — it is the soil concentration grows in."
     },
     {
       "id": "a5",
@@ -390,7 +393,8 @@
       "apply": {
         "prompt": "Which do you personally need more right now — a steadier lens (concentration) or clearer looking (insight)? Say why in a sentence.",
         "min": 40
-      }
+      },
+      "whyreq": "The map organizes the path the Fourth Truth prescribes; without the Truths you don't know what the map is for."
     },
     {
       "id": "b1",
@@ -461,7 +465,8 @@
       "apply": {
         "prompt": "Write your own one-sentence intention to say before your next sit (e.g. 'For ten minutes I train attention on the breath and return gently when it wanders').",
         "min": 40
-      }
+      },
+      "whyreq": "Real sitting needs the ethical calm of sīla and the concentration/insight map — otherwise you're rowing hard on no river."
     },
     {
       "id": "b2",
@@ -531,7 +536,8 @@
       "apply": {
         "prompt": "Next sit, silently note 'catch' and smile each time you notice you'd wandered. Afterward write roughly how many catches you got, and whether the smiling changed anything.",
         "min": 40
-      }
+      },
+      "whyreq": "You can't stabilize attention before you've set up a posture, an intention, and a single object to stabilize on."
     },
     {
       "id": "b3",
@@ -608,7 +614,8 @@
       "apply": {
         "prompt": "Which of the five hindrances is YOUR signature saboteur? Name it, and write the specific antidote you'll reach for next time it shows up — in meditation or in daily life.",
         "min": 50
-      }
+      },
+      "whyreq": "The hindrances only show their faces to someone actually trying to stay on one object."
     },
     {
       "id": "b4",
@@ -678,7 +685,8 @@
       "apply": {
         "prompt": "Next sit, twice ask yourself 'vivid or just quiet?' and deliberately brighten perception. Write what changed when you brightened.",
         "min": 40
-      }
+      },
+      "whyreq": "Dullness is what remains after mind-wandering fades — you only meet it once attention already holds."
     },
     {
       "id": "b5",
@@ -749,7 +757,8 @@
       "apply": {
         "prompt": "Have you ever tasted a moment of settled, effortless, slightly pleasant attention — in meditation, sport, music, deep work? Describe it. That flavor is your target.",
         "min": 50
-      }
+      },
+      "whyreq": "Access = hindrances quiet AND mind bright. Miss either and the door doesn't appear."
     },
     {
       "id": "b6",
@@ -819,7 +828,8 @@
       "apply": {
         "prompt": "Write what it would mean for you to have access to a contentment that doesn't depend on getting anything. Where in your life would that change how you act?",
         "min": 50
-      }
+      },
+      "whyreq": "The first jhāna is entered from access concentration — there is no other entrance."
     },
     {
       "id": "b7",
@@ -889,7 +899,8 @@
       "apply": {
         "prompt": "Where in ordinary life have you felt happier AFTER letting something go — a grudge, a plan, a possession, the need to be right? Describe one instance.",
         "min": 50
-      }
+      },
+      "whyreq": "Each higher jhāna is reached by releasing a factor of the one before it; you need the first to have something to release."
     },
     {
       "id": "b8",
@@ -959,7 +970,8 @@
       "apply": {
         "prompt": "This node is a map, not a task. In a sentence, why might chasing exotic states prematurely actually work against the goal of the path?",
         "min": 40
-      }
+      },
+      "whyreq": "The formless attainments launch from the imperturbable equanimity of the fourth jhāna."
     },
     {
       "id": "b9",
@@ -1029,7 +1041,8 @@
       "apply": {
         "prompt": "You've reached the end of the Concentration track. In your own words, what was concentration FOR? Write the one-sentence answer you'd give a friend.",
         "min": 50
-      }
+      },
+      "whyreq": "Mastery means reliable entry, duration, and exit of states you already know from the inside."
     },
     {
       "id": "c1",
@@ -1040,12 +1053,75 @@
         "b4"
       ],
       "glyph": "☘️",
-      "stub": true,
       "title": "The Three Characteristics",
+      "whyreq": "You need to know what phenomena actually are (the aggregates) and hold attention steady without dullness — otherwise there is nothing clear enough to watch arise and pass.",
       "bridge": [
-        "Impermanence, unsatisfactoriness, and not-self — the three lenses insight looks through. This is where a concentrated mind starts to see, not just settle.",
-        "Fully authored next — press Continue to unlock this lesson, its cross-book sources, quiz, and practice."
-      ]
+        "Insight is not learning new content. It is seeing three facts stamped on every moment of experience you already have: anicca — impermanence; dukkha — unsatisfactoriness; anattā — not-self. Every sensation, thought, and mood you watched while training concentration carries all three.",
+        "They interlock like gears. Whatever you observe closely enough is changing (impermanence). Whatever is changing cannot be a stable basis for lasting satisfaction (unsatisfactoriness). And whatever arises from conditions and vanishes on its own schedule is not a self and not owned by one (not-self) — which is exactly what the five aggregates showed you: process, no fixed center.",
+        "The critical warning, and every book here repeats it: intellectual agreement is not insight. You already 'believe' things change; that belief has freed no one. Insight is perceptual — the concentrated mind watches finely enough that change is seen directly, and the seeing rewires the grip. That is why this track sits behind the concentration you built: a wobbly mind sees the story; a steady mind sees the frames."
+      ],
+      "sources": [
+        {
+          "book": "The Experience of Insight",
+          "ref": "impermanence and the flow of experience",
+          "quote": [
+            "Everything that arises passes away. Sit quietly and observe: there is nothing in the mind or body that stays — and in that flow, no one behind it directing."
+          ]
+        },
+        {
+          "book": "The Mind Illuminated",
+          "ref": "insight and the transformation of perception",
+          "quote": [
+            "Insight is not an idea but a profound shift in how the mind perceives reality; it comes when a stable, bright attention observes experience as it actually is."
+          ]
+        },
+        {
+          "book": "The Path of Purification",
+          "ref": "Visuddhimagga XX — comprehension by groups",
+          "quote": [
+            "Whatever is impermanent is painful; whatever is painful is not-self. Seeing thus with right understanding, the mind turns away from clinging."
+          ]
+        }
+      ],
+      "quiz": [
+        {
+          "q": "The three characteristics are impermanence, unsatisfactoriness, and:",
+          "c": [
+            "emptiness of space",
+            "not-self (anattā)",
+            "rebirth",
+            "silence"
+          ],
+          "a": 1,
+          "why": "Anicca, dukkha, anattā."
+        },
+        {
+          "q": "How do the three interlock?",
+          "c": [
+            "they don't — they're separate doctrines",
+            "what changes can't satisfy as a stable basis, and what arises by conditions isn't a self",
+            "only impermanence matters",
+            "they apply only to thoughts"
+          ],
+          "a": 1,
+          "why": "Each implies the next: changing → unreliable → not a self."
+        },
+        {
+          "q": "Why does this node require concentration training first?",
+          "c": [
+            "tradition demands it",
+            "insight is perceptual — only a steady, vivid mind sees change directly instead of just believing in it",
+            "concentration is the same as insight",
+            "it doesn't, the lock is arbitrary"
+          ],
+          "a": 1,
+          "why": "A wobbly mind sees the story; a steady mind sees the frames."
+        }
+      ],
+      "apply": {
+        "prompt": "Today, deliberately watch one pleasant experience end — a meal, a song, a hot shower. Write what you actually noticed at its ending, not what you think about endings.",
+        "min": 50
+      }
     },
     {
       "id": "c2",
@@ -1055,12 +1131,75 @@
         "b2"
       ],
       "glyph": "🖐️",
-      "stub": true,
       "title": "Mindfulness of Body & Feeling",
+      "whyreq": "Watching the body and feeling-tone continuously requires the basic attentional stability you trained in Stabilizing Attention — without it, mindfulness lasts three seconds at a time.",
       "bridge": [
-        "The four foundations of mindfulness, starting with the body and the feeling-tone where craving is born.",
-        "Fully authored next — press Continue."
-      ]
+        "The tradition's core mindfulness manual — the satipaṭṭhāna, which Goldstein's retreat instructions follow — establishes mindfulness on four foundations: body, feeling, mind, and mental objects. It starts with the body for a blunt tactical reason: the body is coarse, slow, and always here. Breath, posture, warmth, pressure, movement — a training ground that never leaves the room.",
+        "The second foundation is the hinge of the whole system: vedanā, feeling-tone — the instant pleasant / unpleasant / neutral flavor that arrives with every single experience. You met it in the aggregates; now it becomes a practice. Feeling-tone is where craving is born: pleasant → grab, unpleasant → push, neutral → zone out. That reflex runs your life exactly as fast as you fail to see it.",
+        "So the practice is deceptively simple: know the body directly, and catch the feeling-tone of each experience before the story starts. Not judging, not fixing — knowing. Every manipulation tactic in the shadow wing, incidentally, works by injecting a feeling-tone and letting your reflex do the rest. Mindfulness of vedanā is where that stops being automatic."
+      ],
+      "sources": [
+        {
+          "book": "The Experience of Insight",
+          "ref": "contemplating the body and feelings",
+          "quote": [
+            "Begin with the breath and the body — sensations of warmth, pressure, movement. Then notice feelings: pleasant, unpleasant, neutral, arising with every experience, constantly changing."
+          ]
+        },
+        {
+          "book": "Mindfulness, Bliss and Beyond",
+          "ref": "present-moment awareness",
+          "quote": [
+            "Full awareness of the body in this moment is the gateway. Do not go to the past or future; know what is happening as it happens."
+          ]
+        },
+        {
+          "book": "The Mind Illuminated",
+          "ref": "body sensations and introspective awareness",
+          "quote": [
+            "Using the body and breath as the anchor, awareness learns to notice what else arises — feelings and mental states — without losing the thread of attention."
+          ]
+        }
+      ],
+      "quiz": [
+        {
+          "q": "Why does mindfulness training start with the body?",
+          "c": [
+            "the body is sacred",
+            "it's coarse, slow, and always present — an anchor that never leaves",
+            "the mind doesn't matter",
+            "to improve posture only"
+          ],
+          "a": 1,
+          "why": "Tactical, not mystical: the easiest continuous object."
+        },
+        {
+          "q": "Vedanā (feeling-tone) is:",
+          "c": [
+            "emotion, like anger or joy",
+            "the instant pleasant/unpleasant/neutral flavor arriving with every experience",
+            "a breathing technique",
+            "a type of thought"
+          ],
+          "a": 1,
+          "why": "It's prior to emotion — the raw tone that triggers grab/push/numb."
+        },
+        {
+          "q": "Why is watching feeling-tone strategically important?",
+          "c": [
+            "it feels nice",
+            "craving is born at feeling-tone; catch it there and the reflex chain never starts",
+            "it replaces concentration",
+            "it's required by the app"
+          ],
+          "a": 1,
+          "why": "Pleasant→grab, unpleasant→push — seen early, the chain breaks."
+        }
+      ],
+      "apply": {
+        "prompt": "Three times today, pause mid-experience and name only the feeling-tone: pleasant, unpleasant, or neutral. Tonight, write which one you noticed most and what it usually makes you do.",
+        "min": 50
+      }
     },
     {
       "id": "c3",
@@ -1070,12 +1209,75 @@
         "c2"
       ],
       "glyph": "📿",
-      "stub": true,
-      "title": "Noting & the Experience of Insight",
+      "title": "Noting — and Keeping the Methods Straight",
+      "whyreq": "Noting is a precision tool laid on top of established body-and-feeling mindfulness; without that base there is nothing steady to note.",
       "bridge": [
-        "Goldstein's noting practice: how naming experience loosens its grip and reveals its flow.",
-        "Fully authored next — press Continue."
-      ]
+        "Goldstein's tradition (the Mahasi lineage) sharpens mindfulness with a tool of almost embarrassing simplicity: the soft mental note. 'Thinking.' 'Hearing.' 'Pressure.' 'Wanting.' A one-word label, whispered in the mind, that does two jobs: it keeps mindfulness from drifting, and it turns experience from something you are lost inside into something you are watching. The label objectifies — from 'I am furious' to 'anger is here.'",
+        "Mechanics matter: the note takes five percent of attention; ninety-five stays with the raw experience. Note lightly, like touching a bell, and if labeling ever becomes clumsy scaffolding, let it fall away — the noting was training the seeing, and the seeing remains. Done continuously, noting speeds perception up until you catch experiences arising and passing in quick succession — the doorway to real insight.",
+        "One honesty checkpoint, because this vault refuses to blend books: this is one vehicle among three in your library. Goldstein rides continuous noting with modest concentration ('dry insight'). Brasington rides jhāna first, then turns the concentrated mind to insight. Culadasa unifies both in one staged path. They genuinely differ on method — and agree on the destination: perception fast and steady enough to see the three characteristics directly. Pick a vehicle per sit; never switch mid-ride."
+      ],
+      "sources": [
+        {
+          "book": "The Experience of Insight",
+          "ref": "the technique of noting",
+          "quote": [
+            "Make a soft mental note of whatever arises: 'thinking, thinking', 'hearing, hearing'. The note keeps the mind alert and prevents identification — you see the anger rather than being the anger."
+          ]
+        },
+        {
+          "book": "Right Concentration",
+          "ref": "jhāna then insight — a different vehicle",
+          "quote": [
+            "This is a concentration-first path: enter the jhānas, and afterwards, with the mind bright and pliant, do your insight practice. Others teach insight directly with less absorption — both are legitimate roads."
+          ]
+        },
+        {
+          "book": "The Mind Illuminated",
+          "ref": "the unified path",
+          "quote": [
+            "Śamatha and vipassanā develop together; a mind that is both stable and mindful will produce insight naturally, without choosing between calm and clarity."
+          ]
+        }
+      ],
+      "quiz": [
+        {
+          "q": "A mental note should take roughly:",
+          "c": [
+            "all of your attention, said precisely",
+            "5% of attention — a light touch while experience keeps 95%",
+            "half your attention",
+            "no attention at all"
+          ],
+          "a": 1,
+          "why": "The label serves the seeing, never replaces it."
+        },
+        {
+          "q": "What does noting 'objectify' means?",
+          "c": [
+            "it makes you objective and emotionless",
+            "it shifts 'I am furious' to 'anger is here' — experience becomes something watched, not something you're lost in",
+            "it names objects in the room",
+            "it creates distance from other people"
+          ],
+          "a": 1,
+          "why": "Dis-identification is the whole point of the label."
+        },
+        {
+          "q": "Goldstein, Brasington, and Culadasa:",
+          "c": [
+            "teach the identical method with different words",
+            "genuinely differ on method (noting-first, jhāna-first, unified) while agreeing on the destination — so don't blend them mid-sit",
+            "disagree about the goal of practice",
+            "all require jhāna before any insight"
+          ],
+          "a": 1,
+          "why": "Three real vehicles, one destination — kept distinct in this vault on purpose."
+        }
+      ],
+      "apply": {
+        "prompt": "Do five minutes of soft noting, any posture. Then write the three labels that came up most often — your mind's current top three habits.",
+        "min": 40
+      }
     },
     {
       "id": "c4",
@@ -1086,12 +1288,68 @@
         "c1"
       ],
       "glyph": "🔗",
-      "stub": true,
-      "title": "Dependent Origination",
+      "title": "Dependent Origination — the Assembly Line of Suffering",
+      "whyreq": "The links of the chain are the aggregates in motion, and the chain only becomes visible through the lens of the three characteristics — without both, it's a list to memorize instead of a process to watch.",
       "bridge": [
-        "The twelve-link chain of how suffering is manufactured, moment to moment — and where the chain can be broken.",
-        "Fully authored next — press Continue."
-      ]
+        "The Buddha's deepest teaching — the one the Visuddhimagga devotes its densest chapter to — is a production line: paṭiccasamuppāda, dependent origination. Twelve links describing how suffering is manufactured, not by fate or punishment, but by an automatic chain: ignorance conditions mental formations, then consciousness, then mind-and-body, the six senses, contact, feeling, craving, clinging, becoming, birth, and aging-death — the whole catastrophe, assembled step by step.",
+        "Do not start by memorizing twelve links. Start where the tradition says the machine can actually be stopped, the working section you have already trained on: contact → feeling → craving → clinging. A sight, sound, or thought makes contact; feeling-tone arises instantly (you watched this in Mindfulness of Body & Feeling); and then — here is the entire fork in the road — craving either follows, or it doesn't. Feeling is automatic. Craving is not, if mindfulness stands in the gap.",
+        "That gap is the practical meaning of freedom in this tradition. Nothing upstream (contact, feeling) can be prevented — the world will keep touching you. Everything downstream (clinging, becoming, the next round of suffering) is negotiable at exactly one point. Every hour of concentration and mindfulness you have banked was training for that two-millisecond negotiation."
+      ],
+      "sources": [
+        {
+          "book": "The Experience of Insight",
+          "ref": "dependent origination",
+          "quote": [
+            "Conditioned by contact, feeling arises; conditioned by feeling, craving arises. But between feeling and craving the chain can be broken — this is where the practice does its work."
+          ]
+        },
+        {
+          "book": "The Path of Purification",
+          "ref": "Visuddhimagga XVII — the wheel of becoming",
+          "quote": [
+            "With ignorance as condition, formations come to be; with feeling as condition, craving. Not knowing the three characteristics, beings grasp — and the wheel turns again."
+          ]
+        }
+      ],
+      "quiz": [
+        {
+          "q": "Where does the tradition say the chain can actually be broken?",
+          "c": [
+            "at contact — stop the world touching you",
+            "between feeling and craving — feeling is automatic, craving is not",
+            "at birth",
+            "nowhere; the chain is fate"
+          ],
+          "a": 1,
+          "why": "The gap between vedanā and taṇhā is the entire fork in the road."
+        },
+        {
+          "q": "'Ignorance' as the first link means:",
+          "c": [
+            "lack of education",
+            "not seeing the three characteristics — mistaking the changing for stable, the unsatisfying for reliable, processes for a self",
+            "forgetting names",
+            "sleeping too much"
+          ],
+          "a": 1,
+          "why": "It's perceptual blindness to anicca/dukkha/anattā, which is why c1 gates this node."
+        },
+        {
+          "q": "The right way to first approach the twelve links is:",
+          "c": [
+            "memorize all twelve in Pali",
+            "find the working section — contact → feeling → craving → clinging — and watch it live",
+            "recite them daily",
+            "draw the wheel"
+          ],
+          "a": 1,
+          "why": "It's a process to observe, not a list to memorize."
+        }
+      ],
+      "apply": {
+        "prompt": "Catch one full sequence today: contact → feeling-tone → craving (an ad, a notification, a smell of food, a message). Write the sequence as it actually happened, step by step.",
+        "min": 50
+      }
     },
     {
       "id": "c5",
@@ -1102,12 +1360,68 @@
         "c4"
       ],
       "glyph": "🪜",
-      "stub": true,
-      "title": "The Progress of Insight (the ñāṇas)",
+      "title": "The Progress of Insight — the Map of What Unfolds",
+      "whyreq": "These stages describe what sustained noting practice produces, understood through the chain of origination — without both, the map is trivia; with them, it's territory you'll recognize.",
       "bridge": [
-        "The classical stages of insight from the Visuddhimagga — the map of what unfolds as insight matures, including the hard passages.",
-        "Fully authored next — press Continue."
-      ]
+        "As insight practice matures, experience unfolds in a mapped sequence — the insight knowledges (ñāṇas) charted in the Visuddhimagga. Early rungs: the meditator distinguishes mind from body, sees cause-and-effect between them, and then meets the three characteristics directly. Then comes the famous rung: knowledge of arising and passing away — perception speeds up, and with it often come lights, rapture, effortless mindfulness, and blazing confidence.",
+        "The tradition immediately posts a warning sign on that rung, and it is one of the most useful warnings in your entire library: the 'corruptions of insight.' The lights and bliss are so convincing that meditators mistake them for enlightenment and camp there, subtly attached. The instruction: note the rapture too. It is arising and passing like everything else. What follows is sobering — dissolution, where endings dominate perception, and then a genuinely hard stretch the maps name plainly: fear, misery, disgust, desire for deliverance. Unmapped, this feels like your practice — or your life — is breaking. Mapped, it is weather on a known road, and the response is the same: keep noting, lighten effort, seek guidance if it gets intense.",
+        "Beyond the rough stretch the path levels into equanimity about formations — steady, effortless, unbothered observation — the plateau from which the tradition says the real breakthrough occurs. Fidelity note, as always: this is the Theravāda commentarial map that Goldstein's tradition uses. Culadasa's ten stages chart the śamatha side of the journey — a related but distinct map. Two maps, two instruments; do not overlay them carelessly."
+      ],
+      "sources": [
+        {
+          "book": "The Path of Purification",
+          "ref": "Visuddhimagga XX–XXI — the knowledges",
+          "quote": [
+            "When he sees arising and passing away, there arise in him illumination, rapture, tranquility, and attachment to these. Skilled, he understands: this is not the path — and noting even these, he passes on through dissolution, fear, and disenchantment to equanimity about formations."
+          ]
+        },
+        {
+          "book": "The Experience of Insight",
+          "ref": "the unfolding of practice",
+          "quote": [
+            "There comes a stage when everything is seen to arise and pass with great rapidity, accompanied by lights and rapture. Later the mind may swing into fear and disgust. All of it is the path unfolding; the instruction never changes — observe, and let it pass."
+          ]
+        }
+      ],
+      "quiz": [
+        {
+          "q": "The 'corruptions of insight' are:",
+          "c": [
+            "moral failures that end your progress",
+            "lights, rapture, and confidence at arising-and-passing that get mistaken for enlightenment — and attached to",
+            "errors in the ancient texts",
+            "hindrances by another name"
+          ],
+          "a": 1,
+          "why": "The trap isn't the experiences — it's camping in them."
+        },
+        {
+          "q": "When practice (or life) turns dark after a brilliant stretch — fear, misery, disgust — the map says:",
+          "c": [
+            "you've broken your practice; stop immediately",
+            "this is a charted stage; keep noting, lighten effort, get guidance if intense",
+            "you must return to the jhānas permanently",
+            "switch traditions"
+          ],
+          "a": 1,
+          "why": "Mapped, the hard stretch is weather on a known road — often progress, not failure."
+        },
+        {
+          "q": "The Visuddhimagga's insight map and Culadasa's ten stages are:",
+          "c": [
+            "the same map with different numbering",
+            "two distinct maps — insight knowledges vs the śamatha journey — not to be carelessly overlaid",
+            "both obsolete",
+            "secret teachings"
+          ],
+          "a": 1,
+          "why": "Related instruments, different things measured — kept separate to keep the books unmixed."
+        }
+      ],
+      "apply": {
+        "prompt": "Write your personal protocol for the next time things turn suddenly rough after going brilliantly — in practice or in life. Three lines max: what you'll remember, what you'll do, who you'd ask.",
+        "min": 60
+      }
     },
     {
       "id": "c6",
@@ -1117,12 +1431,75 @@
         "c5"
       ],
       "glyph": "🌊",
-      "stub": true,
       "title": "Equanimity & the Fruits",
+      "whyreq": "Equanimity about formations is itself the final stage of the insight progression — it can't be understood, let alone reached, without the map that leads there.",
       "bridge": [
-        "Where the insight track leads: deep equanimity toward all formations, and the fruits of practice.",
-        "Fully authored next — press Continue."
-      ]
+        "Equanimity is the most misunderstood word in the light wing, so define it precisely: it is not indifference, not numbness, not caring less. It is full contact without compulsion — every sight, feeling, and thought lands completely, and nothing in you is forced to grab, flinch, or flee. The mind stops fighting experience, and formations arise and pass on their own, watched by something that no longer needs them to be otherwise.",
+        "At this depth, the tradition says, effort becomes redundant — practice 'does itself,' and from that plateau the breakthrough the maps call path and fruition can occur: the mind's first direct taste of the unconditioned, nibbāna. Hold the summit claims however you like; this vault doesn't require belief. What is beyond argument is the trainable result visible long before any summit: gain and loss, praise and blame, pleasure and pain start receiving the same steady reception.",
+        "And notice what you have at the end of this track: the gap between feeling and response — first glimpsed at dependent origination — has become a permanent, widened residence. That is the light wing's answer to the entire shadow wing: every manipulation tactic ever devised needs your reflexes to work. A mind that meets provocation with equanimity is not a harder target. It is no longer a target at all — which is exactly where the final Defense track will pick this thread up."
+      ],
+      "sources": [
+        {
+          "book": "The Path of Purification",
+          "ref": "Visuddhimagga XXI — equanimity about formations",
+          "quote": [
+            "Knowledge of equanimity about formations neither delights in nor recoils from any formation; seeing all as impermanent, it abides balanced, and the mind inclines of itself toward the deathless."
+          ]
+        },
+        {
+          "book": "The Experience of Insight",
+          "ref": "opening to all experience",
+          "quote": [
+            "A profound balance of mind develops in which whatever arises is fully experienced without the slightest clinging or aversion. In that balance the deepest letting-go becomes possible."
+          ]
+        },
+        {
+          "book": "Mindfulness, Bliss and Beyond",
+          "ref": "the culmination of letting go",
+          "quote": [
+            "When the meditator has let go of everything — even the wanting to attain — the mind arrives at a stillness that nothing in the world can shake."
+          ]
+        }
+      ],
+      "quiz": [
+        {
+          "q": "Equanimity, precisely, is:",
+          "c": [
+            "caring less about everything",
+            "full contact without compulsion — everything lands, nothing forces a grab or a flinch",
+            "suppressing emotion",
+            "mild boredom"
+          ],
+          "a": 1,
+          "why": "Not less experience — less compulsion inside it."
+        },
+        {
+          "q": "The trainable, no-belief-required fruit of this track is:",
+          "c": [
+            "supernatural powers",
+            "gain/loss, praise/blame, pleasure/pain meeting the same steady reception — a widened gap between feeling and response",
+            "never feeling pain again",
+            "perfect memory"
+          ],
+          "a": 1,
+          "why": "The gap first seen at dependent origination becomes home."
+        },
+        {
+          "q": "Why is equanimity the ultimate defense against the shadow wing?",
+          "c": [
+            "it isn't — defense needs tactics only",
+            "every manipulation needs your reflexes to fire; an equanimous mind stops being a target at all",
+            "it makes you unreadable",
+            "it intimidates manipulators"
+          ],
+          "a": 1,
+          "why": "Tactics grab feeling-tone and pull the reflex chain; equanimity is the chain unhooked."
+        }
+      ],
+      "apply": {
+        "prompt": "Recall the most equanimous moment of your life — full contact, no compulsion. Describe the conditions that allowed it, and one condition you could recreate this week.",
+        "min": 60
+      }
     },
     {
       "id": "d1",
@@ -1150,7 +1527,8 @@
       "bridge": [
         "The oldest lever: a gift creates an obligation. Cialdini, the 48 Laws, and the dark-psych books all pull it — for good and ill.",
         "Fully authored next — press Continue."
-      ]
+      ],
+      "whyreq": "Reciprocity is one trigger of the perception-machine described in the root idea."
     },
     {
       "id": "d3",
@@ -1165,7 +1543,8 @@
       "bridge": [
         "Why we outsource judgment to the crowd and the expert — and how that shortcut is exploited.",
         "Fully authored next — press Continue."
-      ]
+      ],
+      "whyreq": "Proof and authority only steer minds that navigate by appearances — the root premise."
     },
     {
       "id": "d4",
@@ -1180,7 +1559,8 @@
       "bridge": [
         "We say yes to those we like, and we stay loyal to our own prior yes. Two of the strongest and quietest forces in persuasion.",
         "Fully authored next — press Continue."
-      ]
+      ],
+      "whyreq": "An accepted favor (reciprocity) is precisely how liking and commitment sink their first hook."
     },
     {
       "id": "d5",
@@ -1195,7 +1575,8 @@
       "bridge": [
         "Less-available reads as more-valuable, and the frame around a choice decides the choice. The mechanics of desire and context.",
         "Fully authored next — press Continue."
-      ]
+      ],
+      "whyreq": "Scarcity and framing amplify the crowd-and-authority shortcuts — you need those first."
     },
     {
       "id": "d6",
@@ -1211,7 +1592,8 @@
       "bridge": [
         "Davis's quiet influence: moving people without manipulation. Where the shadow wing and the light wing finally shake hands.",
         "Fully authored next — press Continue."
-      ]
+      ],
+      "whyreq": "Quiet influence is the ethical redeployment of every lever learned before it."
     },
     {
       "id": "e1",
@@ -1226,7 +1608,8 @@
       "bridge": [
         "Greene's first law: make those above you feel superior. The politics of ego and safety.",
         "Fully authored next — press Continue."
-      ]
+      ],
+      "whyreq": "Managing those above you is perception management aimed upward."
     },
     {
       "id": "e2",
@@ -1241,7 +1624,8 @@
       "bridge": [
         "Keep others reacting to a fog while you shape the board and the choices they think are theirs.",
         "Fully authored next — press Continue."
-      ]
+      ],
+      "whyreq": "You can only conceal intentions from minds you already know read surfaces."
     },
     {
       "id": "e3",
@@ -1256,7 +1640,8 @@
       "bridge": [
         "Reputation is the shield and attention is the currency. Building and guarding both.",
         "Fully authored next — press Continue."
-      ]
+      ],
+      "whyreq": "Reputation is social proof about you — that lever must be understood first."
     },
     {
       "id": "e4",
@@ -1271,7 +1656,8 @@
       "bridge": [
         "Patience as a weapon; knowing the ripe moment. Greene's most contemplative laws — and where power quietly meets stillness.",
         "Fully authored next — press Continue."
-      ]
+      ],
+      "whyreq": "Timing games presume you already control what others can see of your plans."
     },
     {
       "id": "e5",
@@ -1286,7 +1672,8 @@
       "bridge": [
         "The hardest power move is restraint: disdain what you cannot have, and refuse the bait. Strategy's off-switch.",
         "Fully authored next — press Continue."
-      ]
+      ],
+      "whyreq": "Knowing when not to act is timing's final exam."
     },
     {
       "id": "f1",
@@ -1302,7 +1689,8 @@
       "bridge": [
         "The thirty covert tactics and the dark-psych playbook — read defensively. Naming a tactic is the first defense against it.",
         "Fully authored next — press Continue."
-      ]
+      ],
+      "whyreq": "You spot manipulation by recognizing its levers from the inside — reciprocity, proof, authority."
     },
     {
       "id": "f2",
@@ -1317,7 +1705,8 @@
       "bridge": [
         "Mitnick's art of deception: the human is the exploit. How trust is engineered, and how to harden yours.",
         "Fully authored next — press Continue."
-      ]
+      ],
+      "whyreq": "Social engineering chains the covert tactics into full attacks on trust; know the tactics first."
     },
     {
       "id": "f3",
@@ -1346,7 +1735,8 @@
       "bridge": [
         "The capstone that links both wings: an unshakeable mind is the ultimate defense against manipulation, and the calmest player sees the board most clearly.",
         "Fully authored next — press Continue."
-      ]
+      ],
+      "whyreq": "Unshakeable means you see the hook coming (defense) and your mind doesn't bite (hindrance mastery)."
     }
   ]
 }

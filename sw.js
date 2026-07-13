@@ -1,5 +1,6 @@
-const CACHE = "vault-v8";
-const ASSETS = ["./", "./index.html", "./content.enc", "./manifest.json", "./icon.svg"];
+const CACHE = "vault-v9";
+const ASSETS = ["./", "./index.html", "./content.enc", "./manifest.json", "./icon.svg",
+  "./icon-192.png", "./icon-512.png", "./apple-touch-icon.png"];
 
 // On install, fetch every asset bypassing the HTTP cache ({cache:"reload"}) so a new
 // version always precaches the freshest files (otherwise a stale content.enc can pin).

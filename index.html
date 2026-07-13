@@ -7,6 +7,11 @@
 <title>The Vault</title>
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Vault">
 <style>
 :root{
   --bg:#0a0c12; --bg2:#10131d; --card:rgba(255,255,255,.045); --card2:rgba(255,255,255,.08);
@@ -204,6 +209,8 @@ header .brand span{color:var(--gold)}
 .tnode:not(:last-child)::after{content:"";position:absolute;left:27px;bottom:-20px;height:20px;width:2px;background:var(--line)}
 .tnode .ng{font-size:22px;width:28px;text-align:center;flex:0 0 auto;line-height:1.1}
 .tnode .ntx{flex:1;min-width:0}
+.tnode .stg{display:block;font-size:9.5px;letter-spacing:.24em;color:var(--tacc,var(--gold));opacity:.8;margin-bottom:3px}
+.tnode.locked .stg{color:var(--tx2)}
 .tnode .nt{font-size:13.5px;font-weight:600;line-height:1.3}
 .tnode .nsub{font-size:11px;color:var(--tx2);margin-top:4px;line-height:1.35}
 .tnode .badge{flex:0 0 auto;font-size:15px;margin-left:4px}
@@ -762,19 +769,19 @@ function renderPath(){
     const doneN=ns.filter(n=>nodeDone(n.id)).length;
     let html=`<div class="track-h"><span class="tg">${tr.glyph}</span><span class="tn">${esc(tr.name)}</span><span class="tp">${doneN}/${ns.length}</span></div>
       <div class="track-blurb">${esc(tr.blurb)}</div>`;
-    for(const n of ns){
+    ns.forEach((n,si)=>{
       const st=nodeStatus(n.id);
       const badge=st==="done"?"✓":st==="avail"?"▸":"🔒";
       let sub;
       if(st==="locked"){const need=n.prereq.filter(p=>!nodeDone(p)).map(p=>{const x=nodeById(p);return x?x.title:p});
-        sub=`<div class="nsub">needs: ${esc(need.join(", "))}</div>`;}
+        sub=`<div class="nsub" ${n.whyreq?`title="${esc(n.whyreq)}"`:""}>needs: ${esc(need.join(", "))}</div>`;}
       else if(st==="done") sub=`<div class="nsub">mastered</div>`;
       else if(n.stub) sub=`<div class="nsub">preview · full lesson next</div>`;
       else sub=`<div class="nsub">ready — tap to begin</div>`;
       const just=(S._justUnlocked&&S._justUnlocked.includes(n.id))?" just":"";
       html+=`<button class="tnode ${st}${just}" data-node="${n.id}"><span class="ng">${n.glyph}</span>`+
-        `<span class="ntx"><span class="nt">${esc(n.title)}</span>${sub}</span><span class="badge">${badge}</span></button>`;
-    }
+        `<span class="ntx"><span class="stg">STAGE ${si+1}</span><span class="nt">${esc(n.title)}</span>${sub}</span><span class="badge">${badge}</span></button>`;
+    });
     col.innerHTML=html;tree.appendChild(col);
   }
   S._justUnlocked=null;
@@ -805,14 +812,17 @@ function openNode(id){
   const body=$("nbody");body.style.fontSize=S.font+"px";body.innerHTML="";
   const gate=$("ngate");gate.innerHTML="";
   const h=document.createElement("h1");h.textContent=n.title;body.appendChild(h);
+  const tns=DATA.nodes.filter(x=>x.track===n.track).sort((a,b)=>a.tier-b.tier);
+  const stg=tns.findIndex(x=>x.id===n.id)+1;
   const sub=document.createElement("div");sub.className="nsubh";
-  sub.textContent=`${tr.name.toUpperCase()} · ${st==="done"?"MASTERED ✓":st==="locked"?"LOCKED":"+"+NODE_XP+" XP TO MASTER"}`;
+  sub.textContent=`${tr.name.toUpperCase()} · STAGE ${stg} OF ${tns.length} · ${st==="done"?"MASTERED ✓":st==="locked"?"LOCKED":"+"+NODE_XP+" XP TO MASTER"}`;
   body.appendChild(sub);
   if(st==="locked"){
     const need=n.prereq.filter(p=>!nodeDone(p)).map(p=>nodeById(p));
     gate.innerHTML=`<div class="locknote">🔒 <b>This idea is locked.</b><br><br>First master:<br>`+
       need.map(x=>`${x.glyph} ${esc(x.title)}`).join("<br>")+
-      `<br><br><button class="ghostbtn" id="lockback">← Back to the Path</button></div>`;
+      (n.whyreq?`<div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--line);font-size:12.5px;line-height:1.6;text-align:left"><b style="color:var(--gold)">Why this lock is real:</b><br>${esc(n.whyreq)}</div>`:"")+
+      `<br><button class="ghostbtn" id="lockback">← Back to the Path</button></div>`;
     $("lockback").onclick=()=>{renderPath();show("path")};
     show("node");return;
   }
@@ -852,8 +862,12 @@ function renderGate(n){
   n.quiz.forEach((q,qi)=>{
     const item=document.createElement("div");item.className="qitem";
     item.innerHTML=`<div class="qq"><span class="qnum">Q${qi+1}</span>${esc(q.q)}</div>`;
-    q.c.forEach((ch,ci)=>{
-      const b=document.createElement("button");b.className="choice";b.textContent=ch;
+    // shuffle choices so answer position carries no signal
+    const order=q.c.map((_,i)=>i);
+    for(let i=order.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[order[i],order[j]]=[order[j],order[i]];}
+    item.dataset.correct=order.indexOf(q.a);
+    order.forEach((oi,ci)=>{
+      const b=document.createElement("button");b.className="choice";b.textContent=q.c[oi];
       b.onclick=()=>{item.querySelectorAll(".choice").forEach(x=>x.classList.remove("sel","right","wrong"));
         item.querySelector(".qwhy").classList.remove("on");b.classList.add("sel");item.dataset.pick=ci;};
       item.appendChild(b);
@@ -871,10 +885,10 @@ function gradeQuiz(n,card,msg){
   const items=[...card.querySelectorAll(".qitem")];let correct=0,answered=true;
   items.forEach((item,qi)=>{
     if(item.dataset.pick===undefined){answered=false;return;}
-    const pick=+item.dataset.pick,q=n.quiz[qi],choices=[...item.querySelectorAll(".choice")];
+    const pick=+item.dataset.pick,good=+item.dataset.correct,q=n.quiz[qi],choices=[...item.querySelectorAll(".choice")];
     choices.forEach(c=>c.classList.remove("right","wrong"));
-    if(pick===q.a){choices[pick].classList.add("right");correct++;}
-    else{choices[pick].classList.add("wrong");choices[q.a].classList.add("right");}
+    if(pick===good){choices[pick].classList.add("right");correct++;}
+    else{choices[pick].classList.add("wrong");choices[good].classList.add("right");}
     const why=item.querySelector(".qwhy");why.innerHTML=`<b>Why:</b> ${esc(q.why)}`;why.classList.add("on");
   });
   if(!answered){msg.className="gatemsg bad";msg.textContent="Answer every question first.";return;}
