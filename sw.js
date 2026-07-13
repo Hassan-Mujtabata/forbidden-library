@@ -1,8 +1,16 @@
-const CACHE = "vault-v6";
+const CACHE = "vault-v7";
 const ASSETS = ["./", "./index.html", "./content.enc", "./manifest.json", "./icon.svg"];
 
+// On install, fetch every asset bypassing the HTTP cache ({cache:"reload"}) so a new
+// version always precaches the freshest files (otherwise a stale content.enc can pin).
 self.addEventListener("install", e => {
-  e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)).then(() => self.skipWaiting()));
+  e.waitUntil((async () => {
+    const c = await caches.open(CACHE);
+    await Promise.all(ASSETS.map(async u => {
+      try { const r = await fetch(u, { cache: "reload" }); if (r.ok) await c.put(u, r); } catch (_) {}
+    }));
+    await self.skipWaiting();
+  })());
 });
 
 self.addEventListener("activate", e => {
