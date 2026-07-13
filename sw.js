@@ -1,4 +1,4 @@
-const CACHE = "vault-v7";
+const CACHE = "vault-v8";
 const ASSETS = ["./", "./index.html", "./content.enc", "./manifest.json", "./icon.svg"];
 
 // On install, fetch every asset bypassing the HTTP cache ({cache:"reload"}) so a new

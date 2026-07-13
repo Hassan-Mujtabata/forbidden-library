@@ -428,7 +428,7 @@ function toast(msg,big){const t=document.createElement("div");t.className="toast
 /* ============ crypto load ============ */
 const b64d=s=>{s=s.replace(/-/g,"+").replace(/_/g,"/");while(s.length%4)s+="=";const b=atob(s);const u=new Uint8Array(b.length);for(let i=0;i<b.length;i++)u[i]=b.charCodeAt(i);return u};
 async function tryLoad(k){
-  const raw=await(await fetch("content.enc")).arrayBuffer();
+  const raw=await(await fetch("content.enc",{cache:"no-cache"})).arrayBuffer();
   const key=await crypto.subtle.importKey("raw",b64d(k),"AES-GCM",false,["decrypt"]);
   const pt=await crypto.subtle.decrypt({name:"AES-GCM",iv:new Uint8Array(raw.slice(0,12))},key,raw.slice(12));
   const txt=await new Response(new Response(pt).body.pipeThrough(new DecompressionStream("gzip"))).text();
