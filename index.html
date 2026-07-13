@@ -151,8 +151,8 @@ header .brand span{color:var(--gold)}
 
 /* ---------- generative art & motion ---------- */
 #rbanner{display:block;width:100%;height:150px;margin:16px auto 4px;border-radius:14px;border:1px solid var(--line)}
-#rbody p,#rbody blockquote{opacity:0;transform:translateY(10px);transition:opacity .6s ease,transform .6s ease}
-#rbody p.vis,#rbody blockquote.vis{opacity:1;transform:none}
+#rbody p,#rbody blockquote,#nbody>p,#nbody .src{opacity:0;transform:translateY(10px);transition:opacity .6s ease,transform .6s ease}
+#rbody p.vis,#rbody blockquote.vis,#nbody>p.vis,#nbody .src.vis{opacity:1;transform:none}
 #rbody .pull{font-size:1.22em;font-style:italic;text-align:center;color:var(--gold);
   padding:10px 6px;margin:1.5em 0;line-height:1.65}
 #rbody .pull::before,#rbody .pull::after{content:"— ✦ —";display:block;color:var(--tx2);
@@ -182,7 +182,7 @@ header .brand span{color:var(--gold)}
 .an-roll{animation:froll 7s linear infinite}
 @media(max-width:560px){.rdbody figure.sidefig{float:none!important;width:auto;max-width:230px;margin:18px auto!important}}
 @media (prefers-reduced-motion:reduce){
-  #rbody p,#rbody blockquote,.rdbody figure.sidefig{opacity:1;transform:none;transition:none}
+  #rbody p,#rbody blockquote,#nbody>p,#nbody .src,.rdbody figure.sidefig{opacity:1;transform:none;transition:none}
   .rdbody figure.sidefig svg *{animation:none!important}
 }
 
@@ -415,7 +415,7 @@ const ACH=[
  {id:"balance",e:"☯️",n:"Balanced Mind",d:"Read shadow & light in one day",c:()=>{const d=S.days[today()];return d&&d.shadow&&d.light}},
  {id:"owl",e:"🦉",n:"Night Owl",d:"Finish an episode after midnight",c:()=>S.owlFlag},
  {id:"bird",e:"🌅",n:"Dawn Reader",d:"Finish an episode before 8 am",c:()=>S.birdFlag},
- {id:"mix",e:"🎛️",n:"Mixmaster",d:"Clear a full Daily Mix",c:()=>S.mix&&S.mix.day===today()&&S.mix.items.every(i=>isRead(i.b,i.e))},
+ {id:"mix",e:"🎛️",n:"Mixmaster",d:"Clear a full Daily Mix",c:()=>S.mix&&S.mix.day===today()&&S.mix.items.length>0&&S.mix.items.every(mixItemDone)},
  {id:"hl1",e:"⭐",n:"Collector",d:"Save your first highlight",c:()=>S.hl.length>=1},
  {id:"hl25",e:"🗃️",n:"Archivist",d:"Save 25 highlights",c:()=>S.hl.length>=25},
  {id:"lvl5",e:"🎖️",n:"Adept",d:"Reach level 5",c:()=>lvl()>=5},
@@ -460,15 +460,23 @@ $("keygo").onclick=async()=>{const k=$("keyin").value.trim();if(!k)return;
   catch(e){$("keyerr").textContent="That key doesn't fit this lock."}};
 
 /* ============ views ============ */
-function show(v){for(const el of document.querySelectorAll(".view"))el.classList.remove("on");
+function show(v,nopush){for(const el of document.querySelectorAll(".view"))el.classList.remove("on");
   for(const el of document.querySelectorAll(".overlay"))el.classList.remove("on");
   if(v!=="reader")stopArt();
   $("topbar").style.display=(v==="home"||v==="path")?"flex":"none";
   if(v==="home"||v==="path")setNav(v);
+  // one history entry while inside a lesson/episode so the phone back button exits to the map, not the app
+  if((v==="reader"||v==="node")&&!nopush){
+    const st={v};(history.state&&history.state.v)?history.replaceState(st,""):history.pushState(st,"");
+  }else if(!nopush&&history.state&&history.state.v)history.replaceState({},"");
   $(v).classList.add("on");window.scrollTo(0,0)}
+window.addEventListener("popstate",()=>{
+  if($("node").classList.contains("on")){renderPath();show("path",true)}
+  else if($("reader").classList.contains("on")){renderHome();show("home",true)}
+});
 function setNav(v){$("nav-path").classList.toggle("on",v==="path");$("nav-lib").classList.toggle("on",v==="home")}
 function renderTopbar(){
-  $("streak").innerHTML=`🔥 ${S.streak.count} <small>streak</small>`;
+  $("streak").innerHTML=`🔥 ${S.streak.count} <small>${S.streak.day===today()?"today ✓":"streak"}</small>`;
   const l=lvl(),lo=lvlFloor(l),hi=lvlCeil(l);
   $("lvlname").textContent="LV "+l+" · "+lvlName();
   $("xptext").textContent=`${S.xp-lo} / ${hi-lo} XP`;
@@ -510,29 +518,47 @@ function renderHome(){
 }
 /* ---------- daily mix ---------- */
 function mulberry(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+const mixItemDone=i=>i.n?nodeDone(i.n):isRead(i.b,i.e);
 function buildMix(){
   const d=today();
-  if(S.mix&&S.mix.day===d)return;
+  if(S.mix&&S.mix.day===d&&S.mix.v===2)return;
   let seed=0;for(const ch of d)seed=seed*31+ch.charCodeAt(0)|0;
   const rnd=mulberry(seed);
+  const items=[];
+  // up to two unlocked, unmastered Path ideas lead the mix
+  const nodePool=(DATA.nodes||[]).filter(n=>!n.stub&&nodeStatus(n.id)==="avail");
+  for(let k=0;k<2&&nodePool.length;k++)
+    items.push({n:nodePool.splice(Math.floor(rnd()*nodePool.length),1)[0].id});
   const pool={shadow:[],light:[]};
   for(const b of DATA.books){const rs=readSet(b.id);
     for(let i=0;i<b.episodes.length;i++)if(!rs.has(i))pool[b.wing].push({b:b.id,e:i});}
-  const items=[];const order=rnd()<.5?["shadow","light","shadow","light"]:["light","shadow","light","shadow"];
-  for(const w of order){const p=pool[w];if(!p.length)continue;
-    const pick=p.splice(Math.floor(rnd()*p.length),1)[0];items.push(pick);}
-  S.mix={day:d,items};save();
+  const order=rnd()<.5?["shadow","light","shadow","light"]:["light","shadow","light","shadow"];
+  for(const w of order){if(items.length>=4)break;const p=pool[w];if(!p.length)continue;
+    items.push(p.splice(Math.floor(rnd()*p.length),1)[0]);}
+  S.mix={day:d,v:2,items};save();
 }
 function renderMix(){
   buildMix();
-  const doneN=S.mix.items.filter(i=>isRead(i.b,i.e)).length;
+  const doneN=S.mix.items.filter(mixItemDone).length;
   $("mixsub").textContent=doneN>=S.mix.items.length&&S.mix.items.length?"CLEARED ✓":`${doneN}/${S.mix.items.length} — a fresh blend every day`;
   const g=$("mixgrid");g.innerHTML="";
-  for(const it of S.mix.items){const b=bookById(it.b);if(!b)continue;const ep=b.episodes[it.e];const done=isRead(it.b,it.e);
+  for(const it of S.mix.items){
+    const done=mixItemDone(it);
     const el=document.createElement("button");el.className="mixchip"+(done?" done":"");
-    el.innerHTML=`<div class="g">${b.glyph}</div><div><div class="t">${esc(ep.t)}</div>
-      <div class="b">${esc(b.title)} · ${Math.max(1,Math.round(epWords(ep)/230))} min</div></div>${done?'<div class="ck">✓</div>':""}`;
-    el.onclick=()=>openEp(it.b,it.e);g.appendChild(el);}
+    if(it.n){
+      const nd=nodeById(it.n);if(!nd)continue;const tr=trackById(nd.track);
+      const w=nd.bridge.join(" ").split(" ").length+(nd.sources||[]).reduce((s,x)=>s+x.quote.join(" ").split(" ").length,0);
+      el.innerHTML=`<div class="g">${nd.glyph}</div><div><div class="t">${esc(nd.title)}</div>
+        <div class="b">PATH · ${esc(tr.name)} · ${Math.max(2,Math.round(w/200)+2)} min</div></div>${done?'<div class="ck">✓</div>':""}`;
+      el.onclick=()=>openNode(it.n);
+    }else{
+      const b=bookById(it.b);if(!b)continue;const ep=b.episodes[it.e];
+      el.innerHTML=`<div class="g">${b.glyph}</div><div><div class="t">${esc(ep.t)}</div>
+        <div class="b">${esc(b.title)} · ${Math.max(1,Math.round(epWords(ep)/230))} min</div></div>${done?'<div class="ck">✓</div>':""}`;
+      el.onclick=()=>openEp(it.b,it.e);
+    }
+    g.appendChild(el);
+  }
 }
 /* ---------- reader ---------- */
 let CUR={b:null,e:0};
@@ -587,16 +613,21 @@ function complete(){
 // reveal fade-up elements once they're near the viewport (robust, no IntersectionObserver dependency)
 function revealVisible(factor){
   const h=window.innerHeight*(factor||1.05);
-  for(const el of document.querySelectorAll("#rbody p:not(.vis),#rbody blockquote:not(.vis),.rdbody figure.sidefig:not(.vis)"))
+  for(const el of document.querySelectorAll("#rbody p:not(.vis),#rbody blockquote:not(.vis),#nbody>p:not(.vis),#nbody .src:not(.vis),.rdbody figure.sidefig:not(.vis)"))
     if(el.getBoundingClientRect().top<h)el.classList.add("vis");
 }
-// scroll progress + position save
+// scroll progress + position save (library reader AND path lessons)
 let scrollT;window.addEventListener("scroll",()=>{
-  if(!$("reader").classList.contains("on"))return;
+  const inReader=$("reader").classList.contains("on"),inNode=$("node").classList.contains("on");
+  if(!inReader&&!inNode)return;
   revealVisible();
   const h=document.documentElement,max=h.scrollHeight-h.clientHeight;
-  $("rprog").style.width=(max>0?h.scrollTop/max*100:0)+"%";
-  clearTimeout(scrollT);scrollT=setTimeout(()=>{if(CUR.b){S.pos[CUR.b]={ep:CUR.e,scroll:h.scrollTop};save()}},300);
+  const pct=(max>0?h.scrollTop/max*100:0)+"%";
+  if(inReader)$("rprog").style.width=pct;else $("rprog2").style.width=pct;
+  clearTimeout(scrollT);scrollT=setTimeout(()=>{
+    if(inReader&&CUR.b){S.pos[CUR.b]={ep:CUR.e,scroll:h.scrollTop};save()}
+    else if(inNode&&CURN){S.nodePos={id:CURN,scroll:h.scrollTop};save()}
+  },300);
 },{passive:true});
 $("r-back").onclick=()=>{renderHome();show("home")};
 $("r-fminus").onclick=()=>{S.font=Math.max(14,S.font-1);$("rbody").style.fontSize=S.font+"px";save()};
@@ -611,21 +642,30 @@ $("r-list").onclick=()=>{const b=bookById(CUR.b);const w=$("eprows");w.innerHTML
 /* ---------- highlights ---------- */
 const hlBtn=$("hlbtn");
 document.addEventListener("selectionchange",()=>{
-  if(!$("reader").classList.contains("on")){hlBtn.style.display="none";return}
+  const inReader=$("reader").classList.contains("on"),inNode=$("node").classList.contains("on");
+  if(!inReader&&!inNode){hlBtn.style.display="none";return}
+  const box=inReader?$("rbody"):$("nbody");
   const sel=document.getSelection();
-  if(sel.isCollapsed||!$("rbody").contains(sel.anchorNode)){hlBtn.style.display="none";return}
+  if(sel.isCollapsed||!box.contains(sel.anchorNode)){hlBtn.style.display="none";return}
   const r=sel.getRangeAt(0).getBoundingClientRect();
   hlBtn.style.display="block";
   hlBtn.style.left=Math.max(8,Math.min(window.innerWidth-160,r.left+r.width/2-70))+"px";
   hlBtn.style.top=(r.top+window.scrollY-44)+"px";
 });
 hlBtn.onclick=()=>{const sel=document.getSelection();const t=sel.toString().trim().slice(0,600);
-  if(!t)return;S.hl.unshift({b:CUR.b,e:CUR.e,t});save();sel.removeAllRanges();hlBtn.style.display="none";
+  if(!t)return;
+  if($("node").classList.contains("on")&&CURN)S.hl.unshift({n:CURN,t});
+  else S.hl.unshift({b:CUR.b,e:CUR.e,t});
+  save();sel.removeAllRanges();hlBtn.style.display="none";
   toast("⭐ Highlight saved");checkAch()};
 $("btn-hl").onclick=()=>{const w=$("hlrows");w.innerHTML="";
   if(!S.hl.length)w.innerHTML='<p style="color:var(--tx2)">Select any text while reading to collect it here.</p>';
-  for(const h of S.hl){const b=bookById(h.b);const el=document.createElement("div");el.className="hlrow";
-    el.innerHTML=`<div class="q">“${esc(h.t)}”</div><div class="m"><span>${b?esc(b.glyph+" "+b.title):""}</span><button style="color:var(--tx2)" data-del>remove</button></div>`;
+  for(const h of S.hl){
+    let label="";
+    if(h.n){const nd=nodeById(h.n);label=nd?nd.glyph+" "+nd.title:"";}
+    else{const b=bookById(h.b);label=b?b.glyph+" "+b.title:"";}
+    const el=document.createElement("div");el.className="hlrow";
+    el.innerHTML=`<div class="q">“${esc(h.t)}”</div><div class="m"><span>${esc(label)}</span><button style="color:var(--tx2)" data-del>remove</button></div>`;
     el.querySelector("[data-del]").onclick=()=>{S.hl=S.hl.filter(x=>x!==h);save();el.remove()};
     w.appendChild(el)}
   $("hls").classList.add("on")};
@@ -636,6 +676,19 @@ let sT;$("sinput").addEventListener("input",()=>{clearTimeout(sT);sT=setTimeout(
 function doSearch(){
   const q=$("sinput").value.trim().toLowerCase();const w=$("sres");w.innerHTML="";
   if(q.length<3)return;let n=0;
+  // path lessons first
+  for(const nd of (DATA.nodes||[])){
+    if(nd.stub||n>=10)continue;
+    const hay=[nd.title,...(nd.bridge||[]),...(nd.sources||[]).flatMap(s=>s.quote)];
+    for(const p of hay){const i=p.toLowerCase().indexOf(q);
+      if(i>=0){n++;
+        const tr=trackById(nd.track),st=nodeStatus(nd.id);
+        const el=document.createElement("button");el.className="srow";
+        const pre=p.slice(Math.max(0,i-70),i),hit=p.slice(i,i+q.length),post=p.slice(i+q.length,i+q.length+90);
+        el.innerHTML=`<div class="w">${nd.glyph} PATH · ${esc(tr.name)} · ${esc(nd.title)}${st==="locked"?" 🔒":st==="done"?" ✓":""}</div>
+          <div class="s">…${esc(pre)}<mark>${esc(hit)}</mark>${esc(post)}…</div>`;
+        el.onclick=()=>{$("search").classList.remove("on");openNode(nd.id)};
+        w.appendChild(el);break;}}}
   for(const b of DATA.books){for(let e=0;e<b.episodes.length&&n<50;e++){
     for(const p of b.episodes[e].p){const i=p.toLowerCase().indexOf(q);
       if(i>=0){n++;
@@ -754,11 +807,12 @@ function nextAvailNode(){const o=[...DATA.nodes].sort((a,b)=>a.tier-b.tier);
 
 function renderPath(){
   renderTopbar();
-  const nx=nextAvailNode(),c=$("pathcont");
+  const resume=S.nodePos&&nodeById(S.nodePos.id)&&!nodeDone(S.nodePos.id)&&nodeAvail(S.nodePos.id)&&!nodeById(S.nodePos.id).stub?nodeById(S.nodePos.id):null;
+  const nx=resume||nextAvailNode(),c=$("pathcont");
   if(nx){const tr=trackById(nx.track);c.style.display="block";
-    c.innerHTML=`<div class="tag" style="color:${tr.accent}">▶ CONTINUE THE PATH</div>
+    c.innerHTML=`<div class="tag" style="color:${tr.accent}">▶ ${resume?"RESUME LESSON":"CONTINUE THE PATH"}</div>
       <div style="font-family:var(--serif);font-size:20px;margin:2px 0 4px">${nx.glyph} ${esc(nx.title)}</div>
-      <div style="color:var(--tx2);font-size:13px">${esc(tr.name)} · ${nx.stub?"preview":"read → quiz → apply to unlock what comes next"}</div>
+      <div style="color:var(--tx2);font-size:13px">${esc(tr.name)} · ${resume?"pick up where you left off":nx.stub?"preview":"read → quiz → apply to unlock what comes next"}</div>
       <div class="glyphbg">${tr.glyph}</div>`;
     c.onclick=()=>openNode(nx.id);
   } else c.style.display="none";
@@ -837,14 +891,16 @@ function openNode(id){
   }
   nodeFigure(body,tr.accent,n.id);
   if(n.stub){
-    gate.innerHTML=`<div class="stubnote"><div class="e">🚧</div><b>This lesson is coming next.</b>
-      <div style="color:var(--tx2);font-size:13px;margin-top:8px;line-height:1.5">You've unlocked the preview. In chat, press “continue” and I'll author the full ${esc(tr.name)} lesson — book sources, quiz, and practice — so it becomes masterable.</div>
+    gate.innerHTML=`<div class="stubnote"><div class="e">🚧</div><b>This lesson is still being written.</b>
+      <div style="color:var(--tx2);font-size:13px;margin-top:8px;line-height:1.5">You've unlocked the preview above. The full ${esc(tr.name)} lesson — book sources, quiz, and practice — arrives in a coming update and will become masterable then.</div>
       <div style="margin-top:14px"><button class="ghostbtn" id="stubback">← Back to the Path</button></div></div>`;
     $("stubback").onclick=()=>{renderPath();show("path")};
-    show("node");return;
+    show("node");revealVisible(1.3);return;
   }
   renderGate(n);
   show("node");
+  if(S.nodePos&&S.nodePos.id===id&&S.nodePos.scroll&&!nodeDone(id))window.scrollTo(0,S.nodePos.scroll);
+  revealVisible(1.5);
 }
 function renderGate(n){
   const gate=$("ngate");gate.innerHTML="";
@@ -902,16 +958,19 @@ function renderApply(n){
   const gate=$("ngate");gate.innerHTML="";const rec=S.node[n.id]||{};const min=(n.apply&&n.apply.min)||40;
   const card=document.createElement("div");card.className="gatecard";card.id="applybox";
   card.innerHTML=`<h3>Apply it</h3><div class="gsub">${esc(n.apply.prompt)}</div>`;
-  const ta=document.createElement("textarea");ta.value=rec.applied||"";ta.placeholder=`Write from your own life… (at least ${min} characters)`;
+  const ta=document.createElement("textarea");ta.value=rec.applied||rec.draft||"";ta.placeholder=`Write from your own life… (at least ${min} characters)`;
   const cc=document.createElement("div");cc.className="cc";
   const btn=document.createElement("button");btn.className="goldbtn";btn.textContent=`Master this idea  +${NODE_XP} XP`;
-  const upd=()=>{const len=ta.value.trim().length;cc.textContent=len+" / "+min;btn.disabled=len<min;btn.style.opacity=len<min?.5:1;};
+  let draftT;
+  const upd=()=>{const len=ta.value.trim().length;cc.textContent=len+" / "+min;btn.disabled=len<min;btn.style.opacity=len<min?.5:1;
+    clearTimeout(draftT);draftT=setTimeout(()=>{(S.node[n.id]=S.node[n.id]||{}).draft=ta.value;save()},400);};
   ta.oninput=upd;
   btn.onclick=()=>{if(ta.value.trim().length<min)return;(S.node[n.id]=S.node[n.id]||{}).applied=ta.value.trim();completeNode(n);};
   card.appendChild(ta);card.appendChild(cc);card.appendChild(btn);gate.appendChild(card);upd();
 }
 function completeNode(n){
   const rec=S.node[n.id]=S.node[n.id]||{};
+  delete rec.draft;
   if(!rec.doneAt){
     rec.doneAt=Date.now();const before=lvl();S.xp+=NODE_XP;
     const d=today();
