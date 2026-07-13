@@ -1,0 +1,291 @@
+{
+  "tracks": [
+    {"id":"A","name":"Foundations","glyph":"🌱","accent":"#27ae60","blurb":"The roots. What the mind is, what suffering is, and the map of the whole path."},
+    {"id":"B","name":"Concentration & Jhāna","glyph":"🔆","accent":"#f39c12","blurb":"Training attention to the point of absorption — calm, unified, luminous states."},
+    {"id":"C","name":"Insight & Wisdom","glyph":"👁️","accent":"#2980b9","blurb":"Using a still mind to see how experience actually works — and being freed by it."},
+    {"id":"D","name":"Influence & Persuasion","glyph":"🎯","accent":"#c0a062","blurb":"How minds are moved. The engine underneath every 'yes'."},
+    {"id":"E","name":"Power & Strategy","glyph":"♛","accent":"#d4af37","blurb":"Positioning, timing, and the long game among people."},
+    {"id":"F","name":"Defense & Clear Thinking","glyph":"🛡️","accent":"#8e9aa6","blurb":"Seeing manipulation coming — and thinking better than it."}
+  ],
+  "nodes": [
+    {
+      "id":"a1","track":"A","tier":0,"prereq":[],"glyph":"🌱","title":"Why Train the Mind",
+      "bridge":[
+        "Every book in this vault, shadow or light, rests on one quiet assumption: the mind can be trained. Most people never test it. They take their attention, their reactions, and their cravings as fixed weather. This first idea is the hinge the whole Path turns on.",
+        "The contemplative traditions and modern psychology agree on the mechanism, if not the vocabulary: what you repeatedly attend to strengthens, and what you starve fades. Meditation is deliberate practice for attention and emotion, the way a gym is deliberate practice for muscle.",
+        "You are not trying to empty the mind or reach a blank. You are learning two skills everything else here depends on: to place attention where you choose, and to see what is actually happening without immediately reacting. Concentration and insight. Hold those two words."
+      ],
+      "sources":[
+        {"book":"The Mind Illuminated","ref":"Introduction & Overview of the Ten Stages","quote":["Meditation is the practice of training and refining attention and awareness. Progress comes from consistent daily practice, not from chasing special experiences."]},
+        {"book":"Mindfulness, Bliss and Beyond","ref":"Ajahn Brahm — the way of letting go","quote":["The way to deep meditation is through letting go. You do not force the mind still; you gently remove what disturbs it, and stillness appears on its own."]}
+      ],
+      "quiz":[
+        {"q":"What single assumption does every track here depend on?","c":["The mind is fixed and can't really change","The mind can be trained like any trainable skill","Only monks can meditate","Emotions are meaningless"],"a":1,"why":"The whole Path rests on the trainability of attention and emotion."},
+        {"q":"The two core skills to train are:","c":["Speed reading and memory","Concentration (placing attention) and insight (seeing clearly)","Debate and persuasion","Breathing and stretching"],"a":1,"why":"Concentration and insight recur in every contemplative node."},
+        {"q":"Progress comes mainly from:","c":["Chasing dramatic experiences","Consistent daily practice","Reading about it once","Buying the right cushion"],"a":1,"why":"Both Culadasa and Brahm stress steady practice over peak-hunting."}
+      ],
+      "apply":{"prompt":"In a sentence or two: name one thing in your daily life you currently treat as 'fixed weather' — a mood, a craving, a reaction — that you're willing to test as trainable this week.","min":40}
+    },
+    {
+      "id":"a2","track":"A","tier":1,"prereq":["a1"],"glyph":"☸️","title":"The Four Noble Truths",
+      "bridge":[
+        "The Path of Purification and most of the light-wing books assume you already carry this frame. It is the Buddha's core diagnosis, and it reads like a physician's chart: symptom, cause, prognosis, treatment.",
+        "One — dukkha: there is unsatisfactoriness woven through ordinary experience; even pleasant things don't fully satisfy and don't last. Two — its cause is taṇhā, craving: the reflex of grasping at the pleasant and pushing away the unpleasant. Three — there is a cessation: the grasping can end. Four — there is a path: the Eightfold Path (ethics, concentration, wisdom) that leads to that ending.",
+        "Notice the structure isn't pessimism; it's engineering. Name the problem precisely, find the actual lever (craving, not the world), and there's a route out. Every later idea — the hindrances, the jhānas, insight — is machinery hanging off this frame. This is the prerequisite the dense old texts never stop to explain."
+      ],
+      "sources":[
+        {"book":"The Experience of Insight","ref":"Goldstein — the Four Noble Truths","quote":["The teaching begins not with belief but with a fact to be investigated: that there is suffering, that it has a cause, that it can end, and that there is a way."]},
+        {"book":"The Path of Purification","ref":"Visuddhimagga I — Virtue (framing)","quote":["The path of purification is taught by way of virtue, concentration, and understanding — and purification itself should be understood as nibbāna."]}
+      ],
+      "quiz":[
+        {"q":"The Four Noble Truths are best described as:","c":["A pessimistic worldview","A physician's frame: symptom, cause, cessation, cure","A set of commandments","A breathing technique"],"a":1,"why":"Diagnosis → cause → prognosis → treatment."},
+        {"q":"The cause of dukkha is located in:","c":["Other people","Craving / grasping (taṇhā)","The body","Fate"],"a":1,"why":"The second truth points to craving, not external conditions."},
+        {"q":"The fourth truth (the path) is organized as:","c":["Virtue, concentration, wisdom","Faith, hope, charity","Diet, exercise, sleep","Reading, writing, arithmetic"],"a":0,"why":"Sīla, samādhi, paññā — the same three that structure the Visuddhimagga."}
+      ],
+      "apply":{"prompt":"Pick one recurring frustration from the last few days. Name as precisely as you can the craving underneath it — the wanting-it-to-be-otherwise. One sentence.","min":40}
+    },
+    {
+      "id":"a3","track":"A","tier":2,"prereq":["a2"],"glyph":"🧩","title":"The Five Aggregates — What 'Self' Is Made Of",
+      "bridge":[
+        "When you look for the 'self' that's suffering, the tradition hands you a surprising answer: look closer and you find not a thing but a process — five streams braided together.",
+        "Form (the body and senses), feeling (the instant pleasant / unpleasant / neutral tone of any experience), perception (recognition and labeling), formations (impulses, reactions, habits, intentions), and consciousness (the bare knowing of an object). Every moment is some mix of these five.",
+        "Why it matters: 'not-self' (anattā) — a claim you'll meet again in the Insight track — isn't mystical. It's the observation that none of the five is a stable, separate owner; they arise and pass by conditions. Feeling especially is the hinge where craving grabs on, which is why so much practice watches feeling."
+      ],
+      "sources":[
+        {"book":"The Experience of Insight","ref":"Goldstein — the aggregates","quote":["What we call 'I' is a collection of processes — body, feelings, perceptions, mental reactions, and awareness — with no unchanging center to be found."]},
+        {"book":"The Path of Purification","ref":"Visuddhimagga XIV — the Aggregates","quote":["Whatever is felt, pleasant or painful or neither, is the feeling aggregate; the recognizing of an object is perception; the constructing mental factors are the formations."]}
+      ],
+      "quiz":[
+        {"q":"The five aggregates are form, feeling, perception, formations, and:","c":["soul","consciousness","memory","willpower"],"a":1,"why":"Consciousness = the bare knowing of an object."},
+        {"q":"Which aggregate is 'the hinge where craving grabs on'?","c":["form","feeling","perception","consciousness"],"a":1,"why":"The pleasant/unpleasant tone of feeling triggers grasping or aversion."},
+        {"q":"'Not-self' (anattā) means:","c":["you don't exist at all","none of the five aggregates is a stable, separate owner","the body is purely an illusion","you should dislike yourself"],"a":1,"why":"It's the absence of an unchanging controller, found by direct observation."}
+      ],
+      "apply":{"prompt":"For a few minutes today, when something bugs you, try to catch the raw feeling-tone (pleasant / unpleasant / neutral) a beat before the story about it. Write what you noticed.","min":40}
+    },
+    {
+      "id":"a4","track":"A","tier":1,"prereq":["a1"],"glyph":"⚖️","title":"Ethics as the Ground (sīla)",
+      "bridge":[
+        "It's tempting to skip straight to the glamorous states. The tradition refuses to let you: concentration is built on sīla — ethical conduct — for a blunt psychological reason, not a moralistic one.",
+        "A mind agitated by regret, deception, or harm cannot settle. Every lie you're maintaining, every person you've wronged and are avoiding, is a background process stealing attention. Sīla is mental hygiene: reduce the acts that generate remorse and self-conflict, and the mind has far less to churn on when you sit.",
+        "The classic five: refrain from killing, stealing, sexual misconduct, false speech, and intoxication that clouds the mind. Read them not as rules imposed from outside but as the removal of the loudest inner noise. This is also where the two wings quietly diverge — the power books teach deception as a tool; here, deception is a tax on your own concentration."
+      ],
+      "sources":[
+        {"book":"Right Concentration","ref":"Brasington — the ground for the jhānas","quote":["The jhānas are much easier to enter when the mind is not troubled. A life of basic integrity is not a prerequisite handed down to punish you; it is what lets the mind grow quiet."]},
+        {"book":"The Path of Purification","ref":"Visuddhimagga I — Virtue","quote":["Established on virtue, the meditator develops concentration; and concentration is the proximate cause of understanding. Virtue is where it all begins."]}
+      ],
+      "quiz":[
+        {"q":"The main reason sīla comes before concentration is that:","c":["it punishes beginners","a guilty, agitated mind can't settle","tradition demands obedience","it looks impressive"],"a":1,"why":"It's psychological hygiene, not moralism."},
+        {"q":"In this framework, maintaining a lie is:","c":["a useful power move","a background process that steals attention","ethically neutral","required for jhāna"],"a":1,"why":"Unresolved deception churns in the mind and blocks calm."},
+        {"q":"Sīla is best understood as:","c":["externally imposed rules","removal of the loudest sources of inner noise","a diet plan","optional for advanced meditators"],"a":1,"why":"The precepts reduce remorse-generating acts so attention can gather."}
+      ],
+      "apply":{"prompt":"Name one small ongoing thing — a half-truth, an avoidance, a habit — that reliably churns in your mind. What is one concrete step to reduce that churn this week?","min":50}
+    },
+    {
+      "id":"a5","track":"A","tier":2,"prereq":["a2"],"glyph":"🗺️","title":"The Map: Concentration vs Insight",
+      "bridge":[
+        "Two engines drive the whole light wing, and confusing them wastes years. Samatha (calm / concentration) gathers and stills the mind — its peak expressions are the jhānas. Vipassanā (insight) uses a collected mind to see the actual nature of experience: impermanence, unsatisfactoriness, not-self. It's insight, not calm, that is said to liberate.",
+        "The relationship is practical: concentration is the lens-grinding; insight is the looking. A wobbly, distracted mind sees blurry; a concentrated mind sees fine detail. Most systems here — TMI, Brasington, Goldstein, the Visuddhimagga — develop concentration first, then turn that stability toward investigation.",
+        "This is why the Path branches after Foundations: the Concentration track builds the lens; the Insight track does the looking. You can begin both, but the deep insight nodes require real concentration first — exactly the way the tradition sequences it."
+      ],
+      "sources":[
+        {"book":"Right Concentration","ref":"Brasington — samatha and vipassanā","quote":["The jhānas are concentration states. They are not themselves insight, but they make the mind supple and bright, so the insight practice that follows can go deep."]},
+        {"book":"The Mind Illuminated","ref":"Culadasa — unifying calm and insight","quote":["Śamatha and vipassanā are not different practices but qualities of a well-trained mind; the goal is to develop them together."]}
+      ],
+      "quiz":[
+        {"q":"Samatha's peak expressions are the:","c":["insight knowledges","jhānas","precepts","aggregates"],"a":1,"why":"Concentration culminates in jhāna."},
+        {"q":"Which is said to actually liberate?","c":["calm (samatha) alone","insight (vipassanā)","neither","posture"],"a":1,"why":"Calm supports; insight sees, and seeing frees."},
+        {"q":"The working relationship is:","c":["concentration grinds the lens, insight does the looking","they are opposites you must choose between","insight always comes first","they are unrelated"],"a":0,"why":"Stability enables clear seeing."}
+      ],
+      "apply":{"prompt":"Which do you personally need more right now — a steadier lens (concentration) or clearer looking (insight)? Say why in a sentence.","min":40}
+    },
+
+    {
+      "id":"b1","track":"B","tier":3,"prereq":["a4","a5"],"glyph":"🪑","title":"Setting Up: Posture, Intention, the Object",
+      "bridge":[
+        "Concentration has a boringly reliable recipe, and beginners skip the setup then wonder why the mind won't settle. Three pieces: a stable body, a clear intention, and a single object.",
+        "Posture: upright but not rigid, so the body is alert yet won't demand attention with pain. Intention: decide, before you start, what you're doing — 'for these minutes I train attention on one object and return gently when it wanders.' That sentence does real work; it pre-commits the mind. Object: most traditions here use the breath — the sensations of breathing at one spot, the nostrils or the abdomen. One object, chosen in advance, not a buffet.",
+        "The whole game of the early stages is: attention rests on the object, wanders off (it will, constantly), you notice, you return — without irritation. That blame-free return, done ten thousand times, is the rep that builds the muscle."
+      ],
+      "sources":[
+        {"book":"The Mind Illuminated","ref":"Stage One — Establishing a Practice","quote":["Your goal in Stage One is to establish a consistent practice and keep your attention on the breath as best you can, gently returning whenever you notice it has wandered."]},
+        {"book":"Mindfulness, Bliss and Beyond","ref":"Ajahn Brahm — knowing the breath","quote":["Give the breath your full attention as an act of kindness, not control. Guard it gently, and let each breath be known from beginning to end."]}
+      ],
+      "quiz":[
+        {"q":"The three setup pieces are a stable body, a single object, and:","c":["a mantra","a clear intention","incense","a teacher present"],"a":1,"why":"Pre-committing an intention shapes the whole sit."},
+        {"q":"When attention wanders, the correct response is to:","c":["scold yourself to build discipline","gently notice and return without irritation","open your eyes and stop","switch objects"],"a":1,"why":"The blame-free return is the actual training rep."},
+        {"q":"'One object, not a buffet' means:","c":["choose a single object in advance and stay with it","eat before meditating","rotate objects each minute","use no object at all"],"a":0,"why":"A fixed object lets attention deepen."}
+      ],
+      "apply":{"prompt":"Write your own one-sentence intention to say before your next sit (e.g. 'For ten minutes I train attention on the breath and return gently when it wanders').","min":40}
+    },
+    {
+      "id":"b2","track":"B","tier":4,"prereq":["b1"],"glyph":"🎯","title":"Stabilizing Attention: Overcoming Mind-Wandering",
+      "bridge":[
+        "The first real obstacle isn't dramatic — it's that you forget you're meditating at all. You're on the breath, then you 'wake up' three minutes later mid-daydream. This is mind-wandering, and defeating it is TMI's Stages Two and Three.",
+        "The skill has two parts. First, shorten the wandering by strengthening introspective awareness — a background watchfulness that flags 'we've drifted' sooner. Second, when you catch it, appreciate the catching instead of punishing the drift; that reframes the whole nervous system's relationship to practice. You are literally rewarding the neural event you want more of.",
+        "A gentle scaffold: follow the breath, then connect with it — know the full in-breath and out-breath, then notice the small pause between them. As continuity grows, forgetting shrinks. Don't force; make the object interesting by looking at finer and finer detail."
+      ],
+      "sources":[
+        {"book":"The Mind Illuminated","ref":"Stages Two & Three — Mind-Wandering and Forgetting","quote":["The moment of realizing you've been distracted is a moment to celebrate — it is the return of introspective awareness. Never berate yourself; simply redirect attention to the breath."]},
+        {"book":"Right Concentration","ref":"Brasington — sustaining attention","quote":["Keep coming back to the breath. Each time you return, the returning gets a little easier, and the periods of staying get a little longer."]}
+      ],
+      "quiz":[
+        {"q":"Mind-wandering is primarily a failure of:","c":["effort","introspective awareness (noticing you've drifted)","posture","intelligence"],"a":1,"why":"Strengthening the background watcher shortens the drift."},
+        {"q":"On catching yourself distracted you should:","c":["punish the lapse","appreciate the catch and gently return","end the session","hold the breath"],"a":1,"why":"Rewarding the catch trains more of it."},
+        {"q":"A good way to build continuity is to:","c":["force the mind blank","notice finer detail of the breath, including the pauses","breathe as hard as possible","count to a thousand"],"a":1,"why":"Interest and detail sustain attention naturally."}
+      ],
+      "apply":{"prompt":"Next sit, silently note 'catch' and smile each time you notice you'd wandered. Afterward write roughly how many catches you got, and whether the smiling changed anything.","min":40}
+    },
+    {
+      "id":"b3","track":"B","tier":5,"prereq":["b2"],"glyph":"🚧","title":"The Five Hindrances and Their Antidotes",
+      "bridge":[
+        "Across every meditation book in this vault, the same five saboteurs appear — the tradition calls them the five hindrances. Naming them is half the cure, because a named hindrance is an object you can watch instead of a fog you're lost in.",
+        "Sensory desire (wanting a pleasure, replaying it); ill-will (aversion, irritation, self-criticism); sloth-and-torpor (dullness, sinking, sleepiness); restlessness-and-worry (agitation, the planning mind); and doubt ('I can't do this / is this even working?'). Each has an antidote: for desire, see its impermanence and cost; for ill-will, deliberately cultivate goodwill (mettā); for dullness, brighten energy — sit up, open the eyes, take a fuller breath; for restlessness, calm and reassure, lengthen the exhale; for doubt, recall past small successes and simply continue.",
+        "The deep point from Brasington and the Visuddhimagga: the jhānas are literally defined as what appears when the five hindrances are temporarily suspended. So this isn't a detour — it's the doorway. Access concentration is a mind with the hindrances quiet, and everything past here depends on it."
+      ],
+      "sources":[
+        {"book":"The Mind Illuminated","ref":"Second Interlude — The Hindrances and Problems","quote":["The five hindrances are sensory desire, aversion, sloth and torpor, restlessness and remorse, and doubt. Skill is recognizing which one is present and applying its specific antidote."]},
+        {"book":"The Experience of Insight","ref":"Goldstein — working with hindrances","quote":["Do not take the hindrances personally. They are impersonal states, arising by conditions and passing away. Note them clearly, and their grip loosens."]},
+        {"book":"Right Concentration","ref":"Brasington — hindrances and access","quote":["When the five hindrances are suspended, the mind becomes concentrated and joyful. That suspension is the gateway to the first jhāna."]}
+      ],
+      "quiz":[
+        {"q":"The five hindrances include desire, ill-will, dullness, doubt, and:","c":["pride","restlessness / worry","boredom","fear"],"a":1,"why":"Restlessness-and-worry is the fifth."},
+        {"q":"The antidote to ill-will / aversion is to:","c":["suppress it hard","cultivate goodwill (mettā)","ignore the breath","stop meditating"],"a":1,"why":"Goodwill directly counters aversion."},
+        {"q":"Why is this node called the 'doorway' to jhāna?","c":["it isn't, it's a detour","jhāna is defined as what appears when the hindrances are suspended","it only teaches posture","it's just review"],"a":1,"why":"Access concentration = the hindrances gone quiet."}
+      ],
+      "apply":{"prompt":"Which of the five hindrances is YOUR signature saboteur? Name it, and write the specific antidote you'll reach for next time it shows up — in meditation or in daily life.","min":50}
+    },
+    {
+      "id":"b4","track":"B","tier":5,"prereq":["b2"],"glyph":"🔅","title":"Continuous Attention & Overcoming Dullness",
+      "bridge":[
+        "Once forgetting fades, a subtler enemy takes its place, and almost everyone mistakes it for progress: dullness. The mind feels calm, quiet, pleasant… and dim. This is subtle dullness, and camping in it for months is one of the most common ways to stall (TMI Stages Four and Five).",
+        "The fix is to keep raising the brightness and vividness of the object, not just its stability. Stability without vividness is a fog; you want stability and clarity — attention steady on the breath while awareness stays wide, alert, luminous. Practical levers: intend to perceive more detail, expand to the whole body of the breath, lift energy slightly, and periodically check 'is this vivid, or just quiet?'",
+        "Getting this right is the difference between a concentration that can support jhāna and insight, and a comfortable trance that goes nowhere. Vividness is the currency of the higher stages."
+      ],
+      "sources":[
+        {"book":"The Mind Illuminated","ref":"Stages Four & Five — Overcoming Subtle Dullness","quote":["Subtle dullness is seductive because it feels peaceful. But the antidote is to increase the brightness and clarity of perception, not merely to remain still."]},
+        {"book":"Right Concentration","ref":"Brasington — a bright, unified mind","quote":["You want the mind collected but also bright and energized. A dull mind cannot enter the jhānas; a bright, unified mind slips in naturally."]}
+      ],
+      "quiz":[
+        {"q":"Subtle dullness is dangerous because it:","c":["is obviously unpleasant","feels calm and pleasant, so you mistake it for progress","causes physical pain","is very rare"],"a":1,"why":"Its comfort is exactly the trap."},
+        {"q":"The antidote to dullness is to increase:","c":["stability only","brightness / vividness and energy","the length of the sit only","effort to force stillness"],"a":1,"why":"Clarity, not just calm."},
+        {"q":"A concentration fit for jhāna requires:","c":["stillness alone","stability AND vividness","sleepiness","a dark room"],"a":1,"why":"Vividness is the currency of the higher stages."}
+      ],
+      "apply":{"prompt":"Next sit, twice ask yourself 'vivid or just quiet?' and deliberately brighten perception. Write what changed when you brightened.","min":40}
+    },
+    {
+      "id":"b5","track":"B","tier":6,"prereq":["b3","b4"],"glyph":"🌟","title":"Access Concentration & the Nimitta",
+      "bridge":[
+        "There's a threshold just before jhāna, and it has a name: access concentration (upacāra samādhi). The hindrances are quiet, attention rests almost effortlessly on the breath, and the mind feels gathered, still, and pleasantly energized. You're at the door.",
+        "Often a sign appears — the nimitta. As attention unifies, the breath grows subtle and a mental brightness or a felt sense of pleasant stillness can arise. Brasington's practical instruction is the key move: at access, gently shift attention from the breath toward a subtle pleasant sensation somewhere in the field — often a quiet joy or well-being — and let it grow. That redirection is the on-ramp to the first jhāna.",
+        "Don't grab. The paradox of this threshold is that reaching for the state scatters it. You allow, you incline, and the momentum of collectedness carries you. Access concentration is also, by itself, plenty concentrated to begin serious insight work — which is why the Insight track can branch from around here."
+      ],
+      "sources":[
+        {"book":"Right Concentration","ref":"Brasington — entering the first jhāna","quote":["When the mind is concentrated and the hindrances are gone, look for a pleasant sensation and put your attention on it. Let the pleasantness grow and fill the mind — this is how you enter the first jhāna."]},
+        {"book":"The Path of Purification","ref":"Visuddhimagga IV — the counterpart sign","quote":["When the hindrances are suppressed the counterpart sign arises. Concentration is called 'access' in its neighborhood, and 'absorption' when fully attained."]}
+      ],
+      "quiz":[
+        {"q":"Access concentration is:","c":["the deepest jhāna","the threshold just before jhāna, with the hindrances quiet","itself a hindrance","the same as insight"],"a":1,"why":"Upacāra samādhi — the neighborhood of absorption."},
+        {"q":"Brasington's on-ramp to the first jhāna is to:","c":["grip the breath harder","shift attention to a subtle pleasant sensation and let it grow","open the eyes","count breaths faster"],"a":1,"why":"Incline toward the pleasant feeling and let it fill the mind."},
+        {"q":"The paradox at this threshold is that:","c":["reaching for the state scatters it","you must force it","it needs no concentration","it can't lead to insight"],"a":0,"why":"Allowing, not grabbing, lets momentum carry you in."}
+      ],
+      "apply":{"prompt":"Have you ever tasted a moment of settled, effortless, slightly pleasant attention — in meditation, sport, music, deep work? Describe it. That flavor is your target.","min":50}
+    },
+    {
+      "id":"b6","track":"B","tier":7,"prereq":["b5"],"glyph":"🕯️","title":"The First Jhāna",
+      "bridge":[
+        "The first jhāna is a state of absorption with a specific fingerprint: the mind is gathered onto one pleasant object and five factors are present — applied attention (vitakka), sustained attention (vicāra), rapture (pīti), happiness (sukha), and one-pointedness (ekaggatā). Beginners expect fireworks; Brasington's gentler 'jhāna lite' is far more accessible than the thunderous classical descriptions, and still transformative.",
+        "You arrive not by adding effort but on the momentum from access: the pleasant sensation you inclined toward grows, rapture and happiness suffuse the body-mind, thinking quiets to a hum, and attention settles almost on its own. The Visuddhimagga's simile is a bath-maker kneading water through soap-powder until the whole ball is saturated — pīti and sukha permeate the entire field.",
+        "The value isn't the pleasure for its own sake, though it is healing. It's threefold: it proves the hindrances can be dropped, it makes the mind supple and bright, and it gives a stable, non-craving happiness independent of the world — which loosens ordinary cravings and sets up the insight work to come."
+      ],
+      "sources":[
+        {"book":"Right Concentration","ref":"Brasington — the first jhāna","quote":["In the first jhāna there is pīti and sukha born of seclusion, along with some subtle thought. It is unmistakable: a wave of well-being fills you, and the mind is content to stay."]},
+        {"book":"The Path of Purification","ref":"Visuddhimagga IV — the first jhāna","quote":["Quite secluded from sense desires he enters upon and abides in the first jhāna, which is accompanied by applied and sustained thought, with rapture and happiness born of seclusion."]}
+      ],
+      "quiz":[
+        {"q":"The five factors of the first jhāna include applied & sustained attention, one-pointedness, and:","c":["doubt and worry","rapture (pīti) and happiness (sukha)","sloth and desire","pride and fear"],"a":1,"why":"Vitakka, vicāra, pīti, sukha, ekaggatā."},
+        {"q":"The Visuddhimagga's bath-maker simile illustrates:","c":["forcing the breath","pīti and sukha permeating the whole body-mind","counting breaths","ethical conduct"],"a":1,"why":"Soap kneaded through water = joy saturating experience."},
+        {"q":"The deepest value of jhāna for the path is:","c":["the pleasure itself","a non-craving happiness that loosens ordinary cravings and readies the mind for insight","impressing others","escaping life permanently"],"a":1,"why":"It's fuel and proof, not the destination."}
+      ],
+      "apply":{"prompt":"Write what it would mean for you to have access to a contentment that doesn't depend on getting anything. Where in your life would that change how you act?","min":50}
+    },
+    {
+      "id":"b7","track":"B","tier":8,"prereq":["b6"],"glyph":"🔥","title":"Deepening: Second to Fourth Jhānas",
+      "bridge":[
+        "The jhānas are a graded letting-go: at each step you release the coarsest factor still present, and the mind grows quieter and more refined. Second jhāna — applied and sustained thought fall away; what remains is rapture, happiness, and unification, now with inner stillness and confidence, no more subtle steering.",
+        "Third jhāna — even rapture, the energetic buzz, is seen as slightly coarse and released; what remains is a serene, contented happiness with mindful equanimity: 'abiding in equanimity, mindful and fully aware.' Fourth jhāna — pleasure and pain, gladness and sadness all subside into pure equanimity and one-pointedness: a still, luminous, utterly steady mind, neither pleasant nor unpleasant but profoundly peaceful.",
+        "The trajectory teaches the whole path in miniature: happiness increases as you release, not as you acquire. The fourth jhāna's imperturbable, bright equanimity is the traditional launch-pad for the deepest insight."
+      ],
+      "sources":[
+        {"book":"Right Concentration","ref":"Brasington — second through fourth","quote":["Each jhāna is entered by becoming disenchanted with the factor now seen as coarse. Let go of thinking for the second, of rapture for the third, of even pleasure for the fourth, where only equanimity and one-pointedness remain."]},
+        {"book":"The Path of Purification","ref":"Visuddhimagga IV — the higher jhānas","quote":["With the fading of rapture he abides in equanimity, mindful and fully aware; with the abandoning of pleasure and pain he enters the fourth jhāna, purified by equanimity and mindfulness."]}
+      ],
+      "quiz":[
+        {"q":"Moving up the jhānas, at each step you:","c":["add a new factor","release the coarsest remaining factor","increase effort","change objects"],"a":1,"why":"It's a graded letting-go."},
+        {"q":"The fourth jhāna is characterized by:","c":["intense rapture","pure equanimity and one-pointedness, beyond pleasure and pain","strong thinking","sleepiness"],"a":1,"why":"Neither pleasant nor unpleasant — imperturbable stillness."},
+        {"q":"The core lesson of the sequence is that happiness increases as you:","c":["acquire more","release","force harder","analyze more"],"a":1,"why":"Deeper peace comes from letting go, not adding."}
+      ],
+      "apply":{"prompt":"Where in ordinary life have you felt happier AFTER letting something go — a grudge, a plan, a possession, the need to be right? Describe one instance.","min":50}
+    },
+    {
+      "id":"b8","track":"B","tier":9,"prereq":["b7"],"glyph":"🌌","title":"The Immaterial Jhānas (Fifth to Eighth)",
+      "bridge":[
+        "Beyond the fourth jhāna the object itself dissolves. Using the imperturbable equanimity of the fourth as a base, attention turns from any form toward increasingly subtle, formless dimensions — the four immaterial attainments (āyatanas).",
+        "Fifth: the base of infinite space — attention expands past the body's boundary into boundless space. Sixth: infinite consciousness — attention turns to the awareness pervading that space. Seventh: nothingness — resting in the absence of any 'thing.' Eighth: neither-perception-nor-non-perception — so subtle that perception barely functions. These are extraordinarily refined states of unification.",
+        "Two honest cautions the books stress. First, these are advanced and usually need a strong fourth jhāna and often a teacher; treat this node as a map, not a to-do list. Second, they are still concentration, not liberation — profoundly peaceful, but the Insight track is where the actual freeing work happens."
+      ],
+      "sources":[
+        {"book":"Right Concentration","ref":"Brasington — the formless attainments","quote":["After the fourth jhāna come the formless attainments: infinite space, infinite consciousness, nothingness, and neither-perception-nor-non-perception — each subtler than the last, each a further letting-go of the object."]},
+        {"book":"The Path of Purification","ref":"Visuddhimagga X — the immaterial states","quote":["Passing quite beyond perceptions of form, 'space is infinite,' he enters the base of boundless space; and so on through boundless consciousness, nothingness, and neither perception nor non-perception."]}
+      ],
+      "quiz":[
+        {"q":"The immaterial jhānas begin when:","c":["you fall asleep","the object / form dissolves and attention turns to formless dimensions","rapture returns","you open your eyes"],"a":1,"why":"They are the 'formless' attainments beyond the fourth jhāna."},
+        {"q":"Their correct order is space → consciousness → nothingness →:","c":["first jhāna","neither-perception-nor-non-perception","access concentration","insight"],"a":1,"why":"The eighth is the subtlest."},
+        {"q":"The book's honest caution is that these states are:","c":["liberation itself","still concentration, not the liberating insight","dangerous to even know about","easy for beginners"],"a":1,"why":"Peaceful, but not freeing on their own."}
+      ],
+      "apply":{"prompt":"This node is a map, not a task. In a sentence, why might chasing exotic states prematurely actually work against the goal of the path?","min":40}
+    },
+    {
+      "id":"b9","track":"B","tier":9,"prereq":["b7"],"glyph":"🛠️","title":"Mastery: The Five Masteries & Jhāna for Insight",
+      "bridge":[
+        "A jhāna you stumble into once is a curiosity; a jhāna you can use is a tool. The tradition defines mastery five ways: mastery in adverting (turning to the jhāna), attaining (entering it), resolving (staying a set time), emerging (leaving cleanly), and reviewing (examining its factors afterward). In plain terms: you can enter reliably, stay as intended, and come out clearly.",
+        "The point of that reliability is the handoff to insight. With a bright, malleable, freshly-concentrated mind, you emerge and turn attention to experience itself — and now investigation cuts deep because the mind is stable and clear. Brasington's whole method is 'jhāna, then vipassanā': use the states to prime the mind, then watch the arising and passing of phenomena — including the jhāna factors themselves — as impermanent, unsatisfactory, not-self.",
+        "This is the bridge to the Insight track. Concentration was never the destination; it was the lens-grinding. Here you pick the lens up and look. Completing this node means you understand why you built the concentration in the first place."
+      ],
+      "sources":[
+        {"book":"Right Concentration","ref":"Brasington — jhāna to insight","quote":["Come out of the jhāna and turn the concentrated mind toward the three characteristics. The stability of the jhāna lets you see impermanence, unsatisfactoriness, and not-self with unusual clarity."]},
+        {"book":"The Path of Purification","ref":"Visuddhimagga IV — the five masteries","quote":["There are five kinds of mastery: in adverting, attaining, resolving, emerging, and reviewing. Until he has acquired these he should not strive for the next jhāna."]}
+      ],
+      "quiz":[
+        {"q":"The five masteries are adverting, attaining, resolving, emerging, and:","c":["forgetting","reviewing","forcing","sleeping"],"a":1,"why":"Reviewing = examining the factors after emerging."},
+        {"q":"The main purpose of jhāna mastery is:","c":["showing off","to prime a bright, stable mind for insight practice","to avoid insight","to stay blissful forever"],"a":1,"why":"Concentration is the lens; insight is the looking."},
+        {"q":"Brasington's method is summarized as:","c":["insight only, no concentration","jhāna, then turn the concentrated mind to the three characteristics","concentration forever","ethics only"],"a":1,"why":"Use the states to prime deep investigation."}
+      ],
+      "apply":{"prompt":"You've reached the end of the Concentration track. In your own words, what was concentration FOR? Write the one-sentence answer you'd give a friend.","min":50}
+    },
+
+    {"id":"c1","track":"C","tier":3,"prereq":["a3","b4"],"glyph":"☘️","stub":true,"title":"The Three Characteristics","bridge":["Impermanence, unsatisfactoriness, and not-self — the three lenses insight looks through. This is where a concentrated mind starts to see, not just settle.","Fully authored next — press Continue to unlock this lesson, its cross-book sources, quiz, and practice."]},
+    {"id":"c2","track":"C","tier":4,"prereq":["b2"],"glyph":"🖐️","stub":true,"title":"Mindfulness of Body & Feeling","bridge":["The four foundations of mindfulness, starting with the body and the feeling-tone where craving is born.","Fully authored next — press Continue."]},
+    {"id":"c3","track":"C","tier":5,"prereq":["c2"],"glyph":"📿","stub":true,"title":"Noting & the Experience of Insight","bridge":["Goldstein's noting practice: how naming experience loosens its grip and reveals its flow.","Fully authored next — press Continue."]},
+    {"id":"c4","track":"C","tier":5,"prereq":["a3","c1"],"glyph":"🔗","stub":true,"title":"Dependent Origination","bridge":["The twelve-link chain of how suffering is manufactured, moment to moment — and where the chain can be broken.","Fully authored next — press Continue."]},
+    {"id":"c5","track":"C","tier":6,"prereq":["c3","c4"],"glyph":"🪜","stub":true,"title":"The Progress of Insight (the ñāṇas)","bridge":["The classical stages of insight from the Visuddhimagga — the map of what unfolds as insight matures, including the hard passages.","Fully authored next — press Continue."]},
+    {"id":"c6","track":"C","tier":7,"prereq":["c5"],"glyph":"🌊","stub":true,"title":"Equanimity & the Fruits","bridge":["Where the insight track leads: deep equanimity toward all formations, and the fruits of practice.","Fully authored next — press Continue."]},
+
+    {"id":"d1","track":"D","tier":0,"prereq":[],"glyph":"🎭","stub":true,"title":"Perception Is Everything","bridge":["Before any tactic: people respond to the image you project, not the reality. Managing appearances is the root skill of the whole shadow wing.","Fully authored next — press Continue to unlock this lesson and its sources across Greene, Cialdini and the dark-psychology books."]},
+    {"id":"d2","track":"D","tier":1,"prereq":["d1"],"glyph":"🎁","stub":true,"title":"Reciprocity","bridge":["The oldest lever: a gift creates an obligation. Cialdini, the 48 Laws, and the dark-psych books all pull it — for good and ill.","Fully authored next — press Continue."]},
+    {"id":"d3","track":"D","tier":1,"prereq":["d1"],"glyph":"👥","stub":true,"title":"Social Proof & Authority","bridge":["Why we outsource judgment to the crowd and the expert — and how that shortcut is exploited.","Fully authored next — press Continue."]},
+    {"id":"d4","track":"D","tier":2,"prereq":["d2"],"glyph":"🤝","stub":true,"title":"Liking, Commitment & Consistency","bridge":["We say yes to those we like, and we stay loyal to our own prior yes. Two of the strongest and quietest forces in persuasion.","Fully authored next — press Continue."]},
+    {"id":"d5","track":"D","tier":2,"prereq":["d3"],"glyph":"⏳","stub":true,"title":"Scarcity & Framing","bridge":["Less-available reads as more-valuable, and the frame around a choice decides the choice. The mechanics of desire and context.","Fully authored next — press Continue."]},
+    {"id":"d6","track":"D","tier":3,"prereq":["d4","d5"],"glyph":"🍃","stub":true,"title":"Ethical & Quiet Influence","bridge":["Davis's quiet influence: moving people without manipulation. Where the shadow wing and the light wing finally shake hands.","Fully authored next — press Continue."]},
+
+    {"id":"e1","track":"E","tier":2,"prereq":["d1"],"glyph":"🎚️","stub":true,"title":"Never Outshine the Master","bridge":["Greene's first law: make those above you feel superior. The politics of ego and safety.","Fully authored next — press Continue."]},
+    {"id":"e2","track":"E","tier":2,"prereq":["d1"],"glyph":"🃏","stub":true,"title":"Conceal Intention, Control the Options","bridge":["Keep others reacting to a fog while you shape the board and the choices they think are theirs.","Fully authored next — press Continue."]},
+    {"id":"e3","track":"E","tier":2,"prereq":["d3"],"glyph":"🎪","stub":true,"title":"Court Attention & Reputation","bridge":["Reputation is the shield and attention is the currency. Building and guarding both.","Fully authored next — press Continue."]},
+    {"id":"e4","track":"E","tier":3,"prereq":["e2"],"glyph":"⏱️","stub":true,"title":"Timing & the Long Game","bridge":["Patience as a weapon; knowing the ripe moment. Greene's most contemplative laws — and where power quietly meets stillness.","Fully authored next — press Continue."]},
+    {"id":"e5","track":"E","tier":4,"prereq":["e4"],"glyph":"🛑","stub":true,"title":"Knowing When Not to Act","bridge":["The hardest power move is restraint: disdain what you cannot have, and refuse the bait. Strategy's off-switch.","Fully authored next — press Continue."]},
+
+    {"id":"f1","track":"F","tier":2,"prereq":["d2","d3"],"glyph":"🕵️","stub":true,"title":"Spotting Covert Manipulation","bridge":["The thirty covert tactics and the dark-psych playbook — read defensively. Naming a tactic is the first defense against it.","Fully authored next — press Continue."]},
+    {"id":"f2","track":"F","tier":3,"prereq":["f1"],"glyph":"🎣","stub":true,"title":"Social Engineering & Deception","bridge":["Mitnick's art of deception: the human is the exploit. How trust is engineered, and how to harden yours.","Fully authored next — press Continue."]},
+    {"id":"f3","track":"F","tier":0,"prereq":[],"glyph":"💎","stub":true,"title":"The Beautiful Mind","bridge":["De Bono's craft of listening, asking, and holding alternatives — thinking that makes you genuinely good company and hard to fool.","Fully authored next — press Continue."]},
+    {"id":"f4","track":"F","tier":5,"prereq":["b3","f1"],"glyph":"☯️","stub":true,"title":"Cross-Training: Stillness Meets Strategy","bridge":["The capstone that links both wings: an unshakeable mind is the ultimate defense against manipulation, and the calmest player sees the board most clearly.","Fully authored next — press Continue."]}
+  ]
+}

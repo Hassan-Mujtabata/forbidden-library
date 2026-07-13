@@ -43,6 +43,17 @@ BOOKS = [
     dict(id="tmi",       file="The Mind Illuminated - A Complete Meditation Guide Integrating Buddhist Wisdom and Brain Science ( PDFDrive.com ) (1).pdf",
          title="The Mind Illuminated", author="Culadasa (John Yates)",
          wing="light", glyph="\U0001f319", accent="#34495e"),
+    dict(id="rightconc", file="Right Concentration PDF.pdf",
+         title="Right Concentration", author="Leigh Brasington",
+         wing="light", glyph="\U0001f506", accent="#f39c12"),
+]
+
+# repair common Pali terms that lose their diacritics in extraction
+PALI = [
+    (r"\bjh[aā]?\s?nas\b", "jhānas"), (r"\bjh[aā]?\s?na\b", "jhāna"),
+    (r"\bsam[aā]dhi\b", "samādhi"), (r"\bnibb[aā]na\b", "nibbāna"),
+    (r"\bvipassan[aā]\b", "vipassanā"), (r"\b[aā]n[aā]p[aā]na\b", "ānāpāna"),
+    (r"\bmett[aā]\b", "mettā"), (r"\bsati\b", "sati"), (r"\bsukha\b", "sukha"),
 ]
 
 HEAD_RE = re.compile(
@@ -56,6 +67,8 @@ def clean(t):
     t = re.sub(r"-\n(?=[a-z])", "", t)
     t = re.sub(r"\s*\n\s*", " ", t)
     t = re.sub(r"\s{2,}", " ", t)
+    for pat, rep in PALI:
+        t = re.sub(pat, rep, t, flags=re.IGNORECASE)
     return t.strip()
 
 
