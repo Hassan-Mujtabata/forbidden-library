@@ -1507,12 +1507,67 @@
       "tier": 0,
       "prereq": [],
       "glyph": "🎭",
-      "stub": true,
       "title": "Perception Is Everything",
       "bridge": [
-        "Before any tactic: people respond to the image you project, not the reality. Managing appearances is the root skill of the whole shadow wing.",
-        "Fully authored next — press Continue to unlock this lesson and its sources across Greene, Cialdini and the dark-psychology books."
-      ]
+        "Before any specific tactic, the entire shadow wing rests on one uncomfortable premise: people don't respond to who you are, but to the image of you they carry in their heads. Greene builds 48 laws on it; Cialdini shows the science under it; the dark-psychology books weaponize it. Grasp the premise and the tactics become obvious; ignore it and you'll be moved by them without ever seeing the hand.",
+        "The mechanism is cognitive economy. No one has the bandwidth to analyze every person and choice from scratch, so the mind runs on shortcuts — first impressions, reputations, a single vivid trait standing in for the whole. Cialdini calls these fixed-action patterns: click, and a whole tape runs. The image you project loads the tape other people will play about you.",
+        "Two honest readings fork the whole wing. The manipulator's reading (Greene, the dark books): since perception is everything, engineer it — control appearances, reveal little, let others project onto you. The defender's reading (Cialdini, and Davis in the light wing): since perception is everything and easily hijacked, learn the shortcuts so no one runs your tape without your consent. Same fact, opposite ethics. Every node ahead sits on this fork — and you choose, each time, which side you're studying from."
+      ],
+      "sources": [
+        {
+          "book": "The 48 Laws of Power",
+          "ref": "Law 5 — reputation as cornerstone",
+          "quote": [
+            "Reputation is the cornerstone of power. Through reputation alone you can intimidate and win; once it slips, you are vulnerable, and will be attacked on all sides."
+          ]
+        },
+        {
+          "book": "Influence: The Psychology of Persuasion",
+          "ref": "fixed-action patterns and mental shortcuts",
+          "quote": [
+            "We are all cognitive misers, forced to rely on shortcuts to handle a complicated world. Certain triggers set off an automatic response — click, and the appropriate tape plays."
+          ]
+        }
+      ],
+      "quiz": [
+        {
+          "q": "The premise under the whole shadow wing is:",
+          "c": [
+            "people respond to who you truly are",
+            "people respond to the image of you they carry, not the reality",
+            "appearances never matter",
+            "only money persuades"
+          ],
+          "a": 1,
+          "why": "Everything downstream engineers or defends that image."
+        },
+        {
+          "q": "Cialdini's 'fixed-action patterns' are:",
+          "c": [
+            "random behaviors",
+            "automatic response tapes triggered by a single cue — click, and it runs",
+            "meditation states",
+            "legal contracts"
+          ],
+          "a": 1,
+          "why": "The mind's shortcuts are exactly what tactics hijack."
+        },
+        {
+          "q": "The same fact — perception is everything — splits into:",
+          "c": [
+            "one correct use only",
+            "engineer appearances (manipulator) vs learn the shortcuts so none runs without consent (defender)",
+            "a myth",
+            "a purely academic point"
+          ],
+          "a": 1,
+          "why": "Same lever, opposite ethics — the fork you'll stand at all track."
+        }
+      ],
+      "apply": {
+        "prompt": "Recall a time your first impression of someone turned out wrong. What single cue — accent, clothes, confidence, a title — ran the wrong 'tape' for you? Name it; that cue is one of your exploitable shortcuts.",
+        "min": 50
+      }
     },
     {
       "id": "d2",
@@ -1522,13 +1577,75 @@
         "d1"
       ],
       "glyph": "🎁",
-      "stub": true,
       "title": "Reciprocity",
+      "whyreq": "Reciprocity is one trigger of the perception-machine from the root idea — you can't see it working as a lever until you accept the mind runs on automatic shortcuts.",
       "bridge": [
-        "The oldest lever: a gift creates an obligation. Cialdini, the 48 Laws, and the dark-psych books all pull it — for good and ill.",
-        "Fully authored next — press Continue."
+        "The oldest lever in the book: give something, and the receiver feels an almost physical debt to give back. Cialdini shows it's near-universal and often stronger than liking — people repay favors even to those they dislike. The rule runs so deep that an unreciprocated gift creates genuine discomfort, which is precisely what makes it a weapon.",
+        "Watch its two faces in your own library. Cialdini documents reject-then-retreat: ask for something large, get refused, then 'concede' to the smaller thing you wanted all along — your retreat triggers their reciprocal concession. The dark-psychology books teach the darker cousin, manufactured obligation: the unsolicited gift, the favor you never asked for, the love-bomb — engineered so you feel indebted and compliant. Same mechanism, opposite consent.",
+        "Cialdini's defense is precise and worth memorizing: you are not obligated to reciprocate a tactic. If a favor is a genuine favor, reciprocity is the glue of decent relationships. If it was a compliance device — a 'free sample,' a manipulator's sudden generosity — then it's a trick, not a gift, and the rule of reciprocity simply does not apply to tricks. Naming what it is dissolves the debt."
       ],
-      "whyreq": "Reciprocity is one trigger of the perception-machine described in the root idea."
+      "sources": [
+        {
+          "book": "Influence: The Psychology of Persuasion",
+          "ref": "the rule of reciprocation",
+          "quote": [
+            "The rule says we should try to repay, in kind, what another has provided. So pervasive is the impulse that even an uninvited favor creates indebtedness, and a small first gift can compel a much larger return."
+          ]
+        },
+        {
+          "book": "Dark Psychology: 3 Books in 1",
+          "ref": "manufactured obligation",
+          "quote": [
+            "Give before you ask. A gift, a compliment, an unexpected kindness plants a debt the target feels compelled to repay — often many times over, and rarely aware of why they comply."
+          ]
+        },
+        {
+          "book": "The Art of Quiet Influence",
+          "ref": "generosity without a hook",
+          "quote": [
+            "Genuine giving expects nothing and keeps no ledger. The moment a gift becomes a lever, trust quietly dies, even when compliance follows."
+          ]
+        }
+      ],
+      "quiz": [
+        {
+          "q": "Reciprocity is powerful partly because:",
+          "c": [
+            "it only works on close friends",
+            "even an uninvited favor creates a felt debt, and it can outweigh liking",
+            "it requires a written contract",
+            "it is illegal"
+          ],
+          "a": 1,
+          "why": "The debt is felt whether or not the favor was wanted."
+        },
+        {
+          "q": "'Reject-then-retreat' works by:",
+          "c": [
+            "asking for something small first",
+            "making a large request, getting refused, then 'conceding' to the smaller target",
+            "paying cash up front",
+            "simply repeating the ask"
+          ],
+          "a": 1,
+          "why": "Your concession pulls a reciprocal concession from them."
+        },
+        {
+          "q": "Cialdini's defense against weaponized reciprocity is to:",
+          "c": [
+            "always refuse every gift",
+            "redefine a compliance-device 'gift' as the trick it is — the rule doesn't apply to tricks",
+            "reciprocate faster to clear the debt",
+            "never accept help from anyone"
+          ],
+          "a": 1,
+          "why": "Rename the trick and the felt obligation dissolves."
+        }
+      ],
+      "apply": {
+        "prompt": "This week, catch one 'gift' aimed at you — a free sample, an unprompted favor, a compliment right before a request. Write whether it was a genuine gift or a compliance device, and how you can tell.",
+        "min": 50
+      }
     },
     {
       "id": "d3",
@@ -1538,13 +1655,75 @@
         "d1"
       ],
       "glyph": "👥",
-      "stub": true,
       "title": "Social Proof & Authority",
+      "whyreq": "Proof and authority only steer minds that navigate by appearances — you need the root premise (perception is everything) before these two levers make sense.",
       "bridge": [
-        "Why we outsource judgment to the crowd and the expert — and how that shortcut is exploited.",
-        "Fully authored next — press Continue."
+        "Two shortcuts, one root: when unsure, we outsource the decision. Social proof outsources it to the crowd — if everyone's doing it, it must be right. Authority outsources it to the expert — if someone credentialed says so, it must be true. Both are usually efficient, and both are hijackable the instant the crowd is faked or the authority is mere costume.",
+        "Cialdini's research is unsettling on how thin the cues are. For authority, three symbols do most of the work with no substance behind them: titles, clothing (a suit, a uniform, a lab coat), and trappings (the expensive car, the corner office). For social proof, uncertainty plus similarity is the accelerant — we copy others most when we're unsure and when they're like us. The 48 Laws and dark-psychology material simply industrializes this: manufacture consensus, buy the credential, wear the costume, cite the invisible 'everyone.'",
+        "Defense splits the two cleanly. Against authority, ask two questions: is this person truly an expert here, and how truthful are they likely to be — what's their stake? A real expert in the wrong field, or a biased one, is just a costume. Against social proof: when 'everyone' is doing it, check whether the crowd is real, informed, and actually similar to you, or an engineered mirage. The cure for both is converting an automatic 'click' into one deliberate question."
       ],
-      "whyreq": "Proof and authority only steer minds that navigate by appearances — the root premise."
+      "sources": [
+        {
+          "book": "Influence: The Psychology of Persuasion",
+          "ref": "authority — titles, clothes, trappings",
+          "quote": [
+            "It is the appearance of authority, not its substance, that triggers compliance. Titles, clothing, and trappings each work independently — con artists drape themselves in all three."
+          ]
+        },
+        {
+          "book": "Influence: The Psychology of Persuasion",
+          "ref": "social proof under uncertainty",
+          "quote": [
+            "We view a behavior as more correct to the degree that we see others performing it. The principle operates most powerfully under two conditions: uncertainty, and similarity to those we watch."
+          ]
+        },
+        {
+          "book": "The 48 Laws of Power",
+          "ref": "Law 27 — create a cultlike following",
+          "quote": [
+            "People have an overwhelming desire to believe in something. Become the focal point of that desire and you accumulate followers — power borrowed from the crowd's own conviction."
+          ]
+        }
+      ],
+      "quiz": [
+        {
+          "q": "Social proof and authority share a root mechanism:",
+          "c": [
+            "fear of punishment",
+            "outsourcing an uncertain decision to the crowd or the expert",
+            "long-term memory",
+            "physical attraction"
+          ],
+          "a": 1,
+          "why": "Both are delegation of judgment under uncertainty."
+        },
+        {
+          "q": "Cialdini shows authority is triggered mostly by:",
+          "c": [
+            "carefully verified expertise",
+            "symbols — titles, clothing, trappings — often with no substance behind them",
+            "government licenses only",
+            "raw intelligence"
+          ],
+          "a": 1,
+          "why": "The costume does the work; con artists wear all three."
+        },
+        {
+          "q": "The defense against both is to:",
+          "c": [
+            "always obey experts",
+            "trust no one, ever",
+            "convert the automatic 'click' into one deliberate question about the crowd's or expert's realness and stake",
+            "copy whatever the majority does"
+          ],
+          "a": 2,
+          "why": "One deliberate question breaks the automatic tape."
+        }
+      ],
+      "apply": {
+        "prompt": "Find one belief or purchase you hold mainly because 'experts' or 'everyone' endorsed it. Run the defense questions (real expert? real, informed, similar crowd?). Write what you found.",
+        "min": 50
+      }
     },
     {
       "id": "d4",
@@ -1554,13 +1733,75 @@
         "d2"
       ],
       "glyph": "🤝",
-      "stub": true,
       "title": "Liking, Commitment & Consistency",
+      "whyreq": "An accepted favor (reciprocity) is exactly how liking and commitment sink their first hook — so this builds directly on the reciprocity node.",
       "bridge": [
-        "We say yes to those we like, and we stay loyal to our own prior yes. Two of the strongest and quietest forces in persuasion.",
-        "Fully authored next — press Continue."
+        "Two of the quietest, strongest forces, bundled because manipulators chain them. Liking: we say yes to people we like, and liking is manufactured by a short, predictable list — physical attractiveness, similarity, compliments, familiarity through repeated contact, and cooperation toward a shared goal. Almost none of it is about merit; all of it can be faked, which is the salesman's and the seducer's entire craft.",
+        "Commitment and consistency is subtler and more dangerous, because the pressure comes from inside you. Once you take a small stand — a trivial yes, a stated opinion, a signed petition — you feel internal and social pressure to stay consistent with it. Hence the foot-in-the-door: extract a tiny yes and a large one becomes far easier. The dark-psychology books escalate this into slow-boil control, each small concession used to lever the next; the Art of Seduction runs the same engine to bind a target step by step.",
+        "Fidelity note, because this vault refuses to blend the books: Cialdini treats these as levers to defend against; Greene and the seduction material treat them as tools to deploy. The defense against liking is to separate the person from the deal — 'do I like this offer, or just this likeable person?' The defense against consistency is to honor commitments to reality, not to your past self: if a small yes is being used to march you somewhere your gut refuses, the consistent move is to stop, not continue. Foolish consistency is the manipulator's favorite handle."
       ],
-      "whyreq": "An accepted favor (reciprocity) is precisely how liking and commitment sink their first hook."
+      "sources": [
+        {
+          "book": "Influence: The Psychology of Persuasion",
+          "ref": "the friends we like, and why",
+          "quote": [
+            "We most prefer to say yes to those we know and like. The factors are few and predictable — attractiveness, similarity, praise, contact, and cooperation — each quietly increasing compliance."
+          ]
+        },
+        {
+          "book": "Influence: The Psychology of Persuasion",
+          "ref": "foot-in-the-door and consistency",
+          "quote": [
+            "Once we make a choice or take a stand, we meet pressures to behave consistently with it. Begin with a small commitment and you can move a person to comply with far larger, related requests."
+          ]
+        },
+        {
+          "book": "The Art of Seduction",
+          "ref": "binding by small steps",
+          "quote": [
+            "Never rush. Draw the target in through a series of small surrenders, each making the next feel natural, until retreat would seem a betrayal of what they have already given."
+          ]
+        }
+      ],
+      "quiz": [
+        {
+          "q": "According to Cialdini, liking is manufactured mainly by:",
+          "c": [
+            "genuine virtue and merit",
+            "attractiveness, similarity, compliments, familiarity, cooperation — mostly fakeable cues",
+            "wealth alone",
+            "random luck"
+          ],
+          "a": 1,
+          "why": "A short, exploitable list, not character."
+        },
+        {
+          "q": "The foot-in-the-door technique exploits:",
+          "c": [
+            "reciprocity",
+            "commitment/consistency — a tiny yes makes a large yes far easier",
+            "authority costumes",
+            "scarcity deadlines"
+          ],
+          "a": 1,
+          "why": "Internal pressure to match your earlier small stand."
+        },
+        {
+          "q": "The defense against weaponized consistency is:",
+          "c": [
+            "always finish what you started",
+            "honor commitments to reality over your past self — if a small yes is marching you where your gut refuses, stop",
+            "never commit to anything",
+            "stay unpredictable"
+          ],
+          "a": 1,
+          "why": "Consistency with truth, not with a manufactured first step."
+        }
+      ],
+      "apply": {
+        "prompt": "Identify one situation where you kept going mainly to stay consistent with an earlier small 'yes' — a subscription, a purchase path, a relationship pattern. Write what the 'consistent-with-reality' move would be instead.",
+        "min": 50
+      }
     },
     {
       "id": "d5",
@@ -1570,13 +1811,75 @@
         "d3"
       ],
       "glyph": "⏳",
-      "stub": true,
       "title": "Scarcity & Framing",
+      "whyreq": "Scarcity and framing amplify the crowd-and-authority shortcuts — you need those (social proof & authority) understood before you can see them being turbo-charged.",
       "bridge": [
-        "Less-available reads as more-valuable, and the frame around a choice decides the choice. The mechanics of desire and context.",
-        "Fully authored next — press Continue."
+        "Scarcity turns wanting into panic: opportunities feel more valuable as they become less available. Cialdini shows why it's so potent — we hate loss more than we love an equal gain, so 'only 2 left,' 'ends tonight,' and 'exclusive' hit the loss-alarm directly. Worse, scarcity clouds thinking exactly when clarity matters most; the deadline exists to stop you deliberating.",
+        "Framing is scarcity's quieter partner: the same fact changes decisions depending on how it's worded and what surrounds it. '90% lean' beats '10% fat'; a costly middle option makes the expensive one look reasonable; whatever is mentioned first anchors everything after. Greene's laws exploit framing constantly — control the options others see and you control their choice while they feel free. The dark-psychology books weaponize both: false urgency, artificial exclusivity, and framed 'choices' that are all traps.",
+        "The defenses are specific. For scarcity: when you feel the rush of 'act now,' treat the arousal itself as the alarm — ask whether you want the thing for its use or just for the winning of it, and remember that pressure to decide before you can think is the tell. For framing: restate the offer in plain, neutral words and in the opposite frame ('10% fat'), and always ask what options you're not being shown. Slowing down is the universal antidote — which is exactly why every scarcity tactic attacks your clock."
       ],
-      "whyreq": "Scarcity and framing amplify the crowd-and-authority shortcuts — you need those first."
+      "sources": [
+        {
+          "book": "Influence: The Psychology of Persuasion",
+          "ref": "scarcity and loss aversion",
+          "quote": [
+            "Opportunities seem more valuable when their availability is limited. The thought of potential loss plays a large role in decisions — we are more moved by losing something than by gaining its equal."
+          ]
+        },
+        {
+          "book": "The 48 Laws of Power",
+          "ref": "Law 31 — control the options",
+          "quote": [
+            "The best deceptions seem to give the other person a choice: your victims feel in control, but are your puppets. Offer options that come out in your favor whichever they pick."
+          ]
+        },
+        {
+          "book": "30 Covert Emotional Manipulation Tactics",
+          "ref": "manufactured urgency",
+          "quote": [
+            "Urgency is manufactured to rush you past your own judgment. When you feel you must decide right now, that pressure is usually the manipulation itself, not the situation."
+          ]
+        }
+      ],
+      "quiz": [
+        {
+          "q": "Scarcity is potent mainly because:",
+          "c": [
+            "people love novelty",
+            "we hate loss more than we love an equivalent gain, and scarcity hits the loss-alarm",
+            "the items are genuinely rare",
+            "it is courteous"
+          ],
+          "a": 1,
+          "why": "Loss aversion is the wiring scarcity exploits."
+        },
+        {
+          "q": "Framing means:",
+          "c": [
+            "telling outright lies",
+            "the same fact changing decisions by wording and surrounding options — 90% lean vs 10% fat",
+            "using sophisticated vocabulary",
+            "speaking loudly"
+          ],
+          "a": 1,
+          "why": "Presentation, not content, moves the choice."
+        },
+        {
+          "q": "The universal antidote to scarcity and framing pressure is to:",
+          "c": [
+            "decide faster before it's gone",
+            "slow down — restate the offer neutrally, ask what options you're not shown, treat urgency as the tell",
+            "trust the seller's deadline",
+            "always take the middle option"
+          ],
+          "a": 1,
+          "why": "Time is the one thing every scarcity tactic attacks."
+        }
+      ],
+      "apply": {
+        "prompt": "Recall your last impulse purchase or rushed 'yes.' Identify the scarcity cue (deadline, 'last one,' exclusivity) and the frame used. Write how a 24-hour pause would have changed it.",
+        "min": 50
+      }
     },
     {
       "id": "d6",
@@ -1587,13 +1890,75 @@
         "d5"
       ],
       "glyph": "🍃",
-      "stub": true,
       "title": "Ethical & Quiet Influence",
+      "whyreq": "Quiet influence is the ethical redeployment of every lever learned before it — it only means anything once you hold reciprocity, proof, liking, and scarcity in hand.",
       "bridge": [
-        "Davis's quiet influence: moving people without manipulation. Where the shadow wing and the light wing finally shake hands.",
-        "Fully authored next — press Continue."
+        "You've now handled every major lever as a weapon. This final node is the turn Davis's Art of Quiet Influence makes — and the reason the shadow wing and the light wing meet here. Her claim: the most durable influence isn't manipulation at all; it's the ethical redeployment of the very same principles, aimed at mutual benefit and run in the open. Reciprocity becomes genuine generosity. Social proof becomes honestly showing who else has been helped. Commitment becomes helping people act on values they already hold. Consistency becomes integrity — behavior matching word.",
+        "The dividing line is not the technique; it's three questions Davis effectively poses. Is it transparent — would it still work if the other person saw exactly what you're doing? Is it mutual — do they win too, or only you? Is it truthful — are the crowd, the scarcity, the credential real? A move that survives all three is influence; one that needs concealment, asymmetry, or fabrication is manipulation wearing influence's clothes. Same lever, and the target's long-term trust is the tell: manipulation spends it, influence builds it.",
+        "This is also your strongest defense, because you now read the levers fluently in both directions. You can spot the manufactured gift, the costume authority, the foot-in-the-door, the fake deadline — and you can move people toward genuinely good things without becoming the thing you learned to see. Completing this track means you hold the whole persuasion engine and have chosen how to use it. The Defense track ahead sharpens the seeing; the calm you built in the light wing is what keeps your own reflexes from becoming the exploit."
       ],
-      "whyreq": "Quiet influence is the ethical redeployment of every lever learned before it."
+      "sources": [
+        {
+          "book": "The Art of Quiet Influence",
+          "ref": "influence built on trust",
+          "quote": [
+            "Quiet influence persuades without pressure. It works because it is transparent and mutual — you help others move toward what they themselves value, and trust compounds instead of eroding."
+          ]
+        },
+        {
+          "book": "Influence: The Psychology of Persuasion",
+          "ref": "the ethics of the weapons",
+          "quote": [
+            "These principles are neither good nor evil in themselves; they are tools. Used to inform an honest choice they serve everyone; used to fabricate a trigger they are exploitation, and invite just retaliation."
+          ]
+        },
+        {
+          "book": "The Art of Seduction",
+          "ref": "the cost of the manipulative road",
+          "quote": [
+            "The seducer who leaves only emptiness behind is found out in the end; power taken by illusion must be maintained by ever greater illusion, and exhausts the one who wields it."
+          ]
+        }
+      ],
+      "quiz": [
+        {
+          "q": "Davis's core claim about durable influence is:",
+          "c": [
+            "manipulation wins in the long run",
+            "the strongest influence is the same principles redeployed transparently and mutually, so trust compounds",
+            "influence and manipulation are unrelated",
+            "you must pick one lever and use only it"
+          ],
+          "a": 1,
+          "why": "Same engine, run in the open, for mutual benefit."
+        },
+        {
+          "q": "The line between influence and manipulation is:",
+          "c": [
+            "which technique you use",
+            "three questions — is it transparent, mutual, and truthful?",
+            "how confident you sound",
+            "who has more resources"
+          ],
+          "a": 1,
+          "why": "Concealment, asymmetry, or fabrication marks manipulation."
+        },
+        {
+          "q": "The reliable tell over time is:",
+          "c": [
+            "short-term compliance",
+            "the target's trust — manipulation spends it, influence builds it",
+            "how clever the tactic is",
+            "the number of steps involved"
+          ],
+          "a": 1,
+          "why": "Trust is the ledger that eventually settles the account."
+        }
+      ],
+      "apply": {
+        "prompt": "Pick something you genuinely want to persuade someone of this month. Run it through Davis's three questions — transparent? mutual? truthful? Write the version that passes all three.",
+        "min": 60
+      }
     },
     {
       "id": "e1",
