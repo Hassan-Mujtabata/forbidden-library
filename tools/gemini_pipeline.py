@@ -65,12 +65,12 @@ Return ONLY one JSON object (no markdown fences, no text outside JSON) with EXAC
  "sources": [{{"book":"{title}","ref":"<2-5 word topical locator, NOT the author name>","quote":["<faithful close paraphrase of the passage, 12-40 words>"]}}],
  "quiz": [{{"q":"<question>","c":["<o0>","<o1>","<o2>","<o3>"],"a":<int 0-3>,"why":"<one sentence>"}}],
  "apply": {{"prompt":"<a concrete second-person practice/reflection the reader can do this week>","min":50}},
- "whyreq": "<one sentence: what more basic understanding this builds on>"
+ "whyreq": "<one sentence naming the SPECIFIC prior idea or skill this depends on — concrete, not 'this builds on the understanding that...'>"
 }}
 
 HARD RULES:
 - title: name the ACTUAL concept, concrete and specific ("The Habit Loop", "Loss Aversion", "The Window of Tolerance"). NEVER vague or poetic — titles like "The Mind's True Appeal" or "Cultivating Value Sensitivity" are FORBIDDEN. 2-6 words, Title Case.
-- bridge: EXACTLY 3 paragraphs, 45-110 words each, second person, calm and precise. Paragraph 1 frames the idea and why it matters; paragraph 2 gives the concrete mechanism; paragraph 3 connects it to the reader's own life AND, where the link is genuine, to ideas the reader already knows in this app: {vault_ideas}. Name them naturally (e.g. "the feeling-tone you met earlier"). Never force a connection that isn't real.
+- bridge: EXACTLY 3 paragraphs, 45-110 words each, second person, calm and precise. Paragraph 1 must OPEN with the concept named and in action — a concrete instance, example, or the mechanism itself; NEVER a generic throat-clearing sentence like "Our minds are powerful" or "Human beings often...". Paragraph 2 gives the concrete mechanism (name it precisely). Paragraph 3 connects it to the reader's own life AND, where the link is genuine, to ideas the reader already knows in this app: {vault_ideas}. Name them naturally (e.g. "the feeling-tone you met earlier"). Never force a connection that isn't real.
 - sources: 1-2 items. book = "{title}". ref = a topical locator, not the author. quote = a faithful close paraphrase, NEVER a verbatim copyrighted sentence.
 - quiz: EXACTLY 3 items, each EXACTLY 4 distinct options, integer answer index in range, vary which position is correct, plausible distractors.
 - Ground everything in the passage; invent no facts. Plain text only, no markdown, no emphasis characters, never mention being an AI.
