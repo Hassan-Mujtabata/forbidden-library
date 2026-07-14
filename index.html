@@ -892,8 +892,13 @@ $("btn-ach").onclick=()=>{const g=$("achgrid");g.innerHTML="";
   $("achs").classList.add("on")};
 
 /* ---------- patch notes ---------- */
-const APP_VER="3.1";
+const APP_VER="3.2";
 const PATCHES=[
+ {v:"3.2",n:"The Forge",d:"14 Jul 2026",items:[
+  ["new","🤖 An AI pipeline (Gemini) can now read a whole new book and forge it into dependency-locked Path lessons — in the exact same structure as the hand-written ones."],
+  ["content","First AI-authored track is live: 💡 Clear Thinking, distilled from “How to Have a Beautiful Mind.” See if you can tell it apart."],
+  ["new","Hard safeguards: the AI only writes lesson content, never the wiring — so its output can’t create a broken lock or corrupt the graph. Every lesson is validated, sanitized, and de-duplicated before it’s allowed in."],
+  ["polish","The pipeline is quota-aware and resumes on its own — it keeps building the vault even without a subscription behind it."]]},
  {v:"3.1",n:"The Daily Rite",d:"14 Jul 2026",items:[
   ["new","🌅 DAILY RITE: three objectives every day — 📖 Learn, 🔁 Sharpen, 🧘 Sit. Clear all three for a complete day and +40 bonus XP."],
   ["new","The rite card sits at the top of the Path; each objective is a shortcut — tap Sit to sit, Sharpen to review, Learn to open your next idea."],
