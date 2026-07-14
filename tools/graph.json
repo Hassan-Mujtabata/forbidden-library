@@ -48,6 +48,13 @@
       "glyph": "💡",
       "accent": "#5dade2",
       "blurb": "AI-authored from How to Have a Beautiful Mind — a dependency-locked thinking-skills track."
+    },
+    {
+      "id": "H",
+      "name": "Mindfulness in Practice",
+      "glyph": "🪷",
+      "accent": "#16a085",
+      "blurb": "AI-authored from Mindfulness in Practice — a dependency-locked track."
     }
   ],
   "nodes": [
@@ -2970,6 +2977,259 @@
         "min": 50
       },
       "whyreq": "Builds directly on “The Emotional Basis of Choice” — grasp that idea first, then this one follows."
+    },
+    {
+      "id": "h1",
+      "track": "H",
+      "tier": 0,
+      "prereq": [],
+      "glyph": "🧘",
+      "title": "Meditative Path to Insight",
+      "bridge": [
+        "You are embarking on a journey through a well-defined method for developing and deepening your meditation practice. This approach systematically guides you from initial challenges, helping you to transform difficulties into opportunities for progress. It provides clear instructions to gradually incline your mind towards more profound states of awareness and inner calm, laying a solid foundation for sustained practice.",
+        "As you advance along this path, you will learn to cultivate increasingly deep states of absorption, known as jhāna samādhi. This involves developing a concentrated attention that fosters experiences of rapture, profound happiness, inner light, and remarkable steadiness. These stages are not merely fleeting sensations but are presented as achievable and repeatable states of profound mental unification.",
+        "The ultimate aim of cultivating such deep meditative states is to open yourself to liberating insights. By empowering your mind through sustained concentration, you can turn this focused attention to illuminate fundamental truths, such as the emptiness of self. This process leads to a profound understanding that can transform your perspective and usher in a truly liberating wisdom."
+      ],
+      "sources": [
+        {
+          "book": "Mindfulness in Practice",
+          "ref": "Path to Jhāna Samādhi",
+          "quote": [
+            "you will find a thorough set of teachings for developing and deepening meditation, aimed particularly at attaining absorption, or jh›na sam›dhi, and opening to the insights that can follow from it."
+          ]
+        }
+      ],
+      "quiz": [
+        {
+          "q": "What is the primary focus of the teachings described regarding meditation development?",
+          "c": [
+            "Gaining wealth and worldly success.",
+            "Attaining absorption (jhāna samādhi) and liberating insights.",
+            "Developing social connections and community.",
+            "Mastering physical postures and breath exercises exclusively."
+          ],
+          "a": 1,
+          "why": "The text explicitly states the teachings are 'aimed particularly at attaining absorption, or jh›na sam›dhi, and opening to the insights that can follow from it.'"
+        },
+        {
+          "q": "According to the passage, what qualities are associated with the deep states of meditation known as jhāna?",
+          "c": [
+            "Confusion, agitation, and doubt.",
+            "Rapture, happiness, light, and profound steadiness.",
+            "Boredom, sloth, and restlessness.",
+            "Sensory desire and ill will."
+          ],
+          "a": 1,
+          "why": "The text mentions inclining the mind toward 'rapture, happiness, light, and the profound steadiness of jh›na.'"
+        },
+        {
+          "q": "What is the ultimate purpose of cultivating concentrated attention through deep meditation?",
+          "c": [
+            "To become famous as a meditator.",
+            "To avoid all worldly responsibilities.",
+            "To illuminate the emptiness of self for liberating understanding.",
+            "To gain supernatural powers."
+          ],
+          "a": 2,
+          "why": "The passage states Ajahn Brahm 'turns this concentrated attention to illuminate the emptiness of self that brings liberating understanding.'"
+        }
+      ],
+      "apply": {
+        "prompt": "Reflect on a skill you have learned or are currently learning that required a systematic, step-by-step approach to master. Describe the initial difficulties you faced and how breaking the process down into manageable stages helped you overcome them and progress to a deeper understanding or proficiency. Consider how this experience of guided progression might inform your approach to developing a meditation practice.",
+        "min": 50
+      }
+    },
+    {
+      "id": "h2",
+      "track": "H",
+      "tier": 1,
+      "prereq": [
+        "h1"
+      ],
+      "glyph": "🤫",
+      "title": "The Burden of Inner Commentary",
+      "bridge": [
+        "You might often believe your inner commentary helps you understand the world, but it frequently generates suffering. This constant internal dialogue constructs fears, anxieties, and attachments, creating many of life's difficulties. It tends to dwell on past events, forming opinions and judgments rather than engaging with what is truly happening now.",
+        "To find truth and inner peace, it's essential to value silent awareness above your thoughts. The high importance you place on this inner speech is often the primary obstacle to cultivating a calm, silent mind. Wisely diminishing the significance of your thoughts opens the door to a deeper, more accurate understanding of reality.",
+        "One powerful way to quiet this internal chatter is to develop a refined present-moment awareness. By paying such close attention to each incoming experience, you simply won't have the mental space to comment on what just occurred. This practice helps you greet each moment freshly, like a host attending to new guests without getting caught in long conversations with previous ones."
+      ],
+      "sources": [
+        {
+          "book": "Mindfulness in Practice",
+          "ref": "Inner Speech's Effects",
+          "quote": [
+            "Inner speech causes all of life’s problems. It constructs fear and guilt, anxiety and depression. So if you seek truth, you should value silent awareness."
+          ]
+        }
+      ],
+      "quiz": [
+        {
+          "q": "According to the passage, what is a primary consequence of valuing inner speech?",
+          "c": [
+            "It clarifies understanding of the world.",
+            "It leads to deeper meditative insight.",
+            "It creates delusions that cause suffering.",
+            "It fosters healthy emotional attachments."
+          ],
+          "a": 2,
+          "why": "The passage states inner speech \"spins the delusions that cause suffering\" and \"causes all of life’s problems.\""
+        },
+        {
+          "q": "What technique is suggested to overcome inner commentary by focusing closely on experiences?",
+          "c": [
+            "Engaging in detailed internal analysis.",
+            "Developing a refined present-moment awareness.",
+            "Recalling past experiences more vividly.",
+            "Having extended internal conversations."
+          ],
+          "a": 1,
+          "why": "The text explains that by watching every moment closely, you don’t have time to comment on what just happened."
+        },
+        {
+          "q": "What happens when you begin to recognize and become accustomed to the space between thoughts?",
+          "c": [
+            "The silence immediately vanishes.",
+            "It becomes a new burden on the mind.",
+            "The duration of silence gradually increases.",
+            "It generates more continuous inner chatter."
+          ],
+          "a": 2,
+          "why": "The passage states that as you become accustomed to the fleeting silence, \"the silence lasts longer\" and \"it grows.\""
+        }
+      ],
+      "apply": {
+        "prompt": "For the next day, make a conscious effort to observe your own inner commentary. Notice when it arises, what topics it focuses on (past, future, judgments, opinions), and how it feels in your body. Try to identify moments when you are simply experiencing without this internal talk. When you catch yourself commenting internally, gently shift your attention to the immediate sensory experience of the present moment, whether it's the sound of your breath, the feeling of your feet on the ground, or the sight directly in front of you. Reflect on any differences you notice in your state of mind.",
+        "min": 50
+      },
+      "whyreq": "Builds directly on “Meditative Path to Insight” — grasp that first."
+    },
+    {
+      "id": "h3",
+      "track": "H",
+      "tier": 2,
+      "prereq": [
+        "h2"
+      ],
+      "glyph": "🤔",
+      "title": "Reviewing Meditation Sessions",
+      "bridge": [
+        "At the close of each meditation period, dedicate a few minutes to reflecting on your experience. There is no need to make mental notes during the session itself, as significant aspects of your practice will naturally be accessible to your memory. This deliberate review at the session's end is crucial for understanding the dynamics of your mind during meditation.",
+        "During this reflective time, consider the overall quality of your sitting. Was it characterized by a sense of peace and stillness, or did you encounter frustration and distraction? Delve into the reasons behind these states. What actions or attitudes did you adopt that fostered calm, and conversely, what contributed to the mind's wandering or agitation?",
+        "This process of reviewing and inquiring into your meditation generates valuable insight into the practice itself. It helps you discern effective strategies and identify recurring hindrances. By understanding how your mind operates within the meditative context, you can refine your approach, deepen your experience, and gradually overcome obstacles, progressing more effectively in your journey."
+      ],
+      "sources": [
+        {
+          "book": "Mindfulness in Practice",
+          "ref": "Insight into the Way of Meditation",
+          "quote": [
+            "At the end of each meditation session, spend two or three minutes reviewing all that has happened during that session. Such reviewing and inquiry only at the end of the session generates insight into how to meditate and what meditation is."
+          ]
+        }
+      ],
+      "quiz": [
+        {
+          "q": "When is the most effective time to review your meditation session?",
+          "c": [
+            "During the session, to capture fresh insights.",
+            "Immediately after the session, for a few minutes.",
+            "Hours later, to gain emotional distance.",
+            "The next day, as part of a daily journal."
+          ],
+          "a": 1,
+          "why": "The passage specifies reviewing 'at the end of each meditation session' for 'two or three minutes'."
+        },
+        {
+          "q": "What kind of questions should you ask yourself during a post-meditation review?",
+          "c": [
+            "Only about moments of profound peace and stillness.",
+            "Whether you adhered strictly to all instructions.",
+            "Why the session was peaceful or frustrating.",
+            "How long you managed to stay perfectly still."
+          ],
+          "a": 2,
+          "why": "The text explicitly asks, 'Was it peaceful or frustrating? Now ask yourself why.'"
+        },
+        {
+          "q": "What is the primary benefit of regularly reviewing your meditation sessions?",
+          "c": [
+            "To prove you are making progress to yourself.",
+            "To develop insight into how to meditate effectively.",
+            "To compare your progress with other meditators.",
+            "To remember every detail of your mental states."
+          ],
+          "a": 1,
+          "why": "The passage states, 'Such reviewing and inquiry only at the end of the session generates insight into how to meditate and what meditation is.'"
+        }
+      ],
+      "apply": {
+        "prompt": "After your next meditation session, take 2-3 minutes to reflect on your experience. Without judgment, consider what made the session peaceful or challenging. What were the specific mental states or actions that contributed to either calm or distraction? How might you subtly adjust your approach in your next sitting based on these observations? Write down these insights in a personal journal, noting any patterns over time.",
+        "min": 50
+      },
+      "whyreq": "Builds directly on “The Burden of Inner Commentary” — grasp that first."
+    },
+    {
+      "id": "h4",
+      "track": "H",
+      "tier": 3,
+      "prereq": [
+        "h3"
+      ],
+      "glyph": "💡",
+      "title": "The Mind's Restful Clarity",
+      "bridge": [
+        "You might often encounter moments of dullness or sleepiness during your meditation practice, a state known as sloth and torpor. Your natural inclination might be to actively fight against this heavy feeling, trying to push through it with force. However, this struggle often proves counterproductive, leading to frustration and a cyclical battle where true tranquility remains elusive. Instead of overcoming the dullness, you might find yourself more exhausted, perpetuating the very state you wish to escape.",
+        "Consider your mind as having two primary aspects: the 'knower' and the 'doer'. The 'knower' passively observes and receives information, while the 'doer' actively engages in thinking, evaluating, and controlling. Both share a common pool of mental energy. When your daily life is filled with intense activity and the 'doer' is constantly occupied, it consumes a significant portion of this energy, leaving the 'knower' starved. This depletion manifests as the dull, blurry state of sloth and torpor you experience.",
+        "The most effective way to address this imbalance is to cease fighting the dullness and instead allow your mind to rest. By letting go of the struggle and permitting a period of calm, you reduce the demands on the 'doer'. This allows mental energy to naturally flow back to the 'knower,' invigorating your awareness. As the 'knower' brightens, the heavy sensation of sloth and torpor naturally dissipates, leaving you with a clearer, more peaceful, and receptive state of mind for your practice."
+      ],
+      "sources": [
+        {
+          "book": "Mindfulness in Practice",
+          "ref": "Making Peace with Dullness",
+          "quote": [
+            "Make peace not war with sloth and torpor. Then your mental energy will be freed to ﬂow into the knower, and your sloth and torpor will naturally disappear."
+          ]
+        }
+      ],
+      "quiz": [
+        {
+          "q": "According to the text, what is the most effective way to overcome sloth and torpor?",
+          "c": [
+            "Intense concentration on the breath.",
+            "Vigorously fighting the dullness.",
+            "Making peace with the dullness and allowing rest.",
+            "Reflecting on past good karma."
+          ],
+          "a": 2,
+          "why": "The passage explicitly states 'The most profound and effective way... is to make peace with the dullness and stop ﬁghting it!' and provides examples of resting."
+        },
+        {
+          "q": "What happens when the 'doer' half of the mind is overly active?",
+          "c": [
+            "The mind becomes overly bright and restless.",
+            "The 'knower' receives ample mental energy.",
+            "The 'knower' is starved of mental energy, leading to dullness.",
+            "The meditator achieves deep insight effortlessly."
+          ],
+          "a": 2,
+          "why": "The text states, 'when you are doing a lot... the doer consumes most of your mental energy, leaving only a pittance for the knower. When the knower is starved... you experience dullness.'"
+        },
+        {
+          "q": "What was the result of the executive retreatant following the teaching to rest?",
+          "c": [
+            "Her sloth and torpor intensified, and she fell behind the group.",
+            "She became restless and unable to focus.",
+            "Her mind brightened, and she made rapid progress in her meditation.",
+            "She developed a strong aversion to meditation."
+          ],
+          "a": 2,
+          "why": "The passage describes her mind brightening up after three days of resting and then catching up and even excelling in meditation."
+        }
+      ],
+      "apply": {
+        "prompt": "Think about a time recently when your mind felt dull or sluggish during a task or meditation. Instead of pushing through, describe how you might have paused and allowed yourself to rest, even for a brief moment, and what the potential outcome could have been.",
+        "min": 50
+      },
+      "whyreq": "Builds directly on “Reviewing Meditation Sessions” — grasp that first."
     }
   ]
 }
