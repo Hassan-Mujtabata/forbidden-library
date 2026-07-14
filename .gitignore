@@ -3,8 +3,8 @@ tools/books.json
 tools/key.txt
 __pycache__/
 tools/.gemini_keys
-tools/queue/
-tools/*.enc.json
 tools/graph_preview.json
 tools/gemini_test_out.json
 tools/graph.json.bak
+tools/queue/*
+!tools/queue/*.job.enc

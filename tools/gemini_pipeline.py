@@ -261,6 +261,8 @@ def run(book_id, track_name, track_glyph, track_accent, target_nodes, max_this_r
 
 if __name__ == "__main__":
     import argparse
+    if "--queue" in sys.argv:
+        run_queue(); raise SystemExit
     ap = argparse.ArgumentParser()
     ap.add_argument("book"); ap.add_argument("--name", required=True)
     ap.add_argument("--glyph", default="🤖"); ap.add_argument("--accent", default="#5dade2")
@@ -268,3 +270,98 @@ if __name__ == "__main__":
     ap.add_argument("--dry", action="store_true")
     a = ap.parse_args()
     run(a.book, a.name, a.glyph, a.accent, a.target, a.max, a.dry)
+
+# ================================================================ CLOUD (GitHub Actions) mode
+import gzip, base64 as _b64
+from cryptography.hazmat.primitives.ciphers.aead import AESGCM
+CONTENT = os.path.join(HERE, "..", "content.enc")
+QUEUE = os.path.join(HERE, "queue")
+
+def vault_key():
+    k = os.environ.get("VAULT_KEY") or open(os.path.join(HERE, "key.txt")).read().strip()
+    return _b64.urlsafe_b64decode(k + "==")
+
+def dec_enc(path):
+    raw = open(path, "rb").read()
+    pt = AESGCM(vault_key()).decrypt(raw[:12], raw[12:], None)
+    return json.loads(gzip.decompress(pt))
+
+def enc_obj(obj, path):
+    data = gzip.compress(json.dumps(obj, ensure_ascii=False, separators=(",", ":")).encode(), 9)
+    iv = os.urandom(12)
+    open(path, "wb").write(iv + AESGCM(vault_key()).encrypt(iv, data, None))
+
+def append_to_track(graph, tmeta, contents):
+    import copy
+    g = copy.deepcopy(graph)
+    tid = tmeta["id"]
+    if not any(t["id"] == tid for t in g["tracks"]):
+        g["tracks"].append(tmeta)
+    tnodes = [n for n in g["nodes"] if n["track"] == tid]
+    prev = max(tnodes, key=lambda n: n["tier"])["id"] if tnodes else None
+    base_tier = (max(n["tier"] for n in tnodes) + 1) if tnodes else 0
+    ids = {n["id"] for n in g["nodes"]}
+    for i, c in enumerate(contents):
+        nid = f"{tid.lower()}{base_tier + i + 1}"
+        while nid in ids: nid += "x"
+        ids.add(nid)
+        node = {"id": nid, "track": tid, "tier": base_tier + i,
+                "prereq": [prev] if prev else [], "glyph": c["glyph"], "title": c["title"],
+                "bridge": c["bridge"], "sources": c["sources"], "quiz": c["quiz"], "apply": c["apply"]}
+        if prev:
+            node["whyreq"] = clean_text(f"Builds directly on “{(contents[i-1]['title'] if i>0 else next(n['title'] for n in g['nodes'] if n['id']==prev))}” — grasp that first.")
+        g["nodes"].append(node); prev = nid
+    return g
+
+def graph_ok_books(graph, books):
+    sys.path.insert(0, HERE); import build
+    try:
+        build.validate({"books": books}, graph); return True, "ok"
+    except SystemExit: return False, "rejected"
+    except Exception as e: return False, str(e)
+
+def run_queue():
+    """Cloud entry: process one pending encrypted job, chaining across daily runs. Idempotent + resumable."""
+    if not os.path.isdir(QUEUE):
+        print("no queue dir; nothing to do"); return
+    jobs = sorted(f for f in os.listdir(QUEUE) if f.endswith(".job.enc"))
+    graph = json.load(open(GRAPH, encoding="utf-8"))
+    books = dec_enc(CONTENT)["books"]                      # library text, from the encrypted payload only
+    seen = [n["title"] for n in graph["nodes"]]
+    processed = 0
+    for jf in jobs:
+        jp = os.path.join(QUEUE, jf)
+        job = dec_enc(jp)
+        if job.get("done", 0) >= len(job["chunks"]):
+            continue                                       # already finished
+        tmeta = {"id": job["track_id"], "name": job["name"], "glyph": job["glyph"],
+                 "accent": job["accent"], "blurb": job["blurb"]}
+        contents, avoid, i = [], [], job.get("done", 0)
+        while i < len(job["chunks"]) and processed < DAILY_BUDGET:
+            try:
+                n = generate_node({"title": job["title"], "author": job["author"]}, job["chunks"][i], avoid)
+            except Quota:
+                print("quota exhausted; resume next run"); break
+            i += 1; processed += 1
+            if n and not too_similar(n["title"], seen + avoid):
+                contents.append(n); avoid.append(n["title"]); print(f"  {job['id']} #{i}: {n['glyph']} {n['title']}")
+            else:
+                print(f"  {job['id']} #{i}: skipped (invalid/dup)")
+        if contents:
+            merged = append_to_track(graph, tmeta, contents)
+            ok, msg = graph_ok_books(merged, books)
+            if not ok:
+                print(f"  ABORT merge for {job['id']}: {msg}"); continue
+            graph = merged
+            json.dump(graph, open(GRAPH, "w", encoding="utf-8"), ensure_ascii=False, indent=2)
+            enc_obj({"v": 2, "books": books, "tracks": graph["tracks"], "nodes": graph["nodes"]}, CONTENT)
+        job["done"] = i
+        enc_obj(job, jp)
+        pct = round(100 * job["done"] / len(job["chunks"]))
+        write_status(job=job["id"], title=job["title"], track=job["track_id"],
+                     done=job["done"], total=len(job["chunks"]), percent=pct,
+                     state="complete" if job["done"] >= len(job["chunks"]) else "in-progress")
+        print(f"  {job['id']}: {job['done']}/{len(job['chunks'])} ({pct}%)")
+        break                                              # one job per run keeps quota predictable
+    else:
+        write_status(state="idle"); print("queue idle — all jobs complete")

@@ -1,0 +1,44 @@
+name: Vault content pipeline
+
+on:
+  schedule:
+    - cron: "0 6 * * *"        # every day 06:00 UTC — processes one chunk-batch, quota permitting
+  workflow_dispatch: {}          # allow manual runs for testing
+
+permissions:
+  contents: write
+
+concurrency:
+  group: vault-pipeline
+  cancel-in-progress: false
+
+jobs:
+  process:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install --quiet cryptography
+      - name: Process one job from the encrypted queue
+        env:
+          GEMINI_API_KEY:   ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_API_KEY_2: ${{ secrets.GEMINI_API_KEY_2 }}
+          GEMINI_API_KEY_3: ${{ secrets.GEMINI_API_KEY_3 }}
+          GEMINI_API_KEY_4: ${{ secrets.GEMINI_API_KEY_4 }}
+          GEMINI_API_KEY_5: ${{ secrets.GEMINI_API_KEY_5 }}
+          VAULT_KEY:        ${{ secrets.VAULT_KEY }}
+          GEMINI_DAILY_NODES: "40"
+        run: python tools/gemini_pipeline.py --queue
+      - name: Commit results
+        run: |
+          git config user.name  "vault-bot"
+          git config user.email "vault-bot@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "no changes this run"
+          else
+            git commit -m "pipeline: auto-update content [skip ci]"
+            git push
+          fi
