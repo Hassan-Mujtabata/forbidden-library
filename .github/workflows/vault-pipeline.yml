@@ -31,14 +31,17 @@ jobs:
           VAULT_KEY:        ${{ secrets.VAULT_KEY }}
           GEMINI_DAILY_NODES: "40"
         run: python tools/gemini_pipeline.py --queue
-      - name: Commit results
+      - name: Commit results (CONTENT ONLY — pipeline may never touch app code)
         run: |
           git config user.name  "vault-bot"
           git config user.email "vault-bot@users.noreply.github.com"
-          git add -A
+          # hard boundary: only these data files may ever be committed by the pipeline.
+          # index.html / sw.js / tools/*.py are Claude's alone; any change to them here is discarded.
+          git add tools/graph.json content.enc status.json tools/queue/
+          git checkout -- . 2>/dev/null || true
           if git diff --cached --quiet; then
             echo "no changes this run"
           else
-            git commit -m "pipeline: auto-update content [skip ci]"
+            git commit -m "pipeline: book content update [skip ci]"
             git push
           fi

@@ -25,16 +25,27 @@ def extract(path):
     doc.close()
     return paras
 
-def chunk(paras, n):
-    total = sum(len(p.split()) for p in paras)
-    budget = max(120, total // max(1, n))
-    out, cur, w = [], [], 0
+def chunk(paras, target_nodes):
+    """Front-matter-trimmed, model-window-sized chunks, then evenly sampled to target_nodes.
+    Each chunk is ~1300 words (fits the model's input window) instead of book/N — which on a
+    big book produced 19k-word chunks the model only saw 5% of, wrecking the distillation."""
+    start = 0
+    for i, p in enumerate(paras[:60]):     # skip title page / contents / praise until real prose
+        if len(p.split()) >= 60:
+            start = i; break
+    paras = paras[start:]
+    SIZE = 1300
+    raw, cur, w = [], [], 0
     for p in paras:
         cur.append(p); w += len(p.split())
-        if w >= budget:
-            out.append(" ".join(cur)); cur, w = [], 0
-    if cur: out.append(" ".join(cur))
-    return out
+        if w >= SIZE:
+            raw.append(" ".join(cur)); cur, w = [], 0
+    if cur and w > 400:
+        raw.append(" ".join(cur))
+    if len(raw) <= target_nodes:
+        return raw
+    step = len(raw) / target_nodes         # evenly spread the lessons across the whole book
+    return [raw[int(i * step)] for i in range(target_nodes)]
 
 def reserve_track_id():
     graph = json.load(open(gp.GRAPH, encoding="utf-8"))

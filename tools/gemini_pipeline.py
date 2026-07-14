@@ -36,41 +36,81 @@ def load_keys():
 KEYS = load_keys()
 
 # ---------------------------------------------------------------- prompt
-PROMPT = """You are a curriculum author for "The Vault", a serious offline self-study app. \
-You are given a passage from "{title}" by {author}. Distill ONE distinct, self-contained idea \
-into a lesson. Avoid ideas already covered: {avoid}.
+# A real hand-authored lesson the model must match for voice, density, and cross-linking.
+EXEMPLAR = """{
+ "title": "The Five Hindrances",
+ "glyph": "🚧",
+ "bridge": [
+  "Across every meditation book in this vault, the same five saboteurs appear. Naming them is half the cure, because a named hindrance is an object you can watch instead of a fog you are lost inside.",
+  "They are sensory desire, ill-will, dullness, restlessness, and doubt. Each has an antidote: for dullness, brighten the energy; for ill-will, deliberately cultivate goodwill; for restlessness, calm and lengthen the exhale. The point is not to win a war but to recognise which one is present.",
+  "The deep move here is the one you practised in Stabilizing Attention: the moment you notice a hindrance, you have already stepped outside it. That small gap between the state and the seeing of it is the whole of the training, and everything past this point depends on it."
+ ],
+ "sources": [{"book":"The Mind Illuminated","ref":"the hindrances","quote":["Skill is recognising which hindrance is present and applying its specific antidote, rather than fighting the whole storm at once."]}],
+ "quiz": [{"q":"The first step in working with a hindrance is to:","c":["suppress it by force","name and recognise which one is present","end the session","ignore it completely"],"a":1,"why":"A named hindrance becomes an object of attention instead of a fog."}],
+ "apply": {"prompt":"For one sit this week, silently name each hindrance as it arises. Afterwards, write which one visited you most.","min":50}
+}"""
+
+PROMPT = """You are the author of "The Vault", a serious offline self-study app. Write ONE lesson from a passage of "{title}" by {author}, distilling a single self-contained idea, in the app's exact house style.
+
+STUDY THIS REAL LESSON FROM THE APP — match its voice, its density, and the way it links to other ideas:
+{exemplar}
+
+Now write a NEW lesson from the PASSAGE below. Distill ONE distinct idea. Avoid ideas already covered: {avoid}.
 
 Return ONLY one JSON object (no markdown fences, no text outside JSON) with EXACTLY:
 {{
- "title": "<concept as a 2-6 word noun phrase, Title Case>",
+ "title": "<the concept, named the way a sharp textbook chapter would>",
  "glyph": "<one relevant emoji>",
  "bridge": ["<p1>","<p2>","<p3>"],
- "sources": [{{"book":"{title}","ref":"<2-5 word topical locator, NOT the author name>","quote":["<faithful excerpt/close paraphrase from the passage, 12-40 words>"]}}],
+ "sources": [{{"book":"{title}","ref":"<2-5 word topical locator, NOT the author name>","quote":["<faithful close paraphrase of the passage, 12-40 words>"]}}],
  "quiz": [{{"q":"<question>","c":["<o0>","<o1>","<o2>","<o3>"],"a":<int 0-3>,"why":"<one sentence>"}}],
- "apply": {{"prompt":"<a concrete first-person practice/reflection task grounded in the reader's real life>","min":50}},
- "whyreq": "<one sentence: why this idea builds on more basic understanding>"
+ "apply": {{"prompt":"<a concrete second-person practice/reflection the reader can do this week>","min":50}},
+ "whyreq": "<one sentence: what more basic understanding this builds on>"
 }}
 
 HARD RULES:
-- bridge: EXACTLY 3 paragraphs, 45-110 words each, second person, calm and precise. NO markdown, NO asterisks/underscores for emphasis, NO headings. Do NOT quote the book verbatim in the bridge.
-- quiz: EXACTLY 3 items, each EXACTLY 4 options, integer answer index in range, plausible distractors.
-- Ground everything in the passage; invent no facts. Plain text only.
+- title: name the ACTUAL concept, concrete and specific ("The Habit Loop", "Loss Aversion", "The Window of Tolerance"). NEVER vague or poetic — titles like "The Mind's True Appeal" or "Cultivating Value Sensitivity" are FORBIDDEN. 2-6 words, Title Case.
+- bridge: EXACTLY 3 paragraphs, 45-110 words each, second person, calm and precise. Paragraph 1 frames the idea and why it matters; paragraph 2 gives the concrete mechanism; paragraph 3 connects it to the reader's own life AND, where the link is genuine, to ideas the reader already knows in this app: {vault_ideas}. Name them naturally (e.g. "the feeling-tone you met earlier"). Never force a connection that isn't real.
+- sources: 1-2 items. book = "{title}". ref = a topical locator, not the author. quote = a faithful close paraphrase, NEVER a verbatim copyrighted sentence.
+- quiz: EXACTLY 3 items, each EXACTLY 4 distinct options, integer answer index in range, vary which position is correct, plausible distractors.
+- Ground everything in the passage; invent no facts. Plain text only, no markdown, no emphasis characters, never mention being an AI.
 
 PASSAGE:
 {chunk}
 """
 
+# forced output shape — eliminates malformed/missing-key output (the main source of skips)
+NODE_SCHEMA = {
+  "type": "object",
+  "properties": {
+    "title": {"type": "string"}, "glyph": {"type": "string"},
+    "bridge": {"type": "array", "items": {"type": "string"}},
+    "sources": {"type": "array", "items": {"type": "object", "properties": {
+        "book": {"type": "string"}, "ref": {"type": "string"},
+        "quote": {"type": "array", "items": {"type": "string"}}}, "required": ["book", "ref", "quote"]}},
+    "quiz": {"type": "array", "items": {"type": "object", "properties": {
+        "q": {"type": "string"}, "c": {"type": "array", "items": {"type": "string"}},
+        "a": {"type": "integer"}, "why": {"type": "string"}}, "required": ["q", "c", "a", "why"]}},
+    "apply": {"type": "object", "properties": {"prompt": {"type": "string"}, "min": {"type": "integer"}}, "required": ["prompt", "min"]},
+    "whyreq": {"type": "string"},
+  },
+  "required": ["title", "glyph", "bridge", "sources", "quiz", "apply", "whyreq"],
+}
+
 # ---------------------------------------------------------------- gemini call w/ key rotation
 class Quota(Exception): pass
 
-def call(prompt, temp=0.7):
+def call(prompt, temp=0.7, schema=NODE_SCHEMA):
     last = None
+    cfg = {"temperature": temp, "responseMimeType": "application/json"}
+    if schema:
+        cfg["responseSchema"] = schema
     for ki, key in enumerate(KEYS):
         if key in call.dead:
             continue
         url = f"https://generativelanguage.googleapis.com/v1beta/models/{MODEL}:generateContent?key={key}"
         body = json.dumps({"contents": [{"parts": [{"text": prompt}]}],
-                           "generationConfig": {"temperature": temp, "responseMimeType": "application/json"}}).encode()
+                           "generationConfig": cfg}).encode()
         req = urllib.request.Request(url, data=body, headers={"Content-Type": "application/json"})
         try:
             with urllib.request.urlopen(req, timeout=120) as r:
@@ -127,9 +167,10 @@ def content_errors(n):
         e.append(f"exc:{ex}")
     return e
 
-def generate_node(book, chunk, avoid, retries=3):
-    prompt = PROMPT.format(title=book["title"], author=book["author"],
-                           avoid="; ".join(avoid[-12:]) or "(none yet)", chunk=chunk[:6500])
+def generate_node(book, chunk, avoid, vault_ideas=None, retries=3):
+    prompt = PROMPT.format(title=book["title"], author=book["author"], exemplar=EXEMPLAR,
+                           vault_ideas="; ".join(vault_ideas or [])[:1400] or "(none)",
+                           avoid="; ".join(avoid[-12:]) or "(none yet)", chunk=chunk[:9000])
     for attempt in range(retries):
         try:
             raw = call(prompt, temp=0.7 - attempt * 0.2)
@@ -209,6 +250,10 @@ def too_similar(title, seen):
     t = title.lower()
     return any(difflib.SequenceMatcher(None, t, s.lower()).ratio() > 0.8 for s in seen)
 
+def curated_ideas(graph):
+    """Only the hand-authored tracks (A-F) — the crisp titles worth cross-linking to."""
+    return [n["title"] for n in graph["nodes"] if n["track"] in ("A", "B", "C", "D", "E", "F")]
+
 def write_status(**kw):
     st = {}
     if os.path.exists(STATUS):
@@ -222,6 +267,7 @@ def run(book_id, track_name, track_glyph, track_accent, target_nodes, max_this_r
     graph = json.load(open(GRAPH, encoding="utf-8"))
     book = next(b for b in books["books"] if b["id"] == book_id)
     seen = [n["title"] for n in graph["nodes"]]
+    ideas = curated_ideas(graph)
     chunks = chunk_book(book, target_nodes)
     print(f"book={book_id} chunks={len(chunks)} budget/run={max_this_run} model={MODEL} keys={len(KEYS)}")
     contents, avoid = [], []
@@ -229,7 +275,7 @@ def run(book_id, track_name, track_glyph, track_accent, target_nodes, max_this_r
         if len(contents) >= max_this_run:
             print(f"  reached run budget ({max_this_run})"); break
         try:
-            n = generate_node(book, ch, avoid)
+            n = generate_node(book, ch, avoid, ideas)
         except Quota:
             print("  QUOTA: all keys exhausted — will resume next run"); break
         if not n:
@@ -308,14 +354,16 @@ def graph_ok_books(graph, books):
     except SystemExit: return False, "rejected"
     except Exception as e: return False, str(e)
 
-def run_queue():
-    """Cloud entry: process one pending encrypted job, chaining across daily runs. Idempotent + resumable."""
+def run_queue(only=None):
+    """Cloud entry: process one pending encrypted job, chaining across daily runs. Idempotent + resumable.
+    `only` (substring) restricts to a specific job file — used for targeted local testing."""
     if not os.path.isdir(QUEUE):
         print("no queue dir; nothing to do"); return
-    jobs = sorted(f for f in os.listdir(QUEUE) if f.endswith(".job.enc"))
+    jobs = sorted(f for f in os.listdir(QUEUE) if f.endswith(".job.enc") and (not only or only in f))
     graph = json.load(open(GRAPH, encoding="utf-8"))
     books = dec_enc(CONTENT)["books"]                      # library text, from the encrypted payload only
     seen = [n["title"] for n in graph["nodes"]]
+    ideas = curated_ideas(graph)
     processed = 0
     for jf in jobs:
         jp = os.path.join(QUEUE, jf)
@@ -327,7 +375,7 @@ def run_queue():
         contents, avoid, i = [], [], job.get("done", 0)
         while i < len(job["chunks"]) and processed < DAILY_BUDGET:
             try:
-                n = generate_node({"title": job["title"], "author": job["author"]}, job["chunks"][i], avoid)
+                n = generate_node({"title": job["title"], "author": job["author"]}, job["chunks"][i], avoid, ideas)
             except Quota:
                 print("quota exhausted; resume next run"); break
             i += 1; processed += 1
@@ -358,7 +406,10 @@ def run_queue():
 if __name__ == "__main__":
     import argparse
     if "--queue" in sys.argv:
-        run_queue(); raise SystemExit
+        only = None
+        if "--job" in sys.argv:
+            only = sys.argv[sys.argv.index("--job") + 1]
+        run_queue(only); raise SystemExit
     ap = argparse.ArgumentParser()
     ap.add_argument("book"); ap.add_argument("--name", required=True)
     ap.add_argument("--glyph", default="🤖"); ap.add_argument("--accent", default="#5dade2")
