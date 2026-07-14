@@ -387,6 +387,7 @@ header .brand span{color:var(--gold)}
 
 <div id="path" class="view">
   <div class="bigcard daily" id="daily"></div>
+  <div class="bigcard slim" id="pipestatus" style="display:none"></div>
   <button class="bigcard" id="pathcont" style="display:none"></button>
   <button class="bigcard" id="sharpen" style="display:none"></button>
   <div class="bigcard">
@@ -892,8 +893,13 @@ $("btn-ach").onclick=()=>{const g=$("achgrid");g.innerHTML="";
   $("achs").classList.add("on")};
 
 /* ---------- patch notes ---------- */
-const APP_VER="3.2";
+const APP_VER="3.3";
 const PATCHES=[
+ {v:"3.3",n:"The Living Vault",d:"14 Jul 2026",items:[
+  ["new","The AI pipeline now runs itself — a daily cloud job (GitHub Actions) reads queued books and forges new tracks, with no computer of yours running and no subscription behind it."],
+  ["content","Proof of life: 🪷 Mindfulness in Practice, a track the cloud built end-to-end from Ajahn Brahm, is live — generated, validated, encrypted, and committed entirely by the automated pipeline."],
+  ["new","Progress is visible: a 🤖 AI Pipeline card on the Path shows what's being forged and how far along, updating as the cloud works."],
+  ["polish","Your 5 API keys live only as encrypted GitHub secrets now — never in the app, never in the repo. The keys pasted in chat should still be rotated when you get a chance."]]},
  {v:"3.2",n:"The Forge",d:"14 Jul 2026",items:[
   ["new","🤖 An AI pipeline (Gemini) can now read a whole new book and forge it into dependency-locked Path lessons — in the exact same structure as the hand-written ones."],
   ["content","First AI-authored track is live: 💡 Clear Thinking, distilled from “How to Have a Beautiful Mind.” See if you can tell it apart."],
@@ -1054,6 +1060,24 @@ function reviewStep(idx,gained){
     card.appendChild(b);
   });
   body.appendChild(card);
+}
+
+/* ---------- pipeline status ---------- */
+let PIPE_FETCHED=false, PIPE=null;
+async function renderPipeStatus(){
+  const c=$("pipestatus");
+  if(!PIPE_FETCHED){
+    PIPE_FETCHED=true;
+    try{PIPE=await(await fetch("status.json",{cache:"no-cache"})).json();}catch(e){PIPE=null;}
+    if(PIPE)renderPipeStatus();
+    return;
+  }
+  if(!PIPE||!PIPE.title){c.style.display="none";return;}
+  const done=PIPE.state==="complete", pct=PIPE.percent||0;
+  c.style.display="flex";
+  c.innerHTML=`<span class="tag" style="color:${done?'var(--jade)':'#c084fc'}">🤖 ${done?'AI PIPELINE':'AI PIPELINE · WORKING'}</span>`+
+    `<span class="slimtxt">${done?`built “${esc(PIPE.title)}” — a new AI-authored track is live`:`forging “${esc(PIPE.title)}” · ${pct}% (${PIPE.done}/${PIPE.total}) · resumes daily`}</span>`;
+  c.onclick=()=>{renderPath();show("path")};
 }
 
 /* ---------- daily rite (dailies) ---------- */
@@ -1278,7 +1302,7 @@ function renderPath(){
       <div class="glyphbg">${tr.glyph}</div>`;
     c.onclick=()=>openNode(nx.id);
   } else c.style.display="none";
-  renderDaily();renderMix();renderSharpen();
+  renderDaily();renderMix();renderSharpen();renderPipeStatus();
   const tm=sitTotalMin();
   $("sittxt").textContent=(S.sits&&S.sits.length?`${S.sits.length} sits · ${tm} min logged — `:"")+"begin a timed sit · bells at start & end";
   const tree=$("tree");tree.innerHTML="";

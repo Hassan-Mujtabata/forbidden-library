@@ -1,4 +1,4 @@
-const CACHE = "vault-v19";
+const CACHE = "vault-v20";
 const ASSETS = ["./", "./index.html", "./content.enc", "./manifest.json", "./icon.svg",
   "./icon-192.png", "./icon-512.png", "./apple-touch-icon.png"];
 
@@ -25,6 +25,11 @@ self.addEventListener("activate", e => {
 // stale-while-revalidate: serve instantly from cache, refresh in the background
 self.addEventListener("fetch", e => {
   if (e.request.method !== "GET" || !e.request.url.startsWith(self.location.origin)) return;
+  // pipeline progress must never be stale — always go to network, fall back to cache offline
+  if (e.request.url.includes("status.json")) {
+    e.respondWith(fetch(e.request).catch(() => caches.match(e.request)));
+    return;
+  }
   e.respondWith(
     caches.open(CACHE).then(async c => {
       const hit = await c.match(e.request, { ignoreSearch: true });
