@@ -370,6 +370,13 @@ def run_queue(only=None):
         job = dec_enc(jp)
         if job.get("done", 0) >= len(job["chunks"]):
             continue                                       # already finished
+        # browser-queued jobs may carry an empty or already-taken track id — assign a
+        # real, collision-free one on first touch and persist it back to the job.
+        if job.get("done", 0) == 0:
+            used = {t["id"] for t in graph["tracks"]}
+            if not job.get("track_id") or job["track_id"] in used:
+                job["track_id"] = next_track_id(graph)
+                enc_obj(job, jp)
         tmeta = {"id": job["track_id"], "name": job["name"], "glyph": job["glyph"],
                  "accent": job["accent"], "blurb": job["blurb"]}
         contents, avoid, i = [], [], job.get("done", 0)
