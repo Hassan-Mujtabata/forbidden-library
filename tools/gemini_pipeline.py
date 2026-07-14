@@ -259,18 +259,6 @@ def run(book_id, track_name, track_glyph, track_accent, target_nodes, max_this_r
                  total_nodes=len(merged["nodes"]), state="added")
     print(f"WROTE graph.json (+track {tid}, +{len(contents)} nodes). Backup at graph.json.bak")
 
-if __name__ == "__main__":
-    import argparse
-    if "--queue" in sys.argv:
-        run_queue(); raise SystemExit
-    ap = argparse.ArgumentParser()
-    ap.add_argument("book"); ap.add_argument("--name", required=True)
-    ap.add_argument("--glyph", default="🤖"); ap.add_argument("--accent", default="#5dade2")
-    ap.add_argument("--target", type=int, default=8); ap.add_argument("--max", type=int, default=DAILY_BUDGET)
-    ap.add_argument("--dry", action="store_true")
-    a = ap.parse_args()
-    run(a.book, a.name, a.glyph, a.accent, a.target, a.max, a.dry)
-
 # ================================================================ CLOUD (GitHub Actions) mode
 import gzip, base64 as _b64
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
@@ -365,3 +353,16 @@ def run_queue():
         break                                              # one job per run keeps quota predictable
     else:
         write_status(state="idle"); print("queue idle — all jobs complete")
+
+# ---------------------------------------------------------------- entry point (must be LAST)
+if __name__ == "__main__":
+    import argparse
+    if "--queue" in sys.argv:
+        run_queue(); raise SystemExit
+    ap = argparse.ArgumentParser()
+    ap.add_argument("book"); ap.add_argument("--name", required=True)
+    ap.add_argument("--glyph", default="🤖"); ap.add_argument("--accent", default="#5dade2")
+    ap.add_argument("--target", type=int, default=8); ap.add_argument("--max", type=int, default=DAILY_BUDGET)
+    ap.add_argument("--dry", action="store_true")
+    a = ap.parse_args()
+    run(a.book, a.name, a.glyph, a.accent, a.target, a.max, a.dry)
