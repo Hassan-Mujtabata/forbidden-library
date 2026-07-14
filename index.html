@@ -297,6 +297,21 @@ header .brand span{color:var(--gold)}
 .srcgo:hover{background:rgba(78,205,196,.12)}
 .srcquarry{margin-top:10px;font-size:11px;color:var(--tx2);font-style:italic}
 
+/* ---------- sit timer ---------- */
+.bigcard.slim{padding:13px 20px;display:flex;align-items:center;gap:12px;width:100%;text-align:left;cursor:pointer}
+.bigcard.slim .tag{margin-bottom:0}
+.bigcard.slim .slimtxt{color:var(--tx2);font-size:12.5px}
+#sit-chips{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;max-width:420px}
+.sitchip{border:1px solid var(--line);border-radius:99px;padding:9px 16px;font-size:13.5px;color:var(--tx);transition:.15s}
+.sitchip.sel{border-color:var(--jade);background:rgba(78,205,196,.14);font-weight:700}
+#sit-circle{width:210px;height:210px;margin:0 auto;border-radius:50%;border:2px solid var(--jade);
+  display:flex;align-items:center;justify-content:center;box-shadow:0 0 50px -18px var(--jade);
+  animation:sitbreathe 8s ease-in-out infinite}
+#sit-circle.paused{animation-play-state:paused;opacity:.6}
+@keyframes sitbreathe{0%,100%{transform:scale(.86)}50%{transform:scale(1.1)}}
+#sit-left{font-family:var(--serif);font-size:40px;letter-spacing:.06em}
+#sit-hint{text-align:center;color:var(--tx2);font-size:12px;letter-spacing:.3em;margin-top:26px;text-transform:uppercase}
+
 /* ---------- journal ---------- */
 .jsec{font-size:11px;letter-spacing:.24em;color:var(--tx2);margin:24px 0 12px;border-top:1px solid var(--line);padding-top:18px}
 #jstats{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
@@ -368,6 +383,7 @@ header .brand span{color:var(--gold)}
     <div class="tag">⚗️ TODAY'S MIX — <span id="mixsub"></span></div>
     <div class="mixgrid" id="mixgrid"></div>
   </div>
+  <button class="bigcard slim" id="sitcard"><span class="tag" style="color:var(--jade)">🧘 SIT</span><span class="slimtxt" id="sittxt"></span></button>
   <div id="tree"></div>
 </div>
 
@@ -412,6 +428,25 @@ header .brand span{color:var(--gold)}
   <div class="jsec">✍️ YOUR APPLY NOTES</div><div id="jnotes"></div>
   <div class="jsec">⭐ HIGHLIGHTS</div><div id="hlrows"></div>
   <input type="file" id="jfile" accept="application/json" style="display:none">
+</div></div>
+<div class="overlay" id="sit"><div class="fwrap">
+  <div id="sit-setup">
+    <div style="font-family:var(--serif);letter-spacing:.3em;font-size:22px;text-align:center">🧘 SIT</div>
+    <p style="color:var(--tx2);font-size:13px;text-align:center;margin:10px 0 18px">a bell to begin, a bell to end · the screen stays awake</p>
+    <div id="sit-chips"></div>
+    <div style="text-align:center;margin-top:20px">
+      <button class="goldbtn" id="sit-start">BEGIN</button>
+      <button class="ghostbtn" data-close="sit">cancel</button>
+    </div>
+  </div>
+  <div id="sit-run" style="display:none">
+    <div id="sit-circle"><span id="sit-left"></span></div>
+    <div id="sit-hint">breathe in</div>
+    <div style="text-align:center;margin-top:22px">
+      <button class="ghostbtn" id="sit-pause">⏸ pause</button>
+      <button class="ghostbtn" id="sit-end">end sit</button>
+    </div>
+  </div>
 </div></div>
 <div class="overlay" id="review"><div class="panel" style="max-width:660px"><h2>🔁 SHARPEN <span id="rvcount" style="font-size:13px;color:var(--tx2)"></span> <button class="x" data-close="review">✕</button></h2><div id="rvbody"></div></div></div>
 <div class="overlay" id="patches"><div class="panel" style="max-width:700px"><h2>📜 PATCH NOTES <span id="patchver" style="font-size:13px;color:var(--tx2)"></span> <button class="x" data-close="patches">✕</button></h2><div id="patchlist"></div></div></div>
@@ -484,6 +519,9 @@ const ACH=[
  {id:"wholepath",e:"🧭",n:"Keeper of the Path",d:"Master every idea on the Path",c:()=>DATA.nodes.every(x=>nodeDone(x.id))},
  {id:"whet",e:"🔁",n:"Whetstone",d:"Answer 10 review questions right",c:()=>(S.rvN||0)>=10},
  {id:"razor",e:"🪒",n:"Razor",d:"Answer 50 review questions right",c:()=>(S.rvN||0)>=50},
+ {id:"sit1",e:"🧘",n:"First Sit",d:"Complete your first timed sit",c:()=>(S.sits||[]).length>=1},
+ {id:"sit10",e:"🪷",n:"The Cushion Knows You",d:"Complete 10 sits",c:()=>(S.sits||[]).length>=10},
+ {id:"sit300",e:"⏳",n:"Five Hours Still",d:"300 minutes sat in total",c:()=>sitTotalMin()>=300},
 ];
 function checkAch(){for(const a of ACH){if(!S.ach.includes(a.id)&&a.c()){S.ach.push(a.id);toast(`${a.e} Achievement — ${a.n}`,true)}}save()}
 function toast(msg,big){const t=document.createElement("div");t.className="toast"+(big?" big":"");t.textContent=msg;
@@ -768,6 +806,7 @@ function renderJournal(){
     ["✍️",notes.length,"notes"],
     ["⭐",S.hl.length,"highlights"],
     ["🔥",Math.max(S.streak.count,S.bestStreak||0),"best streak"],
+    ["🧘",sitTotalMin(),"min sat"],
     ["⚡",S.xp,"XP"],
   ].map(([e,v,l])=>`<span class="hstat">${e} <b>${v}</b> <small>${l}</small></span>`).join("");
   $("jactions").innerHTML="";
@@ -839,8 +878,14 @@ $("btn-ach").onclick=()=>{const g=$("achgrid");g.innerHTML="";
   $("achs").classList.add("on")};
 
 /* ---------- patch notes ---------- */
-const APP_VER="2.9";
+const APP_VER="3.0";
 const PATCHES=[
+ {v:"3.0",n:"The Cushion",d:"14 Jul 2026",items:[
+  ["new","🧘 SIT: a built-in meditation timer — pick 5 to 60 minutes, a bell rings you in and out, a breathing circle paces you, and the screen stays awake."],
+  ["new","Sits are logged and earn XP (2 per minute), count toward your streak, and show in the Journal — reading, mastering, reviewing, and now practicing, all in one vault."],
+  ["new","Concentration lessons offer “Sit first, then write” right in the practice step — the track finally comes with a cushion."],
+  ["new","Three sit achievements: First Sit, The Cushion Knows You (10 sits), Five Hours Still (300 min)."],
+  ["polish","Pause mid-sit if life interrupts; sits under a minute aren't logged."]]},
  {v:"2.9",n:"The Crossroads",d:"13 Jul 2026",items:[
   ["new","Lessons now open into the books: every source card has a “📖 Continue in the book →” button that drops you into the full text in the Library."],
   ["new","⚡ Flow mode works inside lessons — speed-read a whole idea, guide note and quotes included."],
@@ -987,6 +1032,85 @@ function reviewStep(idx,gained){
   body.appendChild(card);
 }
 
+/* ---------- sit timer ---------- */
+let BELL_CTX=null;
+function bell(){
+  try{
+    BELL_CTX=BELL_CTX||new (window.AudioContext||window.webkitAudioContext)();
+    if(BELL_CTX.state==="suspended")BELL_CTX.resume();
+    const t=BELL_CTX.currentTime;
+    [523.25,1046.5,1567.98].forEach((f,i)=>{
+      const o=BELL_CTX.createOscillator(),g=BELL_CTX.createGain();
+      o.type="sine";o.frequency.value=f;
+      g.gain.setValueAtTime(0.0001,t);
+      g.gain.exponentialRampToValueAtTime(0.32/(i+1),t+0.02);
+      g.gain.exponentialRampToValueAtTime(0.0001,t+4);
+      o.connect(g).connect(BELL_CTX.destination);o.start(t);o.stop(t+4.2);
+    });
+  }catch(e){}
+}
+let SIT={end:0,min:0,timer:null,hintT:null,paused:false,left:0,wake:null};
+function openSit(){
+  S.sitDur??=15;
+  const chips=$("sit-chips");chips.innerHTML="";
+  [5,10,15,20,30,45,60].forEach(m=>{
+    const b=document.createElement("button");b.className="sitchip"+(m===S.sitDur?" sel":"");
+    b.textContent=m+" min";
+    b.onclick=()=>{S.sitDur=m;save();chips.querySelectorAll(".sitchip").forEach(x=>x.classList.remove("sel"));b.classList.add("sel")};
+    chips.appendChild(b);
+  });
+  $("sit-setup").style.display="block";$("sit-run").style.display="none";
+  $("sit").classList.add("on");
+}
+async function startSit(min){
+  SIT.min=min;SIT.end=Date.now()+min*60000;SIT.paused=false;
+  bell();
+  try{SIT.wake=await navigator.wakeLock.request("screen")}catch(e){SIT.wake=null}
+  $("sit-setup").style.display="none";$("sit-run").style.display="block";
+  $("sit-circle").classList.remove("paused");
+  let inhale=true;$("sit-hint").textContent="breathe in";
+  clearInterval(SIT.hintT);SIT.hintT=setInterval(()=>{if(!SIT.paused){inhale=!inhale;$("sit-hint").textContent=inhale?"breathe in":"breathe out"}},4000);
+  clearInterval(SIT.timer);SIT.timer=setInterval(sitTick,400);sitTick();
+}
+function sitTick(){
+  if(SIT.paused)return;
+  const ms=SIT.end-Date.now();
+  if(ms<=0){finishSit(false);return}
+  const s=Math.ceil(ms/1000);
+  $("sit-left").textContent=Math.floor(s/60)+":"+String(s%60).padStart(2,"0");
+}
+function stopSitMachinery(){
+  clearInterval(SIT.timer);clearInterval(SIT.hintT);SIT.timer=SIT.hintT=null;
+  if(SIT.wake){SIT.wake.release().catch(()=>{});SIT.wake=null}
+}
+function finishSit(early){
+  const rem=SIT.paused?SIT.left:Math.max(0,SIT.end-Date.now());
+  const doneMin=early?Math.floor((SIT.min*60000-rem)/60000):SIT.min;
+  stopSitMachinery();
+  bell();
+  $("sit").classList.remove("on");
+  if(doneMin<1){toast("🧘 Sit ended — under a minute, not logged");return}
+  (S.sits??=[]).push({d:doneMin,at:Date.now()});
+  const xp=Math.max(1,Math.round(doneMin*2));
+  const before=lvl();S.xp+=xp;
+  const dd=today();
+  if(S.streak.day!==dd){S.streak.count=S.streak.day===yesterday()?S.streak.count+1:1;S.streak.day=dd;S.bestStreak=Math.max(S.bestStreak||0,S.streak.count)}
+  (S.days[dd]??={}).light=true;
+  save();
+  toast(`🧘 ${doneMin} min sat · +${xp} XP`,true);
+  if(lvl()>before)setTimeout(()=>toast(`⬆ LEVEL ${lvl()} — ${lvlName()}`,true),700);
+  checkAch();
+  renderPath();
+}
+$("sitcard").onclick=openSit;
+$("sit-start").onclick=()=>startSit(S.sitDur||15);
+$("sit-pause").onclick=()=>{SIT.paused=!SIT.paused;
+  if(SIT.paused){SIT.left=SIT.end-Date.now();$("sit-pause").textContent="▶ resume";$("sit-circle").classList.add("paused")}
+  else{SIT.end=Date.now()+SIT.left;$("sit-pause").textContent="⏸ pause";$("sit-circle").classList.remove("paused")}};
+$("sit-end").onclick=()=>finishSit(true);
+document.addEventListener("visibilitychange",()=>{if(!document.hidden&&SIT.timer)sitTick()});
+const sitTotalMin=()=>(S.sits||[]).reduce((n,x)=>n+x.d,0);
+
 /* ---------- flow mode (RSVP) ---------- */
 let F={words:[],i:0,timer:null,playing:false};
 function launchFlow(words){
@@ -1102,6 +1226,8 @@ function renderPath(){
     c.onclick=()=>openNode(nx.id);
   } else c.style.display="none";
   renderMix();renderSharpen();
+  const tm=sitTotalMin();
+  $("sittxt").textContent=(S.sits&&S.sits.length?`${S.sits.length} sits · ${tm} min logged — `:"")+"begin a timed sit · bells at start & end";
   const tree=$("tree");tree.innerHTML="";
   for(const tr of DATA.tracks){
     const col=document.createElement("div");col.className="track";col.style.setProperty("--tacc",tr.accent);
@@ -1257,7 +1383,10 @@ function renderApply(n){
     clearTimeout(draftT);draftT=setTimeout(()=>{(S.node[n.id]=S.node[n.id]||{}).draft=ta.value;save()},400);};
   ta.oninput=upd;
   btn.onclick=()=>{if(ta.value.trim().length<min)return;(S.node[n.id]=S.node[n.id]||{}).applied=ta.value.trim();completeNode(n);};
-  card.appendChild(ta);card.appendChild(cc);card.appendChild(btn);gate.appendChild(card);upd();
+  card.appendChild(ta);card.appendChild(cc);card.appendChild(btn);
+  if(n.track==="A"||n.track==="B"){const sb=document.createElement("button");sb.className="ghostbtn";
+    sb.textContent="🧘 Sit first, then write";sb.onclick=openSit;card.appendChild(sb);}
+  gate.appendChild(card);upd();
 }
 function completeNode(n){
   const rec=S.node[n.id]=S.node[n.id]||{};
