@@ -297,6 +297,15 @@ header .brand span{color:var(--gold)}
 .srcgo:hover{background:rgba(78,205,196,.12)}
 .srcquarry{margin-top:10px;font-size:11px;color:var(--tx2);font-style:italic}
 
+/* ---------- daily rite ---------- */
+.bigcard.daily{padding:15px 20px}
+.bigcard.daily.alldone{border-color:rgba(212,175,55,.55);box-shadow:0 0 26px -12px rgba(212,175,55,.6)}
+.dailyobjs{display:flex;gap:8px;flex-wrap:wrap;margin-top:11px}
+.dobj{display:flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:99px;
+  padding:8px 15px;font-size:13px;color:var(--tx2);transition:.15s}
+.dobj:hover{border-color:var(--tx2);color:var(--tx)}
+.dobj.ok{border-color:#2f7d55;color:var(--jade);font-weight:700}
+
 /* ---------- sit timer ---------- */
 .bigcard.slim{padding:13px 20px;display:flex;align-items:center;gap:12px;width:100%;text-align:left;cursor:pointer}
 .bigcard.slim .tag{margin-bottom:0}
@@ -377,6 +386,7 @@ header .brand span{color:var(--gold)}
 </div>
 
 <div id="path" class="view">
+  <div class="bigcard daily" id="daily"></div>
   <button class="bigcard" id="pathcont" style="display:none"></button>
   <button class="bigcard" id="sharpen" style="display:none"></button>
   <div class="bigcard">
@@ -522,6 +532,9 @@ const ACH=[
  {id:"sit1",e:"🧘",n:"First Sit",d:"Complete your first timed sit",c:()=>(S.sits||[]).length>=1},
  {id:"sit10",e:"🪷",n:"The Cushion Knows You",d:"Complete 10 sits",c:()=>(S.sits||[]).length>=10},
  {id:"sit300",e:"⏳",n:"Five Hours Still",d:"300 minutes sat in total",c:()=>sitTotalMin()>=300},
+ {id:"rite1",e:"🌅",n:"Dawn Rite",d:"Complete your first Daily Rite",c:()=>(S.ritesN||0)>=1},
+ {id:"rite7",e:"🌟",n:"Devoted",d:"Complete 7 Daily Rites",c:()=>(S.ritesN||0)>=7},
+ {id:"rite30",e:"☀️",n:"The Practice",d:"Complete 30 Daily Rites",c:()=>(S.ritesN||0)>=30},
 ];
 function checkAch(){for(const a of ACH){if(!S.ach.includes(a.id)&&a.c()){S.ach.push(a.id);toast(`${a.e} Achievement — ${a.n}`,true)}}save()}
 function toast(msg,big){const t=document.createElement("div");t.className="toast"+(big?" big":"");t.textContent=msg;
@@ -706,7 +719,7 @@ function complete(){
   save();
   toast(`+${epXP(ep)} XP`);
   if(lvl()>before)setTimeout(()=>toast(`⬆ LEVEL ${lvl()} — ${lvlName()}`,true),600);
-  checkAch();renderEnd();
+  markDaily("learn");checkAch();renderEnd();
 }
 // reveal fade-up elements once they're near the viewport (robust, no IntersectionObserver dependency)
 function revealVisible(factor){
@@ -807,6 +820,7 @@ function renderJournal(){
     ["⭐",S.hl.length,"highlights"],
     ["🔥",Math.max(S.streak.count,S.bestStreak||0),"best streak"],
     ["🧘",sitTotalMin(),"min sat"],
+    ["🌟",S.ritesN||0,"rites"],
     ["⚡",S.xp,"XP"],
   ].map(([e,v,l])=>`<span class="hstat">${e} <b>${v}</b> <small>${l}</small></span>`).join("");
   $("jactions").innerHTML="";
@@ -878,8 +892,13 @@ $("btn-ach").onclick=()=>{const g=$("achgrid");g.innerHTML="";
   $("achs").classList.add("on")};
 
 /* ---------- patch notes ---------- */
-const APP_VER="3.0";
+const APP_VER="3.1";
 const PATCHES=[
+ {v:"3.1",n:"The Daily Rite",d:"14 Jul 2026",items:[
+  ["new","🌅 DAILY RITE: three objectives every day — 📖 Learn, 🔁 Sharpen, 🧘 Sit. Clear all three for a complete day and +40 bonus XP."],
+  ["new","The rite card sits at the top of the Path; each objective is a shortcut — tap Sit to sit, Sharpen to review, Learn to open your next idea."],
+  ["new","Three rite achievements: Dawn Rite, Devoted (7 days), and The Practice (30 days)."],
+  ["polish","Streak, mix, reviews, and sits are now one daily loop instead of four scattered cards."]]},
  {v:"3.0",n:"The Cushion",d:"14 Jul 2026",items:[
   ["new","🧘 SIT: a built-in meditation timer — pick 5 to 60 minutes, a bell rings you in and out, a breathing circle paces you, and the screen stays awake."],
   ["new","Sits are logged and earn XP (2 per minute), count toward your streak, and show in the Journal — reading, mastering, reviewing, and now practicing, all in one vault."],
@@ -997,7 +1016,7 @@ function reviewStep(idx,gained){
     body.innerHTML=`<div class="gatecard" style="text-align:center"><h3>🔁 Sharpened</h3>
       <div class="gsub">${RQ.length} idea${RQ.length>1?"s":""} reviewed · +${gained} XP</div>
       <button class="goldbtn" data-close="review">Done</button></div>`;
-    $("rvcount").textContent="";renderPath();return;
+    $("rvcount").textContent="";checkDaily();renderPath();return;
   }
   const n=nodeById(RQ[idx]),rv=rvState(n.id),tr=trackById(n.track);
   const q=n.quiz[Math.floor(Math.random()*n.quiz.length)];
@@ -1030,6 +1049,35 @@ function reviewStep(idx,gained){
     card.appendChild(b);
   });
   body.appendChild(card);
+}
+
+/* ---------- daily rite (dailies) ---------- */
+const DAILY_XP=40;
+function dailyState(){const d=today();
+  if(!S.daily||S.daily.day!==d)S.daily={day:d,learn:false,sit:false,claimed:false};
+  return S.daily;}
+function dailySharpenDone(){return reviewDue().length===0}
+function dailyDone(){const x=dailyState();return x.learn&&x.sit&&dailySharpenDone()}
+function markDaily(k){dailyState()[k]=true;save();checkDaily()}
+function checkDaily(){const x=dailyState();
+  if(dailyDone()&&!x.claimed){x.claimed=true;S.ritesN=(S.ritesN||0)+1;S.xp+=DAILY_XP;save();
+    setTimeout(()=>toast(`🌟 Daily Rite complete · +${DAILY_XP} XP`,true),500);checkAch();
+    if($("path").classList.contains("on"))renderDaily();}}
+function renderDaily(){
+  const x=dailyState();
+  const objs=[
+    ["📖","Learn",x.learn,()=>{const nx=nextAvailNode();if(nx)openNode(nx.id)}],
+    ["🔁","Sharpen",dailySharpenDone(),()=>{if(reviewDue().length)startReview()}],
+    ["🧘","Sit",x.sit,openSit],
+  ];
+  const done=objs.filter(o=>o[2]).length,all=done===3;
+  const c=$("daily");c.className="bigcard daily"+(all?" alldone":"");
+  c.innerHTML=`<div class="tag" style="color:${all?"#d4af37":"var(--jade)"}">${all?(x.claimed?"🌟 DAILY RITE COMPLETE":"🌟 RITE READY"):"🌅 TODAY'S RITE — "+done+"/3"}</div>
+    <div style="color:var(--tx2);font-size:12.5px;margin-top:2px">${all?"a full day: you learned, sharpened, and sat · +"+DAILY_XP+" XP":"learn something, clear your reviews, and sit — a complete day"}</div>
+    <div class="dailyobjs"></div>`;
+  const row=c.querySelector(".dailyobjs");
+  objs.forEach(([e,l,ok,fn])=>{const b=document.createElement("button");b.className="dobj"+(ok?" ok":"");
+    b.innerHTML=`${ok?"✓":e} ${l}`;b.onclick=fn;row.appendChild(b);});
 }
 
 /* ---------- sit timer ---------- */
@@ -1099,7 +1147,7 @@ function finishSit(early){
   save();
   toast(`🧘 ${doneMin} min sat · +${xp} XP`,true);
   if(lvl()>before)setTimeout(()=>toast(`⬆ LEVEL ${lvl()} — ${lvlName()}`,true),700);
-  checkAch();
+  markDaily("sit");checkAch();
   renderPath();
 }
 $("sitcard").onclick=openSit;
@@ -1225,7 +1273,7 @@ function renderPath(){
       <div class="glyphbg">${tr.glyph}</div>`;
     c.onclick=()=>openNode(nx.id);
   } else c.style.display="none";
-  renderMix();renderSharpen();
+  renderDaily();renderMix();renderSharpen();
   const tm=sitTotalMin();
   $("sittxt").textContent=(S.sits&&S.sits.length?`${S.sits.length} sits · ${tm} min logged — `:"")+"begin a timed sit · bells at start & end";
   const tree=$("tree");tree.innerHTML="";
@@ -1295,6 +1343,7 @@ function openNode(id){
   const g=document.createElement("div");g.className="lblrow guide";g.textContent="✦ Guide note — written for you";body.appendChild(g);
   for(const p of n.bridge){const el=document.createElement("p");el.textContent=p;body.appendChild(el)}
   (S.node[id]=S.node[id]||{}).read=true;save();
+  if(!n.stub)markDaily("learn");
   if(!n.stub&&n.sources){
     const sh=document.createElement("div");sh.className="lblrow books";sh.textContent="📖 From the books";body.appendChild(sh);
     for(const s of n.sources){const d=document.createElement("div");d.className="src";
