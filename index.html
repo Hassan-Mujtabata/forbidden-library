@@ -914,8 +914,12 @@ $("btn-ach").onclick=()=>{const g=$("achgrid");g.innerHTML="";
   $("achs").classList.add("on")};
 
 /* ---------- patch notes ---------- */
-const APP_VER="3.5";
+const APP_VER="3.6";
 const PATCHES=[
+ {v:"3.6",n:"The Clean Slate",d:"14 Jul 2026",items:[
+  ["content","How to Win Friends and Influence People (Carnegie) added to the Library — a text-readable copy this time, cover to cover. That's 20 full books now."],
+  ["fix","Tracks Clear Thinking and Mindfulness in Practice were rebuilt from scratch: the old versions had vague titles and garbled source text. They're re-queued from clean library text with the tuned pipeline, and will reappear at the quality of the hand-written tracks."],
+  ["polish","The pipeline's text cleaner now strips letter-spaced title pages and praise/foreword pages before distilling — no more lessons accidentally written about book blurbs."]]},
  {v:"3.5",n:"Six New Shelves",d:"14 Jul 2026",items:[
   ["content","Six full books added to the Library, readable cover to cover: Thinking, Fast and Slow (Kahneman), Atomic Habits (Clear), The Body Keeps the Score (van der Kolk), Meditations (Marcus Aurelius), The Laws of Human Nature (Greene), and What Everybody Is Saying (Navarro)."],
   ["polish","These are the bridge books that fill the middle of your library — the mechanism of the mind, of habit, of emotion, of virtue, and of reading people. Their Path lessons will follow as the pipeline forges them."]]},

@@ -1,4 +1,4 @@
-const CACHE = "vault-v22";
+const CACHE = "vault-v23";
 const ASSETS = ["./", "./index.html", "./content.enc", "./manifest.json", "./icon.svg",
   "./icon-192.png", "./icon-512.png", "./apple-touch-icon.png"];
 

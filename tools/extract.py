@@ -64,6 +64,9 @@ BOOKS = [
     dict(id="navarro", file="what-everybody-is-saying.pdf",
          title="What Everybody Is Saying", author="Joe Navarro",
          wing="shadow", glyph="\U0001f440", accent="#5d6d7e"),
+    dict(id="winfriends", file="31-10-2020-083612How to Win Friends and Influence People - Dale Carnegie.pdf",
+         title="How to Win Friends and Influence People", author="Dale Carnegie",
+         wing="shadow", glyph="\U0001f91d", accent="#4a90b8"),
 ]
 
 # repair common Pali terms that lose their diacritics in extraction

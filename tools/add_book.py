@@ -25,13 +25,25 @@ def extract(path):
     doc.close()
     return paras
 
+def _garbled(p):
+    """True for letter-spaced decorative text ('A M E D I TAT O R S H A N D B O O K') —
+    common on title/praise pages, which otherwise poison the first chunk."""
+    toks = p.split()
+    if len(toks) < 8:
+        return False
+    return sum(1 for t in toks if len(t) <= 2) / len(toks) > 0.45
+
 def chunk(paras, target_nodes):
     """Front-matter-trimmed, model-window-sized chunks, then evenly sampled to target_nodes.
     Each chunk is ~1300 words (fits the model's input window) instead of book/N — which on a
     big book produced 19k-word chunks the model only saw 5% of, wrecking the distillation."""
+    paras = [p for p in paras if not _garbled(p)]     # drop letter-spaced decorative lines
+    fm = re.compile(r"praise for|foreword|acknowledg|table of contents|by the same author"
+                    r"|about the author|copyright|all rights reserved|dedicat|introduction to the",
+                    re.I)
     start = 0
-    for i, p in enumerate(paras[:60]):     # skip title page / contents / praise until real prose
-        if len(p.split()) >= 60:
+    for i, p in enumerate(paras[:80]):     # skip title/praise/foreword/TOC until real prose
+        if len(p.split()) >= 60 and not fm.search(p[:200]):
             start = i; break
     paras = paras[start:]
     SIZE = 1300
