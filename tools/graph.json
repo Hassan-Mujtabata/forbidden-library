@@ -41,6 +41,13 @@
       "glyph": "🛡️",
       "accent": "#8e9aa6",
       "blurb": "Seeing manipulation coming — and thinking better than it."
+    },
+    {
+      "id": "J",
+      "name": "Atomic Habits",
+      "glyph": "🔁",
+      "accent": "#7bc96f",
+      "blurb": "AI-authored from Atomic Habits — a dependency-locked track."
     }
   ],
   "nodes": [
@@ -2646,6 +2653,778 @@
         "prompt": "Reflect on the whole Path. Write, in a few sentences, one real situation where 'see the move AND don't be moved' would change how you show up — and which wing (seeing or stillness) you most need to strengthen for it.",
         "min": 60
       }
+    },
+    {
+      "id": "j1",
+      "track": "J",
+      "tier": 0,
+      "prereq": [],
+      "glyph": "💪",
+      "title": "Ownership of Progress",
+      "bridge": [
+        "When facing significant setbacks, like a devastating injury or a humiliating failure, it's natural to feel overwhelmed. James Clear, after a severe baseball injury and then being cut from the varsity team, experienced deep self-doubt. Yet, he realized that for things to improve, he was the sole person responsible for making it happen, shifting his perspective from victim to agent in his own story.",
+        "This mechanism, Ownership of Progress, is the active acceptance that your future outcomes, especially in areas you care about, are primarily within your sphere of influence. It means moving beyond external blame or waiting for circumstances to change, and instead, identifying what steps you can take, however small, to move forward. It's about an internal locus of control.",
+        "Cultivating this sense of ownership is crucial for any meaningful self-improvement. It aligns with the fundamental premise of Why Train the Mind: that you have the capacity to shape your internal and external experience. When you take ownership, you empower yourself, moving from passive observation to active participation in your own development, much like how Stabilizing Attention requires your consistent effort to redirect focus."
+      ],
+      "sources": [
+        {
+          "book": "Atomic Habits",
+          "ref": "Baseball Setback",
+          "quote": [
+            "Despite his difficult high school baseball career, he maintained belief in his potential and understood that he alone was responsible for any future improvement."
+          ]
+        }
+      ],
+      "quiz": [
+        {
+          "q": "What is the core idea of 'Ownership of Progress'?",
+          "c": [
+            "Blaming external factors for slow development",
+            "Waiting for others to provide solutions",
+            "Actively taking responsibility for one's own improvement",
+            "Accepting that some things are entirely out of your control"
+          ],
+          "a": 2,
+          "why": "Ownership of Progress emphasizes personal responsibility and internal agency in driving improvement."
+        },
+        {
+          "q": "After his injury and being cut from the team, what was James Clear's turning point realization?",
+          "c": [
+            "He should give up on baseball entirely",
+            "His parents were responsible for his recovery",
+            "He was solely responsible for his own improvement",
+            "He needed to find a new coach immediately"
+          ],
+          "a": 2,
+          "why": "The passage states he knew he was the one responsible for making things happen."
+        },
+        {
+          "q": "Which mindset best reflects 'Ownership of Progress'?",
+          "c": [
+            "\"I hope things get better soon.\"",
+            "\"My circumstances prevent me from succeeding.\"",
+            "\"What can I do today to move closer to my goal?\"",
+            "\"If only I had more support, I'd achieve more.\""
+          ],
+          "a": 2,
+          "why": "This mindset focuses on proactive steps and personal agency."
+        }
+      ],
+      "apply": {
+        "prompt": "Reflect on an area of your life where you feel stuck or dissatisfied. Instead of focusing on external obstacles or what others could do, consider what concrete actions you can take this week to initiate progress. Write down at least three specific steps, however small, that demonstrate your ownership of the situation.",
+        "min": 50
+      }
+    },
+    {
+      "id": "j2",
+      "track": "J",
+      "tier": 1,
+      "prereq": [
+        "j1"
+      ],
+      "glyph": "🧊",
+      "title": "The Plateau of Latent Potential",
+      "bridge": [
+        "When you pour effort into a new habit or skill, but see no immediate results, you're likely on the Plateau of Latent Potential. This is like heating an ice cube from twenty-five to thirty-one degrees; the work is being done, but the visible change—the melting—only occurs at thirty-two degrees. Your efforts are not wasted; they are accumulating silently beneath the surface, building the necessary tension for a breakthrough.",
+        "This mechanism explains why consistent, small actions often yield sudden, dramatic shifts. Just as a stonecutter's hundredth blow might finally split the rock, it's the cumulative force of all prior strikes, not just the last, that creates the break. The \"overnight success\" you witness in others is merely the visible eruption of long-stored potential, often years in the making, where change happens all at once.",
+        "Understanding this plateau cultivates patience and resilience, crucial for any long-term endeavor. It reminds you that the absence of immediate external feedback does not mean an absence of internal progress. This perspective is vital for sustaining the \"Continuous Attention\" required in practices like meditation, where visible progress can also feel elusive for extended periods, yet internal shifts are constantly occurring."
+      ],
+      "sources": [
+        {
+          "book": "Atomic Habits",
+          "ref": "Plateau of Latent Potential",
+          "quote": [
+            "Your work is being stored, not wasted. When you finally break through the Plateau of Latent Potential, people will call it an overnight success, unaware of the long accumulation of effort."
+          ]
+        }
+      ],
+      "quiz": [
+        {
+          "q": "What best describes the Plateau of Latent Potential?",
+          "c": [
+            "A period of rapid, exponential growth in a new habit.",
+            "A period where effort accumulates without visible results, leading to a sudden breakthrough.",
+            "A moment of intense motivation that quickly fades.",
+            "The initial easy phase of habit formation before challenges arise."
+          ],
+          "a": 1,
+          "why": "The Plateau of Latent Potential is characterized by hidden progress that eventually leads to a sudden, noticeable change."
+        },
+        {
+          "q": "The \"ice cube\" analogy primarily illustrates that:",
+          "c": [
+            "Results often appear suddenly after a period of hidden accumulation.",
+            "Some habits are inherently harder to build than others.",
+            "It's important to set specific temperature-based goals for habits.",
+            "Effort is only valuable if it produces immediate, visible change."
+          ],
+          "a": 0,
+          "why": "The analogy shows that underlying work can happen for a long time before a critical threshold is met, leading to a sudden visible outcome."
+        },
+        {
+          "q": "What is a common feeling when experiencing the Plateau of Latent Potential?",
+          "c": [
+            "Excitement due to rapid progress.",
+            "Confidence in the linear progression of effort.",
+            "Discouragement due to a lack of immediate progress.",
+            "A sense of mastery and effortless execution."
+          ],
+          "a": 2,
+          "why": "The text describes a 'valley of disappointment' where people feel discouraged by the lack of results after hard work."
+        }
+      ],
+      "apply": {
+        "prompt": "Think of a habit you've tried to build or break, where you felt discouraged by a lack of visible progress. Write down how understanding the Plateau of Latent Potential changes your perspective on that past effort. How might this insight encourage you to approach future challenges with more patience, trusting that your efforts are always accumulating, even when unseen?",
+        "min": 50
+      },
+      "whyreq": "Builds directly on “Ownership of Progress” — grasp that first."
+    },
+    {
+      "id": "j3",
+      "track": "J",
+      "tier": 2,
+      "prereq": [
+        "j2"
+      ],
+      "glyph": "🔁",
+      "title": "The Habit Loop",
+      "bridge": [
+        "Imagine you walk into a dark room and automatically reach for the light switch. This seemingly simple action is a demonstration of the habit loop in action, a fundamental neurological feedback cycle that governs nearly all your behaviors. Your brain is constantly scanning your environment, predicting outcomes, trying responses, and learning from the results, often without your conscious awareness. This intricate, continuous process allows you to perform countless actions efficiently, freeing your mind for more complex challenges.",
+        "This loop breaks down into four sequential steps: cue, craving, response, and reward. A cue is the trigger, a piece of information predicting a reward. This cue then sparks a craving, the motivational desire for a change in your internal state. The response is the actual behavior you perform, which can be a thought or an action. Finally, the reward satisfies the craving, reinforcing the entire cycle and teaching your brain to repeat the action when the cue reappears.",
+        "Understanding this loop gives you powerful leverage over your own actions. Just as you learned in Stabilizing Attention: Overcoming Mind-Wandering to observe your thoughts, here you can observe the subtle mechanics of your habits. By identifying the specific cue that triggers a craving, or the reward that satisfies it, you gain the ability to intentionally shape your routines. This insight allows you to build beneficial habits and dismantle unhelpful ones, much like understanding Dependent Origination helps you break cycles of suffering."
+      ],
+      "sources": [
+        {
+          "book": "Atomic Habits",
+          "ref": "four stages of habit",
+          "quote": [
+            "Habits operate via a four-step neurological feedback loop: cue, craving, response, and reward. This cycle is continuous, driving behavior and teaching the brain to repeat actions."
+          ]
+        }
+      ],
+      "quiz": [
+        {
+          "q": "Which of the following is the first step in the habit loop?",
+          "c": [
+            "Craving",
+            "Cue",
+            "Response",
+            "Reward"
+          ],
+          "a": 1,
+          "why": "The cue is the initial trigger that signals a potential reward, initiating the habit cycle."
+        },
+        {
+          "q": "What is the primary purpose of the 'craving' stage in the habit loop?",
+          "c": [
+            "To perform the physical action",
+            "To receive external validation",
+            "To desire a change in internal state",
+            "To identify the trigger"
+          ],
+          "a": 2,
+          "why": "Cravings are the motivational force, representing a desire to alter one's current internal state."
+        },
+        {
+          "q": "How do rewards contribute to the habit loop?",
+          "c": [
+            "They reduce the effort required for the response",
+            "They eliminate the need for a cue",
+            "They satisfy the craving and teach the brain which actions to repeat",
+            "They only provide temporary pleasure"
+          ],
+          "a": 2,
+          "why": "Rewards close the feedback loop by satisfying the craving and reinforcing the behavior, teaching the brain to associate the action with satisfaction."
+        }
+      ],
+      "apply": {
+        "prompt": "This week, choose one small, recurring habit you want to understand better, either a good one or one you wish to change. For a few days, observe and journal the four steps of its habit loop: What is the exact cue? What craving does it spark? What is your precise response? What reward do you gain from it? Reflect on how each step influences the next.",
+        "min": 50
+      },
+      "whyreq": "Builds directly on “The Plateau of Latent Potential” — grasp that first."
+    },
+    {
+      "id": "j4",
+      "track": "J",
+      "tier": 3,
+      "prereq": [
+        "j3"
+      ],
+      "glyph": "🔗",
+      "title": "Habit Stacking",
+      "bridge": [
+        "You want to read more, meditate daily, or exercise consistently, but find yourself forgetting or lacking the motivation to start. This is where Habit Stacking comes in: a powerful method to integrate new behaviors into your existing daily routine. Instead of relying on willpower or memory, you link your desired new action to something you already do automatically, making the new habit almost impossible to miss.",
+        "The core mechanism is a simple formula: \"After [CURRENT HABIT], I will [NEW HABIT].\" This creates an obvious cue for your new behavior by leveraging the momentum of an already established routine. For instance, \"After I pour my morning coffee, I will meditate for one minute.\" The current habit acts as a trigger, prompting the next action without conscious effort, much like a chain reaction.",
+        "This strategy taps into the natural flow of your day, recognizing that behaviors rarely happen in isolation; one action often cues the next. By intentionally designing these links, you create a positive chain, reversing the \"Diderot Effect\" where one purchase leads to another. This deliberate arrangement of conditions for your desired actions mirrors the intentionality you bring to your meditation practice in Setting Up: Posture, Intention, the Object."
+      ],
+      "sources": [
+        {
+          "book": "Atomic Habits",
+          "ref": "Habit Stacking Formula",
+          "quote": [
+            "Identify a current daily habit and stack your new behavior on top, using the formula 'After [CURRENT HABIT], I will [NEW HABIT]' to create an obvious cue."
+          ]
+        }
+      ],
+      "quiz": [
+        {
+          "q": "What is the primary purpose of Habit Stacking?",
+          "c": [
+            "To completely overhaul all your existing routines at once",
+            "To replace old bad habits with entirely new ones",
+            "To link a new desired behavior to an existing daily habit",
+            "To develop new habits by sheer willpower alone"
+          ],
+          "a": 2,
+          "why": "Habit stacking uses an existing habit as a trigger for a new one."
+        },
+        {
+          "q": "Which of the following best represents the Habit Stacking formula?",
+          "c": [
+            "Before [NEW HABIT], I will [CURRENT HABIT].",
+            "After [CURRENT HABIT], I will [NEW HABIT].",
+            "If [LOCATION], then [NEW HABIT].",
+            "I will [NEW HABIT] at [TIME]."
+          ],
+          "a": 1,
+          "why": "The formula explicitly states to perform the new habit after an existing one."
+        },
+        {
+          "q": "Habit Stacking leverages the principle that:",
+          "c": [
+            "New habits are always easier to start from scratch",
+            "Behaviors often occur in isolation",
+            "One action can naturally become a cue for the next",
+            "Only major life changes can lead to new habits"
+          ],
+          "a": 2,
+          "why": "The method works by recognizing that behaviors are interconnected, with one triggering the next."
+        }
+      ],
+      "apply": {
+        "prompt": "Choose one small new habit you wish to cultivate (e.g., drink a glass of water, stretch for 30 seconds, read one page). Identify an existing daily habit you perform consistently. Write down your Habit Stacking formula, then practice it for one week. Afterwards, reflect on how consistently you performed the new habit and what made it easier or harder.",
+        "min": 75
+      },
+      "whyreq": "Builds directly on “The Habit Loop” — grasp that first."
+    },
+    {
+      "id": "j5",
+      "track": "J",
+      "tier": 4,
+      "prereq": [
+        "j4"
+      ],
+      "glyph": "🌟",
+      "title": "The Allure of Supernormal Stimuli",
+      "bridge": [
+        "The allure of supernormal stimuli is everywhere, from the perfectly engineered crunch of a potato chip to the endless scroll of social media. These are not merely attractive; they are hyper-attractive, designed to exploit deep-seated instincts. You encounter them daily in advertising, processed foods, and digital experiences, each crafted to be more compelling than anything found in the natural world.",
+        "Supernormal stimuli are exaggerated versions of natural cues that trigger an amplified, often automatic, response. Just as a goose might try to incubate a volleyball, your brain, with its ancient wiring, reacts intensely to heightened versions of salt, sugar, fat, social validation, or visual appeal. Modern industries meticulously engineer products to hit a 'bliss point,' bypassing your rational defenses and driving strong cravings and behaviors.",
+        "Understanding these engineered appeals is crucial for navigating a world constantly pushing your buttons. Recognizing a supernormal stimulus allows you to observe its effect, much like you learned to step outside the fog of \"The Five Hindrances\". This insight builds on \"Perception Is Everything\", revealing how external cues are deliberately crafted to manipulate our natural responses and make certain actions, like overeating or excessive scrolling, seem irresistible."
+      ],
+      "sources": [
+        {
+          "book": "Atomic Habits",
+          "ref": "Exaggerated Cues",
+          "quote": [
+            "Supernormal stimuli are heightened versions of reality that elicit a stronger, often instinctual, response in both animals and humans than natural cues."
+          ]
+        },
+        {
+          "book": "Atomic Habits",
+          "ref": "Bliss Point",
+          "quote": [
+            "Food scientists find the 'bliss point' for products, a precise combination of salt, sugar, and fat that excites the brain and keeps consumers returning."
+          ]
+        }
+      ],
+      "quiz": [
+        {
+          "q": "What is a core characteristic of a supernormal stimulus?",
+          "c": [
+            "It is a rare and unique object.",
+            "It is an exaggerated version of a natural cue.",
+            "It is a stimulus that causes fear.",
+            "It is a simple, unprocessed natural item."
+          ],
+          "a": 1,
+          "why": "Supernormal stimuli are designed to amplify natural attractions beyond their evolutionary purpose."
+        },
+        {
+          "q": "Why does modern junk food act as a supernormal stimulus?",
+          "c": [
+            "It is difficult to find and obtain.",
+            "It offers low nutritional value.",
+            "It combines high salt, sugar, and fat, which were historically scarce.",
+            "It requires complex preparation."
+          ],
+          "a": 2,
+          "why": "Our ancient brains evolved to highly value calorie-dense foods like salt, sugar, and fat due to their historical scarcity."
+        },
+        {
+          "q": "Which concept describes combining crunchy and creamy sensations in food to increase appeal?",
+          "c": [
+            "Orosensation.",
+            "Bliss point.",
+            "Dynamic contrast.",
+            "Supernormal flavoring."
+          ],
+          "a": 2,
+          "why": "Dynamic contrast specifically refers to the combination of varied sensations to maintain interest and encourage more consumption."
+        }
+      ],
+      "apply": {
+        "prompt": "For one day this week, actively observe your environment for instances of supernormal stimuli. Note three specific examples (e.g., a specific food, social media feature, advertisement), explaining how each exaggerates a natural attractive quality and its noticeable effect on you.",
+        "min": 50
+      },
+      "whyreq": "Builds directly on “Habit Stacking” — grasp that first."
+    },
+    {
+      "id": "j6",
+      "track": "J",
+      "tier": 5,
+      "prereq": [
+        "j5"
+      ],
+      "glyph": "🧩",
+      "title": "Underlying Motives, Surface Cravings",
+      "bridge": [
+        "When you reach for a specific habit – a snack, social media, or even a particular workout – you are responding to a surface-level craving. But beneath that immediate desire lies a deeper, ancient human motive. For instance, your craving for a taco isn't just about the taste; it's a specific manifestation of the fundamental need to obtain food and water for survival.",
+        "Your brain didn't evolve to desire modern phenomena like cigarettes or Instagram. Instead, these habits latch onto universal human drivers: connecting with others, reducing uncertainty, achieving status, or finding belonging. A specific craving, then, is merely one of many possible solutions your mind has learned to associate with an underlying need.",
+        "Recognising this distinction is powerful. Your current habits are not the only, or even the best, ways to address your deep-seated needs; they are simply the solutions you've picked up. This awareness allows you to consciously choose new, more beneficial habits that still satisfy those core motives, much like understanding the feeling-tone you met earlier helps you relate differently to experience."
+      ],
+      "sources": [
+        {
+          "book": "Atomic Habits",
+          "ref": "Cravings and Motives",
+          "quote": [
+            "Every behavior has a surface craving, yet a deeper underlying motive. Your brain did not evolve to want specific modern habits, but rather these habits attach to ancient human desires like connection or status."
+          ]
+        }
+      ],
+      "quiz": [
+        {
+          "q": "Which best describes the relationship between a surface craving and an underlying motive?",
+          "c": [
+            "A surface craving creates an underlying motive.",
+            "An underlying motive is a specific manifestation of a surface craving.",
+            "A surface craving is a specific manifestation of an underlying motive.",
+            "They are completely unrelated."
+          ],
+          "a": 2,
+          "why": "Surface cravings are the specific ways deeper, ancient motives express themselves in modern life."
+        },
+        {
+          "q": "According to the text, which is an example of an underlying human motive?",
+          "c": [
+            "Smoking cigarettes.",
+            "Checking social media.",
+            "Playing video games.",
+            "Achieving status and prestige."
+          ],
+          "a": 3,
+          "why": "The text lists achieving status and prestige as one of the deep, ancient human motives."
+        },
+        {
+          "q": "Understanding the difference between cravings and motives allows you to:",
+          "c": [
+            "Only pursue habits that directly satisfy surface cravings.",
+            "Force yourself to stop all current habits immediately.",
+            "Identify alternative, healthier habits to meet core needs.",
+            "Conclude that all habits are inherently negative."
+          ],
+          "a": 2,
+          "why": "Knowing underlying motives helps you find better, alternative solutions to satisfy them."
+        }
+      ],
+      "apply": {
+        "prompt": "This week, choose one habit you want to change. For two days, observe its surface craving. Then, reflect on the deeper underlying motive it might be trying to satisfy. Write down at least two alternative, healthier ways you could meet that same underlying motive.",
+        "min": 50
+      },
+      "whyreq": "Builds directly on “The Allure of Supernormal Stimuli” — grasp that first."
+    },
+    {
+      "id": "j7",
+      "track": "J",
+      "tier": 6,
+      "prereq": [
+        "j6"
+      ],
+      "glyph": "➡️",
+      "title": "The Law of Least Effort",
+      "bridge": [
+        "You observe The Law of Least Effort whenever you choose the easiest option available. Whether it's opting for the closest parking spot or selecting the pre-sliced vegetables, your brain is naturally wired to conserve energy. This inherent inclination means that human behavior will consistently gravitate towards the path of least resistance. To effectively influence your habits, you must understand and consciously leverage this fundamental principle.",
+        "The core mechanism at play is friction: the amount of effort required to perform an action. To build good habits, you must actively reduce this friction by designing your environment to make desired actions as easy as possible. Conversely, to break bad habits, you deliberately increase friction, making unwanted behaviors difficult to execute. This 'proactive laziness' ensures the default choice is often the beneficial one, minimizing the need for willpower.",
+        "Consider how a simple act, like laying out your workout clothes the night before, can act as an 'entrance ramp' to an entire exercise routine. This initial, low-friction step makes subsequent actions flow more easily, much like how a strong intention, as discussed in Setting Up: Posture, Intention, the Object, guides your meditation practice. By consciously shaping your surroundings, you create a world where doing what's right is also the easiest thing to do."
+      ],
+      "sources": [
+        {
+          "book": "Atomic Habits",
+          "ref": "Designing for ease",
+          "quote": [
+            "Human behavior follows the Law of Least Effort, naturally gravitating toward the option requiring the least work. Design your environment to make good behaviors easy and bad behaviors difficult by adjusting friction."
+          ]
+        }
+      ],
+      "quiz": [
+        {
+          "q": "According to the Law of Least Effort, what primarily drives human behavior?",
+          "c": [
+            "The desire for novelty",
+            "The pursuit of pleasure",
+            "The path of least resistance",
+            "The need for challenge"
+          ],
+          "a": 2,
+          "why": "Human behavior naturally gravitates toward the option that requires the least amount of work."
+        },
+        {
+          "q": "To successfully build a good habit, what should you do regarding friction?",
+          "c": [
+            "Increase it significantly",
+            "Maintain a moderate level",
+            "Reduce it as much as possible",
+            "Ignore it completely"
+          ],
+          "a": 2,
+          "why": "When friction is low, habits are easy to perform."
+        },
+        {
+          "q": "Which of the following is an example of increasing friction for a bad habit?",
+          "c": [
+            "Pre-chopping vegetables for meals",
+            "Placing drawing tools on your desk",
+            "Unplugging the television after each use",
+            "Setting out workout clothes the night before"
+          ],
+          "a": 2,
+          "why": "Unplugging the television makes it more difficult to watch mindlessly, thereby increasing friction."
+        }
+      ],
+      "apply": {
+        "prompt": "Identify one good habit you want to cultivate and one bad habit you want to break this week. For the good habit, describe how you will reduce friction in your environment. For the bad habit, describe how you will increase friction. Reflect on the immediate impact of these changes.",
+        "min": 50
+      },
+      "whyreq": "Builds directly on “Underlying Motives, Surface Cravings” — grasp that first."
+    },
+    {
+      "id": "j8",
+      "track": "J",
+      "tier": 7,
+      "prereq": [
+        "j7"
+      ],
+      "glyph": "⏳",
+      "title": "The Immediate-Return Bias",
+      "bridge": [
+        "You live in a world where many rewards are delayed: a paycheck weeks away, fitness next year, retirement decades from now. This 'delayed-return environment' is a recent societal invention, yet your brain operates with hardware designed for a very different past. For thousands of generations, your ancestors thrived by prioritizing immediate needs like securing food or shelter, making instant gratification a survival mechanism. This evolutionary wiring means your brain naturally values present rewards over future ones.",
+        "This 'immediate-return bias' creates a fundamental conflict: bad habits offer instant pleasure but delayed harm, while good habits demand immediate effort for distant benefits. Smoking provides instant stress relief, but lung cancer is years away. Exercising is effortful now, but fitness comes later. Your 'present self' consistently overrides the intentions of your 'future self' because the brain's reward system is inconsistent across time, always favoring the now.",
+        "To overcome this deep-seated bias, you must work with human nature, not against it. The key is to add immediate satisfaction to your good habits. This 'reinforcement' creates a feeling of success, signalling to your brain that the effort was worthwhile, even before the long-term payoffs accrue. Just as you learned to recognise and work with The Five Hindrances, you can observe this bias and strategically re-engineer your environment to make the 'road less travelled' of delayed gratification more appealing in the moment."
+      ],
+      "sources": [
+        {
+          "book": "Atomic Habits",
+          "ref": "Time Inconsistency",
+          "quote": [
+            "Your brain, evolved for immediate-return environments, struggles in modern society where rewards are delayed, prioritizing present gratification over future benefits due to time inconsistency."
+          ]
+        }
+      ],
+      "quiz": [
+        {
+          "q": "Why do bad habits often persist despite known long-term negative consequences?",
+          "c": [
+            "The consequences are rarely severe enough to matter.",
+            "The immediate rewards outweigh the delayed negative outcomes.",
+            "People are generally unaware of the long-term consequences.",
+            "Bad habits are simply too difficult to break due to willpower."
+          ],
+          "a": 1,
+          "why": "The brain prioritizes immediate gratification, making instant rewards more compelling than distant consequences."
+        },
+        {
+          "q": "In a 'delayed-return environment', what is a common challenge for individuals?",
+          "c": [
+            "Finding sufficient opportunities for work.",
+            "Maintaining social connections.",
+            "Aligning immediate actions with long-term goals.",
+            "Accessing necessary resources quickly."
+          ],
+          "a": 2,
+          "why": "The brain's preference for immediate gratification makes it difficult to pursue actions with delayed benefits."
+        },
+        {
+          "q": "According to the lesson, how can you best encourage good habits that have delayed rewards?",
+          "c": [
+            "By relying solely on strong willpower and discipline.",
+            "By focusing only on the ultimate long-term benefits.",
+            "By adding immediate satisfaction or small rewards to the habit.",
+            "By ignoring the immediate unpleasantness of the habit."
+          ],
+          "a": 2,
+          "why": "Immediate rewards (reinforcement) create a feeling of success and help habits stick before the long-term benefits are apparent."
+        }
+      ],
+      "apply": {
+        "prompt": "Identify one good habit you want to establish this week that has primarily delayed rewards (e.g., studying, exercising, saving). Design and implement a small, immediate reward you will give yourself immediately after completing the habit each day. Reflect on how this immediate reward impacts your motivation and adherence.",
+        "min": 50
+      },
+      "whyreq": "Builds directly on “The Law of Least Effort” — grasp that first."
+    },
+    {
+      "id": "j9",
+      "track": "J",
+      "tier": 8,
+      "prereq": [
+        "j8"
+      ],
+      "glyph": "🤝",
+      "title": "Habit Contracts and Accountability",
+      "bridge": [
+        "When you find yourself struggling to break a bad habit, a formal commitment can provide the necessary leverage. A habit contract is a clear agreement you make, often written, stating your commitment to a specific action and the precise, painful consequences if you fail to follow through. This externalizes the internal struggle, turning a private intention into a public obligation.",
+        "The mechanism works by making the cost of inaction immediate, tangible, and concrete. While distant consequences like future health problems are easy to ignore, the threat of an immediate financial penalty or public embarrassment creates a powerful deterrent. This shifts the balance, ensuring the cost of procrastination or laziness outweighs the cost of taking action.",
+        "This strategy powerfully leverages social pressure, a force you've encountered with ideas like Social Proof. Knowing that others are watching, and that your reputation is on the line, can be a profound motivator. An accountability partner transforms a personal goal into a shared commitment, adding a social cost to failing to uphold your promises, not just to yourself, but to others."
+      ],
+      "sources": [
+        {
+          "book": "Atomic Habits",
+          "ref": "habit contracts and consequences",
+          "quote": [
+            "To make bad habits unsatisfying, create a habit contract or use an accountability partner to add immediate, public, and painful consequences to inaction."
+          ]
+        }
+      ],
+      "quiz": [
+        {
+          "q": "What is the primary purpose of a habit contract?",
+          "c": [
+            "To make a habit easier to perform",
+            "To add immediate and painful consequences to inaction",
+            "To track progress over time",
+            "To share your goals with friends"
+          ],
+          "a": 1,
+          "why": "Habit contracts are designed to make bad habits unsatisfying by attaching immediate costs to not following through."
+        },
+        {
+          "q": "According to the passage, which characteristic makes consequences most effective in influencing behavior?",
+          "c": [
+            "Global and vague",
+            "Delayed and intangible",
+            "Local, tangible, and immediate",
+            "Internal and abstract"
+          ],
+          "a": 2,
+          "why": "The passage states that consequences are more likely to influence behavior if they are local, tangible, concrete, and immediate."
+        },
+        {
+          "q": "An accountability partner primarily influences behavior by leveraging what?",
+          "c": [
+            "Internal motivation",
+            "The desire for self-improvement",
+            "Social pressure and external observation",
+            "Financial incentives alone"
+          ],
+          "a": 2,
+          "why": "Accountability partners work by adding a social cost to inaction, leveraging the human desire to present one's best self and avoid negative judgment from others."
+        }
+      ],
+      "apply": {
+        "prompt": "Identify one small habit you want to break this week (e.g., checking social media first thing in the morning, hitting snooze twice). Write a mini-habit contract for yourself, outlining a specific, immediate, and slightly painful consequence if you fail. Share this contract with one trusted person and ask them to be your accountability partner. Report on your experience.",
+        "min": 50
+      },
+      "whyreq": "Builds directly on “The Immediate-Return Bias” — grasp that first."
+    },
+    {
+      "id": "j10",
+      "track": "J",
+      "tier": 9,
+      "prereq": [
+        "j9"
+      ],
+      "glyph": "💪",
+      "title": "The Professional Mindset",
+      "bridge": [
+        "The Professional Mindset means showing up and doing the work, even when you don't feel like it. When you face tasks that are annoying, painful, or draining, your commitment to the schedule becomes the deciding factor. This discipline separates those who achieve long-term success from those who only pursue goals when they are convenient or exciting. It's about consistently putting in the effort, regardless of your current mood or level of motivation.",
+        "The mechanism is to override the immediate desire for comfort or excitement with a commitment to your established routine. While amateurs let their feelings dictate their actions, professionals prioritize their schedule and purpose. This isn't about enjoying every moment of the process, but rather finding a way to consistently put in the necessary repetitions. You choose to act based on what is important to you, not on fleeting urges or the allure of variable rewards.",
+        "This steadfastness is crucial for any self-improvement journey, echoing the discipline needed to maintain Stabilizing Attention during meditation. Just as you learn to return to the breath despite mind-wandering, here you learn to return to your habit despite internal resistance. It requires a willingness to 'fall in love with boredom,' understanding that consistent, unexciting effort forms the bedrock of true mastery."
+      ],
+      "sources": [
+        {
+          "book": "Atomic Habits",
+          "ref": "Professional vs. Amateur",
+          "quote": [
+            "Professionals stick to the schedule, even when it is annoying or painful, knowing that continuous, often boring, effort makes the difference over amateurs who let mood dictate action."
+          ]
+        }
+      ],
+      "quiz": [
+        {
+          "q": "What distinguishes a professional from an amateur in habit formation?",
+          "c": [
+            "Professionals always enjoy their work.",
+            "Professionals only work when they feel motivated.",
+            "Professionals stick to their schedule regardless of mood.",
+            "Professionals seek constant variable rewards."
+          ],
+          "a": 2,
+          "why": "Professionals prioritize their schedule and purpose over fluctuating feelings or convenience."
+        },
+        {
+          "q": "What is identified as the greatest threat to long-term success with habits?",
+          "c": [
+            "Lack of talent",
+            "Boredom",
+            "Failure",
+            "External distractions"
+          ],
+          "a": 1,
+          "why": "As habits become routine, they can lose their initial excitement, making boredom a significant challenge to consistent effort."
+        },
+        {
+          "q": "When a habit becomes automatic, what is a potential downside for mastery?",
+          "c": [
+            "It becomes too exciting.",
+            "You become less sensitive to feedback and stop improving.",
+            "It requires more conscious effort.",
+            "It prevents you from starting new habits."
+          ],
+          "a": 1,
+          "why": "Automaticity can lead to mindless repetition and a decreased awareness of small errors, hindering further refinement."
+        }
+      ],
+      "apply": {
+        "prompt": "Identify one habit you are trying to build or maintain this week. For three days, commit to performing this habit at its scheduled time, even if you feel bored, unmotivated, or tired. Reflect on how pushing through these feelings impacted your consistency and sense of accomplishment.",
+        "min": 50
+      },
+      "whyreq": "Builds directly on “Habit Contracts and Accountability” — grasp that first."
+    },
+    {
+      "id": "j11",
+      "track": "J",
+      "tier": 10,
+      "prereq": [
+        "j10"
+      ],
+      "glyph": "✨",
+      "title": "Desire Initiates, Pleasure Sustains",
+      "bridge": [
+        "When you embark on a new habit, a surge of desire often propels you forward. This initial wanting – the craving for a future reward or outcome – provides the necessary spark to begin. You might envision a fitter self, a cleaner home, or a completed project, and this mental image fuels your first steps. Without this initial pull, the inertia of starting something new would be too great to overcome, leaving your intentions unfulfilled.",
+        "This mechanism reveals two distinct forces at play: desire and pleasure. Desire, or wanting, is the feeling that motivates you to act; it's the craving for what's to come. Pleasure, or liking, is the feeling of satisfaction you experience after acting, which teaches your brain to repeat the action. If the outcome doesn't meet or exceed your expectations, the lack of pleasure means the habit won't stick, regardless of how strong the initial desire was.",
+        "Understanding this distinction is crucial for building lasting habits. You can use your initial desire to kickstart a behavior, but to truly embed it, you must find genuine pleasure in the process or its immediate outcome. This connects to the feeling-tone you encountered in Stabilizing Attention, where the subtle experience of the present moment can either draw you in or push you away. Cultivating satisfaction, even in small increments, becomes the engine for long-term consistency."
+      ],
+      "sources": [
+        {
+          "book": "Atomic Habits",
+          "ref": "Wanting and Liking",
+          "quote": [
+            "Desire and craving initiate behavior, while pleasure and satisfaction sustain it. If it's not desirable, you won't start; if it's not enjoyable, you won't repeat."
+          ]
+        }
+      ],
+      "quiz": [
+        {
+          "q": "What is the primary role of 'desire' in habit formation?",
+          "c": [
+            "To ensure the habit is always enjoyable.",
+            "To initiate the first action of a new behavior.",
+            "To provide long-term satisfaction.",
+            "To predict future outcomes accurately."
+          ],
+          "a": 1,
+          "why": "Desire and craving are the initial motivators that get you to act."
+        },
+        {
+          "q": "What factor is most responsible for sustaining a habit over time?",
+          "c": [
+            "The strength of initial hope.",
+            "The absence of any negative expectations.",
+            "The feeling of pleasure and satisfaction after the action.",
+            "The promise of a large future reward."
+          ],
+          "a": 2,
+          "why": "If a behavior is not enjoyable, there is no reason to repeat it."
+        },
+        {
+          "q": "According to the text, if your 'wants outpace your likes,' what is the likely outcome?",
+          "c": [
+            "Increased motivation to achieve more.",
+            "Perpetual dissatisfaction.",
+            "A balanced perspective on progress.",
+            "A stronger sense of hope for the future."
+          ],
+          "a": 1,
+          "why": "When wants exceed likes, you will always feel unsatisfied."
+        }
+      ],
+      "apply": {
+        "prompt": "Reflect on a habit you've tried to build but failed to maintain. Write about how your initial desire for it compared to the actual pleasure or satisfaction you derived from performing it. How might you redesign the habit to increase the 'liking' aspect?",
+        "min": 50
+      },
+      "whyreq": "Builds directly on “The Professional Mindset” — grasp that first."
+    },
+    {
+      "id": "j12",
+      "track": "J",
+      "tier": 11,
+      "prereq": [
+        "j11"
+      ],
+      "glyph": "🗓️",
+      "title": "The Power of Visual Progress",
+      "bridge": [
+        "When you commit to a new habit, the biggest challenge is often seeing the invisible progress. Imagine Benjamin Franklin tracking his virtues daily, or someone moving paper clips from one jar to another to mark completed tasks. This simple act of making progress visible transforms an abstract goal into a tangible chain of effort you don't want to break.",
+        "This visual feedback loop serves as an immediate reward in an environment often characterized by delayed returns. Your brain, evolved to prefer quick payoffs, receives a small dopamine hit each time you mark a habit complete. This consistent, visible proof of effort fuels motivation and reinforces the behavior, making it easier to sustain over the long term.",
+        "The 'Don't Break the Chain' method leverages your innate desire for consistency. Each completed day adds another link, strengthening your commitment and making the prospect of missing a day more undesirable. This practice helps you cultivate the sustained effort necessary for Why Train the Mind, ensuring that even small, daily actions accumulate into significant long-term growth."
+      ],
+      "sources": [
+        {
+          "book": "Atomic Habits",
+          "ref": "Tracking progress",
+          "quote": [
+            "Tracking progress, like a daily food log, significantly increases success rates, with those who tracked losing twice as much weight. The goal is to avoid breaking the chain of consistent action."
+          ]
+        }
+      ],
+      "quiz": [
+        {
+          "q": "The primary benefit of visually tracking your habit's progress is that it:",
+          "c": [
+            "makes the habit more complicated to perform",
+            "provides immediate and tangible feedback",
+            "reduces the overall time commitment needed",
+            "allows you to skip days without consequence"
+          ],
+          "a": 1,
+          "why": "Visual tracking offers immediate feedback, which acts as a powerful motivator and reward, especially in delayed-return environments."
+        },
+        {
+          "q": "The 'Don't Break the Chain' method is effective because it:",
+          "c": [
+            "forces you to accelerate your habit formation",
+            "capitalizes on your desire for consistency and to avoid breaking a streak",
+            "simplifies the habit by reducing its complexity",
+            "eliminates the need for internal motivation"
+          ],
+          "a": 1,
+          "why": "This method creates a strong psychological incentive to maintain continuous effort by making the streak visible."
+        },
+        {
+          "q": "According to the lesson, what is the impact of missing a habit once, provided you get back on track?",
+          "c": [
+            "It guarantees the habit will fail in the long-term",
+            "It significantly reduces your chances of future success",
+            "It has virtually no impact on long-term habit development",
+            "It requires you to restart your habit formation process from scratch"
+          ],
+          "a": 2,
+          "why": "Research indicates that a single missed habit has negligible effect on long-term formation as long as consistency is quickly restored."
+        }
+      ],
+      "apply": {
+        "prompt": "Choose one small habit you want to cultivate this week. Create a simple visual tracker (e.g., a calendar to mark off days, a jar for marbles, a notebook tally). At the end of the week, reflect on how seeing your progress influenced your motivation and consistency.",
+        "min": 50
+      },
+      "whyreq": "Builds directly on “Desire Initiates, Pleasure Sustains” — grasp that first."
     }
   ]
 }
