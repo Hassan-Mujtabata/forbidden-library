@@ -374,6 +374,11 @@ header .brand span{color:var(--gold)}
 .jnote .jq{font-family:var(--sans);font-size:11.5px;color:var(--tx2);margin-bottom:6px;line-height:1.4}
 .jnote .jt{font-family:var(--serif);font-size:14.5px;line-height:1.6}
 .jnote .jm{font-size:11px;color:var(--tx2);margin-top:7px;display:flex;justify-content:space-between;gap:8px}
+.jreview{background:rgba(78,205,196,.08);border-left:3px solid var(--jade);border-radius:0 9px 9px 0;
+  padding:11px 14px;margin:-4px 0 14px;font-size:13px;line-height:1.6;color:#cfe8e4}
+.jreview b{color:var(--jade);letter-spacing:.06em}
+.jreview .jr-re{float:right;color:var(--tx2);cursor:pointer;font-size:12px;margin-left:8px}
+.jreview.pending{color:var(--tx2);font-style:italic}
 
 /* ---------- toasts ---------- */
 #toasts{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);z-index:100;display:flex;flex-direction:column;gap:8px;align-items:center}
@@ -479,6 +484,7 @@ header .brand span{color:var(--gold)}
   <h2>📓 JOURNAL <button class="x" data-close="hls">✕</button></h2>
   <div id="jstats"></div>
   <div id="jactions"></div>
+  <div class="abtok" id="gembox" style="margin-top:8px"></div>
   <div class="jsec">✍️ YOUR APPLY NOTES</div><div id="jnotes"></div>
   <div class="jsec">⭐ HIGHLIGHTS</div><div id="hlrows"></div>
   <input type="file" id="jfile" accept="application/json" style="display:none">
@@ -874,7 +880,7 @@ function journalNotes(){return DATA.nodes
 function journalText(){
   let t="# The Vault — Journal\n\n## Apply notes\n\n";
   for(const {node,rec} of journalNotes())
-    t+=`### ${node.title} (${trackById(node.track).name}${rec.doneAt?", "+fmtDate(rec.doneAt):""})\n> ${node.apply.prompt}\n\n${rec.applied}\n\n`;
+    t+=`### ${node.title} (${trackById(node.track).name}${rec.doneAt?", "+fmtDate(rec.doneAt):""})\n> ${node.apply.prompt}\n\n${rec.applied}\n`+(rec.review?`\n🎓 Tutor: ${rec.review}\n`:"")+`\n`;
   t+="## Highlights\n\n";
   for(const h of S.hl){
     const src=h.n?(nodeById(h.n)||{}).title:(bookById(h.b)||{}).title;
@@ -906,6 +912,61 @@ function restoreVault(file){
   }catch(e){toast("⚠️ That file isn't a vault backup")}};
   rd.readAsText(file);
 }
+/* ---------- Gemini tutor: reviews your apply-notes (browser-side, your key, when online) ---------- */
+const geminiKeys=()=>(localStorage.getItem("vault_gemini")||"").split(/[\s,]+/).filter(Boolean);
+async function geminiCall(prompt,maxTok=220){
+  const keys=geminiKeys();if(!keys.length)throw new Error("no-key");
+  let quota=false;
+  for(const k of keys){
+    try{
+      const r=await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key="+encodeURIComponent(k),
+        {method:"POST",headers:{"Content-Type":"application/json"},
+         body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{maxOutputTokens:maxTok,temperature:0.7}})});
+      if(r.status===429){quota=true;continue;}          // this key spent -> next key
+      if(r.status===400||r.status===403)continue;        // bad key -> next key
+      if(!r.ok)throw new Error("gemini "+r.status);
+      const j=await r.json();
+      const t=j.candidates&&j.candidates[0]&&j.candidates[0].content&&j.candidates[0].content.parts[0].text;
+      if(t)return t.trim();
+    }catch(e){if(e.message==="no-key")throw e;}          // network error -> try next key
+  }
+  throw new Error(quota?"quota":"unreachable");
+}
+async function reviewNote(nodeId){
+  const n=nodeById(nodeId),rec=S.node[nodeId];if(!n||!rec||!rec.applied)return;
+  const prompt=`You are a warm, sharp self-study tutor inside a personal learning app. A learner applied the idea "${n.title}" to their own life.\nThe practice prompt was: "${(n.apply&&n.apply.prompt)||""}"\nWhat they wrote: "${rec.applied}"\n\nWrite 2 to 4 sentences of feedback as plain text, second person, no preamble and no markdown. First, affirm something specific and genuine in how they applied it. Then deepen it: name a subtlety, the next layer of the idea, or gently correct a misunderstanding if there is one. End with one concrete thing to try or notice next. Warm but not gushing. Never mention being an AI or a model.`;
+  const fb=await geminiCall(prompt,220);
+  rec.review=fb;rec.reviewAt=Date.now();save();return fb;
+}
+async function reviewAllNotes(){
+  const pending=journalNotes().filter(x=>!x.rec.review);if(!pending.length)return;
+  const btn=$("gem-review");if(btn)btn.disabled=true;
+  let done=0;
+  for(const {node} of pending){
+    if(btn)btn.textContent="Reviewing… "+(done+1)+"/"+pending.length;
+    try{await reviewNote(node.id);done++;}
+    catch(e){toast(e.message==="quota"?"Gemini quota spent — resets tomorrow":e.message==="no-key"?"Add a Gemini key first":"Tutor unreachable — check your connection");break;}
+  }
+  renderJournal();
+  if(done)toast("🎓 "+done+" reflection"+(done>1?"s":"")+" reviewed by your tutor");
+}
+function renderGemBox(){
+  const box=$("gembox"),keys=geminiKeys(),unrev=journalNotes().filter(x=>!x.rec.review).length;
+  if(keys.length){
+    box.classList.add("ok");
+    box.innerHTML=`🎓 <b>Tutor connected</b> (${keys.length} key${keys.length>1?"s":""}). `+
+      (unrev?`${unrev} reflection${unrev>1?"s":""} awaiting feedback. <button class="ghostbtn" id="gem-review" style="margin:6px 8px 0 0;padding:7px 14px;font-size:12.5px">Review now</button>`
+            :"Every reflection has tutor feedback. ")+
+      `<span class="miniA" id="gem-clear">disconnect</span>`;
+    if($("gem-review"))$("gem-review").onclick=reviewAllNotes;
+    $("gem-clear").onclick=()=>{localStorage.removeItem("vault_gemini");renderJournal()};
+  }else{
+    box.classList.remove("ok");
+    box.innerHTML=`<div class="abnote" style="margin:0 0 8px">🎓 <b>Optional — a tutor for your reflections.</b> Paste a Google Gemini API key (one per line for several). When you're online, a tutor reads what you write in the “Apply it” step and leaves feedback under it, like a coach checking your self-study. Stored only on this device.</div>
+      <input type="password" id="gem-key" placeholder="AIza…"><span class="miniA" id="gem-save">connect tutor</span>`;
+    $("gem-save").onclick=()=>{const v=$("gem-key").value.trim();if(v){localStorage.setItem("vault_gemini",v);renderJournal()}};
+  }
+}
 function renderJournal(){
   const stats=$("jstats");
   const notes=journalNotes();
@@ -925,6 +986,7 @@ function renderJournal(){
   mk("📋 Copy all as text",copyJournal);
   mk("💾 Download backup",backupVault);
   mk("📥 Restore backup",()=>$("jfile").click());
+  renderGemBox();
   const jn=$("jnotes");jn.innerHTML="";
   if(!notes.length)jn.innerHTML='<p style="color:var(--tx2);font-size:13px">Master ideas on the Path — everything you write in the “Apply it” step collects here.</p>';
   for(const {node,rec} of notes){
@@ -934,6 +996,13 @@ function renderJournal(){
       <div class="jm"><span>${esc(trackById(node.track).name)}</span><span>${rec.doneAt?fmtDate(rec.doneAt):""} · tap to revisit ›</span></div>`;
     el.onclick=()=>openNode(node.id);
     jn.appendChild(el);
+    if(rec.review){
+      const rv=document.createElement("div");rv.className="jreview";
+      rv.innerHTML=`<span class="jr-re" title="get fresh feedback">↻</span>🎓 <b>TUTOR</b> — ${esc(rec.review)}`;
+      rv.querySelector(".jr-re").onclick=async()=>{rv.classList.add("pending");rv.innerHTML="🎓 the tutor is re-reading…";
+        try{await reviewNote(node.id)}catch(e){toast(e.message==="quota"?"Gemini quota spent — resets tomorrow":"Tutor unreachable")}renderJournal()};
+      jn.appendChild(rv);
+    }
   }
   const w=$("hlrows");w.innerHTML="";
   if(!S.hl.length)w.innerHTML='<p style="color:var(--tx2);font-size:13px">Select any text while reading to collect it here.</p>';
@@ -992,8 +1061,12 @@ $("btn-ach").onclick=()=>{const g=$("achgrid");g.innerHTML="";
   $("achs").classList.add("on")};
 
 /* ---------- patch notes ---------- */
-const APP_VER="3.7";
+const APP_VER="3.8";
 const PATCHES=[
+ {v:"3.8",n:"The Tutor",d:"14 Jul 2026",items:[
+  ["new","🎓 A tutor for your reflections. Connect a Gemini key in the Journal (stored only on your device) and, when you're online, a tutor reads what you write in the “Apply it” step and leaves specific feedback under it — like a coach checking your self-study."],
+  ["new","New reflections are reviewed automatically as you write them; older ones get a “Review now” button, and any note can be re-reviewed with ↻. Feedback is saved and included in your journal export and backup."],
+  ["polish","Audited the whole vault: all 21 books have their full content in the app, and every idea on the Path stays locked until its prerequisite concept is mastered."]]},
  {v:"3.7",n:"The Polish",d:"14 Jul 2026",items:[
   ["new","Highlight a word and tap 📖 Define — you get its meaning from your OWN lessons if you've met it before (with a link back), or the dictionary if not."],
   ["fix","Adding a book is now one step: pick the PDF, done. The pipeline decides where it belongs on the Path — no more being asked to name a track."],
@@ -1747,6 +1820,9 @@ function completeNode(n){
   }
   if(trackDone(n.track)){const tr=trackById(n.track);setTimeout(()=>toast(`${tr.glyph} ${tr.name.toUpperCase()} — TRACK COMPLETE`,true),1150);}
   if(DATA.nodes.every(x=>nodeDone(x.id)))setTimeout(()=>toast("🧭 THE ENTIRE PATH — MASTERED",true),1800);
+  // hand the fresh reflection to the tutor in the background (if connected & online)
+  if(rec.applied&&!rec.review&&geminiKeys().length&&navigator.onLine)
+    reviewNote(n.id).then(()=>{toast("🎓 Your tutor left feedback in the Journal");if($("hls").classList.contains("on"))renderJournal();}).catch(()=>{});
   const unlocked=DATA.nodes.filter(c=>c.prereq.includes(n.id)&&nodeAvail(c.id)&&!nodeDone(c.id));
   S._justUnlocked=unlocked.map(u=>u.id);
   const gate=$("ngate");
