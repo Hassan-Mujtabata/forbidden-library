@@ -109,8 +109,20 @@ header .brand span{color:var(--gold)}
 .goldbtn:hover{transform:translateY(-2px)}
 .ghostbtn{border:1px solid var(--line);border-radius:12px;padding:13px 26px;color:var(--tx);font-size:13.5px;margin:6px;transition:.2s}
 .ghostbtn:hover{background:var(--card2)}
-#hlbtn{position:absolute;z-index:70;background:var(--gold);color:#151006;font-weight:700;font-size:12.5px;
-  padding:7px 13px;border-radius:99px;display:none;box-shadow:0 6px 18px rgba(0,0,0,.5)}
+#hlbtn{position:absolute;z-index:70;display:none;gap:1px;border-radius:10px;overflow:hidden;box-shadow:0 6px 18px rgba(0,0,0,.55)}
+#hlbtn button{font-weight:700;font-size:12.5px;padding:8px 13px;border:none;cursor:pointer}
+#hlbtn #hl-save{background:var(--gold);color:#151006}
+#hlbtn #hl-def{background:#1c1a12;color:var(--gold);border-left:1px solid rgba(0,0,0,.3)}
+#defpop{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);z-index:105;display:none;
+  width:min(460px,92vw);background:#12131b;border:1px solid var(--gold);border-radius:16px;padding:16px 18px;
+  box-shadow:0 16px 40px rgba(0,0,0,.6)}
+#defpop.on{display:block;animation:pop .25s ease-out}
+#defpop .dp-x{position:absolute;top:10px;right:12px;background:none;border:none;color:var(--tx2);font-size:18px;cursor:pointer}
+#defpop .dp-word{font-family:var(--serif);font-size:19px;color:var(--gold);margin-bottom:3px;padding-right:20px}
+#defpop .dp-src{font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--tx2);margin-bottom:8px}
+#defpop .dp-body{font-size:14px;line-height:1.6;color:var(--tx);max-height:38vh;overflow-y:auto}
+#defpop .dp-body mark{background:rgba(212,175,55,.28);color:var(--tx);border-radius:3px;padding:0 2px}
+#defpop .dp-open{margin-top:12px;padding:9px 16px;font-size:12.5px}
 
 /* ---------- drawer / panels ---------- */
 .panel{max-width:660px;margin:40px auto;padding:0 18px 60px}
@@ -193,6 +205,17 @@ header .brand span{color:var(--gold)}
 .nav{display:flex;gap:4px;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:3px}
 .navbtn{padding:7px 15px;border-radius:999px;font-size:13px;color:var(--tx2);font-weight:600;transition:.2s}
 .navbtn.on{background:var(--card2);color:var(--tx)}
+@media(max-width:560px){
+  /* deliberate 3-row layout: [brand · icons] / [nav · streak] / [xp bar] */
+  #topbar{gap:8px 7px;padding:10px 11px}
+  #topbar .brand{font-size:13px;letter-spacing:.05em;order:1}
+  .iconrow{order:2;margin-left:auto;gap:4px}
+  .iconbtn{padding:6px 7px;font-size:14px;border-radius:9px}
+  .nav{order:3}
+  .navbtn{padding:6px 12px;font-size:12.5px}
+  #topbar .hstat{order:4;padding:5px 10px;font-size:11.5px}
+  #xpwrap{order:5;flex:1 1 100%;max-width:none;min-width:0}
+}
 
 /* ---------- the path (skill tree) ---------- */
 #path{padding-top:6px}
@@ -493,7 +516,8 @@ header .brand span{color:var(--gold)}
   </div>
 </div></div>
 
-<button id="hlbtn">⭐ Save highlight</button>
+<div id="hlbtn"><button id="hl-save">⭐ Save</button><button id="hl-def">📖 Define</button></div>
+<div id="defpop"><button class="dp-x" id="dp-x">✕</button><div class="dp-word" id="dp-word"></div><div class="dp-src" id="dp-src"></div><div class="dp-body" id="dp-body"></div><button class="ghostbtn dp-open" id="dp-open" style="display:none">Open the lesson →</button></div>
 <div id="toasts"></div>
 
 <script>
@@ -774,23 +798,74 @@ $("r-list").onclick=()=>{const b=bookById(CUR.b);const w=$("eprows");w.innerHTML
 
 /* ---------- highlights ---------- */
 const hlBtn=$("hlbtn");
+let SELTEXT="";
 document.addEventListener("selectionchange",()=>{
   const inReader=$("reader").classList.contains("on"),inNode=$("node").classList.contains("on");
   if(!inReader&&!inNode){hlBtn.style.display="none";return}
   const box=inReader?$("rbody"):$("nbody");
   const sel=document.getSelection();
   if(sel.isCollapsed||!box.contains(sel.anchorNode)){hlBtn.style.display="none";return}
+  const t=sel.toString().trim();SELTEXT=t;
+  if(!t){hlBtn.style.display="none";return}
+  const words=t.split(/\s+/).length;
+  $("hl-def").style.display=(words<=4&&t.length<=44)?"block":"none";  // define only short vocab
   const r=sel.getRangeAt(0).getBoundingClientRect();
-  hlBtn.style.display="block";
-  hlBtn.style.left=Math.max(8,Math.min(window.innerWidth-160,r.left+r.width/2-70))+"px";
-  hlBtn.style.top=(r.top+window.scrollY-44)+"px";
+  hlBtn.style.display="flex";
+  const w=hlBtn.offsetWidth||150;
+  hlBtn.style.left=Math.max(8,Math.min(window.innerWidth-w-8,r.left+r.width/2-w/2))+"px";
+  hlBtn.style.top=(r.top+window.scrollY-42)+"px";
 });
-hlBtn.onclick=()=>{const sel=document.getSelection();const t=sel.toString().trim().slice(0,600);
-  if(!t)return;
+$("hl-save").onclick=()=>{const t=SELTEXT.slice(0,600);if(!t)return;
   if($("node").classList.contains("on")&&CURN)S.hl.unshift({n:CURN,t});
   else S.hl.unshift({b:CUR.b,e:CUR.e,t});
-  save();sel.removeAllRanges();hlBtn.style.display="none";
+  save();getSelection().removeAllRanges();hlBtn.style.display="none";
   toast("⭐ Highlight saved");checkAch()};
+$("hl-def").onclick=()=>{const t=SELTEXT.trim();if(t){hlBtn.style.display="none";defineTerm(t)}};
+
+/* ---------- vocab lookup: vault first, dictionary if online ---------- */
+function vaultDefine(term){
+  const tl=term.toLowerCase(), esc2=term.replace(/[.*+?^${}()|[\]\\]/g,"\\$&");
+  const re=new RegExp("[^.!?]*\\b"+esc2+"\\b[^.!?]*[.!?]","i");
+  const cue=/\b(is|are|means?|refers to|called|defined as|known as|is a|is the|is when)\b/i;
+  let best=null;
+  for(const nd of DATA.nodes){
+    const text=[nd.title,...(nd.bridge||[]),...(nd.sources||[]).flatMap(s=>s.quote)].join("  ");
+    if(text.toLowerCase().indexOf(tl)<0)continue;
+    const m=text.match(re);if(!m)continue;
+    const s=m[0].trim();
+    const score=(cue.test(s)?2:1)+(nd.title.toLowerCase().includes(tl)?2:0);
+    if(!best||score>best.score)best={src:"Explained in your Path · "+nd.title,node:nd.id,snippet:s,score};
+    if(best.score>=4)break;
+  }
+  return best;
+}
+async function defineTerm(term){
+  term=term.replace(/[^\p{L}\p{M}\s'-]/gu,"").trim();if(!term)return;
+  const pop=$("defpop");
+  $("dp-word").textContent=term;$("dp-open").style.display="none";
+  $("dp-src").textContent="LOOKING UP…";$("dp-body").textContent="…";pop.classList.add("on");
+  const v=vaultDefine(term);
+  if(v&&v.score>=2){
+    $("dp-src").textContent="✦ FROM YOUR VAULT";
+    const hl=v.snippet.replace(new RegExp("("+term.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")+")","ig"),"<mark>$1</mark>");
+    $("dp-body").innerHTML="“"+hl+"”<div style='color:var(--tx2);font-size:12px;margin-top:8px'>"+esc(v.src)+"</div>";
+    const ob=$("dp-open");if(v.node){ob.style.display="inline-block";ob.onclick=()=>{pop.classList.remove("on");openNode(v.node)}}
+    return;
+  }
+  if(term.split(/\s+/).length===1){
+    try{
+      const r=await fetch("https://api.dictionaryapi.dev/api/v2/entries/en/"+encodeURIComponent(term.toLowerCase()));
+      if(r.ok){const e=(await r.json())[0],out=[];
+        for(const m of e.meanings.slice(0,2)){const d0=m.definitions[0];
+          out.push("<b style='color:var(--jade)'>"+esc(m.partOfSpeech)+"</b> "+esc(d0.definition)+(d0.example?"<div style='color:var(--tx2);font-size:12.5px;margin-top:2px'>e.g. "+esc(d0.example)+"</div>":""));}
+        $("dp-src").textContent="📖 DICTIONARY";$("dp-body").innerHTML=out.join("<div style='height:8px'></div>");return;}
+    }catch(e){}
+  }
+  $("dp-src").textContent="NOT FOUND";
+  $("dp-body").innerHTML=v?"Nearest mention in your vault: “"+esc(v.snippet)+"”":
+    (navigator.onLine?"No definition found for “"+esc(term)+"”.":"You're offline — only your vault can be searched, and this term isn't explained in your lessons yet.");
+}
+$("dp-x").onclick=()=>$("defpop").classList.remove("on");
 const fmtDate=ts=>new Date(ts).toLocaleDateString(undefined,{day:"numeric",month:"short",year:"numeric"});
 function journalNotes(){return DATA.nodes
   .filter(x=>S.node[x.id]&&S.node[x.id].applied)
@@ -853,21 +928,24 @@ function renderJournal(){
   const jn=$("jnotes");jn.innerHTML="";
   if(!notes.length)jn.innerHTML='<p style="color:var(--tx2);font-size:13px">Master ideas on the Path — everything you write in the “Apply it” step collects here.</p>';
   for(const {node,rec} of notes){
-    const el=document.createElement("div");el.className="jnote";
+    const el=document.createElement("div");el.className="jnote";el.style.cursor="pointer";
     el.innerHTML=`<div class="jq">${node.glyph} ${esc(node.title)} — ${esc(node.apply.prompt)}</div>
       <div class="jt">${esc(rec.applied)}</div>
-      <div class="jm"><span>${esc(trackById(node.track).name)}</span><span>${rec.doneAt?fmtDate(rec.doneAt):""}</span></div>`;
+      <div class="jm"><span>${esc(trackById(node.track).name)}</span><span>${rec.doneAt?fmtDate(rec.doneAt):""} · tap to revisit ›</span></div>`;
+    el.onclick=()=>openNode(node.id);
     jn.appendChild(el);
   }
   const w=$("hlrows");w.innerHTML="";
   if(!S.hl.length)w.innerHTML='<p style="color:var(--tx2);font-size:13px">Select any text while reading to collect it here.</p>';
   for(const h of S.hl){
-    let label="";
-    if(h.n){const nd=nodeById(h.n);label=nd?nd.glyph+" "+nd.title:"";}
-    else{const b=bookById(h.b);label=b?b.glyph+" "+b.title:"";}
-    const el=document.createElement("div");el.className="hlrow";
-    el.innerHTML=`<div class="q">“${esc(h.t)}”</div><div class="m"><span>${esc(label)}</span><button style="color:var(--tx2)" data-del>remove</button></div>`;
-    el.querySelector("[data-del]").onclick=()=>{S.hl=S.hl.filter(x=>x!==h);save();el.remove()};
+    let label="",jump=null;
+    if(h.n){const nd=nodeById(h.n);if(nd){label=nd.glyph+" "+nd.title;jump=()=>openNode(h.n);}}
+    else{const b=bookById(h.b);if(b){label=b.glyph+" "+b.title;jump=()=>openEp(h.b,h.e);}}
+    if(!label)label="— source no longer in the vault";
+    const el=document.createElement("div");el.className="hlrow";if(jump)el.style.cursor="pointer";
+    el.innerHTML=`<div class="q">“${esc(h.t)}”</div><div class="m"><span>${esc(label)}${jump?" ›":""}</span><button style="color:var(--tx2)" data-del>remove</button></div>`;
+    el.querySelector("[data-del]").onclick=ev=>{ev.stopPropagation();S.hl=S.hl.filter(x=>x!==h);save();el.remove()};
+    if(jump)el.onclick=jump;
     w.appendChild(el)}
   $("hls").classList.add("on");
 }
@@ -914,8 +992,15 @@ $("btn-ach").onclick=()=>{const g=$("achgrid");g.innerHTML="";
   $("achs").classList.add("on")};
 
 /* ---------- patch notes ---------- */
-const APP_VER="3.6";
+const APP_VER="3.7";
 const PATCHES=[
+ {v:"3.7",n:"The Polish",d:"14 Jul 2026",items:[
+  ["new","Highlight a word and tap 📖 Define — you get its meaning from your OWN lessons if you've met it before (with a link back), or the dictionary if not."],
+  ["fix","Adding a book is now one step: pick the PDF, done. The pipeline decides where it belongs on the Path — no more being asked to name a track."],
+  ["fix","Journal: your notes and highlights are now tappable to jump straight back to where they came from; highlights whose source was removed are handled gracefully."],
+  ["polish","Path lessons are richer — new illustrations for cognition, habit and emotion, including habit-loop and System 1/2 diagrams, and every lesson now gets at least one."],
+  ["polish","Cleaner top bar on phones (no more messy wrapping)."],
+  ["content","The Like Switch (Jack Schafer) added — 21 books now, and it's queued to become a Path track."]]},
  {v:"3.6",n:"The Clean Slate",d:"14 Jul 2026",items:[
   ["content","How to Win Friends and Influence People (Carnegie) added to the Library — a text-readable copy this time, cover to cover. That's 20 full books now."],
   ["fix","Tracks Clear Thinking and Mindfulness in Practice were rebuilt from scratch: the old versions had vague titles and garbled source text. They're re-queued from clean library text with the tuned pipeline, and will reappear at the quality of the hand-written tracks."],
@@ -1155,23 +1240,24 @@ async function ghQueueJob(fname,bytes,tok){
   if(!r.ok)throw new Error("GitHub "+r.status+": "+(await r.text()).slice(0,140));
   return true;
 }
+function cleanTitle(fname){
+  let t=fname.replace(/\.pdf$/i,"");
+  t=t.replace(/\b(pdfdrive|z-?lib|pdf ?room|libgen|epub|ebook|final|copy|\(?\d{4}\)?)\b/gi," ");
+  t=t.replace(/[_\-]+/g," ").replace(/\s*[\(\[].*?[\)\]]\s*/g," ").replace(/\s{2,}/g," ").trim();
+  if(t.includes(" - "))t=t.split(" - ")[0].trim();      // drop " - Author" tails
+  t=t.replace(/^\d+\s+/,"");
+  return t.replace(/\b\w/g,c=>c.toUpperCase()).slice(0,60)||"New Book";
+}
 function renderAddBook(){
   const b=$("ab-body"),tok=localStorage.getItem("vault_gh")||"";
   b.innerHTML=`
-    <p class="abnote">Pick a book PDF from this device. It's read, distilled, and split into ~lesson-sized chunks <b>right here in your browser</b> — the PDF never leaves your device. The encrypted job is handed to the cloud pipeline, which turns it into a dependency-locked track over the next days, on its own.</p>
-    <div class="abrow"><label>Track name</label><input type="text" id="ab-name" placeholder="e.g. Thinking, Fast and Slow"></div>
-    <div class="abhalf">
-      <div class="abrow"><label>Author</label><input type="text" id="ab-author" placeholder="e.g. Daniel Kahneman"></div>
-      <div class="abrow"><label>Emoji</label><input type="text" id="ab-glyph" placeholder="🧠" maxlength="4"></div>
-    </div>
-    <div class="abhalf">
-      <div class="abrow"><label>Lessons</label><input type="number" id="ab-nodes" value="10" min="4" max="20"></div>
-      <div class="abrow"><label>Accent colour</label><input type="text" id="ab-accent" placeholder="#5dade2"></div>
-    </div>
-    <div class="abrow"><div class="abpick" id="ab-pick">📄 <b>Choose PDF</b><div style="font-size:12px;color:var(--tx2);margin-top:4px">tap to pick</div></div></div>
+    <p class="abnote">Just pick a book PDF — that's all you do. It's read and distilled <b>in your browser</b> (the file never leaves your device), then handed to the pipeline, which decides where it belongs on the Path and builds it into a track over the coming days.</p>
+    <div class="abrow"><div class="abpick" id="ab-pick">📄 <b>Choose a PDF</b><div style="font-size:12px;color:var(--tx2);margin-top:4px">tap to pick</div></div></div>
+    <div class="abrow" id="ab-titlerow" style="display:${AB.file?"block":"none"}"><label>Book title (auto — edit if wrong)</label><input type="text" id="ab-name" placeholder="Book title"></div>
     <div class="abtok ${tok?"ok":""}" id="ab-tokbox"></div>
     <div style="text-align:center;margin-top:14px"><button class="goldbtn" id="ab-go">Add to the vault</button></div>
     <div id="ab-out" style="margin-top:14px"></div>`;
+  if(AB.file)$("ab-name").value=cleanTitle(AB.file.name);
   renderTokBox();
   $("ab-glyph").value="📗";
   $("ab-pick").onclick=()=>$("ab-file").click();
@@ -1190,7 +1276,8 @@ function renderTokBox(){
   }
 }
 $("ab-file").onchange=e=>{if(e.target.files[0]){AB.file=e.target.files[0];const p=$("ab-pick");p.classList.add("has");
-  p.innerHTML="📄 <b>"+esc(AB.file.name)+"</b><div style='font-size:12px;color:var(--tx2);margin-top:4px'>tap to change</div>"}};
+  p.innerHTML="📄 <b>"+esc(AB.file.name)+"</b><div style='font-size:12px;color:var(--tx2);margin-top:4px'>tap to change</div>";
+  const tr=$("ab-titlerow");if(tr){tr.style.display="block";$("ab-name").value=cleanTitle(AB.file.name);}}};
 async function submitBook(){
   if(AB.busy)return;
   const name=$("ab-name").value.trim(),out=$("ab-out");
@@ -1203,12 +1290,16 @@ async function submitBook(){
     const pages=await extractPdfPages(AB.file);
     if(pages.length<3)throw new Error("Couldn't read enough text — is this a scanned image PDF?");
     setP("Distilling into lesson-sized chunks…",45);
-    const target=Math.max(4,Math.min(20,+$("ab-nodes").value||10));
+    const words=pages.join(" ").split(/\s+/).length;
+    const target=Math.max(6,Math.min(14,Math.round(words/8000)));   // auto: ~one lesson per 8k words
     const chunks=chunkPages(pages,target);
+    let hash=0;for(const ch of name)hash=(hash*31+ch.charCodeAt(0))>>>0;
+    const glyphs=["📗","📘","📙","📕","📓","🧠","💡","🧭","🔑","⚙️","🪶","🧩"];
+    const accents=["#5dade2","#e08a3c","#9b59b6","#27ae60","#c0a062","#16a085","#c0392b","#2980b9","#8e6f47","#d4a017","#7d8ca3","#5d6d7e"];
+    const glyph=glyphs[hash%glyphs.length], accent=accents[hash%accents.length];
     const id=(name.toLowerCase().replace(/[^a-z0-9]+/g,"")+Date.now().toString(36)).slice(0,16);
-    const job={id,title:name,author:$("ab-author").value.trim()||"Unknown",track_id:nextTrackId(),
-      name,glyph:$("ab-glyph").value.trim()||"📗",accent:$("ab-accent").value.trim()||"#5dade2",
-      blurb:`AI-authored from ${name} — a dependency-locked track.`,chunks,done:0};
+    const job={id,title:name,author:"Unknown",track_id:nextTrackId(),
+      name,glyph,accent,blurb:`AI-authored from ${name} — a dependency-locked track.`,chunks,done:0};
     setP("Encrypting the job with your vault key…",70);
     const bytes=await encJob(job);
     const fname=id+".job.enc";
@@ -1386,6 +1477,13 @@ $("f-wpm").oninput=e=>{S.wpm=+e.target.value;$("f-wpmv").textContent=S.wpm;save(
 /* ---------- side illustrations: concept -> animated SVG ---------- */
 const wrap=(A,inner)=>`<svg viewBox="0 0 100 100" fill="none" stroke="${A}" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">${inner}</svg>`;
 const FIGURES=[
+ {id:"loop",cap:"The Loop",kw:/\bhabit|\bloop|routine|\bcue\b|reward|craving|\btrigger|automatic|repeat|reinforce/,svg:A=>wrap(A,`<g class="an-spin"><circle cx="50" cy="50" r="24" stroke-dasharray="66 14"/><path d="M50 26l-8-4 3 10z" fill="${A}" stroke="none"/></g><circle cx="50" cy="24" r="3.5" fill="${A}" stroke="none"/><circle cx="72" cy="62" r="3.5" fill="${A}" stroke="none"/><circle cx="28" cy="62" r="3.5" fill="${A}" stroke="none"/><circle cx="50" cy="50" r="5" fill="${A}" fill-opacity=".25" stroke="none"/>`)},
+ {id:"twosys",cap:"Two Systems",kw:/system (one|two|1|2)|intuition|deliberate|\bfast\b.{0,8}\bslow|reasoning|\bimpulse|reflect(ive|ion)|gut feeling|snap judg/,svg:A=>wrap(A,`<rect x="12" y="34" width="30" height="32" rx="5" fill="${A}" fill-opacity=".1"/><rect x="12" y="34" width="30" height="32" rx="5"/><path class="an-flick" d="M30 41l-7 11h6l-5 9" stroke-width="2.2"/><rect x="58" y="34" width="30" height="32" rx="5" fill="${A}" fill-opacity=".1"/><rect x="58" y="34" width="30" height="32" rx="5"/><g class="an-spin"><circle cx="73" cy="50" r="7"/><path d="M73 41v-3M73 62v-3M64 50h-3M85 50h-3"/></g><path d="M44 50h12" stroke-dasharray="2 3"/>`)},
+ {id:"compass",cap:"The Compass",kw:/\bvalue|virtue|\bdirection|principle|character|integrity|\bmeaning\b|\bpurpose|north star|moral|\bethic/,svg:A=>wrap(A,`<circle cx="50" cy="50" r="30" fill="${A}" fill-opacity=".07"/><circle cx="50" cy="50" r="30"/><g class="an-bob"><path d="M50 50l11-24-5 28z" fill="${A}" stroke="none"/><path d="M50 50l-11 24 5-28z" fill="${A}" fill-opacity=".3" stroke="none"/></g><circle cx="50" cy="50" r="3" fill="${A}" stroke="none"/><path d="M50 16v6M50 78v6M16 50h6M78 50h6"/>`)},
+ {id:"anchor",cap:"The Anchor",kw:/\bbody\b|\bground|nervous system|\btrauma|\bsafe(ty)?\b|regulat|somatic|window of tolerance|calm the|steady yourself|the present moment/,svg:A=>wrap(A,`<circle cx="50" cy="22" r="7"/><g class="an-bob"><path d="M50 29v42M32 60a18 18 0 0036 0M50 71l-9-7M50 71l9-7M36 44h28"/></g>`)},
+ {id:"bias",cap:"The Distortion",kw:/\bbias|\berror|heuristic|distort|\billusion|fallacy|\bskew|systematic mistake|misjudg/,svg:A=>wrap(A,`<path d="M20 32h60M18 50h64M22 68h56" stroke-opacity=".45"/><path class="an-pulse" d="M36 26c7 22-7 36 0 56"/><path class="an-pulse" d="M64 26c-7 22 7 36 0 56"/>`)},
+ {id:"bridge",cap:"The Bridge",kw:/rapport|\bconnect|\bfriend|likab|\btrust\b|relationship|\bbond\b|\bcommon ground|reading people|\bempath/,svg:A=>wrap(A,`<path d="M12 64c20-32 56-32 76 0" fill="none"/><path d="M12 64V50M88 64V50M12 64h76"/><path d="M30 64V50M50 64V46M70 64V50" stroke-opacity=".6"/>`)},
+ {id:"gear",cap:"The Mechanism",kw:/mechanism|\bprocess\b|machinery|how it works|underlying|the engine|inner working/,svg:A=>wrap(A,`<g class="an-spin"><circle cx="50" cy="50" r="15"/><circle cx="50" cy="50" r="5" fill="${A}" fill-opacity=".2"/><g>${[0,45,90,135,180,225,270,315].map(a=>`<path transform="rotate(${a} 50 50)" d="M50 33v-7" stroke-width="3"/>`).join("")}</g></g>`)},
  {id:"mirror",cap:"Reflection",kw:/mirror|reflect|imitat|\becho|mimic/,svg:A=>wrap(A,`<ellipse cx="50" cy="45" rx="23" ry="31" fill="${A}" fill-opacity=".1"/><ellipse cx="50" cy="45" rx="23" ry="31"/><path class="an-pulse" d="M42 26l-8 32M52 27l-6 18" stroke-opacity=".8"/><path d="M34 82h32M50 76v6"/>`)},
  {id:"mask",cap:"The Mask",kw:/\bmask|disguise|pretend|facade|persona|conceal|two.faced|hypocri/,svg:A=>wrap(A,`<path d="M30 28c14-6 26-6 40 0 2 22-6 46-20 46S28 50 30 28z" fill="${A}" fill-opacity=".12"/><path d="M30 28c14-6 26-6 40 0 2 22-6 46-20 46S28 50 30 28z"/><circle cx="42" cy="46" r="2.6" fill="${A}" stroke="none"/><circle cx="58" cy="46" r="2.6" fill="${A}" stroke="none"/><path class="an-pulse" d="M42 60q8 6 16 0"/>`)},
  {id:"crown",cap:"The Crown",kw:/\bking|queen|crown|throne|royal|monarch|majest|ruler|reign|sovereign/,svg:A=>wrap(A,`<path d="M24 66h52l6-32-17 13-15-23-15 23-17-13z" fill="${A}" fill-opacity=".14"/><path d="M24 66h52l6-32-17 13-15-23-15 23-17-13z"/><path d="M24 74h52"/><circle class="an-pulse" cx="50" cy="24" r="2.6" fill="${A}" stroke="none"/>`)},
@@ -1503,15 +1601,17 @@ function nodeFigure(body,accent,seedId){
   if(ps.length<2)return;
   let seed=7;for(const ch of seedId)seed=seed*31+ch.charCodeAt(0)|0;
   const rnd=mulberry(seed);const used=new Set();let placed=0,last=-2;
-  const max=Math.min(3,ps.length-1);
+  const max=ps.length>=5?3:2;
+  const place=(i,fig)=>{const fc=document.createElement("figure");fc.className="sidefig "+(placed%2?"left":"right")+" vis";
+    fc.innerHTML=fig.svg(accent)+`<figcaption>${fig.cap}</figcaption>`;ps[i].parentNode.insertBefore(fc,ps[i]);used.add(fig.id);placed++;last=i;};
   for(let i=1;i<ps.length&&placed<max;i++){
     if(i-last<2)continue;
     const hits=FIGURES.filter(f=>!used.has(f.id)&&f.kw.test(ps[i].textContent));
-    if(!hits.length)continue;
-    const fig=hits[Math.floor(rnd()*hits.length)];
-    const fc=document.createElement("figure");fc.className="sidefig "+(placed%2?"left":"right")+" vis";
-    fc.innerHTML=fig.svg(accent)+`<figcaption>${fig.cap}</figcaption>`;
-    ps[i].parentNode.insertBefore(fc,ps[i]);used.add(fig.id);placed++;last=i;
+    if(hits.length)place(i,hits[Math.floor(rnd()*hits.length)]);
+  }
+  if(placed===0){   // never leave a lesson bare — seed a broadly-fitting figure
+    const pool=FIGURES.filter(f=>["brain","key","scales","mountain","star","compass","loop","water","maze","gear","candle","eye"].includes(f.id));
+    place(Math.min(1,ps.length-1),pool[Math.floor(rnd()*pool.length)]);
   }
 }
 function openNode(id){
