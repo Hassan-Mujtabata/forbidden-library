@@ -914,23 +914,31 @@ function restoreVault(file){
 }
 /* ---------- Gemini tutor: reviews your apply-notes (browser-side, your key, when online) ---------- */
 const geminiKeys=()=>(localStorage.getItem("vault_gemini")||"").split(/[\s,]+/).filter(Boolean);
+// free-tier quota is PER MODEL, so we try several models across every key until one answers
+const GEM_MODELS=["gemini-2.5-flash-lite","gemini-2.5-flash","gemini-flash-latest","gemini-2.0-flash"];
 async function geminiCall(prompt,maxTok=220){
   const keys=geminiKeys();if(!keys.length)throw new Error("no-key");
-  let quota=false;
-  for(const k of keys){
-    try{
-      const r=await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key="+encodeURIComponent(k),
-        {method:"POST",headers:{"Content-Type":"application/json"},
-         body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{maxOutputTokens:maxTok,temperature:0.7}})});
-      if(r.status===429){quota=true;continue;}          // this key spent -> next key
-      if(r.status===400||r.status===403)continue;        // bad key -> next key
-      if(!r.ok)throw new Error("gemini "+r.status);
-      const j=await r.json();
-      const t=j.candidates&&j.candidates[0]&&j.candidates[0].content&&j.candidates[0].content.parts[0].text;
-      if(t)return t.trim();
-    }catch(e){if(e.message==="no-key")throw e;}          // network error -> try next key
+  let quota=false,reached=false;
+  for(const model of GEM_MODELS){
+    for(const k of keys){
+      let r;
+      try{
+        r=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(k)}`,
+          {method:"POST",headers:{"Content-Type":"application/json"},
+           body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{maxOutputTokens:maxTok,temperature:0.7}})});
+      }catch(e){continue;}                                  // network error -> next key
+      reached=true;
+      if(r.status===429){quota=true;continue;}              // this model+key spent -> next
+      if(r.status===404)break;                              // model not available -> next model
+      if(r.status===400||r.status===403)continue;           // bad key -> next key
+      if(!r.ok)continue;
+      try{const j=await r.json();
+        const t=j.candidates&&j.candidates[0]&&j.candidates[0].content&&j.candidates[0].content.parts[0].text;
+        if(t)return t.trim();
+      }catch(e){}
+    }
   }
-  throw new Error(quota?"quota":"unreachable");
+  throw new Error(!reached?"unreachable":quota?"quota":"failed");
 }
 async function reviewNote(nodeId){
   const n=nodeById(nodeId),rec=S.node[nodeId];if(!n||!rec||!rec.applied)return;
@@ -1061,8 +1069,11 @@ $("btn-ach").onclick=()=>{const g=$("achgrid");g.innerHTML="";
   $("achs").classList.add("on")};
 
 /* ---------- patch notes ---------- */
-const APP_VER="3.8";
+const APP_VER="3.8.1";
 const PATCHES=[
+ {v:"3.8.1",n:"Two Fixes",d:"14 Jul 2026",items:[
+  ["fix","The ➕ Add-a-book button now opens (a leftover reference to a removed field was silently breaking it)."],
+  ["fix","The tutor review now works reliably. Google's free quota is per-model, so it now tries several Gemini models across all your keys until one answers — no more false “quota spent”."]]},
  {v:"3.8",n:"The Tutor",d:"14 Jul 2026",items:[
   ["new","🎓 A tutor for your reflections. Connect a Gemini key in the Journal (stored only on your device) and, when you're online, a tutor reads what you write in the “Apply it” step and leaves specific feedback under it — like a coach checking your self-study."],
   ["new","New reflections are reviewed automatically as you write them; older ones get a “Review now” button, and any note can be re-reviewed with ↻. Feedback is saved and included in your journal export and backup."],
@@ -1332,7 +1343,6 @@ function renderAddBook(){
     <div id="ab-out" style="margin-top:14px"></div>`;
   if(AB.file)$("ab-name").value=cleanTitle(AB.file.name);
   renderTokBox();
-  $("ab-glyph").value="📗";
   $("ab-pick").onclick=()=>$("ab-file").click();
   $("ab-go").onclick=submitBook;
   if(AB.file){$("ab-pick").classList.add("has");$("ab-pick").innerHTML="📄 <b>"+esc(AB.file.name)+"</b><div style='font-size:12px;color:var(--tx2);margin-top:4px'>tap to change</div>"}
