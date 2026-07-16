@@ -269,6 +269,11 @@ header .brand span{color:var(--gold)}
 #ngate{max-width:660px;margin:0 auto;padding:6px 2px 40px}
 .gatecard{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px;margin-top:16px}
 .gatecard h3{font-family:var(--serif);font-weight:400;font-size:19px;margin-bottom:4px}
+.lvlpick{margin:10px 0 4px}
+.lvlq{font-size:12.5px;color:var(--tx2);margin-bottom:9px}
+.lvlbtn{border:1px solid var(--line);border-radius:99px;padding:8px 14px;margin:0 7px 7px 0;font-size:13px;color:var(--tx2);cursor:pointer;transition:.15s}
+.lvlbtn:hover{border-color:var(--tx2)}
+.lvlbtn.on{border-color:var(--gold);background:rgba(212,175,55,.15);color:var(--tx);font-weight:700}
 .gatecard .gsub{color:var(--tx2);font-size:12.5px;margin-bottom:16px}
 .qitem{margin-bottom:18px}
 .qitem .qq{font-size:15px;margin-bottom:10px;line-height:1.4}
@@ -379,6 +384,12 @@ header .brand span{color:var(--gold)}
 .jreview b{color:var(--jade);letter-spacing:.06em}
 .jreview .jr-re{float:right;color:var(--tx2);cursor:pointer;font-size:12px;margin-left:8px}
 .jreview.pending{color:var(--tx2);font-style:italic}
+
+/* ---------- update chip ---------- */
+#updchip{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);z-index:120;background:#1a1608;
+  border:1px solid var(--gold);color:var(--tx);padding:9px 10px 9px 16px;border-radius:99px;font-size:13px;font-weight:600;
+  display:flex;align-items:center;gap:10px;box-shadow:0 10px 30px rgba(0,0,0,.6);animation:pop .3s ease-out}
+#updchip button{background:var(--gold);color:#151006;border:none;border-radius:99px;padding:6px 15px;font-weight:800;cursor:pointer;font-size:12.5px}
 
 /* ---------- toasts ---------- */
 #toasts{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);z-index:100;display:flex;flex-direction:column;gap:8px;align-items:center}
@@ -591,6 +602,14 @@ const ACH=[
 function checkAch(){for(const a of ACH){if(!S.ach.includes(a.id)&&a.c()){S.ach.push(a.id);toast(`${a.e} Achievement — ${a.n}`,true)}}save()}
 function toast(msg,big){const t=document.createElement("div");t.className="toast"+(big?" big":"");t.textContent=msg;
  $("toasts").appendChild(t);setTimeout(()=>{t.classList.add("fadeout");setTimeout(()=>t.remove(),500)},big?3400:2300)}
+let _updChip=false;
+function showUpdateChip(){
+  if(_updChip)return;_updChip=true;
+  const c=document.createElement("div");c.id="updchip";
+  c.innerHTML=`🔄 New version ready <button id="updnow">Update</button>`;
+  document.body.appendChild(c);
+  document.getElementById("updnow").onclick=()=>location.reload();
+}
 
 /* ============ crypto load ============ */
 const b64d=s=>{s=s.replace(/-/g,"+").replace(/_/g,"/");while(s.length%4)s+="=";const b=atob(s);const u=new Uint8Array(b.length);for(let i=0;i<b.length;i++)u[i]=b.charCodeAt(i);return u};
@@ -612,7 +631,16 @@ async function boot(){
   catch(e){$("loading").style.display="none";showLock();$("keyerr").textContent=hashK?"That key doesn't fit this lock.":"";return}
   $("loading").style.display="none";
   landing();checkAch();
-  if("serviceWorker"in navigator)navigator.serviceWorker.register("sw.js").catch(()=>{});
+  if("serviceWorker"in navigator){
+    // surface new versions instead of silently sitting on a stale cache
+    navigator.serviceWorker.addEventListener("controllerchange",()=>{if(navigator.serviceWorker.controller)showUpdateChip();});
+    navigator.serviceWorker.register("sw.js").then(reg=>{
+      const watch=w=>{if(w)w.addEventListener("statechange",()=>{if(w.state==="installed"&&navigator.serviceWorker.controller)showUpdateChip();});};
+      if(reg.waiting&&navigator.serviceWorker.controller)showUpdateChip();
+      reg.addEventListener("updatefound",()=>watch(reg.installing));
+      setInterval(()=>reg.update().catch(()=>{}),30*60*1000);   // check every 30 min
+    }).catch(()=>{});
+  }
 }
 function landing(){ if(DATA.nodes&&DATA.nodes.length){renderPath();show("path")} else {renderHome();show("home")} patchCheck(); }
 $("keygo").onclick=async()=>{const k=$("keyin").value.trim();if(!k)return;
@@ -1069,8 +1097,12 @@ $("btn-ach").onclick=()=>{const g=$("achgrid");g.innerHTML="";
   $("achs").classList.add("on")};
 
 /* ---------- patch notes ---------- */
-const APP_VER="3.8.1";
+const APP_VER="3.9";
 const PATCHES=[
+ {v:"3.9",n:"Your Pace",d:"14 Jul 2026",items:[
+  ["new","Finishing an idea no longer forces “100% mastered.” You now mark how solid you feel — 🌱 Still learning, 🌤️ Getting it, or ⭐ Solid — and you can change it anytime by reopening the idea. Marking something shakier brings its review back sooner."],
+  ["new","The app now tells you when a new version is ready (a 🔄 chip) instead of silently sitting on an old cached copy — so fixes actually reach you."],
+  ["fix","The tutor now uses a model that has free quota (the old one was capped at zero, which is why it always said “quota spent”). The Add-a-Book button is fixed too."]]},
  {v:"3.8.1",n:"Two Fixes",d:"14 Jul 2026",items:[
   ["fix","The ➕ Add-a-book button now opens (a leftover reference to a removed field was silently breaking it)."],
   ["fix","The tutor review now works reliably. Google's free quota is per-model, so it now tries several Gemini models across all your keys until one answers — no more false “quota spent”."]]},
@@ -1200,6 +1232,24 @@ function patchCheck(){
 
 /* ---------- spaced review ("Sharpen") ---------- */
 const RV_DAYS=[1,3,7,21,45], RV_XP=15;
+/* ---------- mastery level: you set how solid you feel, and can change it anytime ---------- */
+const LEVELS=[{k:1,l:"Still learning",e:"🌱"},{k:2,l:"Getting it",e:"🌤️"},{k:3,l:"Solid",e:"⭐"}];
+const levelOf=id=>(S.node[id]&&S.node[id].level)||0;
+const levelMeta=k=>LEVELS.find(L=>L.k===k)||{e:"",l:""};
+function levelPickerHTML(id){
+  const cur=levelOf(id)||2;
+  return `<div class="lvlpick"><div class="lvlq">How solid do you feel on this? You can change it anytime — you don't have to fully master everything.</div>`+
+    LEVELS.map(L=>`<button class="lvlbtn${L.k===cur?" on":""}" data-lvl="${L.k}">${L.e} ${L.l}</button>`).join("")+`</div>`;
+}
+function wireLevelPicker(container,id){
+  container.querySelectorAll(".lvlbtn").forEach(b=>b.onclick=()=>{
+    const lv=+b.dataset.lvl,rec=(S.node[id]=S.node[id]||{});rec.level=lv;
+    const rv=rec.rv; if(rv){rv.k=lv===1?0:lv===2?Math.min(rv.k,1):rv.k;rv.due=Date.now()+RV_DAYS[rv.k]*864e5;}  // shakier = revisit sooner
+    save();
+    container.querySelectorAll(".lvlbtn").forEach(x=>x.classList.toggle("on",+x.dataset.lvl===lv));
+    toast(levelMeta(lv).e+" Progress updated — "+levelMeta(lv).l.toLowerCase());
+  });
+}
 function rvState(id){const r=S.node[id];if(!r||!r.doneAt)return null;
   r.rv??={due:r.doneAt+864e5,k:0};return r.rv}
 function reviewDue(){if(!DATA.nodes)return[];const now=Date.now();
@@ -1665,7 +1715,7 @@ function renderPath(){
       let sub;
       if(st==="locked"){const need=n.prereq.filter(p=>!nodeDone(p)).map(p=>{const x=nodeById(p);return x?x.title:p});
         sub=`<div class="nsub" ${n.whyreq?`title="${esc(n.whyreq)}"`:""}>needs: ${esc(need.join(", "))}</div>`;}
-      else if(st==="done") sub=`<div class="nsub">mastered</div>`;
+      else if(st==="done"){const lm=levelMeta(levelOf(n.id));sub=`<div class="nsub">${lm.e?lm.e+" "+lm.l.toLowerCase():"done"}</div>`;}
       else if(n.stub) sub=`<div class="nsub">preview · full lesson next</div>`;
       else sub=`<div class="nsub">ready — tap to begin</div>`;
       const just=(S._justUnlocked&&S._justUnlocked.includes(n.id))?" just":"";
@@ -1750,10 +1800,14 @@ function renderGate(n){
   const gate=$("ngate");gate.innerHTML="";
   const rec=S.node[n.id]||{};
   if(rec.doneAt){
-    gate.innerHTML=`<div class="gatecard"><h3>✓ Mastered</h3>
-      <div class="gsub">You've completed this idea.${rec.applied?" Your practice note:":""}</div>
+    const card=document.createElement("div");card.className="gatecard";
+    card.innerHTML=`<h3>✓ Completed</h3>
+      <div class="gsub">You've been through this idea.${rec.applied?" Your practice note:":""}</div>
       ${rec.applied?`<p style="font-family:var(--serif);color:#ded9cf;line-height:1.6">“${esc(rec.applied)}”</p>`:""}
-      <div style="margin-top:14px"><button class="ghostbtn" id="gpath2">← Back to the Path</button></div></div>`;
+      ${rec.review?`<div class="jreview" style="margin:8px 0 4px">🎓 <b>TUTOR</b> — ${esc(rec.review)}</div>`:""}
+      ${levelPickerHTML(n.id)}
+      <div style="margin-top:12px"><button class="ghostbtn" id="gpath2">← Back to the Path</button></div>`;
+    gate.appendChild(card);wireLevelPicker(card,n.id);
     $("gpath2").onclick=()=>{renderPath();show("path")};return;
   }
   if(rec.quizBest>=100){renderApply(n);return;}
@@ -1835,11 +1889,15 @@ function completeNode(n){
     reviewNote(n.id).then(()=>{toast("🎓 Your tutor left feedback in the Journal");if($("hls").classList.contains("on"))renderJournal();}).catch(()=>{});
   const unlocked=DATA.nodes.filter(c=>c.prereq.includes(n.id)&&nodeAvail(c.id)&&!nodeDone(c.id));
   S._justUnlocked=unlocked.map(u=>u.id);
+  if(!levelOf(n.id))rec.level=2;save();   // default to "getting it"; the picker lets them change it
   const gate=$("ngate");
-  gate.innerHTML=`<div class="gatecard"><h3>✓ Mastered</h3>
+  const card=document.createElement("div");card.className="gatecard";
+  card.innerHTML=`<h3>✓ Done — mark your progress</h3>
     <div class="gsub">${unlocked.length?"You unlocked "+unlocked.map(u=>esc(u.glyph+" "+u.title)).join(", ")+".":"Your note is saved. Keep going."}</div>
-    <button class="goldbtn" id="gnext">Next idea →</button>
+    ${levelPickerHTML(n.id)}
+    <div style="margin-top:8px"><button class="goldbtn" id="gnext">Next idea →</button>
     <button class="ghostbtn" id="gpath" style="margin-left:6px">Back to the Path</button></div>`;
+  gate.innerHTML="";gate.appendChild(card);wireLevelPicker(card,n.id);
   $("gpath").onclick=()=>{renderPath();show("path")};
   $("gnext").onclick=()=>{const nx=nextAvailNode();if(nx)openNode(nx.id);else{renderPath();show("path")}};
   if(unlocked.length)setTimeout(()=>toast(`🔓 Unlocked ${unlocked.length} new idea${unlocked.length>1?"s":""}`),400);
