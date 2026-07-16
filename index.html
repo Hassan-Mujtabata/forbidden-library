@@ -547,7 +547,9 @@ const yesterday=()=>{const d=new Date(Date.now()-864e5);return d.getFullYear()+"
 function loadS(){try{S=JSON.parse(localStorage.getItem(LS_ST))||{}}catch(e){S={}}
   S.xp??=0; S.read??={}; S.pos??={}; S.streak??={count:0,day:""}; S.ach??=[]; S.hl??=[];
   S.font??=17; S.wpm??=350; S.days??={}; S.mix??=null; S.node??={};}
-const save=()=>localStorage.setItem(LS_ST,JSON.stringify(S));
+let _syncOn=false,_pushT=null,_syncInit=false;
+const save=()=>{S._mtime=Date.now();localStorage.setItem(LS_ST,JSON.stringify(S));
+  if(_syncOn&&localStorage.getItem("vault_gh")){clearTimeout(_pushT);_pushT=setTimeout(()=>pushState(),3000);}};
 const $=id=>document.getElementById(id);
 const esc=s=>{const d=document.createElement("div");d.textContent=s;return d.innerHTML};
 const bookById=id=>DATA.books.find(b=>b.id===id);
@@ -630,7 +632,7 @@ async function boot(){
   try{DATA=await tryLoad(k);localStorage.setItem(LS_KEY,k)}
   catch(e){$("loading").style.display="none";showLock();$("keyerr").textContent=hashK?"That key doesn't fit this lock.":"";return}
   $("loading").style.display="none";
-  landing();checkAch();
+  landing();checkAch();initSync();
   if("serviceWorker"in navigator){
     // surface new versions instead of silently sitting on a stale cache
     navigator.serviceWorker.addEventListener("controllerchange",()=>{if(navigator.serviceWorker.controller)showUpdateChip();});
@@ -644,7 +646,7 @@ async function boot(){
 }
 function landing(){ if(DATA.nodes&&DATA.nodes.length){renderPath();show("path")} else {renderHome();show("home")} patchCheck(); }
 $("keygo").onclick=async()=>{const k=$("keyin").value.trim();if(!k)return;
-  try{DATA=await tryLoad(k);localStorage.setItem(LS_KEY,k);landing()}
+  try{DATA=await tryLoad(k);localStorage.setItem(LS_KEY,k);landing();initSync()}
   catch(e){$("keyerr").textContent="That key doesn't fit this lock."}};
 
 /* ============ views ============ */
@@ -1097,8 +1099,12 @@ $("btn-ach").onclick=()=>{const g=$("achgrid");g.innerHTML="";
   $("achs").classList.add("on")};
 
 /* ---------- patch notes ---------- */
-const APP_VER="3.9";
+const APP_VER="3.10";
 const PATCHES=[
+ {v:"3.10",n:"Everywhere",d:"14 Jul 2026",items:[
+  ["new","☁️ Your progress now syncs across every device. Connect your GitHub token once (in ➕ Add a Book) and everything — mastered ideas, confidence levels, notes, streaks, XP, tutor feedback, highlights — follows you to any phone or laptop, encrypted, and can never be lost."],
+  ["new","One token is now your whole login: it's what lets you (and only you) add books, and it's what carries your progress everywhere. No account to make."],
+  ["polish","Sync merges safely — progress made on two devices is combined, never overwritten."]]},
  {v:"3.9",n:"Your Pace",d:"14 Jul 2026",items:[
   ["new","Finishing an idea no longer forces “100% mastered.” You now mark how solid you feel — 🌱 Still learning, 🌤️ Getting it, or ⭐ Solid — and you can change it anytime by reopening the idea. Marking something shakier brings its review back sooner."],
   ["new","The app now tells you when a new version is ready (a 🔄 chip) instead of silently sitting on an old cached copy — so fixes actually reach you."],
@@ -1360,6 +1366,80 @@ async function encJob(obj){
   const out=new Uint8Array(12+ct.length);out.set(iv,0);out.set(ct,12);return out;
 }
 const bytesToB64=u=>{let s="";for(let i=0;i<u.length;i+=0x8000)s+=String.fromCharCode.apply(null,u.subarray(i,i+0x8000));return btoa(s)};
+/* ---------- cross-device sync: progress in a private gist, encrypted with the vault key ---------- */
+const b64ToBytes=s=>{const b=atob(s);const u=new Uint8Array(b.length);for(let i=0;i<b.length;i++)u[i]=b.charCodeAt(i);return u};
+const _vkey=use=>crypto.subtle.importKey("raw",b64d(localStorage.getItem(LS_KEY)),"AES-GCM",false,[use]);
+async function encState(){
+  const gz=new Uint8Array(await new Response(new Blob([new TextEncoder().encode(JSON.stringify(S))]).stream().pipeThrough(new CompressionStream("gzip"))).arrayBuffer());
+  const iv=crypto.getRandomValues(new Uint8Array(12));
+  const ct=new Uint8Array(await crypto.subtle.encrypt({name:"AES-GCM",iv},await _vkey("encrypt"),gz));
+  const out=new Uint8Array(12+ct.length);out.set(iv,0);out.set(ct,12);return bytesToB64(out);
+}
+async function decState(b64){
+  const raw=b64ToBytes(b64.trim());
+  const pt=await crypto.subtle.decrypt({name:"AES-GCM",iv:raw.slice(0,12)},await _vkey("decrypt"),raw.slice(12));
+  return JSON.parse(await new Response(new Response(pt).body.pipeThrough(new DecompressionStream("gzip"))).text());
+}
+const ghHead=()=>{const t=localStorage.getItem("vault_gh");return t?{Authorization:"Bearer "+t,Accept:"application/vnd.github+json"}:null;};
+async function findSyncGist(h){
+  const id=localStorage.getItem("vault_gist");
+  if(id){const r=await fetch("https://api.github.com/gists/"+id,{headers:h});if(r.ok)return id;localStorage.removeItem("vault_gist");}
+  const r=await fetch("https://api.github.com/gists?per_page=100",{headers:h});
+  if(r.ok){const g=(await r.json()).find(x=>x.files&&x.files["vault-progress.enc"]);if(g){localStorage.setItem("vault_gist",g.id);return g.id;}}
+  return null;
+}
+function mergeState(a,b){ // union merge — never loses progress from either device
+  if(!b)return a;if(!a)return b;
+  const m=JSON.parse(JSON.stringify(a));
+  m.xp=Math.max(a.xp||0,b.xp||0);m.bestStreak=Math.max(a.bestStreak||0,b.bestStreak||0);
+  m.rvN=Math.max(a.rvN||0,b.rvN||0);m.ritesN=Math.max(a.ritesN||0,b.ritesN||0);
+  if(((b.streak&&b.streak.day)||"")>((a.streak&&a.streak.day)||""))m.streak=b.streak;
+  m.read=m.read||{};for(const k in (b.read||{}))m.read[k]=[...new Set([...(m.read[k]||[]),...(b.read[k]||[])])];
+  m.node=m.node||{};
+  for(const id in (b.node||{})){const x=m.node[id],y=b.node[id];
+    if(!x){m.node[id]=y;continue;}
+    const z={...x,...y};z.quizBest=Math.max(x.quizBest||0,y.quizBest||0);
+    if(x.doneAt||y.doneAt)z.doneAt=Math.max(x.doneAt||0,y.doneAt||0);
+    if((x.reviewAt||0)>=(y.reviewAt||0)){z.review=x.review;z.reviewAt=x.reviewAt;}
+    if((x.applied||"").length>=(y.applied||"").length)z.applied=x.applied;
+    if((x.doneAt||0)>=(y.doneAt||0)){if(x.level)z.level=x.level;if(x.rv)z.rv=x.rv;}
+    m.node[id]=z;
+  }
+  const kf=h=>(h.n||("b"+h.b+"_"+h.e))+"|"+h.t,seen=new Set();m.hl=[];
+  for(const h of [...(a.hl||[]),...(b.hl||[])]){const kk=kf(h);if(!seen.has(kk)){seen.add(kk);m.hl.push(h);}}
+  m.days={...(b.days||{}),...(a.days||{})};for(const d in (b.days||{}))m.days[d]={...(b.days[d]||{}),...(m.days[d]||{})};
+  const sa=new Set();m.sits=[];for(const s of [...(a.sits||[]),...(b.sits||[])])if(s&&!sa.has(s.at)){sa.add(s.at);m.sits.push(s);}
+  m.ach=[...new Set([...(a.ach||[]),...(b.ach||[])])];
+  if((b.seenPatch||"")>(a.seenPatch||""))m.seenPatch=b.seenPatch;
+  m._mtime=Math.max(a._mtime||0,b._mtime||0);return m;
+}
+async function pushState(){
+  const h=ghHead();if(!h||!navigator.onLine||!localStorage.getItem(LS_KEY))return;
+  try{const content=await encState(),id=await findSyncGist(h),body={files:{"vault-progress.enc":{content}}};
+    if(id)await fetch("https://api.github.com/gists/"+id,{method:"PATCH",headers:h,body:JSON.stringify(body)});
+    else{body.description="The Vault — encrypted progress (do not edit)";body.public=false;
+      const r=await fetch("https://api.github.com/gists",{method:"POST",headers:h,body:JSON.stringify(body)});
+      if(r.ok)localStorage.setItem("vault_gist",(await r.json()).id);}
+  }catch(e){}
+}
+async function pullState(){
+  const h=ghHead();if(!h||!navigator.onLine)return false;
+  try{const id=await findSyncGist(h);if(!id)return false;
+    const r=await fetch("https://api.github.com/gists/"+id,{headers:h});if(!r.ok)return false;
+    const f=(await r.json()).files["vault-progress.enc"];if(!f)return false;
+    let c=f.content;if(f.truncated&&f.raw_url)c=await(await fetch(f.raw_url,{headers:h})).text();
+    S=mergeState(S,await decState(c));localStorage.setItem(LS_ST,JSON.stringify(S));return true;
+  }catch(e){return false;}
+}
+async function initSync(announce){
+  if(_syncInit)return;_syncInit=true;
+  if(!ghHead()){_syncOn=true;return;}
+  const ok=await pullState();_syncOn=true;
+  if(ok){checkAch();renderTopbar();const v=[...document.querySelectorAll('.view.on')][0];
+    if(v&&v.id==='path')renderPath();else if(v&&v.id==='home')renderHome();
+    if(announce)toast("☁️ Progress synced from your other devices");}
+  pushState();
+}
 function nextTrackId(){
   const used=new Set((DATA.tracks||[]).map(t=>t.id));
   for(const c of "GHIJKLMNOPQRSTUVWXYZ")if(!used.has(c))return c;
@@ -1400,12 +1480,12 @@ function renderAddBook(){
 function renderTokBox(){
   const box=$("ab-tokbox"),tok=localStorage.getItem("vault_gh")||"";
   if(tok){box.classList.add("ok");
-    box.innerHTML=`✅ <b>Auto-queue on.</b> Books commit straight to your repo and the cloud takes over — no computer of yours needed. <span class="miniA" id="ab-tokclear">disconnect</span>`;
-    $("ab-tokclear").onclick=()=>{localStorage.removeItem("vault_gh");renderAddBook()};
+    box.innerHTML=`✅ <b>Connected.</b> This one token is your key: it lets you add books, and it <b>syncs your progress across every device</b> (encrypted). No computer of yours needed. <span class="miniA" id="ab-tokclear">disconnect</span>`;
+    $("ab-tokclear").onclick=()=>{localStorage.removeItem("vault_gh");localStorage.removeItem("vault_gist");renderAddBook()};
   }else{box.classList.remove("ok");
-    box.innerHTML=`<div class="abnote" style="margin:0 0 8px">Optional: paste a GitHub token (fine-grained, <b>Contents: read/write</b> on this repo) so the app can auto-queue books with no terminal. Stored only on this device, never in the vault. Otherwise you'll get a file to drop into <code>tools/queue/</code>.</div>
-      <input type="password" id="ab-tok" placeholder="github_pat_…"><span class="miniA" id="ab-toksave">save token on this device</span>`;
-    $("ab-toksave").onclick=()=>{const v=$("ab-tok").value.trim();if(v){localStorage.setItem("vault_gh",v);renderAddBook()}};
+    box.innerHTML=`<div class="abnote" style="margin:0 0 8px">Paste a GitHub token (fine-grained, with <b>Contents</b> + <b>Gists</b> read/write). This is your one login: it lets you add books AND syncs your progress across devices so nothing is lost. Stored only on this device, never in the vault.</div>
+      <input type="password" id="ab-tok" placeholder="github_pat_…"><span class="miniA" id="ab-toksave">connect</span>`;
+    $("ab-toksave").onclick=()=>{const v=$("ab-tok").value.trim();if(v){localStorage.setItem("vault_gh",v);_syncInit=false;initSync(true);renderAddBook()}};
   }
 }
 $("ab-file").onchange=e=>{if(e.target.files[0]){AB.file=e.target.files[0];const p=$("ab-pick");p.classList.add("has");
@@ -2019,7 +2099,7 @@ async function bioUnlock(){
     const kb=await crypto.subtle.decrypt({name:"AES-GCM",iv:b64d(rec.iv)},wk,b64d(rec.ct));
     const k=b64e(kb);
     DATA=await tryLoad(k);localStorage.setItem(LS_KEY,k);
-    landing();checkAch();
+    landing();checkAch();initSync();
   }catch(err){$("keyerr").textContent="Face unlock failed — use your link or key."}
 }
 $("btn-bio").onclick=enrollBio;
