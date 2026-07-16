@@ -48,6 +48,13 @@
       "glyph": "🔁",
       "accent": "#7bc96f",
       "blurb": "AI-authored from Atomic Habits — a dependency-locked track."
+    },
+    {
+      "id": "G",
+      "name": "Clear Thinking",
+      "glyph": "💡",
+      "accent": "#9b59b6",
+      "blurb": "AI-authored from How to Have a Beautiful Mind — a dependency-locked track."
     }
   ],
   "nodes": [
@@ -3425,6 +3432,387 @@
         "min": 50
       },
       "whyreq": "Builds directly on “Desire Initiates, Pleasure Sustains” — grasp that first."
+    },
+    {
+      "id": "g1",
+      "track": "G",
+      "tier": 0,
+      "prereq": [],
+      "glyph": "🤝",
+      "title": "Genuine Agreement in Conversation",
+      "bridge": [
+        "A beautiful mind, unlike fleeting physical beauty, is a powerful and lasting source of appeal, especially evident in conversation. It's not about high IQ or vast knowledge, but rather the practical application of creativity, imagination, and empathy. When you actively seek genuine points of agreement, you transform a potentially dull interaction into an engaging exchange, making your presence truly magnetic.",
+        "The mechanism of genuine agreement lies in finding common ground without being sycophantic or argumentative. Most people are naturally inclined to assert their ego through disagreement, often reinforced by societal emphasis on debate. However, constantly disagreeing creates an \"intensely irritating\" conversational style, while simply agreeing to everything makes your contribution insignificant. The goal is a balanced, appreciative engagement.",
+        "This careful cultivation of your conversational style directly shapes how others perceive you, enhancing your social appeal far beyond any physical attribute. It's an active practice that can revolutionize your interactions, fostering connection and appreciation. This echoes the principles you explored in Liking, Commitment & Consistency, where genuine engagement builds rapport and influence."
+      ],
+      "sources": [
+        {
+          "book": "How to Have a Beautiful Mind",
+          "ref": "How to Agree",
+          "quote": [
+            "To have a beautiful mind, genuinely seek agreement in conversation, avoiding both constant disagreement that asserts ego and sycophantic agreement that diminishes meaningful exchange."
+          ]
+        }
+      ],
+      "quiz": [
+        {
+          "q": "What is the primary characteristic of a \"beautiful mind\" in de Bono's view?",
+          "c": [
+            "A high IQ and vast knowledge",
+            "Physical attractiveness and elegant style",
+            "Creativity, imagination, and empathy used in conversation",
+            "The ability to win every argument"
+          ],
+          "a": 2,
+          "why": "De Bono states it doesn't need high IQ or knowledge, but creativity, imagination, and empathy."
+        },
+        {
+          "q": "Why is constantly disagreeing detrimental to having a beautiful mind?",
+          "c": [
+            "It makes the conversation too long.",
+            "It demonstrates superiority through ego and is irritating.",
+            "It prevents the other person from learning anything new.",
+            "It shows a lack of intelligence."
+          ],
+          "a": 1,
+          "why": "The passage describes this type of mind as \"intensely irritating\" and seeking to demonstrate superiority through disagreement."
+        },
+        {
+          "q": "What is the main challenge in genuinely seeking agreement in conversation?",
+          "c": [
+            "It requires a high level of intelligence.",
+            "It goes against most people's natural inclinations and ego.",
+            "It is too time-consuming to find common ground.",
+            "It makes conversations boring and unproductive."
+          ],
+          "a": 1,
+          "why": "The passage states it is difficult because \"the motivation to do this is contrary to most people’s natural inclinations\" and is \"very much tied up with the ego.\""
+        }
+      ],
+      "apply": {
+        "prompt": "For your next three significant conversations this week, consciously practice seeking genuine points of agreement. Notice any initial inclination to disagree or merely assent. Afterward, reflect on how this changed the dynamic of the conversation and your perception of the other person.",
+        "min": 50
+      }
+    },
+    {
+      "id": "g2",
+      "track": "G",
+      "tier": 1,
+      "prereq": [
+        "g1"
+      ],
+      "glyph": "🤔",
+      "title": "The What If Approach",
+      "bridge": [
+        "The \"What If?\" approach invites you to suspend current reality and explore hypothetical scenarios. Imagine if dogs could speak: family secrets would vanish, they'd demand political rights, and even work as reporters. This playful thought experiment instantly transforms a mundane subject into a rich landscape of possibilities, making any discussion far more engaging and interesting. It's not about finding truth, but about expanding perspective.",
+        "This method involves taking a known situation or fact and asking \"What if X were different?\" or \"What would happen if Y?\". You then logically (or sometimes fantastically) trace the implications of that hypothetical change. It encourages divergent thinking, moving beyond rigid certainties to consider alternatives. This structured speculation makes even simple topics fertile ground for new ideas and deeper understanding.",
+        "By habitually seeking alternatives and possibilities, you cultivate a mind that is dynamic and less prone to fixed views. This directly enhances your ability to solve problems, much like applying \"The Three Characteristics\" allows you to see the impermanence in situations. It also makes you a more compelling conversationalist, offering fresh perspectives rather than simply stating facts. This skill complements the mental flexibility you develop through practices like \"The Progress of Insight\"."
+      ],
+      "sources": [
+        {
+          "book": "How to Have a Beautiful Mind",
+          "ref": "The 'What If?' Method",
+          "quote": [
+            "The 'what if?' approach plays with ideas, exploring future possibilities to make discussions more interesting and put forward logical alternatives, even for the simplest situations."
+          ]
+        }
+      ],
+      "quiz": [
+        {
+          "q": "What is the primary purpose of the \"What If?\" approach?",
+          "c": [
+            "To define precise terms in a conversation",
+            "To identify absolute truths about a situation",
+            "To explore hypothetical scenarios and alternative possibilities",
+            "To prove a predetermined argument"
+          ],
+          "a": 2,
+          "why": "The approach involves playing with ideas and exploring possibilities rather than seeking certainty."
+        },
+        {
+          "q": "When using the \"What If?\" approach, the ideas put forward should generally be:",
+          "c": [
+            "As fantastical as possible",
+            "Limited to current realities",
+            "As logical as possible",
+            "Immediately verifiable"
+          ],
+          "a": 2,
+          "why": "While occasional fantasy is allowed, the passage emphasizes making ideas as logical as possible."
+        },
+        {
+          "q": "How does adopting the \"What If?\" habit affect a subject's appeal?",
+          "c": [
+            "It makes any subject less serious",
+            "It makes any subject more interesting",
+            "It makes any subject harder to understand",
+            "It makes any subject less open to discussion"
+          ],
+          "a": 1,
+          "why": "Once you get into the habit of looking for alternatives and possibilities, any subject becomes more interesting."
+        }
+      ],
+      "apply": {
+        "prompt": "This week, choose a common everyday situation you usually take for granted (e.g., your commute, a household chore, a regular meeting). Ask \"What if one key element were different?\" and explore three logical (or slightly fantastical) implications. Write down your \"what if\" and its consequences.",
+        "min": 50
+      },
+      "whyreq": "Builds directly on “Genuine Agreement in Conversation” — grasp that first."
+    },
+    {
+      "id": "g3",
+      "track": "G",
+      "tier": 2,
+      "prereq": [
+        "g2"
+      ],
+      "glyph": "💡",
+      "title": "Exploring Alternatives",
+      "bridge": [
+        "When confronted with a proposition or a perceived truth, your mind has a choice: accept it as the only reality, or actively seek out other explanations. Exploring alternatives and possibilities is the practice of consciously asking, \"What else could be true?\" or \"Are there other ways to see this?\" This vital skill prevents you from being trapped by a single perspective, enriching your understanding and freeing you from the certainty that something \"must be so\" simply because no other option has been presented.",
+        "There are four levels of alternatives you can consider. First, those officially considered and checked. Second, official possibilities not yet verified. Third, those the speaker has generated but not explored. Finally, and crucially, are the additional possibilities you, as the listener, can suggest. Generating these options broadens the discussion, ensures a more comprehensive understanding, and actively counters the human tendency to settle for the first plausible explanation.",
+        "This approach is particularly valuable in decision-making. During the ‘consideration’ phase, you must deliberately open up your mind to a wide range of possibilities, even those that seem unlikely. Only in the subsequent ‘action’ phase do you narrow down to the most probable and actionable choices. This disciplined exploration of options is a hallmark of \"The Beautiful Mind\", ensuring you approach complex situations with intellectual rigor rather than premature closure."
+      ],
+      "sources": [
+        {
+          "book": "How to Have a Beautiful Mind",
+          "ref": "alternatives and possibilities",
+          "quote": [
+            "The ability to generate possibilities enriches the discussion and also frees us from the certainty that something ‘must be so’ only because we cannot think of an alternative explanation."
+          ]
+        }
+      ],
+      "quiz": [
+        {
+          "q": "What is a key benefit of generating alternatives in a discussion?",
+          "c": [
+            "It always leads to immediate action",
+            "It confirms the initial proposition is correct",
+            "It enriches the discussion and frees from false certainty",
+            "It limits the scope of investigation"
+          ],
+          "a": 2,
+          "why": "Generating possibilities broadens understanding and prevents premature conclusions by challenging perceived certainty."
+        },
+        {
+          "q": "Which level of alternative involves ideas that you, as the listener, can suggest?",
+          "c": [
+            "Officially considered and checked possibilities",
+            "Official but unchecked possibilities",
+            "Speaker-generated possibilities",
+            "Listener-generated possibilities"
+          ],
+          "a": 3,
+          "why": "The text explicitly states the fourth level is 'additional alternatives and possibilities that you, as a listener, can suggest'."
+        },
+        {
+          "q": "In which phase of decision-making should you prioritize opening up possibilities?",
+          "c": [
+            "The action phase",
+            "The conclusion phase",
+            "The consideration phase",
+            "The implementation phase"
+          ],
+          "a": 2,
+          "why": "The text states that in the 'consideration' phase, you need to open up possibilities."
+        }
+      ],
+      "apply": {
+        "prompt": "This week, when you find yourself or someone else concluding that something \"must be so,\" pause. Actively challenge that certainty by asking aloud, \"What are the alternatives here?\" or \"What other possibilities exist?\" Reflect on how this simple question shifts the conversation or your own thinking.",
+        "min": 50
+      },
+      "whyreq": "Builds directly on “The What If Approach” — grasp that first."
+    },
+    {
+      "id": "g4",
+      "track": "G",
+      "tier": 3,
+      "prereq": [
+        "g3"
+      ],
+      "glyph": "💡",
+      "title": "Challenging Adequate Solutions",
+      "bridge": [
+        "You often find yourself using methods that are 'good enough,' a solution that adequately addresses a task without obvious flaws. Yet, a beautiful mind doesn't stop there. It actively questions whether an 'adequate' solution is truly the best one, understanding that complacency can be as much of a barrier to progress as an outright problem.",
+        "The core mechanism here is the deliberate shift from problem-solving to opportunity-seeking. When no obvious 'problem' exists—no stone in your shoe, no headache—the natural inclination is to cease thinking. However, this rigidity and complacency prevent innovation. By consciously challenging existing, merely adequate methods, you open the door to simplification, efficiency, and significant improvements that might otherwise remain unseen.",
+        "This willingness to question the status quo is vital in all areas of life, from daily routines to complex projects. It's about cultivating a mindset that values continuous improvement, much like the sustained effort required in Continuous Attention & Overcoming Dullness. You're not just fixing what's broken; you're elevating what already works, recognizing that your Perception Is Everything when it comes to identifying potential for betterment."
+      ],
+      "sources": [
+        {
+          "book": "How to Have a Beautiful Mind",
+          "ref": "Adequate vs. Best",
+          "quote": [
+            "Many established methods are merely adequate; a beautiful mind actively seeks better alternatives for progress and improvement, challenging the rigidity of accepting 'good enough'."
+          ]
+        }
+      ],
+      "quiz": [
+        {
+          "q": "What is the primary reason to seek alternatives even when an existing method is adequate?",
+          "c": [
+            "To solve an obvious problem",
+            "To avoid blame",
+            "To find a better way for improvement",
+            "To simply think more"
+          ],
+          "a": 2,
+          "why": "The passage highlights progress, energy, change, improvement, and simplification as reasons to seek a better way."
+        },
+        {
+          "q": "What mental state does the passage identify as a barrier to seeking alternatives when a method is already adequate?",
+          "c": [
+            "Curiosity",
+            "Rigidity",
+            "Open-mindedness",
+            "Enthusiasm"
+          ],
+          "a": 1,
+          "why": "Rigidity and complacency are explicitly named as preventing the search for alternatives."
+        },
+        {
+          "q": "According to the lesson, an 'adequate' way of doing something should be treated as:",
+          "c": [
+            "The final and best solution",
+            "A prompt to stop further thinking",
+            "A potential opportunity for improvement",
+            "An indication that no thinking is needed"
+          ],
+          "a": 2,
+          "why": "Having an adequate way is described as blocking further thinking and improvement, thus an opportunity."
+        }
+      ],
+      "apply": {
+        "prompt": "For one routine task you perform this week (e.g., making coffee, organizing emails, planning your day), consciously consider if there might be an entirely different, more effective, or even simpler way to accomplish it, even if your current method is adequate. Reflect on any assumptions you made about the 'best' way, and briefly describe an alternative you considered, even if you don't implement it.",
+        "min": 50
+      },
+      "whyreq": "Builds directly on “Exploring Alternatives” — grasp that first."
+    },
+    {
+      "id": "g5",
+      "track": "G",
+      "tier": 4,
+      "prereq": [
+        "g4"
+      ],
+      "glyph": "🛣️",
+      "title": "Navigating Conversational Diversions",
+      "bridge": [
+        "In any discussion, you'll inevitably encounter moments where the topic drifts. A story about Cleopatra might sidetrack a talk about the Egyptian economy, or a comment about hippopotamus mating habits could lead to general zoology. These conversational diversions are not inherently bad; they are natural detours that can enrich a dialogue or derail it entirely. Your skill in navigating these shifts determines the quality and focus of the exchange. The key is to understand the underlying purpose of your conversation, as this will dictate how you respond to these unexpected turns.",
+        "The mechanism for handling these diversions is simple: align your response with the discussion's primary purpose. If the conversation is serious and goal-oriented, permit brief, relevant diversions only if there's a clear intent to return to the main subject, and keep them infrequent. Conversely, if the aim is amusement or social connection, embrace the tangents. Follow interesting side roads, pausing to explore points that captivate both parties. This allows for spontaneous discovery and deeper engagement, as long as you avoid changing focus too rapidly to develop any interest.",
+        "Consider how often your own discussions become aimless or frustrating. By consciously assessing the purpose of your conversation – whether it's for serious problem-solving or casual enjoyment – you gain a powerful tool. This mindful approach to conversation mirrors the deliberate intention you bring to your meditation practice, as explored in Setting Up: Posture, Intention, the Object. Just as you learn to observe mind-wandering in Stabilizing Attention, you can learn to observe conversational wandering, choosing whether to gently guide it back or to explore its new terrain, making every interaction more intentional and rewarding."
+      ],
+      "sources": [
+        {
+          "book": "How to Have a Beautiful Mind",
+          "ref": "conversational diversions purpose",
+          "quote": [
+            "How you deal with conversational diversions should depend on the discussion's purpose. For serious talks, limit brief detours with an intent to return. For amusement, follow interesting tangents."
+          ]
+        }
+      ],
+      "quiz": [
+        {
+          "q": "When a serious discussion diverts, what is the best approach?",
+          "c": [
+            "Immediately cut off the diversion and return to the topic",
+            "Allow brief diversions if there is intent to return and they are not too many",
+            "Enjoy the diversion wherever it may lead, regardless of length",
+            "Change the main focus to the new, more interesting topic"
+          ],
+          "a": 1,
+          "why": "The passage states that for serious discussions, brief diversions are permitted if there is an intention to return and they are not too numerous."
+        },
+        {
+          "q": "What is the primary factor determining how you should handle a conversational diversion?",
+          "c": [
+            "The length of the diversion",
+            "The interest level of the new topic",
+            "The purpose of the discussion",
+            "Whether other participants enjoy the new topic"
+          ],
+          "a": 2,
+          "why": "The passage explicitly states, \"Much depends on the purpose of the discussion.\""
+        },
+        {
+          "q": "What happens if you change focus too often and too rapidly in a conversation?",
+          "c": [
+            "It leads to more creative and dynamic exchanges.",
+            "It ensures all participants remain engaged and entertained.",
+            "It prevents the development of interest in any single area.",
+            "It signals an open mind and flexibility to other participants."
+          ],
+          "a": 2,
+          "why": "The passage compares it to moving from person to person at a party without striking up a conversation, implying a lack of depth."
+        }
+      ],
+      "apply": {
+        "prompt": "This week, pay close attention to the purpose of your conversations. When a diversion arises, consciously decide whether to follow it or gently steer back, based on that purpose. Reflect on how this affected the interaction.",
+        "min": 50
+      },
+      "whyreq": "Builds directly on “Challenging Adequate Solutions” — grasp that first."
+    },
+    {
+      "id": "g6",
+      "track": "G",
+      "tier": 5,
+      "prereq": [
+        "g5"
+      ],
+      "glyph": "⚠️",
+      "title": "Strategic Interruption",
+      "bridge": [
+        "When a conversation veers off course with a factual error or a logical leap, you face a choice: let it pass or intervene. Strategic interruption isn't about rudeness, but about steering the dialogue towards truth or clarity. It’s a deliberate pause, carefully timed, to ensure the foundational elements of the discussion remain sound, preventing further building on shaky ground. Your goal is to refine, not to derail, the shared exploration of ideas.",
+        "You have three tactical choices when considering an interruption. The simplest is to wait for your turn, suitable for two-person exchanges. For multi-party conversations, waiting too long can render your point irrelevant. Alternatively, you might interrupt with your full argument, but this risks shattering the coherence of the speaker's flow. The most nuanced approach is to signal your point briefly, promising a fuller explanation later, allowing the speaker to decide when to yield the floor.",
+        "This skill is vital for fostering a truly beautiful mind, one that values accuracy and logical rigor. It supports the ethical ground you've been building, ensuring that discussions are rooted in truth and clarity, not unchallenged assumptions. By mastering when and how to interject, you cultivate a conversational environment where shared understanding can genuinely deepen, moving beyond surface-level exchanges to more robust intellectual exploration, and aligning with the principles of Ethics as the Ground (sīla)."
+      ],
+      "sources": [
+        {
+          "book": "How to Have a Beautiful Mind",
+          "ref": "Interrupting effectively",
+          "quote": [
+            "You have three choices for interruption: wait, interrupt fully, or signal your point for later, each with its own timing considerations for maintaining conversational flow and relevance."
+          ]
+        }
+      ],
+      "quiz": [
+        {
+          "q": "What is a primary risk of interrupting a speaker with your full argument?",
+          "c": [
+            "The speaker might feel personally attacked.",
+            "You might forget your point before finishing.",
+            "It can destroy the coherence of the speaker's line of thinking.",
+            "It makes the conversation too one-sided."
+          ],
+          "a": 2,
+          "why": "The passage explicitly states that a full interruption risks destroying the coherence of the speaker's line of thought."
+        },
+        {
+          "q": "When is signaling your point for later most useful?",
+          "c": [
+            "When you have a minor, unimportant point to make.",
+            "When you want to avoid making your point altogether.",
+            "In multi-party conversations where waiting for your turn is impractical.",
+            "To show the speaker you are smarter than them."
+          ],
+          "a": 2,
+          "why": "Signaling allows you to mark a point without lengthy disruption, especially when a turn might not come soon in a multi-party setting."
+        },
+        {
+          "q": "What is a key motivation for strategic interruption, beyond simply disagreeing?",
+          "c": [
+            "To demonstrate your superior knowledge.",
+            "To politely ensure accuracy or clarify a logical flaw.",
+            "To dominate the conversation.",
+            "To intentionally provoke an argument."
+          ],
+          "a": 1,
+          "why": "Strategic interruption often stems from a genuine desire to ensure accuracy, clarify, or understand, rather than merely to argue or impress."
+        }
+      ],
+      "apply": {
+        "prompt": "For one conversation this week, practice the 'signal your point' technique. When you notice something you want to challenge or add to, briefly interject to acknowledge it and state you'll return to it later. Reflect on how this felt compared to waiting or interrupting fully.",
+        "min": 50
+      },
+      "whyreq": "Builds directly on “Navigating Conversational Diversions” — grasp that first."
     }
   ]
 }
