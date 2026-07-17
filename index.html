@@ -385,6 +385,26 @@ header .brand span{color:var(--gold)}
 .jreview .jr-re{float:right;color:var(--tx2);cursor:pointer;font-size:12px;margin-left:8px}
 .jreview.pending{color:var(--tx2);font-style:italic}
 
+/* ---------- account ---------- */
+#acc-body .accid{display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin-bottom:12px}
+#acc-body .accid .av{font-size:30px}
+#acc-body .accid .who{font-family:var(--serif);font-size:17px}
+#acc-body .accid .role{font-size:11px;letter-spacing:.16em;text-transform:uppercase;margin-top:2px}
+#acc-body .role.owner{color:var(--gold)} #acc-body .role.admin{color:var(--jade)} #acc-body .role.guest,#acc-body .role.member{color:var(--tx2)}
+#acc-body .accnote{font-size:12.5px;color:var(--tx2);line-height:1.55;margin:6px 0 12px}
+#acc-body input[type=password],#acc-body input[type=text]{width:100%;background:var(--bg2);border:1px solid var(--line);border-radius:10px;color:var(--tx);padding:11px 13px;font-size:14px;outline:none}
+#acc-body input:focus{border-color:var(--gold)}
+#acc-body .accsec{font-size:11px;letter-spacing:.22em;color:var(--tx2);text-transform:uppercase;margin:20px 0 10px;border-top:1px solid var(--line);padding-top:16px}
+.acctog{display:flex;align-items:center;gap:10px;padding:9px 11px;border-radius:10px;background:var(--card);margin-bottom:6px;font-size:13.5px}
+.acctog .g{font-size:18px}.acctog .t{flex:1}
+.acctog input{width:38px;height:22px;-webkit-appearance:none;appearance:none;background:var(--card2);border-radius:99px;position:relative;cursor:pointer;transition:.2s;flex:0 0 auto}
+.acctog input:checked{background:var(--jade)}
+.acctog input::after{content:"";position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:50%;background:#fff;transition:.2s}
+.acctog input:checked::after{left:18px}
+#acc-body .warn{background:rgba(212,175,55,.08);border:1px solid rgba(212,175,55,.3);border-radius:10px;padding:11px 13px;font-size:12px;color:var(--tx2);line-height:1.5;margin-top:10px}
+#acc-body .adminrow{display:flex;align-items:center;gap:8px;font-size:13px;padding:7px 10px;background:var(--card);border-radius:8px;margin-bottom:5px}
+#acc-body .adminrow .rm{margin-left:auto;color:#c98;cursor:pointer;font-size:12px}
+
 /* ---------- update chip ---------- */
 #updchip{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);z-index:120;background:#1a1608;
   border:1px solid var(--gold);color:var(--tx);padding:9px 10px 9px 16px;border-radius:99px;font-size:13px;font-weight:600;
@@ -435,6 +455,7 @@ header .brand span{color:var(--gold)}
     <div id="xpbar"><div id="xpfill"></div></div>
   </div>
   <div class="iconrow">
+    <button class="iconbtn" id="btn-account" title="Account & sync">👤</button>
     <button class="iconbtn" id="btn-addbook" title="Add a book">➕</button>
     <button class="iconbtn" id="btn-search" title="Search">🔍</button>
     <button class="iconbtn" id="btn-hl" title="Journal — notes, highlights, backup">📓</button>
@@ -521,6 +542,7 @@ header .brand span{color:var(--gold)}
 </div></div>
 <div class="overlay" id="review"><div class="panel" style="max-width:660px"><h2>🔁 SHARPEN <span id="rvcount" style="font-size:13px;color:var(--tx2)"></span> <button class="x" data-close="review">✕</button></h2><div id="rvbody"></div></div></div>
 <div class="overlay" id="addbook"><div class="panel" style="max-width:640px"><h2>➕ ADD A BOOK <button class="x" data-close="addbook">✕</button></h2><div id="ab-body"></div><input type="file" id="ab-file" accept="application/pdf" style="display:none"></div></div>
+<div class="overlay" id="account"><div class="panel" style="max-width:640px"><h2>👤 ACCOUNT <button class="x" data-close="account">✕</button></h2><div id="acc-body"></div></div></div>
 <div class="overlay" id="patches"><div class="panel" style="max-width:700px"><h2>📜 PATCH NOTES <span id="patchver" style="font-size:13px;color:var(--tx2)"></span> <button class="x" data-close="patches">✕</button></h2><div id="patchlist"></div></div></div>
 <div class="overlay" id="achs"><div class="panel" style="max-width:820px"><h2>🏆 ACHIEVEMENTS <span id="achcount" style="font-size:13px;color:var(--tx2)"></span> <button class="x" data-close="achs">✕</button></h2><div class="achgrid" id="achgrid"></div></div></div>
 <div class="overlay" id="flow"><div class="fwrap">
@@ -632,7 +654,7 @@ async function boot(){
   try{DATA=await tryLoad(k);localStorage.setItem(LS_KEY,k)}
   catch(e){$("loading").style.display="none";showLock();$("keyerr").textContent=hashK?"That key doesn't fit this lock.":"";return}
   $("loading").style.display="none";
-  landing();checkAch();initSync();
+  await loadAccess();landing();checkAch();initSync();
   if("serviceWorker"in navigator){
     // surface new versions instead of silently sitting on a stale cache
     navigator.serviceWorker.addEventListener("controllerchange",()=>{if(navigator.serviceWorker.controller)showUpdateChip();});
@@ -646,7 +668,7 @@ async function boot(){
 }
 function landing(){ if(DATA.nodes&&DATA.nodes.length){renderPath();show("path")} else {renderHome();show("home")} patchCheck(); }
 $("keygo").onclick=async()=>{const k=$("keyin").value.trim();if(!k)return;
-  try{DATA=await tryLoad(k);localStorage.setItem(LS_KEY,k);landing();initSync()}
+  try{DATA=await tryLoad(k);localStorage.setItem(LS_KEY,k);await loadAccess();landing();initSync()}
   catch(e){$("keyerr").textContent="That key doesn't fit this lock."}};
 
 /* ============ views ============ */
@@ -675,6 +697,7 @@ function renderTopbar(){
   $("lvlname").textContent="LV "+l+" · "+lvlName();
   $("xptext").textContent=`${S.xp-lo} / ${hi-lo} XP`;
   $("xpfill").style.width=Math.min(100,(S.xp-lo)/(hi-lo)*100)+"%";
+  $("btn-addbook").style.display=privileged()?"":"none";   // only admins add books (GitHub enforces the write too)
 }
 $("nav-path").onclick=()=>{renderPath();show("path")};
 $("nav-lib").onclick=()=>{renderHome();show("home")};
@@ -698,7 +721,7 @@ function renderHome(){
   for(const[w,label,sub]of wings){
     const head=document.createElement("div");head.className="wing";head.innerHTML=`<h2>${label}</h2><small>${sub}</small>`;
     const grid=document.createElement("div");grid.className="shelf";
-    for(const b of DATA.books.filter(x=>x.wing===w)){
+    for(const b of DATA.books.filter(x=>x.wing===w&&bookVisible(x.id))){
       const done=readSet(b.id).size,pct=Math.round(done/b.episodes.length*100);
       const el=document.createElement("button");el.className="book";el.style.setProperty("--bc",b.accent);
       el.innerHTML=`<div class="cover" style="background:linear-gradient(160deg,${b.accent}55,${b.accent}18 55%,rgba(0,0,0,.35))">
@@ -719,7 +742,7 @@ function buildMix(){
   const rnd=mulberry(seed);
   const items=[];
   // up to two unlocked, unmastered Path ideas lead the mix
-  const nodePool=(DATA.nodes||[]).filter(n=>!n.stub&&nodeStatus(n.id)==="avail");
+  const nodePool=(DATA.nodes||[]).filter(n=>!n.stub&&nodeVisible(n)&&nodeStatus(n.id)==="avail");
   for(let k=0;k<2&&nodePool.length;k++)
     items.push({n:nodePool.splice(Math.floor(rnd()*nodePool.length),1)[0].id});
   const pool={shadow:[],light:[]};
@@ -1067,7 +1090,7 @@ function doSearch(){
   if(q.length<3)return;let n=0;
   // path lessons first
   for(const nd of (DATA.nodes||[])){
-    if(nd.stub||n>=10)continue;
+    if(nd.stub||n>=10||!nodeVisible(nd))continue;
     const hay=[nd.title,...(nd.bridge||[]),...(nd.sources||[]).flatMap(s=>s.quote)];
     for(const p of hay){const i=p.toLowerCase().indexOf(q);
       if(i>=0){n++;
@@ -1078,7 +1101,7 @@ function doSearch(){
           <div class="s">…${esc(pre)}<mark>${esc(hit)}</mark>${esc(post)}…</div>`;
         el.onclick=()=>{$("search").classList.remove("on");openNode(nd.id)};
         w.appendChild(el);break;}}}
-  for(const b of DATA.books){for(let e=0;e<b.episodes.length&&n<50;e++){
+  for(const b of DATA.books){if(!bookVisible(b.id))continue;for(let e=0;e<b.episodes.length&&n<50;e++){
     for(const p of b.episodes[e].p){const i=p.toLowerCase().indexOf(q);
       if(i>=0){n++;
         const el=document.createElement("button");el.className="srow";
@@ -1099,8 +1122,13 @@ $("btn-ach").onclick=()=>{const g=$("achgrid");g.innerHTML="";
   $("achs").classList.add("on")};
 
 /* ---------- patch notes ---------- */
-const APP_VER="3.10";
+const APP_VER="3.11";
 const PATCHES=[
+ {v:"3.11",n:"Accounts",d:"14 Jul 2026",items:[
+  ["new","👤 A real Account screen (top bar) — sign in with your access token. It's your identity, your cross-device sync, and your admin powers, all in one place. No sign-up: the token IS your account."],
+  ["new","Roles: you (the owner) are the permanent main admin and can never be removed. You can grant admin to other GitHub users and take it away — they can't touch you."],
+  ["new","Admins can hide books and whole Path tracks from everyone else — a guest's Library and Path shrink to exactly what you allow. Adding books and changing access are truly locked to admins by GitHub."],
+  ["polish","Signed-in devices on the same account sync together; different accounts stay separate."]]},
  {v:"3.10",n:"Everywhere",d:"14 Jul 2026",items:[
   ["new","☁️ Your progress now syncs across every device. Connect your GitHub token once (in ➕ Add a Book) and everything — mastered ideas, confidence levels, notes, streaks, XP, tutor feedback, highlights — follows you to any phone or laptop, encrypted, and can never be lost."],
   ["new","One token is now your whole login: it's what lets you (and only you) add books, and it's what carries your progress everywhere. No account to make."],
@@ -1439,7 +1467,97 @@ async function initSync(announce){
     if(v&&v.id==='path')renderPath();else if(v&&v.id==='home')renderHome();
     if(announce)toast("☁️ Progress synced from your other devices");}
   pushState();
+  whoAmI().then(()=>{applyAccessToUI()});
 }
+
+/* ---------- accounts, roles & library access ----------
+   HONEST NOTE: on a public static site, hiding books from guests is a UI/visibility
+   convention, not encryption — the write side (adding books, editing access) is truly
+   gated by the GitHub token, but everyone still downloads the same encrypted payload. */
+const OWNER="Hassan-Mujtabata";     // the GitHub account behind the main-admin email; can never be removed
+let ME={login:null,role:"guest"};   // resolved from the connected token
+let ACCESS=null;                     // {v,guestBooks,guestTracks,admins} from access.json, or null=all visible
+const privileged=()=>ME.role==="owner"||ME.role==="admin";
+async function loadAccess(){
+  try{const r=await fetch("access.json",{cache:"no-cache"});if(r.ok)ACCESS=await r.json();}catch(e){}
+  return ACCESS;
+}
+async function whoAmI(){
+  const h=ghHead();
+  if(!h){ME={login:null,role:"guest"};return ME;}
+  try{
+    const u=await(await fetch("https://api.github.com/user",{headers:h})).json();
+    const login=u.login||null;
+    if(!ACCESS)await loadAccess();
+    let role="member";
+    if(login===OWNER)role="owner";
+    else if(ACCESS&&ACCESS.admins&&ACCESS.admins.includes(login))role="admin";
+    ME={login,role,name:u.name||login,avatar:u.avatar_url};
+  }catch(e){ME={login:null,role:"guest"};}
+  return ME;
+}
+const bookVisible=id=>privileged()||!ACCESS||!Array.isArray(ACCESS.guestBooks)?true:ACCESS.guestBooks.includes(id);
+const trackVisible=tid=>privileged()||!ACCESS||!Array.isArray(ACCESS.guestTracks)?true:ACCESS.guestTracks.includes(tid);
+const nodeVisible=n=>trackVisible(n.track);
+function applyAccessToUI(){
+  const v=[...document.querySelectorAll('.view.on')][0];
+  if(v&&v.id==='path')renderPath();else if(v&&v.id==='home')renderHome();
+  renderTopbar();
+}
+async function saveAccess(){
+  const h=ghHead();if(!h)return false;
+  const cfg={v:1,guestBooks:ACCESS.guestBooks||[],guestTracks:ACCESS.guestTracks||[],admins:ACCESS.admins||[]};
+  const url=`https://api.github.com/repos/${GH_REPO}/contents/access.json`;
+  let sha=null;try{const r=await fetch(url,{headers:h});if(r.ok)sha=(await r.json()).sha;}catch(e){}
+  const body={message:"access: update library visibility",content:bytesToB64(new TextEncoder().encode(JSON.stringify(cfg,null,1))),branch:"main"};
+  if(sha)body.sha=sha;
+  const r=await fetch(url,{method:"PUT",headers:h,body:JSON.stringify(body)});
+  return r.ok;
+}
+function renderAccount(){
+  const b=$("acc-body");let h="";
+  if(ME.login){
+    h+=`<div class="accid"><div class="av">${ME.role==="owner"?"👑":ME.role==="admin"?"🛡️":"👤"}</div>
+      <div><div class="who">${esc(ME.name||ME.login)}</div><div class="role ${ME.role}">${ME.role==="owner"?"Main admin · permanent":ME.role}</div></div>
+      <button class="ghostbtn" id="acc-out" style="margin-left:auto;padding:7px 13px">Sign out</button></div>
+      <div class="accnote">☁️ Progress syncs across every device signed in to <b>${esc(ME.login)}</b>. Other accounts sync separately. <span class="miniA" id="acc-syncnow">sync now</span></div>`;
+  }else{
+    h+=`<div class="accnote">Sign in with an access token to <b>sync your progress across devices</b> and — if you're an admin — manage the library. No sign-up: the token from your GitHub account <i>is</i> your identity, and only its holder can add books or change access (GitHub enforces that on its servers).
+      <br><br>Make one at github.com → Settings → Developer settings → Fine-grained tokens, with <b>Contents + Gists: Read and write</b> on this repo.</div>
+      <input type="password" id="acc-tok" placeholder="github_pat_… or ghp_…"><div style="text-align:center;margin-top:12px"><button class="goldbtn" id="acc-in">Sign in</button></div>`;
+  }
+  b.innerHTML=h;
+  if($("acc-out"))$("acc-out").onclick=()=>{["vault_gh","vault_gist"].forEach(k=>localStorage.removeItem(k));ME={login:null,role:"guest"};_syncInit=false;renderAccount();applyAccessToUI();toast("Signed out");};
+  if($("acc-syncnow"))$("acc-syncnow").onclick=async()=>{toast("☁️ Syncing…");await pullState();await pushState();applyAccessToUI();toast("☁️ Synced")};
+  if($("acc-in"))$("acc-in").onclick=async()=>{const v=$("acc-tok").value.trim();if(!v)return;
+    const btn=$("acc-in");btn.textContent="Signing in…";btn.disabled=true;
+    localStorage.setItem("vault_gh",v);await whoAmI();
+    if(!ME.login){localStorage.removeItem("vault_gh");renderAccount();toast("That token didn't work — check it has repo access");return;}
+    _syncInit=false;await initSync(true);renderAccount();applyAccessToUI();toast("👋 Signed in as "+ME.login);};
+  if(privileged())renderAdminControls(b);
+}
+function renderAdminControls(b){
+  if(!ACCESS)ACCESS={v:1,guestBooks:DATA.books.map(x=>x.id),guestTracks:DATA.tracks.map(x=>x.id),admins:[]};
+  ACCESS.guestBooks=ACCESS.guestBooks||DATA.books.map(x=>x.id);
+  ACCESS.guestTracks=ACCESS.guestTracks||DATA.tracks.map(x=>x.id);
+  const gb=new Set(ACCESS.guestBooks),gt=new Set(ACCESS.guestTracks);
+  let h=`<div class="accsec">📚 What guests & members can see</div>
+    <div class="accnote">Toggle a book or track off to hide it from everyone who isn't an admin — their Library and Path shrink to match.</div>`;
+  h+=DATA.books.map(x=>`<label class="acctog"><span class="g">${x.glyph}</span><span class="t">${esc(x.title)}</span><input type="checkbox" data-book="${x.id}" ${gb.has(x.id)?"checked":""}></label>`).join("");
+  h+=`<div class="accsec">🗺️ Path tracks</div>`+DATA.tracks.map(t=>`<label class="acctog"><span class="g">${t.glyph}</span><span class="t">${esc(t.name)}</span><input type="checkbox" data-track="${t.id}" ${gt.has(t.id)?"checked":""}></label>`).join("");
+  h+=`<div class="accsec">🛡️ Admins</div><div class="adminrow">👑 ${OWNER}<span style="color:var(--gold);margin-left:auto;font-size:11px">MAIN · can't be removed</span></div>`;
+  h+=(ACCESS.admins||[]).map(a=>`<div class="adminrow">🛡️ ${esc(a)}${ME.role==="owner"?`<span class="rm" data-rmadmin="${esc(a)}">remove</span>`:""}</div>`).join("");
+  if(ME.role==="owner")h+=`<div style="display:flex;gap:8px;margin-top:8px"><input type="text" id="acc-newadmin" placeholder="github username to grant admin"><button class="ghostbtn" id="acc-addadmin" style="flex:0 0 auto;margin:0">Grant</button></div>`;
+  h+=`<div style="text-align:center;margin-top:16px"><button class="goldbtn" id="acc-save">Save access settings</button></div>
+    <div class="warn">⚠️ Honest limit: hiding books changes what the app <i>shows</i> — perfect for sharing with friends, but it isn't encryption. Anyone you give the unlock link to still technically downloads the whole library. What <b>is</b> truly locked to admins (by GitHub, on their servers): adding books, and changing these very settings.</div>`;
+  const w=document.createElement("div");w.innerHTML=h;b.appendChild(w);
+  w.querySelectorAll("[data-book]").forEach(c=>c.onchange=()=>{c.checked?gb.add(c.dataset.book):gb.delete(c.dataset.book);ACCESS.guestBooks=[...gb]});
+  w.querySelectorAll("[data-track]").forEach(c=>c.onchange=()=>{c.checked?gt.add(c.dataset.track):gt.delete(c.dataset.track);ACCESS.guestTracks=[...gt]});
+  w.querySelectorAll("[data-rmadmin]").forEach(x=>x.onclick=()=>{ACCESS.admins=(ACCESS.admins||[]).filter(a=>a!==x.dataset.rmadmin);renderAccount()});
+  if($("acc-addadmin"))$("acc-addadmin").onclick=()=>{const v=$("acc-newadmin").value.trim().replace(/^@/,"");if(v){ACCESS.admins=[...new Set([...(ACCESS.admins||[]),v])];renderAccount()}};
+  if($("acc-save"))$("acc-save").onclick=async()=>{const s=$("acc-save");s.textContent="Saving…";s.disabled=true;const ok=await saveAccess();toast(ok?"✅ Access saved — guests update within minutes":"⚠️ Save failed — token needs Contents: write");renderAccount();applyAccessToUI()};
+}
+$("btn-account").onclick=async()=>{if(ghHead()&&!ME.login)await whoAmI();renderAccount();$("account").classList.add("on")};
 function nextTrackId(){
   const used=new Set((DATA.tracks||[]).map(t=>t.id));
   for(const c of "GHIJKLMNOPQRSTUVWXYZ")if(!used.has(c))return c;
@@ -1784,6 +1902,7 @@ function renderPath(){
   $("sittxt").textContent=(S.sits&&S.sits.length?`${S.sits.length} sits · ${tm} min logged — `:"")+"begin a timed sit · bells at start & end";
   const tree=$("tree");tree.innerHTML="";
   for(const tr of DATA.tracks){
+    if(!trackVisible(tr.id))continue;
     const col=document.createElement("div");col.className="track";col.style.setProperty("--tacc",tr.accent);
     const ns=DATA.nodes.filter(n=>n.track===tr.id).sort((a,b)=>a.tier-b.tier);
     const doneN=ns.filter(n=>nodeDone(n.id)).length;
@@ -2099,7 +2218,7 @@ async function bioUnlock(){
     const kb=await crypto.subtle.decrypt({name:"AES-GCM",iv:b64d(rec.iv)},wk,b64d(rec.ct));
     const k=b64e(kb);
     DATA=await tryLoad(k);localStorage.setItem(LS_KEY,k);
-    landing();checkAch();initSync();
+    await loadAccess();landing();checkAch();initSync();
   }catch(err){$("keyerr").textContent="Face unlock failed — use your link or key."}
 }
 $("btn-bio").onclick=enrollBio;
