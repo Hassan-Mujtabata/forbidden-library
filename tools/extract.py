@@ -70,6 +70,9 @@ BOOKS = [
     dict(id="likeswitch", file="The Like Switch_ An Ex-FBI Agen - Schafer_ Jack_ Karlins_ Marvin.pdf",
          title="The Like Switch", author="Jack Schafer",
          wing="shadow", glyph="\U0001f60a", accent="#e6844d"),
+    dict(id="meaning", file="632ecf70b27a5-man-s-search-for-meaning.pdf",
+         title="Man's Search for Meaning", author="Viktor Frankl",
+         wing="light", glyph="\U0001f54a️", accent="#7f8fa6"),
 ]
 
 # repair common Pali terms that lose their diacritics in extraction

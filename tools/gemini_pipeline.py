@@ -254,12 +254,30 @@ def curated_ideas(graph):
     """Only the hand-authored tracks (A-F) — the crisp titles worth cross-linking to."""
     return [n["title"] for n in graph["nodes"] if n["track"] in ("A", "B", "C", "D", "E", "F")]
 
+def queue_summary():
+    """Every queued book with its progress — so the app can show the whole queue, not one job."""
+    out = []
+    if os.path.isdir(QUEUE):
+        for f in sorted(os.listdir(QUEUE)):
+            if not f.endswith(".job.enc"):
+                continue
+            try:
+                j = dec_enc(os.path.join(QUEUE, f))
+                total = len(j["chunks"]); done = j.get("done", 0)
+                out.append({"id": j["id"], "title": j["title"], "glyph": j.get("glyph", "📗"),
+                            "done": done, "total": total,
+                            "pct": round(100 * done / total) if total else 0,
+                            "state": "complete" if done >= total else ("in-progress" if done > 0 else "waiting")})
+            except Exception:
+                pass
+    return out
+
 def write_status(**kw):
     st = {}
     if os.path.exists(STATUS):
         try: st = json.load(open(STATUS))
         except Exception: st = {}
-    st.update(kw); st["updated"] = int(time.time())
+    st.update(kw); st["queue"] = queue_summary(); st["updated"] = int(time.time())
     json.dump(st, open(STATUS, "w"), indent=1)
 
 def run(book_id, track_name, track_glyph, track_accent, target_nodes, max_this_run, dry=False):

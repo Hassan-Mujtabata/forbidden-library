@@ -385,6 +385,15 @@ header .brand span{color:var(--gold)}
 .jreview .jr-re{float:right;color:var(--tx2);cursor:pointer;font-size:12px;margin-left:8px}
 .jreview.pending{color:var(--tx2);font-style:italic}
 
+/* ---------- pipeline queue ---------- */
+.qrow{display:flex;align-items:center;gap:11px;padding:11px 13px;border-radius:12px;background:var(--card);border:1px solid var(--line);margin-bottom:8px}
+.qrow .qg{font-size:20px}
+.qrow .qmid{flex:1;min-width:0}
+.qrow .qt{font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.qrow .qbar{height:5px;background:var(--card2);border-radius:99px;overflow:hidden;margin-top:6px}
+.qrow .qbar>div{height:100%;border-radius:99px;transition:width .4s}
+.qrow .qst{font-size:11px;color:var(--tx2);flex:0 0 auto;text-align:right;min-width:56px}
+
 /* ---------- account ---------- */
 #acc-body .accid{display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin-bottom:12px}
 #acc-body .accid .av{font-size:30px}
@@ -543,6 +552,7 @@ header .brand span{color:var(--gold)}
 <div class="overlay" id="review"><div class="panel" style="max-width:660px"><h2>🔁 SHARPEN <span id="rvcount" style="font-size:13px;color:var(--tx2)"></span> <button class="x" data-close="review">✕</button></h2><div id="rvbody"></div></div></div>
 <div class="overlay" id="addbook"><div class="panel" style="max-width:640px"><h2>➕ ADD A BOOK <button class="x" data-close="addbook">✕</button></h2><div id="ab-body"></div><input type="file" id="ab-file" accept="application/pdf" style="display:none"></div></div>
 <div class="overlay" id="account"><div class="panel" style="max-width:640px"><h2>👤 ACCOUNT <button class="x" data-close="account">✕</button></h2><div id="acc-body"></div></div></div>
+<div class="overlay" id="queue"><div class="panel" style="max-width:600px"><h2>🤖 AI PIPELINE QUEUE <button class="x" data-close="queue">✕</button></h2><div id="queue-body"></div></div></div>
 <div class="overlay" id="patches"><div class="panel" style="max-width:700px"><h2>📜 PATCH NOTES <span id="patchver" style="font-size:13px;color:var(--tx2)"></span> <button class="x" data-close="patches">✕</button></h2><div id="patchlist"></div></div></div>
 <div class="overlay" id="achs"><div class="panel" style="max-width:820px"><h2>🏆 ACHIEVEMENTS <span id="achcount" style="font-size:13px;color:var(--tx2)"></span> <button class="x" data-close="achs">✕</button></h2><div class="achgrid" id="achgrid"></div></div></div>
 <div class="overlay" id="flow"><div class="fwrap">
@@ -1122,8 +1132,12 @@ $("btn-ach").onclick=()=>{const g=$("achgrid");g.innerHTML="";
   $("achs").classList.add("on")};
 
 /* ---------- patch notes ---------- */
-const APP_VER="3.11";
+const APP_VER="3.12";
 const PATCHES=[
+ {v:"3.12",n:"The Queue",d:"14 Jul 2026",items:[
+  ["new","The 🤖 AI Pipeline card now opens a full QUEUE — every book you've added, each with its own progress bar, so you can finally see what's building and how much is left. Signed in, it even shows books added since the last run."],
+  ["fix","Clearer now: adding a book builds its PATH lessons over the coming days (that's the pipeline). A full readable LIBRARY copy is a separate step."],
+  ["content","Man's Search for Meaning (Viktor Frankl) added to the Library — readable now — and it's in the queue to become a Path track. 22 books."]]},
  {v:"3.11",n:"Accounts",d:"14 Jul 2026",items:[
   ["new","👤 A real Account screen (top bar) — sign in with your access token. It's your identity, your cross-device sync, and your admin powers, all in one place. No sign-up: the token IS your account."],
   ["new","Roles: you (the owner) are the permanent main admin and can never be removed. You can grant admin to other GitHub users and take it away — they can't touch you."],
@@ -1660,12 +1674,33 @@ async function renderPipeStatus(){
     if(PIPE)renderPipeStatus();
     return;
   }
-  if(!PIPE||!PIPE.title){c.style.display="none";return;}
-  const done=PIPE.state==="complete", pct=PIPE.percent||0;
+  const q=(PIPE&&PIPE.queue)||[];
+  if(!q.length){c.style.display="none";return;}
+  const pending=q.filter(x=>x.state!=="complete");
+  const working=q.find(x=>x.state==="in-progress");
   c.style.display="flex";
-  c.innerHTML=`<span class="tag" style="color:${done?'var(--jade)':'#c084fc'}">🤖 ${done?'AI PIPELINE':'AI PIPELINE · WORKING'}</span>`+
-    `<span class="slimtxt">${done?`built “${esc(PIPE.title)}” — a new AI-authored track is live`:`forging “${esc(PIPE.title)}” · ${pct}% (${PIPE.done}/${PIPE.total}) · resumes daily`}</span>`;
-  c.onclick=()=>{renderPath();show("path")};
+  const label=pending.length
+    ? `${pending.length} book${pending.length>1?"s":""} being written into the Path${working?` · now “${esc(working.title)}” ${working.pct}%`:""} · tap for progress`
+    : "all queued books built · tap to view";
+  c.innerHTML=`<span class="tag" style="color:#c084fc">🤖 AI PIPELINE${pending.length?" · WORKING":""}</span><span class="slimtxt">${label}</span>`;
+  c.onclick=()=>{renderQueue();$("queue").classList.add("on")};
+}
+async function renderQueue(){
+  const b=$("queue-body");
+  let items=(((PIPE&&PIPE.queue)||[])).slice();
+  if(ghHead()){   // catch books added since the last daily run (live from GitHub)
+    try{const r=await fetch(`https://api.github.com/repos/${GH_REPO}/contents/tools/queue`,{headers:ghHead()});
+      if(r.ok){for(const f of (await r.json())){if(!f.name.endsWith(".job.enc"))continue;
+        const id=f.name.replace(".job.enc","");if(!items.find(x=>x.id===id))items.push({id,title:id,glyph:"📗",done:0,total:0,pct:0,state:"waiting"});}}
+    }catch(e){}
+  }
+  const col=s=>s==="complete"?"var(--jade)":s==="in-progress"?"#c084fc":"var(--tx2)";
+  let h=`<div class="accnote">Each book you add becomes a dependency-locked <b>Path</b> track — a few lessons a day, on its own, resuming daily until done. (A full readable Library book is added separately.)</div>`;
+  if(!items.length)h+=`<p style="color:var(--tx2);font-size:13px">Nothing queued right now.</p>`;
+  h+=items.map(x=>`<div class="qrow"><span class="qg">${x.glyph||"📗"}</span>
+    <div class="qmid"><div class="qt">${esc(x.title)}</div><div class="qbar"><div style="width:${x.pct||0}%;background:${col(x.state)}"></div></div></div>
+    <span class="qst">${x.state==="complete"?"✓ done":x.state==="in-progress"?x.pct+"%":x.total?("waiting "+x.done+"/"+x.total):"queued"}</span></div>`).join("");
+  b.innerHTML=h;
 }
 
 /* ---------- daily rite (dailies) ---------- */
