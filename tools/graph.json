@@ -55,6 +55,13 @@
       "glyph": "💡",
       "accent": "#9b59b6",
       "blurb": "AI-authored from How to Have a Beautiful Mind — a dependency-locked track."
+    },
+    {
+      "id": "H",
+      "name": "Mindfulness in Practice",
+      "glyph": "🪷",
+      "accent": "#16a085",
+      "blurb": "AI-authored from Mindfulness, Bliss and Beyond — a dependency-locked track."
     }
   ],
   "nodes": [
@@ -3813,6 +3820,387 @@
         "min": 50
       },
       "whyreq": "Builds directly on “Navigating Conversational Diversions” — grasp that first."
+    },
+    {
+      "id": "h1",
+      "track": "H",
+      "tier": 0,
+      "prereq": [],
+      "glyph": "🍃",
+      "title": "The Path of Letting Go",
+      "bridge": [
+        "The Path of Letting Go is the fundamental movement of meditation. You enter your sit carrying the accumulated burdens of your day, like heavy suitcases. The practice invites you to consciously unload these weights, one by one, giving them away freely without looking back. This isn't about denial, but about creating space for profound peace.",
+        "This process of abandoning is not passive; it requires skillful effort. You don't accumulate or hold onto things in meditation. Instead, your energy is directed toward inclining the mind to give up all burdens, whether they are duties, achievements, or even thoughts and sensations. It's a deliberate cultivation of renunciation, making letting go the main object of your attention.",
+        "As you practice this step-by-step abandoning, you will feel lighter and freer, like a bird soaring unburdened. This inclination towards giving up is precisely what leads you into deep states of meditation, fostering the beautiful silence and clarity you encountered as the goal. It builds directly on your work in Stabilizing Attention, where you learned to observe mind-wandering; here, you actively release what you observe."
+      ],
+      "sources": [
+        {
+          "book": "Mindfulness, Bliss and Beyond",
+          "ref": "Letting Go as Goal",
+          "quote": [
+            "Meditation is the way of letting go of the complex world to reach inner peace. Direct your skillful effort to letting go, as it is the major cause for attaining deep meditation and inner bliss."
+          ]
+        }
+      ],
+      "quiz": [
+        {
+          "q": "What is the primary attitude of mind to cultivate during meditation according to the text?",
+          "c": [
+            "Accumulating and holding on to thoughts",
+            "Focusing intently on duties",
+            "Willingness to let go of burdens",
+            "Struggling against distractions"
+          ],
+          "a": 2,
+          "why": "The text states, \"we should develop a mind that is willing to let go, to give up all burdens.\""
+        },
+        {
+          "q": "What did the Buddha identify as a major cause for achieving deep meditation?",
+          "c": [
+            "Intellectual understanding of the path",
+            "The ability to abandon and renounce",
+            "Strict adherence to rituals",
+            "Suppressing all emotions"
+          ],
+          "a": 1,
+          "why": "The Buddha is quoted as saying, \"the major cause for attaining deep meditation and reaching these powerful states is the ability to abandon, to let go, to renounce.\""
+        },
+        {
+          "q": "How does skillful effort relate to the process of letting go in meditation?",
+          "c": [
+            "It involves forcefully clearing the mind of all content",
+            "It is directed towards accumulating positive experiences",
+            "It means directing energy to abandon and not disturb",
+            "It is solely about intellectual comprehension"
+          ],
+          "a": 2,
+          "why": "The text explains that skillful effort \"means directing your energy to just the right places and sustaining it until the task is complete... it produces the beautiful peace of deep meditation.\" The goal is letting go."
+        }
+      ],
+      "apply": {
+        "prompt": "For your next meditation session, bring to mind the image of carrying heavy suitcases. As thoughts, sensations, or worries arise, consciously visualize placing them down next to you, or handing them over, gently letting go. Observe how your mind feels lighter with each release. Afterwards, reflect on what kind of 'baggage' you found easiest or hardest to release.",
+        "min": 50
+      }
+    },
+    {
+      "id": "h2",
+      "track": "H",
+      "tier": 1,
+      "prereq": [
+        "h1"
+      ],
+      "glyph": "🤫",
+      "title": "The Inner Commentator",
+      "bridge": [
+        "Just as a sports announcer narrates a game you are watching, an inner commentator in your mind constantly describes and judges your experiences. This internal monologue, often unnoticed, is not the direct experience itself but a layer of thought about it. It tells you 'that was good' or 'this is bad,' spinning narratives that distance you from the raw reality of the moment. Recognising this commentary is the first step towards true present-moment awareness.",
+        "This inner speech, while seeming to help you understand the world, actually constructs delusions, causing suffering through judgments, attachments, fears, and anxieties. It's not knowledge; it's opinion, often biased and always retrospective. To move beyond this, you must value silent awareness over any thought, understanding that direct observation without mental chatter brings you closer to truth. The key is to refine your present-moment awareness so intensely that there's no time left for commentary.",
+        "Imagine your mind as a host at a party, greeting each new guest – each experience – as it arrives. If you engage in conversation with one guest, you miss the next. By mindfully greeting every experience immediately and moving on, you leave no space for inner speech. This continuous, immediate engagement with the present moment, without pause for judgment, is a refinement of the continuous attention you practised earlier. It's how you cultivate the profound silence and clarity necessary for deeper meditation, moving past the burdens of past and future."
+      ],
+      "sources": [
+        {
+          "book": "Mindfulness, Bliss and Beyond",
+          "ref": "Inner Commentary vs. Awareness",
+          "quote": [
+            "Just as a sports commentator describes a game, your inner voice narrates experiences, but this speech often creates delusions and suffering, unlike silent awareness which is closer to truth."
+          ]
+        }
+      ],
+      "quiz": [
+        {
+          "q": "What is the primary function of the inner commentator according to the text?",
+          "c": [
+            "To help you understand the world accurately",
+            "To create delusions and cause suffering",
+            "To guide your actions in the present",
+            "To provide a factual record of past events"
+          ],
+          "a": 1,
+          "why": "The text states, \"It is the inner speech that spins the delusions that cause suffering.\""
+        },
+        {
+          "q": "How can one effectively overcome the inner commentary during meditation?",
+          "c": [
+            "By forcefully suppressing all thoughts",
+            "By engaging in deep analytical thinking",
+            "By developing refined present-moment awareness",
+            "By focusing on future possibilities"
+          ],
+          "a": 2,
+          "why": "The text suggests, \"An effective way to overcome the inner commentary is to develop a refined present-moment awareness.\""
+        },
+        {
+          "q": "The text uses which simile to illustrate the difference between silent awareness and thinking about an experience?",
+          "c": [
+            "A skilled actor manipulating an audience",
+            "A wise sage offering counsel",
+            "A host greeting guests at a party",
+            "A tennis match commentator"
+          ],
+          "a": 3,
+          "why": "The passage explicitly uses the simile of \"watching a tennis match on TV\" and \"the match that you hear being described by the commentator.\""
+        }
+      ],
+      "apply": {
+        "prompt": "During your next meditation session, make it your primary intention to simply observe your experiences without adding any internal commentary. As thoughts arise, notice if they are observations or judgments. Afterwards, reflect on how long you were able to maintain silent awareness and what kind of commentary was most prevalent.",
+        "min": 50
+      },
+      "whyreq": "Builds directly on “The Path of Letting Go” — grasp that first."
+    },
+    {
+      "id": "h3",
+      "track": "H",
+      "tier": 2,
+      "prereq": [
+        "h2"
+      ],
+      "glyph": "🌸",
+      "title": "The Beautiful Breath",
+      "bridge": [
+        "When your attention settles deeply on the breath, you may find its nature subtly shifting. The breath you once perceived as ordinary and coarse begins to transform into something remarkably smooth, peaceful, and continuous. This transition marks the emergence of what's known as the beautiful breath, a stage where the mind recognizes and delights in the profound tranquility found within the very act of breathing. It's no longer just an object; it's a source of deepening contentment.",
+        "This transformation occurs as the mind simplifies its focus, moving beyond the dualities of 'in' and 'out' or specific bodily locations. Instead, your awareness rests solely on the essence of the breath's experience: its inherent beauty, peace, and freedom. The mind doesn't force this; rather, it passively observes, allowing the breath to become ever calmer and sweeter. At this stage, any attempt to actively 'do' something or interfere will disrupt the delicate process, causing the beauty to recede.",
+        "The cultivation of this sustained, effortless attention on the beautiful breath is a critical springboard into deeper states of meditation. It demands the same patient, non-interfering observation you practiced in Stabilizing Attention: Overcoming Mind-Wandering, but with a heightened sensitivity. Here, the mind is so still it cannot analyze or comment, moving beyond the chatter that once defined your experience. This quiet delight in the breath is the \"first flowering of bliss,\" a precursor to the profound states of Access Concentration & the Nimitta that will follow."
+      ],
+      "sources": [
+        {
+          "book": "Mindfulness, Bliss and Beyond",
+          "ref": "beautiful breath",
+          "quote": [
+            "As attention rests easily on the breath, it becomes a smooth, peaceful 'beautiful breath' that the mind recognizes and delights in, experiencing deepening contentment without force."
+          ]
+        }
+      ],
+      "quiz": [
+        {
+          "q": "What is the primary characteristic of the \"beautiful breath\" stage?",
+          "c": [
+            "The breath becomes erratic and difficult to follow.",
+            "The mind actively forces the breath to be calm.",
+            "The breath transforms into a smooth, peaceful, and continuous experience.",
+            "The meditator begins to count breaths to maintain focus."
+          ],
+          "a": 2,
+          "why": "The passage describes the beautiful breath as smooth, peaceful, and continuous, recognized and delighted in by the mind."
+        },
+        {
+          "q": "What action is discouraged when experiencing the beautiful breath?",
+          "c": [
+            "Passively observing the breath.",
+            "Allowing the perception of 'in' or 'out' to disappear.",
+            "Trying to actively \"do something\" to the breath.",
+            "Savoring the sweetness of the breath."
+          ],
+          "a": 2,
+          "why": "The text explicitly states that trying to do something at this stage will disturb the process and lose the beauty."
+        },
+        {
+          "q": "How does the mind relate to the beautiful breath?",
+          "c": [
+            "It analyzes its physical characteristics and location.",
+            "It becomes concerned with its cycle (beginning, middle, end).",
+            "It recognizes and delights in its peace and freedom.",
+            "It attempts to shorten or lengthen the breath."
+          ],
+          "a": 2,
+          "why": "The mind recognizes and delights in this peaceful breath, not analyzing its details or trying to control it."
+        }
+      ],
+      "apply": {
+        "prompt": "During your next meditation session, consciously observe if your breath's quality shifts from ordinary to peaceful. If it does, allow your mind to simply rest in that experience without trying to change it. Afterwards, reflect on how this felt.",
+        "min": 50
+      },
+      "whyreq": "Builds directly on “The Inner Commentator” — grasp that first."
+    },
+    {
+      "id": "h4",
+      "track": "H",
+      "tier": 3,
+      "prereq": [
+        "h3"
+      ],
+      "glyph": "💡",
+      "title": "Calm for Problem-Solving",
+      "bridge": [
+        "When a problem arises in your daily life, instead of getting lost in endless rumination, you can use your meditation practice to gain clarity. Just as climbing a tall tree reveals a path out of a dense jungle, a calm mind provides a vantage point to see solutions to your challenges. This approach allows you to address difficulties not from a place of confusion, but from a settled and clear perspective.",
+        "The mechanism here is straightforward: when your mind is entangled in a problem, it's like being lost in a dense forest, unable to see a clear way forward. By engaging in your meditation, you step away from the immediate emotional turmoil and cultivate a state of deep calm. This mental stillness allows you to rise above the chaos and gain a fresh, objective overview of the situation at hand.",
+        "This isn't about ignoring your difficulties; it's about approaching them from a place of wisdom. The same mental muscles of calm and insight you develop in your meditation sessions, perhaps while working with The Five Hindrances or Stabilizing Attention, become powerful tools for navigating life's complexities. From this calm vantage point, the answers often appear naturally, guiding your actions with clarity."
+      ],
+      "sources": [
+        {
+          "book": "Mindfulness, Bliss and Beyond",
+          "ref": "problems affecting daily happiness",
+          "quote": [
+            "Meditation allows you to rise above tangled daily problems, gaining a calm perspective from which solutions appear, much like climbing a tree to see a path out of a confusing jungle."
+          ]
+        }
+      ],
+      "quiz": [
+        {
+          "q": "According to the text, how does meditation help with daily life problems?",
+          "c": [
+            "By making you forget your problems entirely.",
+            "By providing a calm vantage point to see solutions.",
+            "By encouraging endless rumination until an answer appears.",
+            "By magically making problems disappear."
+          ],
+          "a": 1,
+          "why": "The passage uses the simile of climbing a tree to gain perspective and states that answers appear from the calm."
+        },
+        {
+          "q": "What is compared to being lost in a dense jungle when facing a problem?",
+          "c": [
+            "The act of meditation itself.",
+            "Endless thinking about the problem.",
+            "Climbing a tall tree for perspective.",
+            "Achieving a state of deep calm."
+          ],
+          "a": 1,
+          "why": "The text states, 'if you have a heavy problem,do not think about it endlessly. Then you are merely wandering around lost in your jungle.'"
+        },
+        {
+          "q": "What is the recommended action when faced with a heavy problem, according to the passage?",
+          "c": [
+            "To think about it endlessly until a solution emerges.",
+            "To suppress all thoughts about the problem.",
+            "To practice meditation to gain perspective.",
+            "To seek immediate external advice."
+          ],
+          "a": 2,
+          "why": "The passage advises against endless thinking and instead suggests following meditation instructions to rise above the problem and gain insight."
+        }
+      ],
+      "apply": {
+        "prompt": "This week, when a personal or professional problem feels overwhelming, commit to a 10-minute meditation session before you attempt to strategize or decide. Afterwards, reflect on whether your perspective shifted or if any new insights emerged.",
+        "min": 50
+      },
+      "whyreq": "Builds directly on “The Beautiful Breath” — grasp that first."
+    },
+    {
+      "id": "h5",
+      "track": "H",
+      "tier": 4,
+      "prereq": [
+        "h4"
+      ],
+      "glyph": "⚖️",
+      "title": "The Guilt Complex",
+      "bridge": [
+        "The Guilt Complex often manifests as a subtle reluctance to accept peace or joy, especially during meditation. You might find yourself at the brink of deep calm or happiness, only to pull back, feeling you don't quite deserve such a profound state. This isn't always overt anger, but a quiet self-denial, a hidden barrier preventing you from fully embracing the bliss that arises. It's a common, often unrecognised, form of ill will directed inwards.",
+        "The mechanism behind this self-sabotage is typically a deep-seated guilt complex. Our culture often links guilt with punishment, leading us to unconsciously deny ourselves pleasure or freedom when we feel culpable, even for forgotten transgressions. This ingrained association causes us to seek out or impose self-punishment, manifesting as an aversion to inner happiness and a preference for struggle over ease.",
+        "Recognising this internal resistance is crucial for progress. When you encounter this subtle self-denial, remember the broader concept of The Five Hindrances, where ill will is a major saboteur. The antidote is unconditional self-forgiveness and cultivating goodwill toward yourself, allowing your heart to open to all parts of your experience, and giving yourself permission to find peace and bliss."
+      ],
+      "sources": [
+        {
+          "book": "Mindfulness, Bliss and Beyond",
+          "ref": "Ill Will Toward Yourself",
+          "quote": [
+            "Many people carry deep guilt, making them reluctant to allow themselves bliss or success in meditation, often feeling undeserving of happiness."
+          ]
+        }
+      ],
+      "quiz": [
+        {
+          "q": "How does ill will toward oneself commonly manifest in meditation?",
+          "c": [
+            "Directly attacking other meditators",
+            "A reluctance to allow oneself peace or bliss",
+            "Excessive physical pain in posture",
+            "Feeling bored with the meditation object"
+          ],
+          "a": 1,
+          "why": "Ill will toward oneself often appears as a subtle self-denial of happiness or peace."
+        },
+        {
+          "q": "What is often identified as the root cause of self-directed ill will?",
+          "c": [
+            "Lack of sleep",
+            "A deep-seated guilt complex",
+            "Poor meditation instructions",
+            "External distractions"
+          ],
+          "a": 1,
+          "why": "The passage identifies guilt complexes as a primary reason for denying oneself happiness and peace."
+        },
+        {
+          "q": "What is the recommended antidote for ill will toward oneself?",
+          "c": [
+            "Intensifying concentration through force",
+            "Engaging in vigorous physical exercise",
+            "Unconditional self-forgiveness and goodwill",
+            "Changing to a different meditation object"
+          ],
+          "a": 2,
+          "why": "Cultivating goodwill toward oneself and practicing unconditional self-forgiveness helps overcome self-imposed denial of happiness."
+        }
+      ],
+      "apply": {
+        "prompt": "This week, during your meditation, pay close attention to any subtle feelings of undeservingness or reluctance to accept inner peace and joy. Write down specific instances and how you responded to them.",
+        "min": 50
+      },
+      "whyreq": "Builds directly on “Calm for Problem-Solving” — grasp that first."
+    },
+    {
+      "id": "h6",
+      "track": "H",
+      "tier": 5,
+      "prereq": [
+        "h5"
+      ],
+      "glyph": "😌",
+      "title": "The Perception of Contentment",
+      "bridge": [
+        "The tyrant of restlessness constantly demands more, always finding fault and pushing you to be somewhere else. This relentless seeking for something better—another thought, another place, another activity—is its defining characteristic. The moment you perceive something as not good enough, restlessness takes hold, preventing stillness and deep immersion. It's a fundamental dissatisfaction with the present, no matter how comfortable your circumstances.",
+        "The mechanism to subdue this tyrant is cultivating the perception of contentment. Instead of a faultfinding mind, you train yourself to appreciate what is already here and now. This means actively looking for the beauty or value in the present moment, whether it's the simple act of breathing, the silence, or even physical discomfort. By shifting your perception, you acknowledge the sheer pleasure of doing nothing and find joy in what is.",
+        "This practice directly addresses the hindrance of restlessness you encountered in The Five Hindrances. Learning to be content with the present moment, no matter how your meditation seems to be going, is crucial. Just as Stabilizing Attention taught you to return to the object, here you return to contentment. Even perceived aches or pains can be reframed as fascinating, allowing you to remain still and prevent restlessness from driving you away, deepening your practice naturally."
+      ],
+      "sources": [
+        {
+          "book": "Mindfulness, Bliss and Beyond",
+          "ref": "Restlessness and contentment",
+          "quote": [
+            "Restlessness arises from a faultfinding mind, always seeking something else, but contentment—appreciating what is already present—is its direct antidote, leading to stillness and deeper meditation."
+          ]
+        }
+      ],
+      "quiz": [
+        {
+          "q": "What is the primary cause of restlessness in meditation?",
+          "c": [
+            "A boring meditation object",
+            "Physical discomfort",
+            "A faultfinding mind",
+            "External distractions"
+          ],
+          "a": 2,
+          "why": "Restlessness is described as a sign of not finding joy in what's here, stemming from a faultfinding mind."
+        },
+        {
+          "q": "How does one overcome restlessness, according to the lesson?",
+          "c": [
+            "By forcing the mind to be still",
+            "By changing the meditation environment",
+            "By developing contentment with the present",
+            "By increasing the intensity of effort"
+          ],
+          "a": 2,
+          "why": "Contentment is presented as the direct antidote to restlessness, changing perception to appreciate the present."
+        },
+        {
+          "q": "What is the effect of being content with one's meditation progress?",
+          "c": [
+            "It makes the meditation dull",
+            "It prevents further progress",
+            "It naturally deepens the meditation",
+            "It causes more distractions"
+          ],
+          "a": 2,
+          "why": "The passage states that being absolutely content with meditation, regardless of perceived progress, will actually make it go deeper."
+        }
+      ],
+      "apply": {
+        "prompt": "During your next meditation session, or even while doing a mundane task, observe your mind for any signs of restlessness or dissatisfaction. When you find it, consciously shift your perception to find something to appreciate or be content with in that exact moment. Write down what you observed and how the shift felt.",
+        "min": 50
+      },
+      "whyreq": "Builds directly on “The Guilt Complex” — grasp that first."
     }
   ]
 }
