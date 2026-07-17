@@ -122,7 +122,11 @@ header .brand span{color:var(--gold)}
 #defpop .dp-src{font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--tx2);margin-bottom:8px}
 #defpop .dp-body{font-size:14px;line-height:1.6;color:var(--tx);max-height:38vh;overflow-y:auto}
 #defpop .dp-body mark{background:rgba(212,175,55,.28);color:var(--tx);border-radius:3px;padding:0 2px}
-#defpop .dp-open{margin-top:12px;padding:9px 16px;font-size:12.5px}
+#defpop .dp-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+#defpop .dp-actions button{border:1px solid var(--line);border-radius:99px;padding:8px 14px;font-size:12.5px;color:var(--tx);cursor:pointer;background:var(--card)}
+#defpop #dp-explain{border-color:rgba(78,205,196,.4);color:var(--jade)}
+#defpop #dp-save{border-color:rgba(212,175,55,.4);color:var(--gold)}
+#defpop .dp-open{padding:8px 14px;font-size:12.5px;border:1px solid var(--line);border-radius:99px;background:var(--card);color:var(--tx);cursor:pointer}
 
 /* ---------- drawer / panels ---------- */
 .panel{max-width:660px;margin:40px auto;padding:0 18px 60px}
@@ -527,6 +531,7 @@ header .brand span{color:var(--gold)}
   <div id="jactions"></div>
   <div class="abtok" id="gembox" style="margin-top:8px"></div>
   <div class="jsec">✍️ YOUR APPLY NOTES</div><div id="jnotes"></div>
+  <div class="jsec">📒 SAVED WORDS <button class="ghostbtn" id="jvquiz" style="float:right;padding:5px 12px;font-size:11.5px;margin:0;display:none">🎓 Quiz me</button></div><div id="jvocab"></div>
   <div class="jsec">⭐ HIGHLIGHTS</div><div id="hlrows"></div>
   <input type="file" id="jfile" accept="application/json" style="display:none">
 </div></div>
@@ -566,7 +571,7 @@ header .brand span{color:var(--gold)}
 </div></div>
 
 <div id="hlbtn"><button id="hl-save">⭐ Save</button><button id="hl-def">📖 Define</button></div>
-<div id="defpop"><button class="dp-x" id="dp-x">✕</button><div class="dp-word" id="dp-word"></div><div class="dp-src" id="dp-src"></div><div class="dp-body" id="dp-body"></div><button class="ghostbtn dp-open" id="dp-open" style="display:none">Open the lesson →</button></div>
+<div id="defpop"><button class="dp-x" id="dp-x">✕</button><div class="dp-word" id="dp-word"></div><div class="dp-src" id="dp-src"></div><div class="dp-body" id="dp-body"></div><div class="dp-actions"><button class="dp-open" id="dp-open" style="display:none">Open the lesson →</button><button id="dp-explain">🎓 Explain</button><button id="dp-save">⭐ Save word</button></div></div>
 <div id="toasts"></div>
 
 <script>
@@ -867,7 +872,7 @@ $("r-list").onclick=()=>{const b=bookById(CUR.b);const w=$("eprows");w.innerHTML
 
 /* ---------- highlights ---------- */
 const hlBtn=$("hlbtn");
-let SELTEXT="";
+let SELTEXT="",SELCTX="";
 document.addEventListener("selectionchange",()=>{
   const inReader=$("reader").classList.contains("on"),inNode=$("node").classList.contains("on");
   if(!inReader&&!inNode){hlBtn.style.display="none";return}
@@ -875,9 +880,11 @@ document.addEventListener("selectionchange",()=>{
   const sel=document.getSelection();
   if(sel.isCollapsed||!box.contains(sel.anchorNode)){hlBtn.style.display="none";return}
   const t=sel.toString().trim();SELTEXT=t;
+  const anc=sel.anchorNode,pe=anc&&(anc.nodeType===3?anc.parentElement:anc);
+  const blk=pe&&pe.closest("p,blockquote,.src");SELCTX=blk?blk.textContent.slice(0,700):"";
   if(!t){hlBtn.style.display="none";return}
   const words=t.split(/\s+/).length;
-  $("hl-def").style.display=(words<=4&&t.length<=44)?"block":"none";  // define only short vocab
+  $("hl-def").style.display=(words<=30)?"block":"none";  // short = define; longer = explain/save
   const r=sel.getRangeAt(0).getBoundingClientRect();
   hlBtn.style.display="flex";
   const w=hlBtn.offsetWidth||150;
@@ -913,6 +920,11 @@ async function defineTerm(term){
   const pop=$("defpop");
   $("dp-word").textContent=term;$("dp-open").style.display="none";
   $("dp-src").textContent="LOOKING UP…";$("dp-body").textContent="…";pop.classList.add("on");
+  const ctx=SELCTX;
+  $("dp-explain").style.display="";$("dp-save").style.display="";
+  $("dp-explain").onclick=()=>explainTerm(term,ctx);
+  $("dp-save").onclick=()=>saveVocab(term,ctx);
+  $("dp-save").textContent=(S.vocab||[]).some(x=>x.t.toLowerCase()===term.toLowerCase())?"⭐ Saved":"⭐ Save word";
   const v=vaultDefine(term);
   if(v&&v.score>=2){
     $("dp-src").textContent="✦ FROM YOUR VAULT";
@@ -935,6 +947,37 @@ async function defineTerm(term){
     (navigator.onLine?"No definition found for “"+esc(term)+"”.":"You're offline — only your vault can be searched, and this term isn't explained in your lessons yet.");
 }
 $("dp-x").onclick=()=>$("defpop").classList.remove("on");
+async function explainTerm(term,ctx){
+  const src=$("dp-src"),body=$("dp-body");$("dp-word").textContent=term;$("dp-open").style.display="none";
+  if(!geminiKeys().length){src.textContent="TUTOR NOT CONNECTED";
+    body.innerHTML="Connect a Gemini key in 👤 Account (or the Journal) and the tutor can explain anything you don't get — a word or a whole sentence.";return;}
+  src.textContent="🎓 TUTOR IS EXPLAINING…";body.textContent="…";
+  const prompt=`A learner is reading and doesn't fully understand something. Explain it clearly, simply, and concretely in 2-3 sentences — plain text, no preamble, no markdown.\n\nThey highlighted: "${term}"`+(ctx&&ctx.length>term.length+5?`\nThe surrounding passage: "${ctx}"`:"")+`\n\nSay what it means and, if there's a surrounding passage, why it matters there. Never mention being an AI or a model.`;
+  try{const fb=await geminiCall(prompt,240);src.textContent="🎓 TUTOR";body.textContent=fb;}
+  catch(e){src.textContent="TUTOR UNAVAILABLE";body.textContent=e&&e.message==="quota"?"Gemini quota is spent for now — it resets daily.":"Couldn't reach the tutor — check your connection.";}
+}
+function saveVocab(term,ctx){
+  S.vocab=S.vocab||[];
+  if(S.vocab.some(x=>x.t.toLowerCase()===term.toLowerCase())){toast("Already in your saved words");return;}
+  S.vocab.unshift({t:term,ctx:ctx||"",at:Date.now(),node:$("node").classList.contains("on")?CURN:null,b:$("reader").classList.contains("on")?CUR.b:null});
+  save();$("dp-save").textContent="⭐ Saved";toast("⭐ Saved — review it in your Journal");
+}
+async function vocabQuiz(){
+  const words=(S.vocab||[]).slice(0,10);if(!words.length)return;
+  const pop=$("defpop");$("dp-word").textContent="Vocab check";$("dp-open").style.display="none";
+  $("dp-explain").style.display="none";$("dp-save").style.display="none";
+  $("dp-src").textContent="🎓 BUILDING QUESTIONS…";$("dp-body").textContent="…";pop.classList.add("on");
+  const list=words.map(w=>`- "${w.t}"${w.ctx?` (context: ${w.ctx.slice(0,140)})`:""}`).join("\n");
+  const prompt=`A learner saved these words/phrases while studying and wants to check they truly understood each idea (not just its dictionary meaning). For EACH item, write one short question that probes understanding, and a one-sentence model answer. Format EXACTLY, plain text, no markdown:\nQ: <question>\nA: <answer>\n\n(one blank line between items)\n\nItems:\n${list}`;
+  try{
+    const txt=await geminiCall(prompt,700);
+    const items=txt.split(/\n\s*\n/).map(b=>{const q=(b.match(/Q:\s*([\s\S]*?)(?:\nA:|$)/)||[])[1],a=(b.match(/A:\s*([\s\S]*)/)||[])[1];return q&&a?{q:q.trim(),a:a.trim()}:null}).filter(Boolean);
+    if(!items.length)throw new Error("empty");
+    $("dp-src").textContent="🎓 CHECK YOUR UNDERSTANDING";
+    $("dp-body").innerHTML=items.map((it,i)=>`<div style="margin-bottom:13px"><b>${i+1}. ${esc(it.q)}</b><div class="vq-r" style="color:var(--jade);cursor:pointer;font-size:12.5px;margin-top:4px">tap to reveal answer</div></div>`).join("");
+    [...$("dp-body").querySelectorAll(".vq-r")].forEach((el,i)=>el.onclick=()=>{el.textContent=items[i].a;el.style.cursor="default"});
+  }catch(e){$("dp-src").textContent="TUTOR UNAVAILABLE";$("dp-body").textContent=e&&e.message==="quota"?"Gemini quota spent — resets daily.":"Couldn't reach the tutor.";}
+}
 const fmtDate=ts=>new Date(ts).toLocaleDateString(undefined,{day:"numeric",month:"short",year:"numeric"});
 function journalNotes(){return DATA.nodes
   .filter(x=>S.node[x.id]&&S.node[x.id].applied)
@@ -1087,6 +1130,17 @@ function renderJournal(){
     el.querySelector("[data-del]").onclick=ev=>{ev.stopPropagation();S.hl=S.hl.filter(x=>x!==h);save();el.remove()};
     if(jump)el.onclick=jump;
     w.appendChild(el)}
+  // saved words
+  const vw=$("jvocab");vw.innerHTML="";const vocab=S.vocab||[];
+  $("jvquiz").style.display=(vocab.length&&geminiKeys().length)?"inline-block":"none";$("jvquiz").onclick=vocabQuiz;
+  if(!vocab.length)vw.innerHTML='<p style="color:var(--tx2);font-size:13px">While reading, highlight a word and tap 📖 Define → ⭐ Save word to collect vocabulary here for later.</p>';
+  for(const vv of vocab){
+    const el=document.createElement("div");el.className="hlrow";el.style.cursor="pointer";
+    el.innerHTML=`<div class="q" style="font-family:var(--sans);font-size:14px">${esc(vv.t)}</div><div class="m"><span>${vv.ctx?"“…"+esc(vv.ctx.slice(0,54))+"…”":"tap to look up"}</span><button style="color:var(--tx2)" data-del>remove</button></div>`;
+    el.querySelector("[data-del]").onclick=ev=>{ev.stopPropagation();S.vocab=S.vocab.filter(x=>x!==vv);save();el.remove()};
+    el.onclick=()=>{SELCTX=vv.ctx||"";$("hls").classList.remove("on");defineTerm(vv.t)};
+    vw.appendChild(el);
+  }
   $("hls").classList.add("on");
 }
 $("btn-hl").onclick=renderJournal;
@@ -1132,8 +1186,12 @@ $("btn-ach").onclick=()=>{const g=$("achgrid");g.innerHTML="";
   $("achs").classList.add("on")};
 
 /* ---------- patch notes ---------- */
-const APP_VER="3.12";
+const APP_VER="3.13";
 const PATCHES=[
+ {v:"3.13",n:"Understand It",d:"14 Jul 2026",items:[
+  ["new","Highlight anything — even a whole sentence — and tap 🎓 Explain: your tutor explains it in plain words, in the context of what you're reading. For single words it still checks your vault first, then the dictionary."],
+  ["new","⭐ Save word: collect words and phrases you want to remember. They live in your Journal under 📒 Saved words — tap any to look it up again."],
+  ["new","🎓 Quiz me: your tutor turns your saved words into quick understanding-check questions (not just definitions), so you can prove you really got the concept."]]},
  {v:"3.12",n:"The Queue",d:"14 Jul 2026",items:[
   ["new","The 🤖 AI Pipeline card now opens a full QUEUE — every book you've added, each with its own progress bar, so you can finally see what's building and how much is left. Signed in, it even shows books added since the last run."],
   ["fix","Clearer now: adding a book builds its PATH lessons over the coming days (that's the pipeline). A full readable LIBRARY copy is a separate step."],
