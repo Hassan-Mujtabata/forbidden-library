@@ -1,6 +1,39 @@
 {
  "v": 1,
- "guestBooks": [],
- "guestTracks": [],
+ "guestBooks": [
+  "laws48",
+  "seduction",
+  "dark3in1",
+  "covert30",
+  "deception",
+  "manip",
+  "persuasion",
+  "quietinf",
+  "bliss",
+  "insight",
+  "beautiful",
+  "tmi",
+  "rightconc",
+  "kahneman",
+  "atomic",
+  "meditations",
+  "bodyscore",
+  "humannature",
+  "navarro",
+  "winfriends",
+  "likeswitch",
+  "meaning"
+ ],
+ "guestTracks": [
+  "A",
+  "B",
+  "C",
+  "D",
+  "E",
+  "F",
+  "J",
+  "G",
+  "H"
+ ],
  "admins": []
 }
