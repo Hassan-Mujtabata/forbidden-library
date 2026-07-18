@@ -1,16 +1,6 @@
 {
  "v": 1,
  "guestBooks": [],
- "guestTracks": [
-  "A",
-  "B",
-  "C",
-  "D",
-  "E",
-  "F",
-  "J",
-  "G",
-  "H"
- ],
+ "guestTracks": [],
  "admins": []
 }
