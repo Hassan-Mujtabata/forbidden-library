@@ -1186,8 +1186,11 @@ $("btn-ach").onclick=()=>{const g=$("achgrid");g.innerHTML="";
   $("achs").classList.add("on")};
 
 /* ---------- patch notes ---------- */
-const APP_VER="3.13";
+const APP_VER="3.14";
 const PATCHES=[
+ {v:"3.14",n:"Living Notes",d:"14 Jul 2026",items:[
+  ["fix","Your “Apply it” reflection is now editable after you complete an idea — reopen it, rewrite your note as your understanding grows, and hit Update. It was read-only before, which made the whole thing pointless."],
+  ["new","When you update a note, the tutor re-reads the new version and gives fresh feedback."]]},
  {v:"3.13",n:"Understand It",d:"14 Jul 2026",items:[
   ["new","Highlight anything — even a whole sentence — and tap 🎓 Explain: your tutor explains it in plain words, in the context of what you're reading. For single words it still checks your vault first, then the dictionary."],
   ["new","⭐ Save word: collect words and phrases you want to remember. They live in your Journal under 📒 Saved words — tap any to look it up again."],
@@ -2092,15 +2095,23 @@ function renderGate(n){
   const gate=$("ngate");gate.innerHTML="";
   const rec=S.node[n.id]||{};
   if(rec.doneAt){
+    const min=(n.apply&&n.apply.min)||40;
     const card=document.createElement("div");card.className="gatecard";
-    card.innerHTML=`<h3>✓ Completed</h3>
-      <div class="gsub">You've been through this idea.${rec.applied?" Your practice note:":""}</div>
-      ${rec.applied?`<p style="font-family:var(--serif);color:#ded9cf;line-height:1.6">“${esc(rec.applied)}”</p>`:""}
-      ${rec.review?`<div class="jreview" style="margin:8px 0 4px">🎓 <b>TUTOR</b> — ${esc(rec.review)}</div>`:""}
-      ${levelPickerHTML(n.id)}
-      <div style="margin-top:12px"><button class="ghostbtn" id="gpath2">← Back to the Path</button></div>`;
-    gate.appendChild(card);wireLevelPicker(card,n.id);
-    $("gpath2").onclick=()=>{renderPath();show("path")};return;
+    card.innerHTML=`<h3>✓ Completed</h3><div class="gsub">Your reflection — edit it anytime as your understanding grows.<br><span style="opacity:.8">${esc(n.apply.prompt)}</span></div>`;
+    const ta=document.createElement("textarea");ta.value=rec.applied||"";ta.placeholder="Update your reflection…";
+    ta.style.cssText="width:100%;min-height:110px;background:var(--bg2);border:1px solid var(--line);border-radius:12px;color:var(--tx);padding:14px;font-family:var(--serif);font-size:15px;line-height:1.6;resize:vertical;outline:none;margin-top:6px";
+    const cc=document.createElement("div");cc.className="cc";const upd=()=>cc.textContent=ta.value.trim().length+" chars";ta.oninput=upd;upd();
+    const btn=document.createElement("button");btn.className="goldbtn";btn.textContent="Update note";btn.style.marginTop="4px";
+    btn.onclick=()=>{const t=ta.value.trim();if(t===(rec.applied||"")){toast("No changes");return;}
+      rec.applied=t;delete rec.review;delete rec.reviewAt;save();toast("✏️ Note updated");
+      if(t&&geminiKeys().length&&navigator.onLine){toast("🎓 Tutor is re-reading…");reviewNote(n.id).then(()=>renderGate(n)).catch(()=>renderGate(n));}
+      else renderGate(n);};
+    card.appendChild(ta);card.appendChild(cc);card.appendChild(btn);
+    if(rec.review){const rv=document.createElement("div");rv.className="jreview";rv.style.margin="14px 0 4px";rv.innerHTML=`🎓 <b>TUTOR</b> — ${esc(rec.review)}`;card.appendChild(rv);}
+    const lp=document.createElement("div");lp.innerHTML=levelPickerHTML(n.id);card.appendChild(lp);wireLevelPicker(lp,n.id);
+    const back=document.createElement("button");back.className="ghostbtn";back.textContent="← Back to the Path";back.style.marginTop="12px";
+    back.onclick=()=>{renderPath();show("path")};card.appendChild(back);
+    gate.appendChild(card);return;
   }
   if(rec.quizBest>=100){renderApply(n);return;}
   const card=document.createElement("div");card.className="gatecard";
