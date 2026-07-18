@@ -1,13 +1,22 @@
 {
- "job": "blissre",
- "title": "Mindfulness, Bliss and Beyond",
- "track": "H",
- "done": 6,
- "total": 6,
+ "job": "amirlevinerachel",
+ "title": "Amir Levine, Rachel Heller Attached The New Science Of Adult",
+ "track": "I",
+ "done": 8,
+ "total": 8,
  "percent": 100,
  "state": "complete",
- "updated": 1784316129,
+ "updated": 1784359625,
  "queue": [
+  {
+   "id": "amirlevinerachel",
+   "title": "Amir Levine, Rachel Heller Attached The New Science Of Adult",
+   "glyph": "\ud83d\udcd8",
+   "done": 8,
+   "total": 8,
+   "pct": 100,
+   "state": "complete"
+  },
   {
    "id": "atomichabitspdfd",
    "title": "Atomic Habits",

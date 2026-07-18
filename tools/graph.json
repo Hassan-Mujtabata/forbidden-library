@@ -62,6 +62,13 @@
       "glyph": "🪷",
       "accent": "#16a085",
       "blurb": "AI-authored from Mindfulness, Bliss and Beyond — a dependency-locked track."
+    },
+    {
+      "id": "I",
+      "name": "Amir Levine, Rachel Heller Attached The New Science Of Adult",
+      "glyph": "📘",
+      "accent": "#e08a3c",
+      "blurb": "AI-authored from Amir Levine, Rachel Heller Attached The New Science Of Adult — a dependency-locked track."
     }
   ],
   "nodes": [
@@ -4201,6 +4208,529 @@
         "min": 50
       },
       "whyreq": "Builds directly on “The Guilt Complex” — grasp that first."
+    },
+    {
+      "id": "i1",
+      "track": "I",
+      "tier": 0,
+      "prereq": [],
+      "glyph": "🤝",
+      "title": "Adult Attachment Styles",
+      "bridge": [
+        "When you find yourself caught in recurring relationship patterns—whether it's constant worry about a partner's feelings, a tendency to withdraw when things get close, or a consistent sense of security—these are not random occurrences. Instead, they are often manifestations of your inherent adult attachment style, a predictable way you relate to others in intimate connections. Understanding these styles provides a powerful lens through which to decode complex relational dynamics, offering clarity where once there was only confusion and pain.",
+        "The core mechanism involves three primary adult attachment styles: anxious, avoidant, and secure. Anxious individuals crave intimacy but often worry about their partner's love and commitment, sometimes pushing them away. Avoidant types value independence highly, often feeling uncomfortable with closeness and intimacy, and may withdraw when relationships deepen. Secure individuals, however, are comfortable with both intimacy and independence, communicating effectively and maintaining balanced relationships.",
+        "Recognizing your own and your partner's attachment style can transform your interactions, moving you from reactive confusion to proactive understanding. This knowledge allows you to navigate the intricate dances of intimacy with greater awareness, much like how knowing \"The Five Hindrances\" allows you to observe mental states rather than being lost within them. It empowers you to break cycles and build more fulfilling connections, grounding your approach in a scientific framework."
+      ],
+      "sources": [
+        {
+          "book": "Amir Levine, Rachel Heller Attached The New Science Of Adult",
+          "ref": "Attachment Styles Explained",
+          "quote": [
+            "A new discovery offers a straightforward explanation for relationship problems, rooted in adult attachment styles which dictate how individuals approach intimacy."
+          ]
+        }
+      ],
+      "quiz": [
+        {
+          "q": "What is the primary benefit of understanding adult attachment styles?",
+          "c": [
+            "To predict future relationship outcomes with certainty",
+            "To identify and explain recurring patterns in intimate relationships",
+            "To assign blame for relationship failures to one partner",
+            "To eliminate all conflict from personal relationships"
+          ],
+          "a": 1,
+          "why": "Attachment styles provide a framework for understanding and decoding relationship behaviors."
+        },
+        {
+          "q": "Which attachment style is characterized by a strong desire for intimacy coupled with significant worry about a partner's love?",
+          "c": [
+            "Secure",
+            "Avoidant",
+            "Anxious",
+            "Disorganized"
+          ],
+          "a": 2,
+          "why": "Anxious individuals often seek closeness but are preoccupied with their partner's availability and commitment."
+        },
+        {
+          "q": "What is a key characteristic of the secure attachment style?",
+          "c": [
+            "A tendency to avoid deep emotional connections",
+            "Feeling trapped when intimacy increases",
+            "Comfort with both closeness and independence in relationships",
+            "Consistently doubting a partner's affection"
+          ],
+          "a": 2,
+          "why": "Secure individuals are balanced, comfortable with both intimacy and self-sufficiency."
+        }
+      ],
+      "apply": {
+        "prompt": "Reflect on a past or current significant relationship. Based on the descriptions of anxious, avoidant, and secure styles, consider which style might best describe you and your partner's typical behavior in that relationship. Write down specific examples that illustrate these patterns.",
+        "min": 50
+      }
+    },
+    {
+      "id": "i2",
+      "track": "I",
+      "tier": 1,
+      "prereq": [
+        "i1"
+      ],
+      "glyph": "⚓",
+      "title": "The Secure Base",
+      "bridge": [
+        "You have seen this principle in action with the \"strange situation test,\" where a twelve-month-old explores a room full of toys with confidence, occasionally glancing at her mother. The moment her mother leaves, the child becomes distraught, unable to focus on the toys. Her distress ceases only upon her mother's return, allowing her to resume play. This experiment vividly demonstrates the profound impact a reliable presence has on one's ability to engage with the world.",
+        "This dependable presence is known as a secure base: a supportive figure you can rely on completely, especially in times of need. For a child, this enables exploration, development, and learning. As an adult, having a secure base—often a romantic partner—frees you to take risks, be creative, and pursue your aspirations. Without this foundational security, maintaining focus and engaging fully in life's challenges becomes significantly harder.",
+        "When your partner consistently provides a secure base, you gain the confidence to turn your attention to other meaningful aspects of life, much like how mastering Stabilizing Attention frees your mind to engage deeply with the meditation object. This external sense of safety allows your internal resources to be directed outwards, fostering growth and well-being. Conversely, an inconsistent or unsupportive partner can undermine your physical and emotional health, literally stunting your personal development and ability to thrive."
+      ],
+      "sources": [
+        {
+          "book": "Amir Levine, Rachel Heller Attached The New Science Of Adult",
+          "ref": "Secure Base Function",
+          "quote": [
+            "A secure base, a reliable and supportive attachment figure, is essential for both children's exploration and adults' ability to take risks, be creative, and engage fully with life's challenges."
+          ]
+        }
+      ],
+      "quiz": [
+        {
+          "q": "In the \"strange situation test,\" what allows a child to explore toys confidently?",
+          "c": [
+            "The novelty of the toys",
+            "The presence of a research assistant",
+            "The mother's consistent, supportive presence",
+            "The child's innate curiosity regardless of circumstance"
+          ],
+          "a": 2,
+          "why": "A secure base, provided by the mother, enables a child's exploratory drive."
+        },
+        {
+          "q": "For adults, what does a secure base primarily enable?",
+          "c": [
+            "Financial independence and career advancement",
+            "The ability to take risks and pursue personal goals",
+            "Exclusive focus on the relationship itself",
+            "Avoidance of all difficult challenges"
+          ],
+          "a": 1,
+          "why": "A secure base provides the confidence and security needed to engage with the world and pursue aspirations."
+        },
+        {
+          "q": "According to the passage, what can happen if an adult partner fails to provide a secure base?",
+          "c": [
+            "Increased self-esteem and elevated mood",
+            "Enhanced focus on career development",
+            "Chronic disquiet, tension, and compromised physical health",
+            "Greater independence and self-reliance"
+          ],
+          "a": 2,
+          "why": "A lack of a secure base from a partner can lead to chronic stress and negatively impact emotional and physical well-being."
+        }
+      ],
+      "apply": {
+        "prompt": "Reflect on a significant personal goal or challenge you are currently facing. Consider who in your life acts as a secure base for you in this pursuit, if anyone. Describe how their presence or support (or lack thereof) influences your confidence, focus, and willingness to take necessary steps towards your goal. If you don't have one, consider what kind of support would empower you most.",
+        "min": 50
+      },
+      "whyreq": "Builds directly on “Adult Attachment Styles” — grasp that first."
+    },
+    {
+      "id": "i3",
+      "track": "I",
+      "tier": 2,
+      "prereq": [
+        "i2"
+      ],
+      "glyph": "🚨",
+      "title": "The Activated Attachment System",
+      "bridge": [
+        "When your attachment system activates, it can feel like a sudden, overwhelming shift. You might find yourself consumed by thoughts of a partner, unable to focus on anything else, constantly checking for their communication, or replaying interactions in your mind. This intense focus, as Emily experienced with David, isn't a flaw in your character; it's your brain's ancient mechanism for ensuring safety and connection, now hyper-alert to perceived threats in your relationship.",
+        "For those with an anxious attachment style, this system is supersensitive, designed to detect even the subtlest cues of unavailability or danger. Research shows you are remarkably vigilant to changes in others' emotional expressions, picking up on hints others miss. However, this heightened sensitivity often comes with a tendency to jump to conclusions, misinterpreting these cues if you react too quickly. Your system is finely tuned, but prone to false alarms without sufficient information.",
+        "The crucial insight here is that your vigilance is a strength, but only if you learn to pause. Just as you learned in Stabilizing Attention to create a gap between a thought and your reaction, here you must create a space between sensing a cue and forming a judgment. Waiting a little longer before reacting allows your uncanny ability to decipher the world to work to your advantage, preventing the cascade of activating strategies that can derail your calm."
+      ],
+      "sources": [
+        {
+          "book": "Amir Levine, Rachel Heller Attached The New Science Of Adult",
+          "ref": "sensitive attachment system",
+          "quote": [
+            "Individuals with an anxious attachment style possess a supersensitive attachment system, making them highly vigilant to relationship threats and subtle emotional cues from partners."
+          ]
+        },
+        {
+          "book": "Amir Levine, Rachel Heller Attached The New Science Of Adult",
+          "ref": "vigilance and misinterpretation",
+          "quote": [
+            "While highly sensitive to emotional changes, anxious individuals tend to misinterpret cues if they react too quickly, but gain an advantage if they gather more information before judging."
+          ]
+        }
+      ],
+      "quiz": [
+        {
+          "q": "What is a key characteristic of the attachment system for individuals with an anxious attachment style?",
+          "c": [
+            "It is generally dormant until a major crisis",
+            "It is supersensitive and easily activated",
+            "It functions identically to other attachment styles",
+            "It primarily focuses on personal achievement"
+          ],
+          "a": 1,
+          "why": "The passage states that people with an anxious attachment style have a supersensitive attachment system."
+        },
+        {
+          "q": "According to research, what is a potential drawback of the heightened vigilance in an activated attachment system?",
+          "c": [
+            "It leads to a decreased ability to empathize",
+            "It causes a complete inability to detect any emotional cues",
+            "It often results in jumping to conclusions and misinterpreting cues",
+            "It makes individuals less likely to seek closeness"
+          ],
+          "a": 2,
+          "why": "The study found that anxious individuals tend to jump to conclusions and misinterpret emotional states if they react too quickly."
+        },
+        {
+          "q": "What advice is given to individuals with an anxious attachment style to better utilize their sensitivity?",
+          "c": [
+            "Immediately confront their partner about perceived threats",
+            "Suppress all feelings of anxiety",
+            "Wait longer before reacting and making judgments",
+            "Ignore subtle cues to avoid overthinking"
+          ],
+          "a": 2,
+          "why": "The passage advises waiting a little longer before reacting and jumping to conclusions to use their ability to decipher the world to their advantage."
+        }
+      ],
+      "apply": {
+        "prompt": "This week, pay close attention to moments when your attachment system feels activated in a relationship. Notice any subtle cues you pick up on and the immediate thoughts or feelings that arise. Before reacting or forming a judgment, consciously pause for a few minutes. Observe if waiting provides you with more clarity or a different perspective on the situation. Reflect on how this pause impacts your subsequent actions.",
+        "min": 50
+      },
+      "whyreq": "Builds directly on “The Secure Base” — grasp that first."
+    },
+    {
+      "id": "i4",
+      "track": "I",
+      "tier": 3,
+      "prereq": [
+        "i3"
+      ],
+      "glyph": "🚫",
+      "title": "Deactivating Strategies",
+      "bridge": [
+        "When you find yourself scrutinizing your partner's minor habits, perhaps their way of eating or speaking, and allowing these small imperfections to overshadow your romantic feelings, you are employing a deactivating strategy. This behavior, often subtle and unconscious, serves to create distance in your relationship, preventing true intimacy from taking root and flourishing. It's a way your mind works to keep others at arm's length.",
+        "Deactivating strategies are any thoughts or behaviors used to squelch intimacy and suppress your innate biological attachment system, which naturally seeks closeness with a preferred partner. These are not always deliberate choices; rather, they are often habitual tools your mind uses to maintain a sense of autonomy. From pining for a 'phantom ex' to avoiding physical closeness, these tactics ensure emotional distance.",
+        "While these strategies may offer a fleeting sense of independence, they ultimately prevent you from experiencing the deep satisfaction and security that comes from genuine connection. Recognising these patterns is the first step towards changing them. Much like observing and naming \"The Five Hindrances\" allows you to step outside the state, identifying a deactivating strategy allows you to choose a different path toward true relational happiness."
+      ],
+      "sources": [
+        {
+          "book": "Amir Levine, Rachel Heller Attached The New Science Of Adult",
+          "ref": "Deactivating Strategies",
+          "quote": [
+            "Deactivating strategies are behaviors or thoughts employed to squelch intimacy, suppressing the brain's natural desire for closeness in a relationship."
+          ]
+        }
+      ],
+      "quiz": [
+        {
+          "q": "Which of the following is an example of a deactivating strategy?",
+          "c": [
+            "Engaging in open and honest communication",
+            "Focusing on a partner's minor flaws",
+            "Planning future activities together",
+            "Expressing gratitude for your partner"
+          ],
+          "a": 1,
+          "why": "Focusing on minor flaws creates distance and prevents intimacy."
+        },
+        {
+          "q": "The primary purpose of deactivating strategies is to:",
+          "c": [
+            "Strengthen emotional bonds",
+            "Increase partner's self-esteem",
+            "Suppress the natural desire for closeness",
+            "Enhance mutual understanding"
+          ],
+          "a": 2,
+          "why": "Deactivating strategies are used to squelch intimacy and keep partners at a distance."
+        },
+        {
+          "q": "What is often true about the use of deactivating strategies?",
+          "c": [
+            "They are always conscious and deliberate choices.",
+            "They lead to greater relationship satisfaction.",
+            "They are frequently unconscious behaviors or thoughts.",
+            "They only occur in new relationships."
+          ],
+          "a": 2,
+          "why": "Many deactivating strategies are unconscious tools used to maintain emotional distance."
+        }
+      ],
+      "apply": {
+        "prompt": "This week, pay close attention to any moments where you feel a subtle urge to create distance in your close relationships. Note down specific thoughts or actions you observe that might be deactivating strategies. Reflect on what feelings might be beneath these actions.",
+        "min": 50
+      },
+      "whyreq": "Builds directly on “The Activated Attachment System” — grasp that first."
+    },
+    {
+      "id": "i5",
+      "track": "I",
+      "tier": 4,
+      "prereq": [
+        "i4"
+      ],
+      "glyph": "🤔",
+      "title": "Secure Forgiveness & Responsibility",
+      "bridge": [
+        "Sometimes, even those with a secure attachment style find themselves trapped in relationships that have turned toxic. You might observe them tolerating unacceptable behavior for far too long, giving endless chances where others would have long since departed. This isn't a failure of their secure foundation, but rather a manifestation of some of its most admirable qualities, taken to an extreme in an unhealthy context. It highlights a unique vulnerability.",
+        "This stems from two core secure tendencies: a profound sense of responsibility for their partner's well-being and a heightened capacity for forgiveness. Secure individuals are adept at understanding others' needs and motives, making generous attributions for hurtful actions, and are less likely to dwell on negatives. They often believe they can help their partner through a \"rough patch,\" feeling it's their duty to provide support.",
+        "While these traits typically foster robust and healthy relationships, they can become a liability when facing persistent, damaging behavior. Recognizing this pattern in yourself or others requires a careful balance. It underscores the importance of self-awareness, reminding you that even positive attributes can lead to undesirable outcomes if not tempered by a clear understanding of boundaries and when to apply the wisdom you explored in \"Knowing When Not to Act.\""
+      ],
+      "sources": [
+        {
+          "book": "Amir Levine, Rachel Heller Attached The New Science Of Adult",
+          "ref": "Forgiveness and Responsibility",
+          "quote": [
+            "Secure individuals often forgive partners for wrongdoing due to their cognitive and emotional ability to understand motives and make generous attributions. They also feel responsible for their partner's well-being."
+          ]
+        }
+      ],
+      "quiz": [
+        {
+          "q": "What is a primary reason secure individuals might stay in a problematic relationship for too long?",
+          "c": [
+            "They fear being alone.",
+            "They feel responsible for their partner's well-being.",
+            "They lack alternative relationship options.",
+            "They enjoy the drama and conflict."
+          ],
+          "a": 1,
+          "why": "Secure individuals often feel a strong sense of responsibility for their partner's happiness and stability."
+        },
+        {
+          "q": "Secure individuals' tendency to forgive their partners is attributed to their ability to:",
+          "c": [
+            "Ignore their partner's faults entirely.",
+            "Understand motives and make generous attributions.",
+            "Manipulate situations to their advantage.",
+            "Expect future apologies and changes."
+          ],
+          "a": 1,
+          "why": "Their cognitive and emotional capacities allow them to explain hurtful actions benignly."
+        },
+        {
+          "q": "When does a secure individual's sense of responsibility become a potential liability in a relationship?",
+          "c": [
+            "When their partner consistently meets their emotional needs.",
+            "When they are in a new, healthy relationship.",
+            "When they tolerate persistent, damaging behavior from a long-term partner.",
+            "When they are teaching their partner new skills."
+          ],
+          "a": 2,
+          "why": "Their positive traits can lead to enduring unhealthy dynamics when dealing with sustained negative behavior."
+        }
+      ],
+      "apply": {
+        "prompt": "Reflect on a past or current relationship where you or someone you know demonstrated a strong sense of responsibility or high capacity for forgiveness. Describe how these traits impacted the relationship, both positively and negatively, and what lessons were learned about boundaries.",
+        "min": 50
+      },
+      "whyreq": "Builds directly on “Deactivating Strategies” — grasp that first."
+    },
+    {
+      "id": "i6",
+      "track": "I",
+      "tier": 5,
+      "prereq": [
+        "i5"
+      ],
+      "glyph": "🧘‍♀️",
+      "title": "The One-Sided Compromise",
+      "bridge": [
+        "When faced with irresolvable intimacy clashes in a relationship, you might find yourself in a 'one-sided compromise.' This means that instead of both partners actively adjusting, you make a conscious decision to shift your expectations and approach to reduce conflict and find peace, acknowledging that certain fundamental patterns may not change.",
+        "This pragmatic strategy involves admitting that in certain areas, your mate may never be an active partner. You stop urging them to change, cease taking personal offense when they create distance, and proactively seek satisfaction for needs your partner cannot meet elsewhere, such as with friends or through independent activities.",
+        "This isn't about giving up on the relationship, but rather about letting go of a specific dream of intimacy that may be unattainable. By accepting these limitations and changing your mindset, you reduce ongoing disappointment and frustration. This echoes the wisdom in The Five Hindrances, where recognizing what is present and adjusting your response is key, rather than fighting a losing battle."
+      ],
+      "sources": [
+        {
+          "book": "Amir Levine, Rachel Heller Attached The New Science Of Adult",
+          "ref": "Irresolvable Intimacy Clashes",
+          "quote": [
+            "When faced with unresolvable intimacy clashes, individuals can choose to change their expectations, accepting limitations and adopting pragmatic strategies to live with limited togetherness."
+          ]
+        }
+      ],
+      "quiz": [
+        {
+          "q": "What is the primary characteristic of a 'one-sided compromise' in a relationship?",
+          "c": [
+            "Both partners adjust their behavior equally.",
+            "One partner makes the primary adjustments in expectations and actions.",
+            "It involves forcing the other partner to change.",
+            "It always leads to the relationship ending."
+          ],
+          "a": 1,
+          "why": "The passage describes the compromise as 'wholly one-sided,' where one partner changes expectations and strategies."
+        },
+        {
+          "q": "Which of these is NOT a pragmatic strategy adopted in a one-sided compromise?",
+          "c": [
+            "Learning to do things independently.",
+            "Engaging with like-minded friends for activities.",
+            "Continuously urging your partner to change.",
+            "Being thankful for what your mate does."
+          ],
+          "a": 2,
+          "why": "The passage explicitly states that individuals in a one-sided compromise 'stop urging him or her to change.'"
+        },
+        {
+          "q": "What is a key benefit of adopting a one-sided compromise when intimacy needs clash?",
+          "c": [
+            "It forces your partner to become more intimate.",
+            "It eliminates all conflict from the relationship.",
+            "It shifts self-blame and reduces personal offense.",
+            "It guarantees mutual satisfaction for both partners."
+          ],
+          "a": 2,
+          "why": "Understanding the irresolvable nature of the clash helps you 'no longer blame yourself' and 'stop taking personal offense.'"
+        }
+      ],
+      "apply": {
+        "prompt": "Reflect on a recurring intimacy conflict in a past or present relationship where you felt perpetually frustrated. Consider how adopting a 'one-sided compromise' by adjusting your expectations or actions might have changed the dynamic. What specific changes would you make to your own behavior or mindset?",
+        "min": 50
+      },
+      "whyreq": "Builds directly on “Secure Forgiveness & Responsibility” — grasp that first."
+    },
+    {
+      "id": "i7",
+      "track": "I",
+      "tier": 6,
+      "prereq": [
+        "i6"
+      ],
+      "glyph": "🗣️",
+      "title": "Effective Communication",
+      "bridge": [
+        "When you feel a relationship need, the impulse might be to act out or withdraw. Instead, effective communication means choosing to articulate that need directly and calmly. This approach replaces indirect signals or explosive accusations with a clear statement of your feelings and desires, inviting a genuine response rather than a reactive one. It's a deliberate act of vulnerability that sets the stage for mutual understanding.",
+        "The concrete mechanism of effective communication involves first acknowledging your own need or discomfort. Then, you proactively choose to express this directly to your partner, without resorting to protest behaviors like incessant calling or criticism, or to avoidant strategies like emotional withdrawal. For avoidant individuals, this means explicitly stating a need for space. This directness ensures your partner understands the actual issue, rather than reacting to a symptom.",
+        "This practice offers profound clarity, whether it strengthens a bond or reveals an incompatibility, ultimately saving you from prolonged uncertainty. It connects to the \"Perception Is Everything\" lesson, as it reframes how you present your needs, shifting from a reactive stance to one of empowered honesty. Committing to this directness, even when it feels scary, is a pathway to more authentic and fulfilling connections."
+      ],
+      "sources": [
+        {
+          "book": "Amir Levine, Rachel Heller Attached The New Science Of Adult",
+          "ref": "effective communication vs protest",
+          "quote": [
+            "Unlike protest behavior which creates uncertainty, effective communication, though potentially daunting, provides unequivocal clarity about relationship concerns and often strengthens the bond, leading to long-term gratitude."
+          ]
+        },
+        {
+          "book": "Amir Levine, Rachel Heller Attached The New Science Of Adult",
+          "ref": "avoidant communication",
+          "quote": [
+            "Avoidant individuals benefit from acknowledging and communicating their need for space in advance, explaining it as a personal need to prevent partners from intensifying efforts to draw closer and avoid pursuit-withdrawal dynamics."
+          ]
+        }
+      ],
+      "quiz": [
+        {
+          "q": "For individuals with an anxious attachment style, what is a common pitfall when trying to express needs?",
+          "c": [
+            "They tend to delay communication until the issue resolves itself.",
+            "They often express needs in an explosive, accusatory, or threatening manner.",
+            "They communicate only through written messages to avoid confrontation.",
+            "They expect their partner to instinctively know what they need without being told."
+          ],
+          "a": 1,
+          "why": "Anxious individuals often get flooded with negative emotions and express needs explosively, which can push partners away."
+        },
+        {
+          "q": "What is a primary benefit of using effective communication instead of protest behavior?",
+          "c": [
+            "It guarantees your partner will always give you the response you hope for.",
+            "It ensures you avoid any arguments or disagreements in the relationship.",
+            "It provides unequivocal clarity about your concerns, even if the outcome is not what you expected.",
+            "It allows you to maintain a sense of mystery and intrigue in the relationship."
+          ],
+          "a": 2,
+          "why": "Effective communication ensures that your concerns are clearly addressed, providing clarity regardless of the specific response."
+        },
+        {
+          "q": "For someone with an avoidant attachment style, what is an important step in using effective communication?",
+          "c": [
+            "To assume their partner is not \"the one\" if they feel a need for distance.",
+            "To withdraw emotionally and physically without explanation.",
+            "To acknowledge and explain their need for space in advance, clarifying it's not about the partner.",
+            "To wait for their partner to initiate all conversations about closeness."
+          ],
+          "a": 2,
+          "why": "Avoidant individuals benefit from proactively communicating their need for space to prevent misunderstandings and pursuit-withdrawal dynamics."
+        }
+      ],
+      "apply": {
+        "prompt": "This week, identify one specific need or concern in a close relationship that you typically avoid discussing or express indirectly. Formulate a direct, calm way to communicate this need to the person involved. Practice this effective communication, and reflect on how the experience felt and what clarity it brought.",
+        "min": 75
+      },
+      "whyreq": "Builds directly on “The One-Sided Compromise” — grasp that first."
+    },
+    {
+      "id": "i8",
+      "track": "I",
+      "tier": 7,
+      "prereq": [
+        "i7"
+      ],
+      "glyph": "🤔",
+      "title": "Assuming Positive Intent",
+      "bridge": [
+        "When you find yourself in a disagreement, your initial interpretation of your partner's actions or words profoundly shapes the outcome. For instance, if your partner is quiet, you might assume they are withdrawing because they don't care, or you might assume they are processing their thoughts. This immediate assumption, often unconscious, dictates your emotional and behavioral response, either escalating or de-escalating the tension.",
+        "The mechanism here is the 'assumption of intent.' In conflict, people with insecure attachment styles often fall into the trap of expecting the worst, interpreting ambiguous cues as personal attacks or signs of rejection. This negative assumption triggers a defensive reaction, which can then provoke a negative response from the partner, creating a self-fulfilling prophecy and a destructive cycle. Conversely, assuming positive intent allows for a more open and constructive dialogue.",
+        "To break this cycle, you must consciously challenge your initial negative interpretations. Even if you have to talk yourself into believing a more positive truth, this shift can steer the conversation in a healthier direction. This practice extends beyond conflict, touching on the idea of 'Perception Is Everything' you've encountered before. By deliberately choosing to see your partner's actions through a lens of care, even when it's difficult, you create the space for genuine resolution and connection, rather than allowing fear to dictate your responses."
+      ],
+      "sources": [
+        {
+          "book": "Amir Levine, Rachel Heller Attached The New Science Of Adult",
+          "ref": "Conflict assumptions",
+          "quote": [
+            "It’s always more effective to assume the best in conflict situations. Expecting the worst often acts as a self-fulfilling prophecy, triggering defensive responses and a vicious cycle of negativity."
+          ]
+        }
+      ],
+      "quiz": [
+        {
+          "q": "What is the primary impact of assuming the worst in a conflict?",
+          "c": [
+            "It always leads to a swift resolution",
+            "It encourages your partner to be more open",
+            "It creates a self-fulfilling prophecy of negativity",
+            "It demonstrates strong boundaries"
+          ],
+          "a": 2,
+          "why": "Expecting the worst typically leads to defensive responses, initiating a negative cycle."
+        },
+        {
+          "q": "When facing an ambiguous situation in a conflict, what does the lesson suggest is a more effective approach?",
+          "c": [
+            "To immediately withdraw to avoid further conflict",
+            "To assume your partner is intentionally trying to hurt you",
+            "To wait for your partner to explicitly state their intent",
+            "To consciously assume positive intent"
+          ],
+          "a": 3,
+          "why": "Assuming the best, even if initially difficult, helps steer the dialogue in a positive direction."
+        },
+        {
+          "q": "Which of these is NOT a direct consequence of assuming positive intent in a conflict?",
+          "c": [
+            "It fosters a more constructive dialogue",
+            "It reduces defensive reactions",
+            "It makes you appear vulnerable and weak",
+            "It can break a cycle of negativity"
+          ],
+          "a": 2,
+          "why": "Assuming positive intent fosters constructive dialogue and breaks negative cycles by reducing defensiveness, not by making one appear weak."
+        }
+      ],
+      "apply": {
+        "prompt": "Reflect on a recent minor disagreement or misunderstanding with a partner, friend, or family member. Write down your initial assumption about their intent. Then, consciously reframe their actions or words with a positive assumption. How might your response have changed if you had started with this positive assumption?",
+        "min": 50
+      },
+      "whyreq": "Builds directly on “Effective Communication” — grasp that first."
     }
   ]
 }
