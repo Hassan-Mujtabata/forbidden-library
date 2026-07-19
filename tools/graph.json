@@ -69,6 +69,13 @@
       "glyph": "📘",
       "accent": "#e08a3c",
       "blurb": "AI-authored from Amir Levine, Rachel Heller Attached The New Science Of Adult — a dependency-locked track."
+    },
+    {
+      "id": "K",
+      "name": "Thinking, Fast and Slow",
+      "glyph": "🧠",
+      "accent": "#e8b45a",
+      "blurb": "AI-authored from Thinking, Fast and Slow — a dependency-locked track."
     }
   ],
   "nodes": [
@@ -4731,6 +4738,771 @@
         "min": 50
       },
       "whyreq": "Builds directly on “Effective Communication” — grasp that first."
+    },
+    {
+      "id": "k1",
+      "track": "K",
+      "tier": 0,
+      "prereq": [],
+      "glyph": "🏷️",
+      "title": "Diagnostic Labels for Bias",
+      "bridge": [
+        "When you encounter a situation where a charismatic speaker sways an audience beyond their actual merit, having a name for this phenomenon—the halo effect—immediately gives you a handle on it. This diagnostic label transforms a vague feeling of unease into a specific, identifiable pattern of error. You move from simply observing a peculiar social dynamic to understanding its underlying mechanism, making it easier to pinpoint and discuss.",
+        "Just as physicians learn the language of medicine to diagnose diseases, you can cultivate a richer vocabulary for understanding errors in judgment and choice. These systematic errors are known as biases, and they recur predictably in specific circumstances. Acquiring diagnostic labels for these biases provides you with a precise framework, allowing you to anticipate, recognize, and comprehend the consistent patterns in human decision-making, both in yourself and in others.",
+        "This practice of naming biases mirrors the wisdom you found in 'The Five Hindrances', where identifying a hindrance by name helps you step outside it. By gaining a precise language for cognitive biases, you equip yourself to become a better diagnostician of your own thought processes and those around you. This improved awareness can inform your daily interactions, helping you navigate complex social dynamics and make more informed choices, moving beyond raw intuition to a more considered understanding."
+      ],
+      "sources": [
+        {
+          "book": "Thinking, Fast and Slow",
+          "ref": "bias vocabulary",
+          "quote": [
+            "A deeper understanding of judgments and choices requires a richer vocabulary, as systematic errors, or biases, recur predictably. Diagnostic labels, like 'halo effect', help anticipate and understand these patterns."
+          ]
+        }
+      ],
+      "quiz": [
+        {
+          "q": "What is the primary benefit of having diagnostic labels for biases?",
+          "c": [
+            "It makes errors disappear entirely",
+            "It helps anticipate, recognize, and understand systematic errors",
+            "It proves human intelligence is flawed",
+            "It only applies to medical diagnoses"
+          ],
+          "a": 1,
+          "why": "Diagnostic labels provide a framework to identify and comprehend predictable patterns of error."
+        },
+        {
+          "q": "According to the text, what are systematic errors in judgment known as?",
+          "c": [
+            "Intuitions",
+            "Opinions",
+            "Biases",
+            "Reflexes"
+          ],
+          "a": 2,
+          "why": "The text explicitly states that systematic errors are known as biases."
+        },
+        {
+          "q": "The passage compares learning the language of biases to learning what?",
+          "c": [
+            "A new musical instrument",
+            "Advanced mathematics",
+            "The language of medicine",
+            "How to write a novel"
+          ],
+          "a": 2,
+          "why": "The author uses the analogy of a physician learning the language of medicine to diagnose diseases."
+        }
+      ],
+      "apply": {
+        "prompt": "This week, choose one common interaction where you observe others making judgments or choices. As you reflect on it, try to identify any patterns of systematic error. If you notice one, research if there's a specific diagnostic label (like 'halo effect' or 'confirmation bias') that describes it. Write down the situation and the bias you identified, explaining how the label helped you understand the dynamic more clearly.",
+        "min": 50
+      }
+    },
+    {
+      "id": "k2",
+      "track": "K",
+      "tier": 1,
+      "prereq": [
+        "k1"
+      ],
+      "glyph": "🤔",
+      "title": "Intellectual Engagement",
+      "bridge": [
+        "When faced with a problem like the bat-and-ball puzzle, your immediate intuition might offer a quick, plausible answer. However, actively engaging your mind, rather than settling for the first thought, reveals the correct solution. This deliberate effort to override superficial responses is a core aspect of intellectual engagement, a critical skill for deeper understanding and accurate reasoning.",
+        "This engagement is a function of your System 2, which has the capacity to slow down, search memory, and check logic, but often avoids the effort. Many people exhibit 'intellectual sloth,' accepting easily accessible answers rather than investing the cognitive work needed for deeper analysis. Cultivating intellectual engagement means consciously choosing to deploy System 2, pushing past initial intuitions to scrutinize arguments and retrieve relevant information.",
+        "The ability to delay gratification and maintain focused attention, much like the children in the famous marshmallow experiment, correlates strongly with higher cognitive control and intelligence later in life. This isn't just about problem-solving; it's about a broader mental discipline. By actively choosing to engage your intellect, you strengthen your capacity for sustained attention, a skill vital for deep learning and for practices like Stabilizing Attention."
+      ],
+      "sources": [
+        {
+          "book": "Thinking, Fast and Slow",
+          "ref": "intellectual sloth",
+          "quote": [
+            "Many people find cognitive effort unpleasant and avoid it, often failing to check intuitive answers due to insufficient motivation rather than lack of ability."
+          ]
+        }
+      ],
+      "quiz": [
+        {
+          "q": "What is a common characteristic of individuals who exhibit intellectual sloth?",
+          "c": [
+            "They are highly skeptical of their intuitions",
+            "They actively search for relevant information",
+            "They are satisfied with superficially attractive answers",
+            "They enjoy investing significant cognitive effort"
+          ],
+          "a": 2,
+          "why": "Intellectual sloth is characterized by an unwillingness to invest effort and a readiness to accept easy answers."
+        },
+        {
+          "q": "The passage suggests that intelligence is not only the ability to reason, but also what?",
+          "c": [
+            "The ability to avoid all cognitive effort",
+            "The ability to quickly accept the first intuitive answer",
+            "The ability to find relevant material in memory and deploy attention",
+            "The ability to ignore complex problems entirely"
+          ],
+          "a": 2,
+          "why": "The passage explicitly states intelligence involves finding relevant material in memory and deploying attention when needed."
+        },
+        {
+          "q": "What did the marshmallow experiment reveal about self-control in children?",
+          "c": [
+            "It has no correlation with future intellectual aptitude",
+            "Children who resisted temptation showed higher intelligence scores later",
+            "All children have an equal capacity for self-control",
+            "Self-control is purely a genetic trait"
+          ],
+          "a": 1,
+          "why": "The experiment showed a significant difference in intellectual aptitude for those who delayed gratification."
+        }
+      ],
+      "apply": {
+        "prompt": "This week, identify a decision or problem you would normally solve quickly based on intuition. Instead, deliberately pause, actively search your memory for all relevant facts, and consciously check the logic of your initial thought before concluding. Reflect on the effort required and any new insights gained.",
+        "min": 50
+      },
+      "whyreq": "Builds directly on “Diagnostic Labels for Bias” — grasp that first."
+    },
+    {
+      "id": "k3",
+      "track": "K",
+      "tier": 2,
+      "prereq": [
+        "k2"
+      ],
+      "glyph": "🖼️",
+      "title": "What You See Is All There Is",
+      "bridge": [
+        "When you encounter new information, your mind swiftly constructs a coherent story from what is immediately available. This mental shortcut, known as What You See Is All There Is (WYSIATI), means you tend to make judgments based solely on the data presented, overlooking the possibility of missing critical information. For instance, if you hear only one side of an argument, you'll feel confident in your judgment, even if you could easily imagine the other perspective. Your confidence stems not from the completeness of the evidence, but from the simple coherence of the story you've managed to build with what you have.",
+        "The mechanism behind WYSIATI is System 1's preference for cognitive ease. It finds it easier to accept a statement as true when it fits into a coherent pattern, even if that pattern is based on limited data. This allows for quick decision-making in a complex world, but it also fosters biases like overconfidence. You become confident in your beliefs because the story you've constructed is internally consistent, not because it's necessarily comprehensive or accurate. Missing evidence simply doesn't register, leading you to believe that what you see is indeed the entire picture.",
+        "Recognizing WYSIATI helps you understand why your initial reactions can be so strong, even with partial information. It's a reminder to pause and consider what might be missing, rather than immediately accepting the coherent narrative your mind creates. This practice aligns with the spirit of \"Why Train the Mind\", encouraging you to move beyond automatic responses and cultivate a more complete understanding. By actively seeking out additional perspectives, you can mitigate the sway of partial information, making more informed decisions in your personal and professional life."
+      ],
+      "sources": [
+        {
+          "book": "Thinking, Fast and Slow",
+          "ref": "coherence from available information",
+          "quote": [
+            "Confidence is determined by the coherence of the story from available information, not completeness. Knowing little often makes it easier to fit everything into a coherent pattern, facilitating cognitive ease."
+          ]
+        }
+      ],
+      "quiz": [
+        {
+          "q": "What does WYSIATI primarily imply about confidence in judgments?",
+          "c": [
+            "It increases with the quantity of evidence.",
+            "It is determined by the completeness of information.",
+            "It stems from the coherence of the story constructed from available information.",
+            "It requires extensive critical analysis of all facts."
+          ],
+          "a": 2,
+          "why": "WYSIATI states that confidence is based on the consistency and coherence of the known information, not its overall quantity or completeness."
+        },
+        {
+          "q": "Which of the following is a consequence of WYSIATI?",
+          "c": [
+            "Enhanced ability to identify missing information.",
+            "Reduced susceptibility to framing effects.",
+            "Increased confidence in judgments based on partial information.",
+            "A natural inclination to seek out opposing viewpoints."
+          ],
+          "a": 2,
+          "why": "WYSIATI leads to overconfidence because people construct coherent stories from limited data and often fail to consider missing evidence."
+        },
+        {
+          "q": "According to the passage, what system does WYSIATI primarily utilize to achieve cognitive ease?",
+          "c": [
+            "System 2's deliberate analysis.",
+            "System 1's automatic assessments.",
+            "A combination of both systems equally.",
+            "Neither system, it's an external factor."
+          ],
+          "a": 1,
+          "why": "The passage states that WYSIATI facilitates cognitive ease, which is a characteristic of System 1's quick, effortless operations."
+        }
+      ],
+      "apply": {
+        "prompt": "For one day this week, actively observe situations where you form a quick, confident judgment based on seemingly complete information. Before acting or committing to that judgment, pause and deliberately ask yourself: \"What might I not be seeing? What critical information could be missing from this picture?\" Reflect on how this conscious effort changes your initial confidence or subsequent action.",
+        "min": 50
+      },
+      "whyreq": "Builds directly on “Intellectual Engagement” — grasp that first."
+    },
+    {
+      "id": "k4",
+      "track": "K",
+      "tier": 3,
+      "prereq": [
+        "k3"
+      ],
+      "glyph": "💡",
+      "title": "The Fluency Heuristic",
+      "bridge": [
+        "The Fluency Heuristic describes how the ease with which information comes to mind often influences your judgments more than the actual content or quantity of that information. For example, if you are asked to list six instances where you behaved assertively, and they come to mind easily, you will likely rate yourself as highly assertive. But if you are asked for twelve instances, and struggle to recall the last few, you might paradoxically rate yourself as less assertive.",
+        "This occurs because your mind prioritizes the experience of retrieval. The feeling of effort or difficulty in recalling examples signals to your System 2 that the trait or category is less common than you initially thought. The number of instances you do retrieve becomes secondary to the subjective ease or difficulty of the retrieval process itself. This unexpected difficulty acts as a cue, overriding the raw count of examples.",
+        "Understanding this means you can spot when your judgments are swayed by how easily something comes to mind, rather than its true prevalence. This mechanism profoundly shapes your self-perception, affecting how you evaluate your own traits, choices, and even products. Just as \"Perception Is Everything\" highlights how your internal models shape reality, the fluency heuristic reveals another subtle way your mind constructs your understanding of the world."
+      ],
+      "sources": [
+        {
+          "book": "Thinking, Fast and Slow",
+          "ref": "Ease of retrieval",
+          "quote": [
+            "People rate themselves as less assertive after listing twelve instances than after listing six, because the difficulty of recalling the later examples signals a lower frequency of assertive behavior, overriding the sheer number of instances retrieved."
+          ]
+        }
+      ],
+      "quiz": [
+        {
+          "q": "If you struggle to recall many instances of a specific behavior, how might this typically influence your self-assessment of that trait?",
+          "c": [
+            "You will rate yourself higher for that trait.",
+            "You will rate yourself lower for that trait.",
+            "The number of instances recalled will be the sole determinant.",
+            "Your assessment will only change if the difficulty is unexpected."
+          ],
+          "a": 1,
+          "why": "The experience of difficult retrieval typically signals that the trait is less characteristic of you."
+        },
+        {
+          "q": "What did the Schwarz study on assertiveness primarily show about how people judge a trait when asked to list instances?",
+          "c": [
+            "The more instances recalled, the stronger the belief in the trait.",
+            "The ease of recalling instances often influences judgment more than the number recalled.",
+            "People consistently overestimate their positive traits.",
+            "Difficulty in recall always leads to a stronger sense of the trait."
+          ],
+          "a": 1,
+          "why": "The study demonstrated that the subjective experience of fluency or difficulty in retrieval was a stronger determinant of self-ratings than the sheer quantity of instances."
+        },
+        {
+          "q": "How can the influence of the Fluency Heuristic be reduced?",
+          "c": [
+            "By consciously listing more examples, regardless of difficulty.",
+            "By attributing the difficulty of retrieval to an external, irrelevant factor.",
+            "By only considering positive examples of the trait.",
+            "By engaging in a task that requires intense cognitive effort."
+          ],
+          "a": 1,
+          "why": "When the difficulty of retrieval is given an external explanation, people no longer use it as a cue for their judgment."
+        }
+      ],
+      "apply": {
+        "prompt": "This week, pay attention to any situation where you are asked to recall examples or instances of something (e.g., your own contributions, a product's advantages, someone's qualities). Notice if the ease or difficulty of recall influences your subsequent judgment or confidence, independent of how many examples you actually retrieve. Write down one instance and reflect on the bias.",
+        "min": 50
+      },
+      "whyreq": "Builds directly on “What You See Is All There Is” — grasp that first."
+    },
+    {
+      "id": "k5",
+      "track": "K",
+      "tier": 4,
+      "prereq": [
+        "k4"
+      ],
+      "glyph": "📉",
+      "title": "Regression to the Mean",
+      "bridge": [
+        "You've likely observed it yourself: exceptional performance is often followed by a less impressive one, and poor performance by an improvement. Think of a student who aces one test then scores merely above average on the next, or an athlete who has a career-best season followed by a more typical one. This pattern isn't necessarily due to complacency or renewed effort; it's a statistical phenomenon called regression to the mean.",
+        "The core mechanism is that extreme outcomes usually involve a combination of skill (or talent) and a significant dose of luck. While skill is relatively stable, luck is inherently fickle. When you see an exceptionally good performance, it's highly probable that above-average skill was augmented by above-average luck. For the next attempt, the skill remains, but that extraordinary luck is unlikely to repeat, pulling the result closer to the individual's average. The same logic applies to exceptionally bad performances, where bad luck is unlikely to persist.",
+        "Understanding regression to the mean helps you resist the urge to invent elaborate causal stories for simple statistical fluctuations. When you see an improvement after a punishment, or a decline after praise, it's easy to attribute the change to your intervention. This can lead to flawed conclusions about what works. Instead, recognize that many outcomes naturally gravitate towards the average, a valuable insight for interpreting the feedback life provides, and for understanding phenomena like the \"Sports Illustrated jinx.\""
+      ],
+      "sources": [
+        {
+          "book": "Thinking, Fast and Slow",
+          "ref": "luck and performance",
+          "quote": [
+            "Exceptional performance often includes a significant element of luck, and since luck is not predictable, future outcomes will tend to be less extreme, moving closer to the average."
+          ]
+        }
+      ],
+      "quiz": [
+        {
+          "q": "A golfer scores exceptionally well on Day 1 of a tournament. What is the most likely prediction for Day 2?",
+          "c": [
+            "He will perform even better due to confidence",
+            "He will perform worse because his extraordinary luck is unlikely to repeat",
+            "He will perform identically",
+            "He will perform poorly due to pressure"
+          ],
+          "a": 1,
+          "why": "Regression to the mean suggests that extreme positive performance is often aided by temporary good luck, which is unlikely to persist."
+        },
+        {
+          "q": "What is the primary reason an extreme performance (either very good or very bad) is often followed by a more average one?",
+          "c": [
+            "People get complacent after success or demoralized after failure",
+            "The individual's underlying skill level changes dramatically",
+            "Luck plays a significant and often temporary role in extreme outcomes",
+            "External factors always balance out over time"
+          ],
+          "a": 2,
+          "why": "Extreme performances are often a combination of stable skill and volatile luck, with luck being the variable that tends to revert to average."
+        },
+        {
+          "q": "When flight instructors punished cadets for poor performance and observed subsequent improvement, what common error were they making?",
+          "c": [
+            "They were incorrectly assuming punishment is always effective",
+            "They failed to consider that the cadets' skill level was improving rapidly",
+            "They mistook regression to the mean for evidence of punishment's effectiveness",
+            "They were not using positive reinforcement enough"
+          ],
+          "a": 2,
+          "why": "The improvement observed after poor performance was likely due to regression to the mean, not necessarily the effectiveness of the punishment, but the instructors attributed it causally."
+        }
+      ],
+      "apply": {
+        "prompt": "This week, observe any situations where you see an extreme performance (either very good or very bad) followed by a more average one. It could be in sports, a colleague's project, or even your own mood. Instead of immediately creating a causal story for the change, pause and consider if regression to the mean might be at play. Reflect on how this understanding changes your interpretation of events.",
+        "min": 50
+      },
+      "whyreq": "Builds directly on “The Fluency Heuristic” — grasp that first."
+    },
+    {
+      "id": "k6",
+      "track": "K",
+      "tier": 5,
+      "prereq": [
+        "k5"
+      ],
+      "glyph": "🦊",
+      "title": "Hedgehogs and Foxes",
+      "bridge": [
+        "When faced with complex predictions, people often fall into one of two distinct categories: Hedgehogs or Foxes. Hedgehogs 'know one big thing,' viewing the world through a single, overarching theory. They confidently fit all events into their coherent framework, often dismissing contradictory evidence. This singular focus gives them a strong, clear narrative, making them appealing pundits, but it also blinds them to the messy reality of multiple interacting forces.",
+        "In contrast, Foxes are complex thinkers who acknowledge that reality emerges from many diverse agents, forces, and even blind luck. They recognize that large, unpredictable outcomes are common and resist the temptation of a single explanatory theory. Philip Tetlock's landmark study found that while all experts performed poorly at long-term prediction, Foxes consistently scored better than Hedgehogs. Despite their superior, albeit still imperfect, performance, Foxes are often less confident and less sought after by media, which prefers the decisive certainty of Hedgehogs.",
+        "This distinction highlights a critical lesson: high confidence is not a reliable indicator of accuracy, especially in unpredictable domains. When you encounter predictions, whether from financial advisors or political commentators, consider whether the speaker embodies the rigid certainty of a Hedgehog or the nuanced, multi-faceted perspective of a Fox. This awareness can help you navigate complex situations, echoing the need to observe reality as it is, rather than as we wish it to be, a core tenet of 'Mindfulness of Body & Feeling'. Cultivating a 'Fox-like' approach in your own thinking can protect you from the illusion of validity and the allure of oversimplified explanations."
+      ],
+      "sources": [
+        {
+          "book": "Thinking, Fast and Slow",
+          "ref": "Hedgehog and Fox experts",
+          "quote": [
+            "Experts' predictive failures stem from their thinking style. 'Hedgehogs' cling to a single grand theory, confidently explaining events within it. 'Foxes' acknowledge reality's complexity, recognizing multiple interacting forces and luck, leading to unpredictable results."
+          ]
+        }
+      ],
+      "quiz": [
+        {
+          "q": "According to Tetlock's study, which type of expert generally performed better at predictions, despite all experts performing poorly overall?",
+          "c": [
+            "Those with the most knowledge",
+            "Hedgehogs",
+            "Foxes",
+            "Those who made flamboyant forecasts"
+          ],
+          "a": 2,
+          "why": "Foxes, with their complex and multi-faceted thinking, scored better than Hedgehogs in Tetlock's study."
+        },
+        {
+          "q": "What characterizes a 'Hedgehog' expert's approach to prediction?",
+          "c": [
+            "Acknowledging many interacting forces and luck",
+            "Recognizing the world's inherent unpredictability",
+            "Knowing one big thing and fitting events into a coherent theory",
+            "Being less confident in their forecasts"
+          ],
+          "a": 2,
+          "why": "Hedgehogs are defined by their reliance on a single, overarching theory to explain events."
+        },
+        {
+          "q": "What did Tetlock's study reveal about the relationship between expert confidence and accuracy?",
+          "c": [
+            "Higher confidence correlates with higher accuracy",
+            "Confidence is irrelevant to accuracy",
+            "High subjective confidence is not a trustworthy indicator of accuracy",
+            "Less famous experts are more accurate due to higher confidence"
+          ],
+          "a": 2,
+          "why": "The study showed that high subjective confidence often masked poor predictive accuracy, especially among famous forecasters."
+        }
+      ],
+      "apply": {
+        "prompt": "This week, when you encounter news commentary, financial advice, or political analysis, try to identify whether the speaker sounds more like a Hedgehog or a Fox. Note down specific phrases or arguments that reveal their thinking style. Reflect on how their confidence level relates to the complexity of the topic.",
+        "min": 50
+      },
+      "whyreq": "Builds directly on “Regression to the Mean” — grasp that first."
+    },
+    {
+      "id": "k7",
+      "track": "K",
+      "tier": 6,
+      "prereq": [
+        "k6"
+      ],
+      "glyph": "⚠️",
+      "title": "The Overconfidence Trap",
+      "bridge": [
+        "You might believe your forecasts are more accurate than they are, or that your skills are superior to others. This tendency, known as overconfidence, leads professionals like chief financial officers to set narrow confidence intervals for stock market returns that are wrong 67% of the time, expecting only 20% error. It also causes medical doctors to be completely certain of a diagnosis that is later proven wrong in 40% of cases. Overconfidence is not a sign of arrogance, but a cognitive blind spot.",
+        "This trap arises because your mind, when estimating an unknown quantity, relies on the information immediately available to it. You construct a coherent story from what you know, without accounting for what you don't know or what hasn't come to mind. This is a direct consequence of the \"What You See Is All That Is\" principle, where difficult questions about an uncertain future are subtly replaced by easier ones about present knowledge and capabilities, leading to an inflated sense of certainty.",
+        "The social world often reinforces this bias. Admitting ignorance or uncertainty, especially for experts, is frequently seen as a weakness, making it professionally risky. People and organizations tend to reward confident, even if misleading, predictions over truthful but uncertain ones. Recognizing overconfidence in yourself and others is a critical step towards more realistic assessments and avoiding the costly consequences of unacknowledged risk. This vigilance connects to the self-awareness you cultivate in Stabilizing Attention."
+      ],
+      "sources": [
+        {
+          "book": "Thinking, Fast and Slow",
+          "ref": "Forecasting Ignorance",
+          "quote": [
+            "Financial officers' forecasts for the S&P index showed no accuracy, and their confidence intervals were four times too narrow, reflecting gross overconfidence."
+          ]
+        }
+      ],
+      "quiz": [
+        {
+          "q": "When chief financial officers were asked to forecast the S&P index, their estimates were found to be:",
+          "c": [
+            "highly accurate over the long term",
+            "slightly better than random chance",
+            "entirely uncorrelated with actual returns",
+            "accurate only when they expressed high confidence"
+          ],
+          "a": 2,
+          "why": "The passage states the correlation between their estimates and the true value was slightly less than zero, meaning they had no clue."
+        },
+        {
+          "q": "According to the passage, why do experts often display high confidence even when uncertain?",
+          "c": [
+            "They are genuinely superior in their field and rarely make mistakes.",
+            "Their training explicitly teaches them to project certainty.",
+            "Social and professional environments penalize admissions of ignorance.",
+            "They are typically unaware of the true extent of their knowledge."
+          ],
+          "a": 2,
+          "why": "The passage explains that admitting ignorance is not socially acceptable and experts fear being replaced by more confident competitors."
+        },
+        {
+          "q": "Overconfidence is often a manifestation of which cognitive process?",
+          "c": [
+            "Regression to the mean",
+            "What You See Is All That Is (WYSIATI)",
+            "The endowment effect",
+            "Anchoring and adjustment"
+          ],
+          "a": 1,
+          "why": "The passage explicitly states \"Overconfidence is another manifestation of WYSIATI.\""
+        }
+      ],
+      "apply": {
+        "prompt": "Identify a future event in your personal or professional life about which you feel highly confident. Now, consider specific factors or outcomes that you might not be accounting for. Create a confidence interval for this event by stating a range you are 80% sure the outcome will fall within, then reflect on how much wider this range is than your initial gut feeling.",
+        "min": 50
+      },
+      "whyreq": "Builds directly on “Hedgehogs and Foxes” — grasp that first."
+    },
+    {
+      "id": "k8",
+      "track": "K",
+      "tier": 7,
+      "prereq": [
+        "k7"
+      ],
+      "glyph": "⚖️",
+      "title": "Fairness as Entitlement",
+      "bridge": [
+        "When a snowstorm hits and your local hardware store doubles the price of shovels, you likely feel a surge of indignation. This isn't just about the money; it's about a violation of an implicit social contract. Your perception of Fairness as Entitlement dictates that the previous price established a reference point, an expected standard you felt entitled to. Raising the price simply because demand spiked feels like an unfair imposition of a loss, rather than a legitimate market adjustment.",
+        "This mechanism operates on a fundamental distinction: people react far more strongly to perceived losses than to foregone gains. An existing price, wage, or rent establishes a crucial reference point, acting as an entitlement. When a firm exploits market power to impose a loss relative to this reference point – like cutting an existing employee's wage despite stable business – it's deemed unfair. However, if that same firm simply fails to share increased profits or hires a new employee at a lower market rate, it's generally considered acceptable. The key is whether an existing entitlement is breached.",
+        "Understanding this cognitive bias is vital for navigating your own perceptions of fairness and anticipating others' reactions. It reveals why people will fight harder to prevent a loss than to achieve an equivalent gain, a principle that echoes in the Loss Aversion you've explored. This isn't just about money; it's about the perceived violation of an established norm, whether in personal relationships, professional dealings, or broader societal expectations. Recognising the power of these reference points helps you understand the deep emotional weight attached to 'what is fair'."
+      ],
+      "sources": [
+        {
+          "book": "Thinking, Fast and Slow",
+          "ref": "Fairness and Entitlements",
+          "quote": [
+            "The public views an existing price or wage as an entitlement, making it unfair for firms to impose losses unless necessary to protect their own profits."
+          ]
+        }
+      ],
+      "quiz": [
+        {
+          "q": "What is the primary factor that makes a price increase after a snowstorm seem unfair?",
+          "c": [
+            "The store is trying to maximize profits",
+            "The new price is higher than the previous reference price",
+            "There is increased demand for shovels",
+            "The store owner is a bad person"
+          ],
+          "a": 1,
+          "why": "An existing price establishes a reference point, making a subsequent increase perceived as an unfair loss."
+        },
+        {
+          "q": "According to the concept of Fairness as Entitlement, which action would likely be considered acceptable?",
+          "c": [
+            "A landlord raises rent for existing tenants when market rates increase",
+            "An employer cuts an existing employee's wage because unemployment is high",
+            "A store reduces wages for all employees because its profitability is falling",
+            "A company exploits market power to increase profits by raising prices on an essential good"
+          ],
+          "a": 2,
+          "why": "Firms are generally allowed to pass on losses to others when their own profitability is threatened, as this protects their entitlement to current profit."
+        },
+        {
+          "q": "What happens when customers perceive an unfair price increase?",
+          "c": [
+            "They usually accept it if the product is essential",
+            "They often retaliate by reducing future purchases",
+            "They report the company to regulatory bodies",
+            "They are more likely to buy from that company again"
+          ],
+          "a": 1,
+          "why": "Customers who perceive an unfair loss often reduce future purchases from that supplier as a form of retaliation."
+        }
+      ],
+      "apply": {
+        "prompt": "This week, observe your own reactions to pricing or wage changes, whether as a consumer or an employee. Notice when you feel something is 'unfair' versus merely 'expensive' or 'not ideal'. Reflect on what specific reference point or entitlement you felt was violated, and how strongly you react to perceived losses compared to situations where you simply didn't gain as much as you hoped. Journal your observations.",
+        "min": 50
+      },
+      "whyreq": "Builds directly on “The Overconfidence Trap” — grasp that first."
+    },
+    {
+      "id": "k9",
+      "track": "K",
+      "tier": 8,
+      "prereq": [
+        "k8"
+      ],
+      "glyph": "↩️",
+      "title": "Regret from Default Deviation",
+      "bridge": [
+        "Imagine you're playing blackjack, and the computer asks, \"Do you wish to hit?\" You say \"yes\" and bust. The regret you feel is often stronger than if the question had been \"Do you wish to stand?\" and you said \"no\" and still busted. This is because your choices are weighed against a perceived default.",
+        "The core mechanism isn't simply about acting versus not acting. Instead, it's about whether your action represents a departure from a standard or expected course. When you deviate from a default option, it becomes easier to imagine the 'normal' outcome that would have occurred had you not acted. If your deviation leads to a bad result, the contrast between what happened and what 'should have' happened amplifies feelings of regret and even blame.",
+        "This principle can subtly steer your decisions, often pushing you towards conventional or risk-averse choices to avoid anticipated regret. You might choose a well-known brand over a generic, or a standard treatment over an experimental one, even if the latter holds promise. Understanding this bias helps you make more conscious decisions, rather than being unconsciously nudged by the fear of regret, aligning with the deliberate choice-making you practice in \"Knowing When Not to Act\"."
+      ],
+      "sources": [
+        {
+          "book": "Thinking, Fast and Slow",
+          "ref": "default options regret",
+          "quote": [
+            "People expect stronger regret from outcomes due to actions deviating from defaults than from identical outcomes due to inaction or adherence to defaults."
+          ]
+        }
+      ],
+      "quiz": [
+        {
+          "q": "According to the lesson, what is the primary factor that intensifies regret?",
+          "c": [
+            "The severity of the bad outcome",
+            "The amount of effort invested in the decision",
+            "Deviating from a default or normal action",
+            "The number of alternative choices considered"
+          ],
+          "a": 2,
+          "why": "The lesson explicitly states regret is amplified when one deviates from a default option."
+        },
+        {
+          "q": "Why might a doctor choose a standard treatment over a potentially better, but unconventional, one?",
+          "c": [
+            "The standard treatment is always more effective",
+            "To avoid the higher cost of unconventional treatments",
+            "The fear of regret and blame if the unconventional treatment fails",
+            "Lack of information about the unconventional treatment"
+          ],
+          "a": 2,
+          "why": "The passage explains that physicians might favor conventional treatments to avoid potential regret, blame, and litigation associated with unusual choices."
+        },
+        {
+          "q": "Which scenario is most likely to cause greater regret, according to the principle of default deviation?",
+          "c": [
+            "You typically drive the speed limit, but one day you speed and get a ticket.",
+            "You always speed, and one day you get a ticket.",
+            "You choose a popular restaurant and have a mediocre meal.",
+            "You choose a new, highly-rated restaurant and have a mediocre meal."
+          ],
+          "a": 0,
+          "why": "Deviating from one's normal behavior (driving the speed limit) and experiencing a negative outcome leads to greater regret than when the outcome aligns with usual behavior."
+        }
+      ],
+      "apply": {
+        "prompt": "This week, pay close attention to decisions where you feel a strong sense of regret or where you anticipate it. Identify if your choice involved deviating from a default option or your usual behavior. Reflect on whether the fear of regret is pushing you towards conventional choices. Write down one instance and what you learned.",
+        "min": 50
+      },
+      "whyreq": "Builds directly on “Fairness as Entitlement” — grasp that first."
+    },
+    {
+      "id": "k10",
+      "track": "K",
+      "tier": 9,
+      "prereq": [
+        "k9"
+      ],
+      "glyph": "🎭",
+      "title": "The Remembering and Experiencing Selves",
+      "bridge": [
+        "You might plan a vacation to create wonderful memories, snapping photos and curating experiences. Yet, in that very moment, you might miss the direct enjoyment of the present. This highlights a fundamental distinction in how you perceive your life: the experiencing self lives in the continuous flow of the present, while the remembering self constructs a story from past events, often focusing on peaks and ends, not duration.",
+        "Your experiencing self is the one living through each moment, feeling sensations, thoughts, and emotions as they arise. It's the 'you' that experiences pain during a colonoscopy or delight in a beautiful scene. In contrast, your remembering self is the storyteller, the one that answers 'How satisfied are you with your life?' It creates a narrative, often biased by recent events or significant moments, rather than the sum of all lived experiences. This self judges the overall value of your life's story.",
+        "Understanding this duality is crucial for evaluating your own well-being. Are you living for a good story, or for good moments? The value you place on present experience, the 'here and now,' is a core theme in many lessons here, particularly in Stabilizing Attention and Continuous Attention & Overcoming Dullness, where the focus is on direct, moment-to-moment awareness. The satisfaction reported by your remembering self can often diverge significantly from the actual sum of your moment-to-moment happiness."
+      ],
+      "sources": [
+        {
+          "book": "Thinking, Fast and Slow",
+          "ref": "Remembering vs. Experiencing Self",
+          "quote": [
+            "The common survey question, 'All things considered, how satisfied are you with your life as a whole these days?', addresses the remembering self. However, experiments showed the remembering self to be an unreliable witness, leading to a focus on the well-being of the experiencing self."
+          ]
+        }
+      ],
+      "quiz": [
+        {
+          "q": "Which 'self' is primarily engaged when you answer a survey about overall life satisfaction?",
+          "c": [
+            "The experiencing self",
+            "The intuitive self",
+            "The remembering self",
+            "The observing self"
+          ],
+          "a": 2,
+          "why": "The remembering self constructs a narrative and judges overall life satisfaction."
+        },
+        {
+          "q": "The experiencing self is best described as:",
+          "c": [
+            "The part of you that tells stories about your past",
+            "The part of you that lives in the continuous flow of the present",
+            "The part of you that plans for the future",
+            "The part of you that judges your actions morally"
+          ],
+          "a": 1,
+          "why": "The experiencing self is sensitive to immediate sensations and emotions, living in the present moment."
+        },
+        {
+          "q": "Why was the author suspicious of global life satisfaction as a measure of well-being?",
+          "c": [
+            "It only reflects negative experiences",
+            "It is too difficult to measure accurately",
+            "The remembering self, which answers such questions, proved to be an unreliable witness in experiments",
+            "It requires too much time to complete"
+          ],
+          "a": 2,
+          "why": "The author's prior work showed the remembering self's memory to be flawed and focused on the experiencing self instead."
+        }
+      ],
+      "apply": {
+        "prompt": "This week, for one day, consciously try to observe moments from the perspective of your 'experiencing self.' Notice what activities you would rather continue than stop, and which you wish to escape. At the end of the day, reflect on how this moment-to-moment experience compares to the story your 'remembering self' wants to tell about the day.",
+        "min": 50
+      },
+      "whyreq": "Builds directly on “Regret from Default Deviation” — grasp that first."
+    },
+    {
+      "id": "k11",
+      "track": "K",
+      "tier": 10,
+      "prereq": [
+        "k10"
+      ],
+      "glyph": "🤔",
+      "title": "The Availability Heuristic",
+      "bridge": [
+        "When you estimate the risk of a heart attack among middle-aged people, you don't typically consult actuarial tables. Instead, your mind quickly recalls instances of heart attacks among acquaintances, or perhaps vivid news stories. This immediate, intuitive assessment is an example of the Availability Heuristic at work.",
+        "This mental shortcut relies on the ease with which instances or occurrences can be brought to mind. If something is easy to recall or imagine, your mind tends to overestimate its frequency or probability, assuming that readily accessible information is also more common. This often serves as a useful, though imperfect, clue for assessing the world around you.",
+        "While often helpful, this heuristic can lead to predictable biases, as factors like vividness, recency, or fame can make events seem more likely than they truly are. This highlights how your subjective experience of 'ease of recall' shapes your understanding of the world, influencing your judgments and decisions. It reinforces the idea from 'Perception Is Everything' that our internal models of reality are heavily influenced by what's readily accessible to our minds."
+      ],
+      "sources": [
+        {
+          "book": "Thinking, Fast and Slow",
+          "ref": "Ease of instance recall",
+          "quote": [
+            "The availability heuristic describes how individuals judge the frequency or likelihood of events based on how readily relevant examples come to their minds."
+          ]
+        }
+      ],
+      "quiz": [
+        {
+          "q": "What is the primary mechanism of the Availability Heuristic?",
+          "c": [
+            "Systematic calculation of probabilities",
+            "Evaluating frequency based on the ease of recalling instances",
+            "Ignoring all available data",
+            "Consulting an expert opinion"
+          ],
+          "a": 1,
+          "why": "The heuristic assesses frequency or probability based on how easily examples come to mind, not through systematic calculation."
+        },
+        {
+          "q": "Which factor is NOT mentioned as influencing the Availability Heuristic, leading to bias?",
+          "c": [
+            "Fame of instances",
+            "Recency of occurrences",
+            "Objective statistical frequency",
+            "Salience of instances"
+          ],
+          "a": 2,
+          "why": "The Availability Heuristic is affected by factors like fame, recency, and salience, leading to biases, rather than being influenced by objective statistical frequency."
+        },
+        {
+          "q": "If you judge a business venture to be very risky because you can easily imagine many ways it could fail, you are likely demonstrating a bias related to:",
+          "c": [
+            "Illusory correlation",
+            "Effectiveness of a search set",
+            "Imaginability of instances",
+            "Objective statistical analysis"
+          ],
+          "a": 2,
+          "why": "The ease of constructing or imagining instances, such as potential difficulties for a venture, can lead to overestimating their likelihood, a bias of imaginability."
+        }
+      ],
+      "apply": {
+        "prompt": "For one week, consciously observe your spontaneous judgments about the likelihood of everyday events, such as how common a certain type of news story is, or the perceived risk of a particular activity. Note down three instances where your initial judgment might have been influenced by how easily vivid or recent examples came to mind, rather than objective data. Reflect on how this might shape your decisions.",
+        "min": 50
+      },
+      "whyreq": "Builds directly on “The Remembering and Experiencing Selves” — grasp that first."
+    },
+    {
+      "id": "k12",
+      "track": "K",
+      "tier": 11,
+      "prereq": [
+        "k11"
+      ],
+      "glyph": "🎯",
+      "title": "Priming Judgments",
+      "bridge": [
+        "When asked to evaluate your overall happiness, your mind doesn't conduct a comprehensive life audit. Instead, if a question about your recent relationship status was just posed, your satisfaction with that relationship will likely dominate your happiness report. This phenomenon, known as priming judgments, illustrates how specific, recently activated information can unconsciously steer your answers to broader, more complex questions.",
+        "The mechanism behind this is simple yet powerful: a prime, whether a question or an environmental cue, makes certain ideas or emotions more accessible. When a subsequent, more difficult judgment arises, your quick-thinking System 1 substitutes the answer to an easier, related question that has been brought to the forefront. This substitution provides a fast, 'good enough' response, even if it's not a truly accurate reflection of the complex reality.",
+        "Understanding priming judgments reveals how susceptible your assessments are to immediate context, highlighting the constant, often invisible, influence on your perception. This process is a testament to the mind's efficiency, but also its shortcuts. Just as you learned in 'Perception Is Everything' that your brain actively constructs your reality, here you see how external cues can subtly dictate the building blocks available for those constructions, shaping your subjective experience."
+      ],
+      "sources": [
+        {
+          "book": "Thinking, Fast and Slow",
+          "ref": "dominates happiness reports",
+          "quote": [
+            "When a specific question, such as marital satisfaction, is asked before a general happiness inquiry, the answer to the specific question often becomes a substitute for the general assessment, leading to a strong correlation between the two."
+          ]
+        }
+      ],
+      "quiz": [
+        {
+          "q": "What is the primary effect of priming on subsequent judgments?",
+          "c": [
+            "It makes judgments more objective.",
+            "It causes a comprehensive review of all relevant information.",
+            "It makes a specific, related idea more accessible for substitution.",
+            "It eliminates all cognitive biases."
+          ],
+          "a": 2,
+          "why": "Priming works by bringing specific, related ideas to the forefront, which are then substituted for more complex judgments."
+        },
+        {
+          "q": "Which mental system is primarily responsible for the quick substitution seen in primed judgments?",
+          "c": [
+            "System 2",
+            "The subconscious mind",
+            "System 1",
+            "The prefrontal cortex"
+          ],
+          "a": 2,
+          "why": "System 1 is characterized by fast, automatic, and intuitive processing, often relying on shortcuts like substitution."
+        },
+        {
+          "q": "If you are asked about your job satisfaction immediately before being asked about your overall life satisfaction, what is the likely outcome?",
+          "c": [
+            "Your job satisfaction will have no bearing on your life satisfaction answer.",
+            "Your life satisfaction answer will be largely determined by your job satisfaction.",
+            "You will consciously separate the two concepts.",
+            "Your life satisfaction will be reported as lower than usual."
+          ],
+          "a": 1,
+          "why": "The specific question about job satisfaction primes that topic, causing it to be substituted for the more general life satisfaction judgment."
+        }
+      ],
+      "apply": {
+        "prompt": "For one day this week, pay close attention to any questions you are asked, or information you consume, immediately before being asked to make a judgment or give an opinion. Reflect on how that preceding input might have subtly influenced your subsequent response. Write down two instances where you suspect priming affected your judgment.",
+        "min": 50
+      },
+      "whyreq": "Builds directly on “The Availability Heuristic” — grasp that first."
     }
   ]
 }

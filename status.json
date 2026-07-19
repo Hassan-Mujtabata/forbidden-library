@@ -1,12 +1,12 @@
 {
- "job": "amirlevinerachel",
- "title": "Amir Levine, Rachel Heller Attached The New Science Of Adult",
- "track": "I",
- "done": 8,
- "total": 8,
+ "job": "danielkahnemanth",
+ "title": "Thinking, Fast and Slow",
+ "track": "K",
+ "done": 12,
+ "total": 12,
  "percent": 100,
  "state": "complete",
- "updated": 1784359625,
+ "updated": 1784447923,
  "queue": [
   {
    "id": "amirlevinerachel",
@@ -48,10 +48,10 @@
    "id": "danielkahnemanth",
    "title": "Thinking, Fast and Slow",
    "glyph": "\ud83e\udde0",
-   "done": 0,
+   "done": 12,
    "total": 12,
-   "pct": 0,
-   "state": "waiting"
+   "pct": 100,
+   "state": "complete"
   },
   {
    "id": "manssearchformea",
