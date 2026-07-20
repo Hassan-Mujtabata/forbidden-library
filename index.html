@@ -1186,8 +1186,10 @@ $("btn-ach").onclick=()=>{const g=$("achgrid");g.innerHTML="";
   $("achs").classList.add("on")};
 
 /* ---------- patch notes ---------- */
-const APP_VER="3.15";
+const APP_VER="3.16";
 const PATCHES=[
+ {v:"3.16",n:"Broken Links",d:"14 Jul 2026",items:[
+  ["fix","The “📖 Continue in the book →” links in AI-built lessons were silently broken when a book's title had a stray capital or messy auto-name (e.g. Man's Search). Fixed the titles, and the app now matches books forgivingly so a small typo never breaks the link again."]]},
  {v:"3.15",n:"One Web",d:"14 Jul 2026",items:[
   ["content","The whole queue is built: every book you added is now a full Path track — Thinking Fast and Slow, Man's Search for Meaning, The Like Switch, Attached, and more."],
   ["new","The big one: new books are no longer isolated islands. Each one now BUILDS ON the foundational idea it depends on — Thinking, Fast and Slow builds on “Perception Is Everything”; Man's Search builds on the Four Noble Truths; habits build on “Why Train the Mind.” The Path is finally one connected web with just 3 true starting points."],
@@ -2075,7 +2077,8 @@ function openNode(id){
     const sh=document.createElement("div");sh.className="lblrow books";sh.textContent="📖 From the books";body.appendChild(sh);
     for(const s of n.sources){const d=document.createElement("div");d.className="src";
       d.innerHTML=`<div class="attr">${esc(s.book)} — ${esc(s.ref)}</div>`+s.quote.map(q=>`<p>“${esc(q)}”</p>`).join("");
-      const lib=DATA.books.find(b=>b.title===s.book);
+      const norm=x=>x.toLowerCase().replace(/[^a-z0-9]/g,"");
+      const lib=DATA.books.find(b=>b.title===s.book)||DATA.books.find(b=>norm(b.title)===norm(s.book))||DATA.books.find(b=>norm(s.book).includes(norm(b.title))&&b.title.length>8);
       if(lib){const go=document.createElement("button");go.className="srcgo";
         go.textContent="📖 Continue in the book →";
         go.onclick=()=>openBook(lib.id);d.appendChild(go);}
