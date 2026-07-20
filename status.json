@@ -1,75 +1,11 @@
 {
- "job": "danielkahnemanth",
+ "job": null,
  "title": "Thinking, Fast and Slow",
  "track": "K",
  "done": 12,
  "total": 12,
  "percent": 100,
- "state": "complete",
- "updated": 1784447923,
- "queue": [
-  {
-   "id": "amirlevinerachel",
-   "title": "Amir Levine, Rachel Heller Attached The New Science Of Adult",
-   "glyph": "\ud83d\udcd8",
-   "done": 8,
-   "total": 8,
-   "pct": 100,
-   "state": "complete"
-  },
-  {
-   "id": "atomichabitspdfd",
-   "title": "Atomic Habits",
-   "glyph": "\ud83d\udd01",
-   "done": 12,
-   "total": 12,
-   "pct": 100,
-   "state": "complete"
-  },
-  {
-   "id": "beautifulre",
-   "title": "How to Have a Beautiful Mind",
-   "glyph": "\ud83d\udca1",
-   "done": 6,
-   "total": 6,
-   "pct": 100,
-   "state": "complete"
-  },
-  {
-   "id": "blissre",
-   "title": "Mindfulness, Bliss and Beyond",
-   "glyph": "\ud83e\udeb7",
-   "done": 6,
-   "total": 6,
-   "pct": 100,
-   "state": "complete"
-  },
-  {
-   "id": "danielkahnemanth",
-   "title": "Thinking, Fast and Slow",
-   "glyph": "\ud83e\udde0",
-   "done": 12,
-   "total": 12,
-   "pct": 100,
-   "state": "complete"
-  },
-  {
-   "id": "manssearchformea",
-   "title": "Man's Search For Meaning",
-   "glyph": "\ud83d\udd11",
-   "done": 0,
-   "total": 6,
-   "pct": 0,
-   "state": "waiting"
-  },
-  {
-   "id": "thelikeswitchane",
-   "title": "The Like Switch",
-   "glyph": "\ud83d\ude0a",
-   "done": 0,
-   "total": 8,
-   "pct": 0,
-   "state": "waiting"
-  }
- ]
+ "state": "idle",
+ "updated": 1784526999,
+ "queue": []
 }
