@@ -120,8 +120,16 @@ header .brand span{color:var(--gold)}
 #defpop .dp-x{position:absolute;top:10px;right:12px;background:none;border:none;color:var(--tx2);font-size:18px;cursor:pointer}
 #defpop .dp-word{font-family:var(--serif);font-size:19px;color:var(--gold);margin-bottom:3px;padding-right:20px}
 #defpop .dp-src{font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--tx2);margin-bottom:8px}
-#defpop .dp-body{font-size:14px;line-height:1.6;color:var(--tx);max-height:38vh;overflow-y:auto}
+#defpop .dp-body{font-size:14px;line-height:1.6;color:var(--tx);max-height:56vh;overflow-y:auto}
 #defpop .dp-body mark{background:rgba(212,175,55,.28);color:var(--tx);border-radius:3px;padding:0 2px}
+/* tutor conversation */
+.tu-you{color:var(--tx2);font-size:12.5px;margin:12px 0 3px;border-left:2px solid var(--line);padding-left:8px}
+.tu-t{margin:3px 0 6px}
+.tu-chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:12px}
+.tu-chip{border:1px solid rgba(78,205,196,.35);border-radius:99px;padding:6px 12px;font-size:12px;color:var(--jade);background:var(--card);cursor:pointer}
+.tu-ask{display:flex;gap:6px;margin-top:8px}
+.tu-ask input{flex:1;background:var(--bg2);border:1px solid var(--line);border-radius:10px;color:var(--tx);padding:8px 11px;font-size:13px;font-family:inherit;outline:none}
+.tu-ask #tutor-go{border:1px solid rgba(212,175,55,.4);border-radius:10px;background:var(--card);color:var(--gold);padding:0 14px;font-size:13px;cursor:pointer}
 #defpop .dp-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
 #defpop .dp-actions button{border:1px solid var(--line);border-radius:99px;padding:8px 14px;font-size:12.5px;color:var(--tx);cursor:pointer;background:var(--card)}
 #defpop #dp-explain{border-color:rgba(78,205,196,.4);color:var(--jade)}
@@ -252,6 +260,9 @@ header .brand span{color:var(--gold)}
 .tnode.avail .ng{filter:drop-shadow(0 0 7px var(--tacc,#d4af37))}
 .tnode.done{cursor:pointer;border-color:#2f7d55}
 .tnode.done .badge{color:var(--jade)}
+.tnode.done.strong{border-color:#3fae72}                              /* tutor-D #46 */
+.tnode.done.rusty{border-color:#b8862f;background:rgba(184,134,47,.06)}
+.tnode.done.rusty .badge{color:var(--gold)}
 .tnode.locked{opacity:.48}
 .tnode.locked .ng{filter:grayscale(1)}
 .tnode.just{animation:unlockpop .7s ease-out}
@@ -538,6 +549,7 @@ header .brand span{color:var(--gold)}
   <div class="abtok" id="gembox" style="margin-top:8px"></div>
   <div class="jsec">✍️ YOUR APPLY NOTES</div><div id="jnotes"></div>
   <div class="jsec">📒 SAVED WORDS <button class="ghostbtn" id="jvquiz" style="float:right;padding:5px 12px;font-size:11.5px;margin:0;display:none">🎓 Quiz me</button></div><div id="jvocab"></div>
+  <div class="jsec" id="jerrsec" style="display:none">🩹 YOUR MISSES <button class="ghostbtn" id="jerrdrill" style="float:right;padding:5px 12px;font-size:11.5px;margin:0;display:none">🎓 Drill these</button></div><div id="jerrors"></div>
   <div class="jsec">⭐ HIGHLIGHTS</div><div id="hlrows"></div>
   <input type="file" id="jfile" accept="application/json" style="display:none">
 </div></div>
@@ -866,10 +878,16 @@ function renderEnd(){
   else{const btn=document.createElement("button");btn.className="goldbtn";btn.textContent=`MARK COMPLETE  +${epXP(ep)} XP`;
     btn.onclick=()=>complete();end.appendChild(btn)}
   const nav=document.createElement("div");nav.style.marginTop="14px";
+  if(geminiKeys().length){const r=document.createElement("button");r.className="ghostbtn";r.textContent="🎓 Recap & test me";  // tutor-E #34
+    r.onclick=()=>recapEpisode(b,ep);nav.appendChild(r);}
   if(CUR.e>0){const p=document.createElement("button");p.className="ghostbtn";p.textContent="← prev";p.onclick=()=>openEp(CUR.b,CUR.e-1);nav.appendChild(p)}
   if(CUR.e<b.episodes.length-1){const n=document.createElement("button");n.className="ghostbtn";
     n.textContent=`next: ${b.episodes[CUR.e+1].t.slice(0,34)} →`;n.onclick=()=>openEp(CUR.b,CUR.e+1);nav.appendChild(n)}
   end.appendChild(nav);
+}
+function recapEpisode(b,ep){   // tutor-E #34: 3-bullet summary + one recall question closes the loop on a reading session
+  const ctxBlock=`From "${b.title}"${b.author?" by "+b.author:""}, section "${ep.t}":\n\n${ep.p.join("\n\n").slice(0,6000)}`;
+  openTutor("Recap",ctxBlock,`Summarise this section in 3 short bullet points (its core claims only), then ask me ONE recall question that checks I understood the main idea. Put the question on its own last line starting with "Q:".`);
 }
 function complete(){
   const b=bookById(CUR.b),ep=b.episodes[CUR.e];
@@ -993,14 +1011,26 @@ async function defineTerm(term){
     (navigator.onLine?"No definition found for “"+esc(term)+"”.":"You're offline — only your vault can be searched, and this term isn't explained in your lessons yet.");
 }
 $("dp-x").onclick=()=>$("defpop").classList.remove("on");
-async function explainTerm(term,ctx){
-  const src=$("dp-src"),body=$("dp-body");$("dp-word").textContent=term;$("dp-open").style.display="none";
-  if(!geminiKeys().length){src.textContent="TUTOR NOT CONNECTED";
-    body.innerHTML="Connect a Gemini key in 👤 Account (or the Journal) and the tutor can explain anything you don't get — a word or a whole sentence.";return;}
-  src.textContent="🎓 TUTOR IS EXPLAINING…";body.textContent="…";
-  const prompt=`A learner is reading and doesn't fully understand something. Explain it clearly, simply, and concretely in 2-3 sentences — plain text, no preamble, no markdown.\n\nThey highlighted: "${term}"`+(ctx&&ctx.length>term.length+5?`\nThe surrounding passage: "${ctx}"`:"")+`\n\nSay what it means and, if there's a surrounding passage, why it matters there. Never mention being an AI or a model.`;
-  try{const fb=await geminiCall(prompt,240);src.textContent="🎓 TUTOR";body.textContent=fb;}
-  catch(e){src.textContent="TUTOR UNAVAILABLE";body.textContent=e&&e.message==="quota"?"Gemini quota is spent for now — it resets daily.":"Couldn't reach the tutor — check your connection.";}
+function explainTerm(term,ctx){
+  // build grounding context from wherever the learner is (tutor-A #1/#6)
+  let ctxBlock="";
+  if($("node").classList.contains("on")&&CURN){const n=nodeById(CURN);if(n){const bk=bookOfNode(n);
+    ctxBlock=`Lesson: "${n.title}"${bk?` (distilled from "${bk.title}"${bk.author?" by "+bk.author:""})`:""}\n\n${nodeText(n)}`;}}
+  else if($("reader").classList.contains("on")&&CUR.b){const b=bookById(CUR.b);if(b){const ep=b.episodes[CUR.e];
+    ctxBlock=`From "${b.title}"${b.author?" by "+b.author:""}, section "${ep.t}":\n\n${ctx&&ctx.length>40?ctx:ep.p.slice(0,3).join("\n\n")}`;}}
+  else if(ctx)ctxBlock=ctx;
+  // tutor-A #4: fold in the most relevant snippets from your OTHER lessons so cross-links use your books' framing
+  const snips=vaultSnippets(term,2).filter(s=>!ctxBlock.toLowerCase().includes(s.snippet.slice(0,40).toLowerCase()));
+  if(snips.length)ctxBlock+="\n\nRelated ideas already in your vault:\n"+snips.map(s=>`• ${s.title}: ${s.snippet}`).join("\n");
+  openTutor("Tutor",ctxBlock,`Explain this clearly and concretely: "${term}". What does it mean, and why does it matter right here?`);
+}
+function coachMe(){   // tutor-F #17: knowledge is organised by book, but life arrives as situations
+  if(!geminiKeys().length){toast("Connect a Gemini key first (👤 Account or Journal)");return;}
+  const mastered=DATA.nodes.filter(x=>nodeDone(x.id)).slice(0,40)
+    .map(x=>`• ${x.title}: ${((x.bridge&&x.bridge[0])||"").slice(0,120)}`).join("\n");
+  const ctxBlock=`IDEAS THE LEARNER HAS MASTERED (only recommend from THESE — name them exactly):\n${mastered||"(none yet)"}`;
+  $("hls").classList.remove("on");
+  openTutor("Coach me",ctxBlock,`I want to apply what I've learned to a real situation. First ask me — in one line — what situation I'm facing. Once I answer, tell me which of my mastered ideas apply and exactly how to use each, naming the ideas.`);
 }
 function saveVocab(term,ctx){
   S.vocab=S.vocab||[];
@@ -1019,7 +1049,7 @@ async function vocabQuiz(){
   const list=words.map(w=>`- "${w.t}"${w.ctx?` (context: ${w.ctx.slice(0,140)})`:""}`).join("\n");
   const prompt=`A learner saved these words/phrases while studying and wants to check they truly understood each idea (not just its dictionary meaning). For EACH item, write one short question that probes understanding, and a one-sentence model answer. Format EXACTLY, plain text, no markdown:\nQ: <question>\nA: <answer>\n\n(one blank line between items)\n\nItems:\n${list}`;
   try{
-    const txt=await geminiCall(prompt,900);   // #19: headroom so the last item isn't truncated
+    const txt=await geminiCall(prompt,900,0.7);   // #19: headroom; temp 0.7 for question variety
     const items=txt.split(/\n\s*\n/).map(b=>{const q=(b.match(/Q:\s*([\s\S]*?)(?:\nA:|$)/)||[])[1],a=(b.match(/A:\s*([\s\S]*)/)||[])[1];return q&&a?{q:q.trim(),a:a.trim()}:null}).filter(Boolean);
     if(!items.length)throw new Error("empty");
     $("dp-src").textContent="🎓 CHECK YOUR UNDERSTANDING";
@@ -1077,37 +1107,107 @@ function restoreVault(file){
 const geminiKeys=()=>(localStorage.getItem("vault_gemini")||"").split(/[\s,]+/).filter(Boolean);
 // free-tier quota is PER MODEL, so we try several models across every key until one answers
 const GEM_MODELS=["gemini-2.5-flash-lite","gemini-2.5-flash","gemini-flash-latest"];  // #14: dropped gemini-2.0-flash (zero free quota → always 429)
-async function geminiCall(prompt,maxTok=220){
+// tutor-A #2: temp defaults LOW (0.3) — explanations should be factual, not creative; callers pass 0.7 only to generate questions
+async function geminiCall(prompt,maxTok=260,temp=0.3){
   const keys=geminiKeys();if(!keys.length)throw new Error("no-key");
+  const gen={maxOutputTokens:maxTok,temperature:temp,thinkingConfig:{thinkingBudget:0}};   // #16
+  const url=m=>`https://generativelanguage.googleapis.com/v1beta/models/${m}:generateContent`;
   let quota=false,reached=false;
   for(const model of GEM_MODELS){
     for(const k of keys){
+      const hdr={"Content-Type":"application/json","x-goog-api-key":k};   // #17: key in header
       let r;
       try{
-        r=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
-          {method:"POST",
-           headers:{"Content-Type":"application/json","x-goog-api-key":k},   // #17: key in header, not the URL
-           signal:AbortSignal.timeout(20000),                               // #15: don't hang forever on a stalled connection
-           // #16: thinkingBudget:0 so reasoning tokens don't eat maxOutputTokens and return empty
-           body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{maxOutputTokens:maxTok,temperature:0.7,thinkingConfig:{thinkingBudget:0}}})});
+        r=await fetch(url(model),{method:"POST",headers:hdr,signal:AbortSignal.timeout(20000),   // #15
+          body:JSON.stringify({contents:[{role:"user",parts:[{text:prompt}]}],generationConfig:gen})});
       }catch(e){continue;}                                  // network error / timeout -> next key
       reached=true;
       if(r.status===429){quota=true;continue;}              // this model+key spent -> next
       if(r.status===404)break;                              // model not available -> next model
       if(r.status===400||r.status===403)continue;           // bad key -> next key
       if(!r.ok)continue;
-      try{const j=await r.json();
-        const t=j.candidates&&j.candidates[0]&&j.candidates[0].content&&j.candidates[0].content.parts[0].text;
-        if(t)return t.trim();
+      try{const j=await r.json();const c=j.candidates&&j.candidates[0];
+        let t=c&&c.content&&c.content.parts&&c.content.parts[0]&&c.content.parts[0].text;
+        if(t){t=t.trim();
+          // tutor-A #8: the model was cut off mid-answer — ask it once to finish, then stitch the pieces
+          if(c.finishReason==="MAX_TOKENS"){
+            try{const cr=await fetch(url(model),{method:"POST",headers:hdr,signal:AbortSignal.timeout(20000),
+              body:JSON.stringify({contents:[{role:"user",parts:[{text:prompt}]},{role:"model",parts:[{text:t}]},{role:"user",parts:[{text:"Continue from exactly where you stopped. Do not repeat anything."}]}],generationConfig:gen})});
+              if(cr.ok){const cj=await cr.json();const ct=cj.candidates&&cj.candidates[0]&&cj.candidates[0].content&&cj.candidates[0].content.parts&&cj.candidates[0].content.parts[0]&&cj.candidates[0].content.parts[0].text;
+                if(ct)t+=(/[-–—]$/.test(t)?"":" ")+ct.trim();}
+            }catch(e){}
+          }
+          return t;
+        }
       }catch(e){}
     }
   }
   throw new Error(!reached?"unreachable":quota?"quota":"failed");
 }
+/* ---------- tutor grounding: feed Gemini YOUR books, not generic pop-psych ---------- */
+function nodeText(n){return [...(n.bridge||[]),...(n.sources||[]).flatMap(s=>s.quote||[])].join("\n\n");}
+function bookOfNode(n){const s=(n.sources||[])[0];if(!s)return null;const nb=x=>x.toLowerCase().replace(/[^a-z0-9]/g,"");
+  return DATA.books.find(b=>b.title===s.book)||DATA.books.find(b=>nb(b.title)===nb(s.book))||null;}
+const masteredTitles=limit=>{const ts=DATA.nodes.filter(x=>nodeDone(x.id)).map(x=>x.title);return limit?ts.slice(0,limit):ts;};
+// tutor-A #4: tiny retrieval — the top-k lesson snippets relevant to a query, to ground answers in your own material
+function vaultSnippets(query,k){k=k||3;const q=(query||"").toLowerCase().split(/\s+/).filter(w=>w.length>3);if(!q.length)return [];
+  const scored=[];
+  for(const nd of DATA.nodes){const text=[nd.title,...(nd.bridge||[]),...(nd.sources||[]).flatMap(s=>s.quote||[])].join(" ");
+    const tl=text.toLowerCase();let s=0;for(const w of q)if(tl.includes(w))s++;
+    if(s)scored.push({s,title:nd.title,text});}
+  scored.sort((a,b)=>b.s-a.s);
+  return scored.slice(0,k).map(x=>({title:x.title,snippet:x.text.slice(0,480)}));
+}
+/* ---------- tutor conversation: a real grounded thread, with follow-ups (tutor-A #9/#10/#36/#37) ---------- */
+let TUTOR={ctx:"",thread:[],title:"Tutor"};
+function openTutor(title,ctxBlock,firstMsg){
+  TUTOR={ctx:ctxBlock||"",thread:[],title:title||"Tutor"};
+  const pop=$("defpop");$("dp-word").textContent=title||"Tutor";$("dp-open").style.display="none";
+  $("dp-explain").style.display="none";$("dp-save").style.display="none";
+  pop.classList.add("on");renderTutor();
+  if(firstMsg)tutorSend(firstMsg);
+}
+async function tutorSend(userMsg){
+  if(!geminiKeys().length){$("dp-src").textContent="TUTOR NOT CONNECTED";
+    $("dp-body").innerHTML="Connect a Gemini key in 👤 Account (or the Journal) and the tutor can explain anything — grounded in your own lessons.";return;}
+  TUTOR.thread.push({role:"user",text:userMsg});renderTutor(true);
+  // tutor-A #1/#3/#5/#6 + #39: answer from the learner's own material; admit uncertainty; cite; connect to ideas they already know
+  const known=masteredTitles(28);
+  const sys=`You are a sharp, warm study tutor inside someone's private learning app. Ground every answer in THE LEARNER'S MATERIAL below — use its framing and wording, not generic textbook knowledge. If the answer isn't in the material, say so in a few words, then give your best general reading clearly flagged as outside their books. If you're unsure, say so plainly rather than guessing confidently. When you draw on the material, name which lesson or book it came from. Plain text, no markdown, 2-4 sentences unless the learner asks for more. Never mention being an AI.\n\n=== THE LEARNER'S MATERIAL ===\n${TUTOR.ctx||"(no specific lesson attached)"}\n=== END MATERIAL ===`
+    +(known.length?`\n\nIdeas the learner has already mastered — connect to these BY NAME when it genuinely helps: ${known.join("; ")}`:"");
+  const convo=TUTOR.thread.map(m=>`${m.role==="user"?"LEARNER":"TUTOR"}: ${m.text}`).join("\n\n");
+  try{const fb=await geminiCall(sys+"\n\n"+convo+"\n\nTUTOR:",420,0.3);TUTOR.thread.push({role:"tutor",text:fb});}
+  catch(e){TUTOR.thread.push({role:"tutor",text:e&&e.message==="quota"?"(Gemini quota is spent for now — it resets daily.)":e&&e.message==="no-key"?"(Connect a Gemini key first.)":"(Couldn't reach the tutor — check your connection.)"});}
+  renderTutor();
+}
+function renderTutor(pending){
+  $("dp-src").textContent="🎓 "+(TUTOR.title||"TUTOR").toUpperCase();
+  const body=$("dp-body");
+  let h=TUTOR.thread.map(m=>m.role==="user"
+    ?`<div class="tu-you">you: ${esc(m.text)}</div>`
+    :`<div class="tu-t">${esc(m.text)}</div>`).join("");
+  if(pending)h+=`<div class="tu-t" style="color:var(--tx2)">…</div>`;
+  h+=`<div class="tu-chips">
+      <button class="tu-chip" data-q="Explain that again more simply, in plainer words.">simpler</button>
+      <button class="tu-chip" data-q="Go deeper — the underlying mechanism, and a subtlety I might be missing.">deeper</button>
+      <button class="tu-chip" data-q="Give me a concrete, everyday example of this.">example</button>
+      <button class="tu-chip" data-q="Give me an analogy from video games or daily life.">analogy</button>
+    </div>
+    <div class="tu-ask"><input id="tutor-in" placeholder="ask a follow-up…" autocomplete="off"><button id="tutor-go">ask</button></div>`;
+  body.innerHTML=h;
+  body.querySelectorAll(".tu-chip").forEach(b=>b.onclick=()=>{if(!pending)tutorSend(b.dataset.q);});
+  const inp=$("tutor-in");if(inp){$("tutor-go").onclick=()=>{const v=inp.value.trim();if(v){inp.value="";tutorSend(v);}};
+    inp.onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();$("tutor-go").click();}};}
+  body.scrollTop=body.scrollHeight;
+}
 async function reviewNote(nodeId){
   const n=nodeById(nodeId),rec=S.node[nodeId];if(!n||!rec||!rec.applied)return;
-  const prompt=`You are a warm, sharp self-study tutor inside a personal learning app. A learner applied the idea "${n.title}" to their own life.\nThe practice prompt was: "${(n.apply&&n.apply.prompt)||""}"\nWhat they wrote: "${rec.applied}"\n\nWrite 2 to 4 sentences of feedback as plain text, second person, no preamble and no markdown. First, affirm something specific and genuine in how they applied it. Then deepen it: name a subtlety, the next layer of the idea, or gently correct a misunderstanding if there is one. End with one concrete thing to try or notice next. Warm but not gushing. Never mention being an AI or a model.`;
-  const fb=await geminiCall(prompt,220);
+  const bk=bookOfNode(n);
+  // tutor-F #42: show the tutor the learner's recent reflections so feedback builds instead of resetting each time
+  const recent=journalNotes().filter(x=>x.node.id!==nodeId&&x.rec.review).slice(0,3)
+    .map(x=>`- On "${x.node.title}": ${(x.rec.applied||"").slice(0,150)}`).join("\n");
+  const prompt=`You are a warm, sharp self-study tutor inside a personal learning app. Ground your feedback in the LESSON below and the learner's own words — never generic advice.\n\nLESSON: "${n.title}"${bk?` (distilled from "${bk.title}"${bk.author?" by "+bk.author:""})`:""}\n${nodeText(n)}\n\nThe practice prompt was: "${(n.apply&&n.apply.prompt)||""}"\nWhat the learner wrote: "${rec.applied}"\n`+(recent?`\nTheir recent reflections (for continuity — reference only if genuinely relevant):\n${recent}\n`:"")+`\nWrite 3-5 sentences, plain text, second person, no markdown. (1) Affirm something specific and genuine in how they applied it. (2) Deepen it — name a subtlety or the next layer, grounded in the lesson, and gently correct any real misunderstanding. (3) End with ONE probing question that pushes their thinking further. Warm, not gushing. If unsure about something, don't invent it. Never mention being an AI.`;
+  const fb=await geminiCall(prompt,340,0.35);
   rec.review=fb;rec.reviewAt=Date.now();save();return fb;
 }
 async function reviewAllNotes(){
@@ -1159,6 +1259,7 @@ function renderJournal(){
   mk("📋 Copy all as text",copyJournal);
   mk("💾 Download backup",backupVault);
   mk("📥 Restore backup",()=>$("jfile").click());
+  if(geminiKeys().length&&nodesDone()>0)mk("🎓 Coach me on a situation",coachMe);   // tutor-F #17
   renderGemBox();
   const jn=$("jnotes");jn.innerHTML="";
   if(!notes.length)jn.innerHTML='<p style="color:var(--tx2);font-size:13px">Master ideas on the Path — everything you write in the “Apply it” step collects here.</p>';
@@ -1209,7 +1310,27 @@ function renderJournal(){
     el.onclick=()=>{SELCTX=vv.ctx||"";$("hls").classList.remove("on");defineTerm(vv.t)};
     vw.appendChild(el);
   }
+  // tutor-G #48: the error journal — your own confusions, most recent first
+  const errs=S.errors||[],ew=$("jerrors");ew.innerHTML="";
+  $("jerrsec").style.display=errs.length?"block":"none";
+  $("jerrdrill").style.display=(errs.length&&geminiKeys().length)?"inline-block":"none";
+  $("jerrdrill").onclick=()=>drillErrors();
+  for(const e of errs.slice(0,40)){
+    const nd=nodeById(e.node);
+    const el=document.createElement("div");el.className="hlrow";if(nd)el.style.cursor="pointer";
+    el.innerHTML=`<div class="q" style="font-size:13.5px">${esc(e.q)}</div><div class="m"><span>you chose “${esc((e.picked||"").slice(0,40))}” · correct: “${esc((e.correct||"").slice(0,40))}”${nd?" · "+esc(nd.title):""}</span><button style="color:var(--tx2)" data-del>remove</button></div>`;
+    el.querySelector("[data-del]").onclick=ev=>{ev.stopPropagation();S.errors=S.errors.filter(x=>x!==e);save();el.remove();if(!S.errors.length)$("jerrsec").style.display="none";};
+    if(nd)el.onclick=()=>{$("hls").classList.remove("on");openNode(e.node);};
+    ew.appendChild(el);
+  }
   $("hls").classList.add("on");
+}
+function drillErrors(){   // tutor-G #48: send your recent misses to the tutor as one focused clinic
+  const errs=(S.errors||[]).slice(0,8);if(!errs.length)return;
+  const ctxLines=errs.map(e=>{const nd=nodeById(e.node);return nd?`From "${nd.title}": ${(nodeText(nd)||"").slice(0,220)}`:"";}).filter(Boolean).join("\n\n");
+  const qs=errs.map((e,i)=>`${i+1}. ${e.q}\n   I chose: "${e.picked}"  ·  Correct: "${e.correct}"`).join("\n\n");
+  $("hls").classList.remove("on");
+  openTutor("Drill my misses",ctxLines,`These are questions I've gotten wrong. For each, briefly name the misconception and the correct principle, grounded in the lessons above. Then give me ONE new question that tests the same idea differently so I can prove I've fixed it.\n\n${qs}`);
 }
 $("btn-hl").onclick=renderJournal;
 $("jfile").onchange=e=>{if(e.target.files[0])restoreVault(e.target.files[0]);e.target.value=""};
@@ -1266,8 +1387,15 @@ $("btn-ach").onclick=()=>{const g=$("achgrid");g.innerHTML="";
   $("achs").classList.add("on")};
 
 /* ---------- patch notes ---------- */
-const APP_VER="3.18";
+const APP_VER="3.19";
 const PATCHES=[
+ {v:"3.19",n:"The Real Tutor",d:"21 Jul 2026",items:[
+  ["new","The tutor now reads YOUR actual lesson — not generic pop-psych — and cites which lesson or book it drew on. It admits when it's unsure instead of making something up, and connects new ideas to ones you've already mastered."],
+  ["new","Every explanation is now a conversation: ask follow-ups, or tap simpler / deeper / example / analogy. Highlight anything and 🎓 Explain opens the thread."],
+  ["new","Miss a quiz question? “🎓 Why did I miss those?” walks you through the exact misconception, grounded in the lesson. Every miss also collects into a 🩹 error journal in your Journal — reviewing your own confusions is the highest-yield study there is."],
+  ["new","Before the multiple-choice, a free-recall step: write what you remember first. Retrieving from memory is the part that actually makes it stick."],
+  ["new","🎓 Coach me on a situation (in the Journal): describe something real and the tutor tells you which of your mastered ideas apply and how. Finished a book chapter? “🎓 Recap & test me.”"],
+  ["polish","The Path now shows which mastered ideas are getting rusty vs solid at a glance, apply-notes get a follow-through nudge a few days later, and tutor feedback ends with a question that pushes your thinking."]]},
  {v:"3.18",n:"The Hardening II",d:"21 Jul 2026",items:[
   ["new","The Path collapses now — tap any track header to fold it away, and finished tracks fold themselves, so 13 tracks isn't one endless scroll."],
   ["new","Search reaches your own material too — highlights, saved words, and apply-notes, not just the books."],
@@ -1482,8 +1610,9 @@ function reviewStep(idx,gained){
   $("rvcount").textContent=`${idx+1} / ${RQ.length}`;
   const body=$("rvbody");body.innerHTML="";
   if(idx>=RQ.length){
+    const soon=reviewDue().length;   // tutor-G #49: set the expectation for next time
     body.innerHTML=`<div class="gatecard" style="text-align:center"><h3>🔁 Sharpened</h3>
-      <div class="gsub">${RQ.length} idea${RQ.length>1?"s":""} reviewed · +${gained} XP</div>
+      <div class="gsub">${RQ.length} idea${RQ.length>1?"s":""} reviewed · +${gained} XP${soon?`<br>${soon} more still fading — worth another round`:"<br>these come back around on schedule — spacing is what fixes them in memory"}</div>
       <button class="goldbtn" data-close="review">Done</button></div>`;
     $("rvcount").textContent="";checkDaily();renderPath();return;
   }
@@ -1507,9 +1636,10 @@ function reviewStep(idx,gained){
       const why=document.createElement("div");why.className="qwhy on";why.innerHTML=`<b>Why:</b> ${esc(q.why)}`;
       card.appendChild(why);
       if(right){rv.k=Math.min(rv.k+1,RV_DAYS.length-1);rv.due=Date.now()+RV_DAYS[rv.k]*864e5;
-        S.xp+=RV_XP;S.rvN=(S.rvN||0)+1;gained+=RV_XP;
+        S.xp+=RV_XP;S.rvN=(S.rvN||0)+1;gained+=RV_XP;clearError(n.id,q.q);   // tutor-G #48: got it — drop it from the error journal
         why.insertAdjacentHTML("beforeend",`<br><b style="color:var(--jade)">+${RV_XP} XP</b> · next review in ${RV_DAYS[rv.k]} day${RV_DAYS[rv.k]>1?"s":""}`);}
       else{rv.k=Math.max(0,rv.k-1);rv.due=Date.now()+864e5;
+        recordError(n.id,q.q,q.c[oi],q.c[q.a]);   // tutor-G #48
         why.insertAdjacentHTML("beforeend",`<br><b style="color:#e8b0b0">back tomorrow</b> — worth a re-read of the idea`);}
       save();checkAch();
       const nx=document.createElement("button");nx.className="goldbtn";nx.style.marginTop="12px";
@@ -1618,6 +1748,10 @@ function mergeState(a,b){ // union merge — never loses progress from either de
   // #23: saved words sync too — union by lowercased term
   const vseen=new Set();m.vocab=[];
   for(const v of [...(a.vocab||[]),...(b.vocab||[])]){const kk=(v.t||"").toLowerCase();if(kk&&!vseen.has(kk)){vseen.add(kk);m.vocab.push(v);}}
+  // tutor-G #48: error journal syncs — union by key, newest kept, most-recent first
+  const eseen=new Set();m.errors=[];
+  for(const e of [...(a.errors||[]),...(b.errors||[])].sort((x,y)=>(y.at||0)-(x.at||0))){if(e.key&&!eseen.has(e.key)){eseen.add(e.key);m.errors.push(e);}}
+  if(m.errors.length>120)m.errors=m.errors.slice(0,120);
   // #24/#102: reading position + "continue" follow the most-recently-active device (union of books, conflicts to the newer one)
   m.pos=aNewer?{...(b.pos||{}),...(a.pos||{})}:{...(a.pos||{}),...(b.pos||{})};
   m.last=aNewer?(a.last!==undefined?a.last:b.last):(b.last!==undefined?b.last:a.last);
@@ -2199,14 +2333,17 @@ function renderPath(){
     ns.forEach((n,si)=>{
       const st=nodeStatus(n.id);
       const badge=st==="done"?"✓":st==="avail"?"▸":"🔒";
-      let sub;
+      let sub,strength="";
       if(st==="locked"){const need=n.prereq.filter(p=>!prereqSatisfied(p)).map(p=>{const x=nodeById(p);return x?x.title:p});  // #34: don't name a lesson the guest can't see
         sub=`<div class="nsub" ${n.whyreq?`title="${esc(n.whyreq)}"`:""}>needs: ${esc(need.join(", "))}</div>`;}
-      else if(st==="done"){const lm=levelMeta(levelOf(n.id));sub=`<div class="nsub">${lm.e?lm.e+" "+lm.l.toLowerCase():"done"}</div>`;}
+      else if(st==="done"){const lm=levelMeta(levelOf(n.id));
+        // tutor-D #46: colour by review strength — rusty (overdue) vs solid — so you see what to shore up at a glance
+        const rv=S.node[n.id]&&S.node[n.id].rv;const due=rv&&rv.due<=Date.now();strength=due?" rusty":(rv&&rv.k>=3?" strong":"");
+        sub=`<div class="nsub">${due?"🔸 due for review":(lm.e?lm.e+" "+lm.l.toLowerCase():"done")}</div>`;}
       else if(n.stub) sub=`<div class="nsub">preview · full lesson next</div>`;
       else sub=`<div class="nsub">ready — tap to begin</div>`;
       const just=(JUST_UNLOCKED&&JUST_UNLOCKED.includes(n.id))?" just":"";
-      html+=`<button class="tnode ${st}${just}" data-node="${n.id}"><span class="ng">${n.glyph}</span>`+
+      html+=`<button class="tnode ${st}${just}${strength}" data-node="${n.id}"><span class="ng">${n.glyph}</span>`+
         `<span class="ntx"><span class="stg">STAGE ${si+1}</span><span class="nt">${esc(n.title)}</span>${sub}</span><span class="badge">${badge}</span></button>`;
     });
     html+=`</div>`;   // close .tnodes
@@ -2307,13 +2444,19 @@ function renderGate(n){
     const min=(n.apply&&n.apply.min)||40;
     const card=document.createElement("div");card.className="gatecard";
     card.innerHTML=`<h3>✓ Completed</h3><div class="gsub">Your reflection — edit it anytime as your understanding grows.<br><span style="opacity:.8">${esc(n.apply.prompt)}</span></div>`;
+    // tutor-F #41: a few days on, close the loop — did you actually try it?
+    if(rec.doneAt&&Date.now()-rec.doneAt>3*864e5&&!rec.followUp){
+      const fu=document.createElement("div");fu.className="jreview";fu.style.margin="0 0 12px";
+      fu.innerHTML=`🌱 <b>Follow-through</b> — a few days back you planned to apply this. Did you try it? What actually happened? Add it below and hit Update.`;
+      card.appendChild(fu);
+    }
     const ta=document.createElement("textarea");ta.value=rec.applied||"";ta.placeholder="Update your reflection…";
     ta.style.cssText="width:100%;min-height:110px;background:var(--bg2);border:1px solid var(--line);border-radius:12px;color:var(--tx);padding:14px;font-family:var(--serif);font-size:15px;line-height:1.6;resize:vertical;outline:none;margin-top:6px";
     const cc=document.createElement("div");cc.className="cc";const upd=()=>cc.textContent=ta.value.trim().length+" chars";ta.oninput=upd;upd();
     const btn=document.createElement("button");btn.className="goldbtn";btn.textContent="Update note";btn.style.marginTop="4px";
     btn.onclick=()=>{const t=ta.value.trim();if(t===(rec.applied||"")){toast("No changes");return;}
       // #21: keep the existing feedback until fresh feedback actually replaces it (offline no longer loses it)
-      rec.applied=t;save();toast("✏️ Note updated");
+      rec.applied=t;rec.followUp=true;save();toast("✏️ Note updated");   // tutor-F #41: loop closed
       if(t&&geminiKeys().length&&navigator.onLine){toast("🎓 Tutor is re-reading…");reviewNote(n.id).then(()=>renderGate(n)).catch(()=>renderGate(n));}
       else renderGate(n);};
     card.appendChild(ta);card.appendChild(cc);card.appendChild(btn);
@@ -2354,7 +2497,15 @@ function renderGate(n){
   const begin=document.createElement("button");begin.className="goldbtn";begin.textContent="Begin quiz — closed book";
   const peek=document.createElement("button");peek.className="ghostbtn";peek.style.cssText="margin:0 0 12px";peek.textContent="📖 Peek at the lesson";peek.style.display="none";
   peek.onclick=()=>{const hidden=nb.style.display==="none";nb.style.display=hidden?"":"none";peek.textContent=hidden?"🙈 Hide the lesson":"📖 Peek at the lesson";};
-  begin.onclick=()=>{nb.style.display="none";begin.style.display="none";peek.style.display="";quizWrap.style.display="";window.scrollTo(0,0);};   // #2: hide the lesson only when they choose to start
+  begin.onclick=()=>{nb.style.display="none";begin.style.display="none";peek.style.display="";window.scrollTo(0,0);   // #2: hide the lesson only when they choose to start
+    // tutor-E #19: free recall BEFORE the multiple-choice — retrieving from memory is what makes it stick
+    const fr=document.createElement("div");fr.style.margin="4px 0 14px";
+    fr.innerHTML=`<div class="gsub" style="margin-bottom:6px">First, from memory — what were the key points? (unscored; this recall is the part that makes it stick)</div>`;
+    const fta=document.createElement("textarea");fta.placeholder="write everything you remember…";
+    fta.style.cssText="width:100%;min-height:78px;background:var(--bg2);border:1px solid var(--line);border-radius:10px;color:var(--tx);padding:11px;font-family:var(--serif);font-size:14px;line-height:1.5;resize:vertical;outline:none";
+    const rev=document.createElement("button");rev.className="goldbtn";rev.style.marginTop="8px";rev.textContent="Reveal the questions →";
+    rev.onclick=()=>{fr.remove();quizWrap.style.display="";window.scrollTo(0,0);};
+    fr.appendChild(fta);fr.appendChild(rev);card.insertBefore(fr,quizWrap);};
   card.appendChild(begin);card.appendChild(peek);card.appendChild(quizWrap);
   gate.appendChild(card);
 }
@@ -2378,11 +2529,36 @@ function gradeQuiz(n,card,msg){
   }else{
     msg.className="gatemsg bad";
     msg.innerHTML=`${correct} of ${n.quiz.length} correct. The ones you missed aren't marked — rethink those and retry.`;
-    const retry=document.createElement("button");retry.className="ghostbtn";retry.style.marginTop="10px";
+    // tutor-B #13: collect the misses so the tutor can coach the specific confusion (the best teaching moment there is)
+    const misses=[];
+    items.forEach((item,qi)=>{const pick=+item.dataset.pick,good=+item.dataset.correct,q=n.quiz[qi],ch=[...item.querySelectorAll(".choice")];
+      if(pick!==good){misses.push({q:q.q,picked:ch[pick].textContent,correct:ch[good].textContent});recordError(n.id,q.q,ch[pick].textContent,ch[good].textContent);}});  // tutor-G #48
+    const row=document.createElement("div");row.style.marginTop="10px";
+    const retry=document.createElement("button");retry.className="ghostbtn";
     retry.textContent="↻ Try again (reshuffled)";
     retry.onclick=()=>renderGate(n);   // #4: rebuild the whole gate → fresh shuffle, no position to memorise
-    msg.appendChild(document.createElement("br"));msg.appendChild(retry);
+    row.appendChild(retry);
+    if(geminiKeys().length&&misses.length){
+      const wb=document.createElement("button");wb.className="ghostbtn";wb.style.marginLeft="6px";wb.textContent="🎓 Why did I miss those?";
+      wb.onclick=()=>explainMisses(n,misses);row.appendChild(wb);
+    }
+    msg.appendChild(document.createElement("br"));msg.appendChild(row);
   }
+}
+// tutor-G #48: every miss collects into an error journal — your own confusions are the best thing to re-read
+function recordError(nodeId,q,picked,correct){
+  S.errors=S.errors||[];const key=nodeId+"|"+q;
+  S.errors=S.errors.filter(e=>e.key!==key);
+  S.errors.unshift({key,node:nodeId,q,picked,correct,at:Date.now()});
+  if(S.errors.length>120)S.errors=S.errors.slice(0,120);
+  save();
+}
+function clearError(nodeId,q){if(!S.errors)return;const key=nodeId+"|"+q;const before=S.errors.length;S.errors=S.errors.filter(e=>e.key!==key);if(S.errors.length!==before)save();}
+function explainMisses(n,misses){   // tutor-B #13
+  const bk=bookOfNode(n);
+  const ctxBlock=`Lesson: "${n.title}"${bk?` (distilled from "${bk.title}"${bk.author?" by "+bk.author:""})`:""}\n\n${nodeText(n)}`;
+  const qs=misses.map((m,i)=>`Q${i+1}: ${m.q}\n  I chose: "${m.picked}"\n  Actually correct: "${m.correct}"`).join("\n\n");
+  openTutor("Why I missed those",ctxBlock,`I just missed these quiz questions. For EACH, explain in 1-2 sentences why my choice reflects a misconception and what the lesson actually shows — grounded in the lesson so I genuinely understand, not just memorise the right option.\n\n${qs}`);
 }
 function renderApply(n){
   const gate=$("ngate");gate.innerHTML="";const rec=S.node[n.id]||{};const min=(n.apply&&n.apply.min)||40;
