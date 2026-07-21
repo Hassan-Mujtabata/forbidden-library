@@ -233,6 +233,10 @@ header .brand span{color:var(--gold)}
 .track-h.done{background:linear-gradient(90deg,rgba(78,205,196,.10),var(--card));border-left-color:var(--jade)}   /* #83 */
 .track-h.done .tp{color:var(--jade);font-weight:700}
 .track-blurb{font-size:11.5px;color:var(--tx2);line-height:1.45;margin:9px 4px 14px}
+.track-h .tcx{margin-left:8px;color:var(--tx2);font-size:12px;transition:transform .2s;display:inline-block}   /* #82 */
+.track.collapsed .tcx{transform:rotate(-90deg)}
+.track.collapsed .track-blurb{display:none}
+.track.collapsed .tnodes{display:none}
 .tnode{position:relative;display:flex;gap:11px;align-items:flex-start;width:100%;text-align:left;
   padding:12px;border-radius:13px;border:1px solid var(--line);background:var(--card);margin-bottom:20px;transition:.18s}
 .tnode:not(:last-child)::after{content:"";position:absolute;left:27px;bottom:-20px;height:20px;width:2px;background:var(--line)}
@@ -587,7 +591,13 @@ function loadS(){try{S=JSON.parse(localStorage.getItem(LS_ST))||{}}catch(e){S={}
   S.xp??=0; S.read??={}; S.pos??={}; S.streak??={count:0,day:""}; S.ach??=[]; S.hl??=[];
   S.font??=17; S.wpm??=350; S.days??={}; S.mix??=null; S.node??={};}
 let _syncOn=false,_pushT=null,_syncInit=false;
-const save=()=>{S._mtime=Date.now();localStorage.setItem(LS_ST,JSON.stringify(S));
+let _quotaWarned=false;
+const save=()=>{S._mtime=Date.now();
+  if(S.hl&&S.hl.length>600)S.hl=S.hl.slice(0,600);              // #30: bound the unbounded lists
+  if(S.vocab&&S.vocab.length>600)S.vocab=S.vocab.slice(0,600);
+  if(S.hlDel&&S.hlDel.length>1500)S.hlDel=S.hlDel.slice(-1500);
+  try{localStorage.setItem(LS_ST,JSON.stringify(S));}
+  catch(e){if(!_quotaWarned){_quotaWarned=true;toast("⚠️ Device storage is full — some new items may not save. Try removing old highlights.");}return;}
   if(_syncOn&&localStorage.getItem("vault_gh")){clearTimeout(_pushT);_pushT=setTimeout(()=>{_pushT=null;pushState();},8000);}};  // #26: coalesce into fewer gist revisions
 // #26: flush a pending sync the moment the tab is hidden/closed, so the longer debounce never loses the last edit
 addEventListener("visibilitychange",()=>{if(document.hidden&&_pushT){clearTimeout(_pushT);_pushT=null;pushState();}});
@@ -672,7 +682,9 @@ async function tryLoad(k){
   const key=await crypto.subtle.importKey("raw",b64d(k),"AES-GCM",false,["decrypt"]);
   const pt=await crypto.subtle.decrypt({name:"AES-GCM",iv:new Uint8Array(raw.slice(0,12))},key,raw.slice(12));
   const txt=await new Response(new Response(pt).body.pipeThrough(new DecompressionStream("gzip"))).text();
-  return JSON.parse(txt);
+  const data=JSON.parse(txt);
+  if(data&&data.v>2)setTimeout(()=>toast("🔄 A newer vault format is live — reload to fully update"),1600);  // #93: cached old app met a newer payload
+  return data;
 }
 async function boot(){
   loadS();
@@ -1048,11 +1060,15 @@ function backupVault(){
 }
 function restoreVault(file){
   const rd=new FileReader();
-  rd.onload=()=>{try{
+  rd.onload=async()=>{try{
     const d=JSON.parse(rd.result);
     if(!d||d.vault!==1||!d.state)throw new Error("not a vault backup");
     if(!confirm("Replace ALL progress on this device with the backup from "+fmtDate(d.at)+"?"))return;
     localStorage.setItem(LS_ST,JSON.stringify(d.state));
+    // #29: otherwise the next sync merges the old cloud state right back in — offer to make the backup authoritative
+    if(localStorage.getItem("vault_gh")&&navigator.onLine&&confirm("Also replace your synced CLOUD copy with this backup?\n(Cancel keeps cloud sync as-is — your other devices' progress will merge back in.)")){
+      S=d.state;try{await pushState(true);}catch(e){}
+    }
     location.reload();
   }catch(e){toast("⚠️ That file isn't a vault backup")}};
   rd.readAsText(file);
@@ -1227,6 +1243,16 @@ function doSearch(){
           <div class="s">…${esc(pre)}<mark>${esc(hit)}</mark>${esc(post)}…</div>`;
         el.onclick=()=>{$("search").classList.remove("on");openEp(b.id,e)};
         w.appendChild(el);break}}}}
+  // #77: your own material — highlights, saved words, apply-notes
+  const yours=[];
+  for(const h of (S.hl||[]))if(h.t&&h.t.toLowerCase().includes(q)){const src=h.n?(nodeById(h.n)||{}).title:(bookById(h.b)||{}).title;yours.push({label:"⭐ Highlight · "+(src||""),text:h.t,go:h.n?()=>openNode(h.n):()=>openEp(h.b,h.e)});}
+  for(const v of (S.vocab||[]))if((v.t+" "+(v.ctx||"")).toLowerCase().includes(q))yours.push({label:"📒 Saved word",text:v.t+(v.ctx?" — "+v.ctx:""),go:()=>{SELCTX=v.ctx||"";defineTerm(v.t)}});
+  for(const nd of (DATA.nodes||[])){const rec=S.node[nd.id];if(rec&&rec.applied&&rec.applied.toLowerCase().includes(q))yours.push({label:"✍️ Your note · "+nd.title,text:rec.applied,go:()=>openNode(nd.id)});}
+  for(const y of yours.slice(0,15)){n++;const i=y.text.toLowerCase().indexOf(q);
+    const el=document.createElement("button");el.className="srow";
+    const pre=i>=0?y.text.slice(Math.max(0,i-60),i):"",hit=i>=0?y.text.slice(i,i+q.length):"",post=i>=0?y.text.slice(i+q.length,i+q.length+80):y.text.slice(0,90);
+    el.innerHTML=`<div class="w">${esc(y.label)}</div><div class="s">…${esc(pre)}<mark>${esc(hit)}</mark>${esc(post)}…</div>`;
+    el.onclick=()=>{$("search").classList.remove("on");y.go();};w.appendChild(el);}
   if(!n)w.innerHTML='<p style="color:var(--tx2)">Nothing in the vault matches that.</p>';
   else w.insertAdjacentHTML("afterbegin",`<div style="color:var(--tx2);font-size:12px;margin-bottom:8px">${n}${n>=50?"+":""} result${n>1?"s":""}</div>`);  // #75
 }
@@ -1240,8 +1266,14 @@ $("btn-ach").onclick=()=>{const g=$("achgrid");g.innerHTML="";
   $("achs").classList.add("on")};
 
 /* ---------- patch notes ---------- */
-const APP_VER="3.17";
+const APP_VER="3.18";
 const PATCHES=[
+ {v:"3.18",n:"The Hardening II",d:"21 Jul 2026",items:[
+  ["new","The Path collapses now — tap any track header to fold it away, and finished tracks fold themselves, so 13 tracks isn't one endless scroll."],
+  ["new","Search reaches your own material too — highlights, saved words, and apply-notes, not just the books."],
+  ["new","Mastered a lesson? “🔁 Test myself again” re-quizzes you without touching your progress. Lessons are now worth XP that scales with their length."],
+  ["fix","Adding a book is smarter: it reads the real author from the PDF, warns if the track already exists, tells you roughly how much of the book the lessons cover, and shows a readable title in the queue instead of a code."],
+  ["fix","Restoring a backup can now replace your cloud copy too (so it doesn't just merge the old state back), storage-full is handled gracefully, and AI lesson excerpts are honestly labelled as close paraphrases."]]},
  {v:"3.17",n:"The Hardening",d:"21 Jul 2026",items:[
   ["fix","A big correctness & security pass. The quiz no longer hands you the answer when you miss — it's closed-book now (the lesson tucks away, with a peek button), reshuffles on every retry, and passing it — not just opening the lesson — is what proves you learned."],
   ["fix","Reading position in books actually restores now (it was silently resetting to the top every time). Saved words, reading spot, and the daily rite finally sync across your devices too."],
@@ -1502,6 +1534,7 @@ function loadPdfJs(){
 async function extractPdfPages(file){
   await loadPdfJs();
   const pdf=await pdfjsLib.getDocument({data:await file.arrayBuffer()}).promise;
+  let author="";try{const md=await pdf.getMetadata();author=((md&&md.info&&md.info.Author)||"").trim();}catch(e){}  // #44
   const pages=[];
   for(let p=1;p<=pdf.numPages;p++){
     const tc=await(await pdf.getPage(p)).getTextContent();
@@ -1512,7 +1545,7 @@ async function extractPdfPages(file){
     if(txt.split(" ").length>=40)pages.push(txt);
   }
   try{await pdf.destroy()}catch(e){}
-  return pages;
+  return {pages,author};
 }
 // mirrors tools/add_book.py chunk(): front-matter trim, 1300-word windows, evenly sampled
 function chunkPages(paras,target){
@@ -1599,12 +1632,13 @@ function mergeState(a,b){ // union merge — never loses progress from either de
   if((b.seenPatch||"")>(a.seenPatch||""))m.seenPatch=b.seenPatch;
   m._mtime=Math.max(a._mtime||0,b._mtime||0);return m;
 }
-async function pushState(){
+async function pushState(overwrite){
   const h=ghHead();if(!h||!navigator.onLine||!localStorage.getItem(LS_KEY))return;
   try{
     const id=await findSyncGist(h);
     // #27: merge whatever's on the server right now BEFORE overwriting, so a concurrent device isn't clobbered
-    if(id){try{const r=await fetch("https://api.github.com/gists/"+id,{headers:h});
+    // #29: overwrite=true skips the merge (used by "restore backup" to make the backup authoritative)
+    if(id&&!overwrite){try{const r=await fetch("https://api.github.com/gists/"+id,{headers:h});
       if(r.ok){const f=(await r.json()).files["vault-progress.enc"];
         if(f&&f.content){let c=f.content;if(f.truncated&&f.raw_url)c=await(await fetch(f.raw_url,{headers:h})).text();
           S=mergeState(S,await decState(c));localStorage.setItem(LS_ST,JSON.stringify(S));}}}catch(e){}}
@@ -1812,16 +1846,21 @@ async function submitBook(){
   if(!name){out.innerHTML='<div class="abprog" style="color:#e8b0b0">Give the track a name.</div>';return}
   if(!AB.file){out.innerHTML='<div class="abprog" style="color:#e8b0b0">Pick a PDF first.</div>';return}
   if(AB.file.size>80*1024*1024){out.innerHTML='<div class="abprog" style="color:#e8b0b0">That PDF is over 80 MB — it may crash the tab. Try a smaller or compressed copy.</div>';return}  // #48
+  // #46: warn (don't block) if a track with this name already exists
+  const nrm=x=>x.toLowerCase().replace(/[^a-z0-9]/g,"");
+  if((DATA.tracks||[]).some(t=>nrm(t.name)===nrm(name))&&!confirm(`A track called “${name}” already exists on the Path. Add it again anyway?`)){return;}
   AB.busy=true;$("ab-go").disabled=true;
   const setP=(t,pct)=>out.innerHTML=`<div class="abprog">${t}<div class="abbar"><div style="width:${pct}%"></div></div></div>`;
   try{
     setP("Reading the PDF in your browser…",15);
-    const pages=await extractPdfPages(AB.file);
+    const {pages,author:pdfAuthor}=await extractPdfPages(AB.file);   // #44
     if(pages.length<3)throw new Error("Couldn't read enough text — is this a scanned image PDF?");
     setP("Distilling into lesson-sized chunks…",45);
     const words=pages.join(" ").split(/\s+/).length;
     const target=Math.max(6,Math.min(14,Math.round(words/8000)));   // auto: ~one lesson per 8k words
     const chunks=chunkPages(pages,target);
+    const fullLessons=Math.max(1,Math.round(words/1300));           // #45: how many lessons the whole book could fill
+    const coverage=Math.min(100,Math.round(chunks.length/fullLessons*100));
     let hash=0;for(const ch of name)hash=(hash*31+ch.charCodeAt(0))>>>0;
     const glyphs=["📗","📘","📙","📕","📓","🧠","💡","🧭","🔑","⚙️","🪶","🧩"];
     const accents=["#5dade2","#e08a3c","#9b59b6","#27ae60","#c0a062","#16a085","#c0392b","#2980b9","#8e6f47","#d4a017","#7d8ca3","#5d6d7e"];
@@ -1829,16 +1868,17 @@ async function submitBook(){
     const pool=freeG.length?freeG:glyphs;
     const glyph=pool[hash%pool.length], accent=accents[hash%accents.length];
     const id=(name.toLowerCase().replace(/[^a-z0-9]+/g,"")+Date.now().toString(36)).slice(0,16);
-    const job={id,title:name,author:"Unknown",track_id:nextTrackId(),
-      name,glyph,accent,blurb:`AI-authored from ${name} — a dependency-locked track.`,chunks,done:0};
+    const job={id,title:name,author:pdfAuthor||"Unknown",track_id:nextTrackId(),   // #44
+      name,glyph,accent,blurb:`${chunks.length} ideas distilled from ${name}, each unlocking the next.`,chunks,done:0};  // #61
     setP("Encrypting the job with your vault key…",70);
     const bytes=await encJob(job);
-    const fname=id+".job.enc";
+    const slug=name.toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"").slice(0,40);  // #47: readable title in the queue
+    const fname=id+(slug?"__"+slug:"")+".job.enc";
     const tok=localStorage.getItem("vault_gh");
     if(tok){
       setP("Handing it to the cloud pipeline…",88);
       await ghQueueJob(fname,bytes,tok);
-      out.innerHTML=`<div class="abprog" style="border-color:#2f7d55">✅ <b>Queued to the cloud.</b> “${esc(name)}” (${chunks.length} chunks) is now in the pipeline. The daily job will build it into a track over the coming days — check the 🤖 progress card on the Path. Nothing else for you to do.</div>`;
+      out.innerHTML=`<div class="abprog" style="border-color:#2f7d55">✅ <b>Queued to the cloud.</b> “${esc(name)}” (${chunks.length} lessons) is now in the pipeline. The daily job will build it into a track over the coming days — check the 🤖 progress card on the Path. Nothing else for you to do.${coverage<90?`<br><span style="color:var(--tx2);font-size:12px">Note: these lessons sample about ${coverage}% of the book — add it again later for deeper coverage.</span>`:""}</div>`;   // #45
     }else{
       const url=URL.createObjectURL(new Blob([bytes],{type:"application/octet-stream"}));
       const a=document.createElement("a");a.href=url;a.download=fname;a.click();setTimeout(()=>URL.revokeObjectURL(url),5000);
@@ -1881,7 +1921,9 @@ async function renderQueue(){
   if(ghHead()){   // catch books added since the last daily run (live from GitHub)
     try{const r=await fetch(`https://api.github.com/repos/${GH_REPO}/contents/tools/queue`,{headers:ghHead()});
       if(r.ok){for(const f of (await r.json())){if(!f.name.endsWith(".job.enc"))continue;
-        const id=f.name.replace(".job.enc","");if(!items.find(x=>x.id===id))items.push({id,title:id,glyph:"📗",done:0,total:0,pct:0,state:"waiting"});}}
+        const base=f.name.replace(".job.enc","");const parts=base.split("__");const rawId=parts[0];  // #47: id__slug
+        const title=parts[1]?parts[1].replace(/-/g," ").replace(/\b\w/g,c=>c.toUpperCase()):rawId;
+        if(!items.find(x=>x.id===rawId||x.title===title))items.push({id:rawId,title,glyph:"📗",done:0,total:0,pct:0,state:"waiting"});}}
     }catch(e){}
   }
   const col=s=>s==="complete"?"var(--jade)":s==="in-progress"?"#c084fc":"var(--tx2)";
@@ -2105,7 +2147,8 @@ function injectFigures(body,ep,b){
 }
 
 /* ============ THE PATH (dependency-locked idea graph) ============ */
-const NODE_XP=80;
+const NODE_XP=80;   // base
+function nodeXP(n){const w=[...(n.bridge||[]),...((n.sources||[]).flatMap(s=>s.quote||[]))].join(" ").split(/\s+/).length;return Math.max(60,Math.min(120,Math.round(w/15)*5));}  // #63: scale by lesson length — median lesson stays 80, spread 60–120
 const nodeById=id=>DATA.nodes.find(n=>n.id===id);
 const trackById=id=>DATA.tracks.find(t=>t.id===id);
 function nodeDone(id){return !!(DATA&&S.node[id]&&S.node[id].doneAt)}
@@ -2143,14 +2186,16 @@ function renderPath(){
   const tm=sitTotalMin();
   $("sittxt").textContent=(S.sits&&S.sits.length?`${S.sits.length} sits · ${tm} min logged — `:"")+"begin a timed sit · bells at start & end";
   const tree=$("tree");tree.innerHTML="";
+  // #82: on first paint, collapse fully-mastered tracks so 13 tracks isn't one endless scroll
+  if(!_collapseInit){_collapseInit=true;for(const tr of DATA.tracks){const tn=DATA.nodes.filter(n=>n.track===tr.id);if(tn.length&&tn.every(n=>nodeDone(n.id)))COLLAPSED.add(tr.id);}}
   for(const tr of DATA.tracks){
     if(!trackVisible(tr.id))continue;
-    const col=document.createElement("div");col.className="track";col.style.setProperty("--tacc",tr.accent);
+    const col=document.createElement("div");col.className="track"+(COLLAPSED.has(tr.id)?" collapsed":"");col.style.setProperty("--tacc",tr.accent);
     const ns=DATA.nodes.filter(n=>n.track===tr.id).sort((a,b)=>a.tier-b.tier);
     const doneN=ns.filter(n=>nodeDone(n.id)).length;
     const trDone=ns.length>0&&doneN===ns.length;   // #83: mark a fully-mastered track
-    let html=`<div class="track-h${trDone?" done":""}"><span class="tg">${tr.glyph}</span><span class="tn">${esc(tr.name)}</span><span class="tp">${doneN}/${ns.length}${trDone?" ✓":""}</span></div>
-      <div class="track-blurb">${esc(tr.blurb)}</div>`;
+    let html=`<div class="track-h${trDone?" done":""}"><span class="tg">${tr.glyph}</span><span class="tn">${esc(tr.name)}</span><span class="tp">${doneN}/${ns.length}${trDone?" ✓":""}</span><span class="tcx">▾</span></div>
+      <div class="track-blurb">${esc(tr.blurb)}</div><div class="tnodes">`;
     ns.forEach((n,si)=>{
       const st=nodeStatus(n.id);
       const badge=st==="done"?"✓":st==="avail"?"▸":"🔒";
@@ -2164,7 +2209,12 @@ function renderPath(){
       html+=`<button class="tnode ${st}${just}" data-node="${n.id}"><span class="ng">${n.glyph}</span>`+
         `<span class="ntx"><span class="stg">STAGE ${si+1}</span><span class="nt">${esc(n.title)}</span>${sub}</span><span class="badge">${badge}</span></button>`;
     });
-    col.innerHTML=html;tree.appendChild(col);
+    html+=`</div>`;   // close .tnodes
+    col.innerHTML=html;
+    const hdr=col.querySelector(".track-h");   // #82: tap the header to collapse/expand
+    hdr.style.cursor="pointer";
+    hdr.onclick=()=>{if(COLLAPSED.has(tr.id))COLLAPSED.delete(tr.id);else COLLAPSED.add(tr.id);col.classList.toggle("collapsed");};
+    tree.appendChild(col);
   }
   JUST_UNLOCKED=null;
   tree.querySelectorAll("[data-node]").forEach(b=>b.onclick=()=>openNode(b.dataset.node));
@@ -2172,6 +2222,7 @@ function renderPath(){
 
 let CURN=null;
 let JUST_UNLOCKED=null;   // #81: transient "flash the newly-unlocked node" hint — must NOT live in synced state S
+const COLLAPSED=new Set();let _collapseInit=false;   // #82: which tracks are collapsed (session-only, not synced)
 function nodeFigure(body,accent,seedId){
   const ps=[...body.querySelectorAll(":scope>p")];
   if(ps.length<2)return;
@@ -2200,7 +2251,7 @@ function openNode(id){
   const tns=DATA.nodes.filter(x=>x.track===n.track).sort((a,b)=>a.tier-b.tier);
   const stg=tns.findIndex(x=>x.id===n.id)+1;
   const sub=document.createElement("div");sub.className="nsubh";
-  sub.textContent=`${tr.name.toUpperCase()} · STAGE ${stg} OF ${tns.length} · ${st==="done"?"MASTERED ✓":st==="locked"?"LOCKED":"+"+NODE_XP+" XP TO MASTER"}`;
+  sub.textContent=`${tr.name.toUpperCase()} · STAGE ${stg} OF ${tns.length} · ${st==="done"?"MASTERED ✓":st==="locked"?"LOCKED":"+"+nodeXP(n)+" XP TO MASTER"}`;
   body.appendChild(sub);
   if(st==="avail"){   // #84: show what mastering this will open
     const opens=DATA.nodes.filter(c=>c.prereq.includes(n.id)&&(privileged()||trackVisible(c.track)));
@@ -2226,7 +2277,8 @@ function openNode(id){
   if(!n.stub&&n.sources){
     const sh=document.createElement("div");sh.className="lblrow books";sh.textContent="📖 From the books";body.appendChild(sh);
     for(const s of n.sources){const d=document.createElement("div");d.className="src";
-      d.innerHTML=`<div class="attr">${esc(s.book)} — ${esc(s.ref)}</div>`+s.quote.map(q=>`<p>“${esc(q)}”</p>`).join("");
+      const aiTrack=!"ABCDEF".includes(n.track);   // #57: AI tracks (G+) carry close paraphrases, not verbatim quotes — label them honestly
+      d.innerHTML=`<div class="attr">${esc(s.book)} — ${esc(s.ref)}${aiTrack?` · <span style="opacity:.65">close paraphrase</span>`:""}</div>`+s.quote.map(q=>`<p>“${esc(q)}”</p>`).join("");
       const norm=x=>x.toLowerCase().replace(/[^a-z0-9]/g,"");
       const lib=DATA.books.find(b=>b.title===s.book)||DATA.books.find(b=>norm(b.title)===norm(s.book))||DATA.books.find(b=>norm(s.book).includes(norm(b.title))&&b.title.length>8);
       if(lib){const go=document.createElement("button");go.className="srcgo";
@@ -2267,7 +2319,10 @@ function renderGate(n){
     card.appendChild(ta);card.appendChild(cc);card.appendChild(btn);
     if(rec.review){const rv=document.createElement("div");rv.className="jreview";rv.style.margin="14px 0 4px";rv.innerHTML=`🎓 <b>TUTOR</b> — ${esc(rec.review)}`;card.appendChild(rv);}
     const lp=document.createElement("div");lp.innerHTML=levelPickerHTML(n.id);card.appendChild(lp);wireLevelPicker(lp,n.id);
-    const back=document.createElement("button");back.className="ghostbtn";back.textContent="← Back to the Path";back.style.marginTop="12px";
+    const retest=document.createElement("button");retest.className="ghostbtn";retest.textContent="🔁 Test myself again";retest.style.marginTop="12px";
+    retest.onclick=()=>{RQ=[n.id];$("review").classList.add("on");reviewStep(0,0);};   // #13: re-quiz via the Sharpen flow — doesn't touch mastery
+    card.appendChild(retest);
+    const back=document.createElement("button");back.className="ghostbtn";back.textContent="← Back to the Path";back.style.marginTop="12px";back.style.marginLeft="6px";
     back.onclick=()=>{renderPath();show("path")};card.appendChild(back);
     gate.appendChild(card);return;
   }
@@ -2335,7 +2390,7 @@ function renderApply(n){
   card.innerHTML=`<h3>Apply it</h3><div class="gsub">${esc(n.apply.prompt)}</div>`;
   const ta=document.createElement("textarea");ta.value=rec.applied||rec.draft||"";ta.placeholder=`Write from your own life… (at least ${min} characters)`;
   const cc=document.createElement("div");cc.className="cc";
-  const btn=document.createElement("button");btn.className="goldbtn";btn.textContent=`Master this idea  +${NODE_XP} XP`;
+  const btn=document.createElement("button");btn.className="goldbtn";btn.textContent=`Master this idea  +${nodeXP(n)} XP`;
   let draftT;
   const enough=v=>v.length>=min&&(v?v.split(/\s+/).length:0)>=8;   // #9: a real reflection, not mashed characters
   const upd=()=>{const v=ta.value.trim();cc.textContent=v.length+" / "+min;const ok=enough(v);btn.disabled=!ok;btn.style.opacity=ok?1:.5;
@@ -2351,12 +2406,12 @@ function completeNode(n){
   const rec=S.node[n.id]=S.node[n.id]||{};
   delete rec.draft;
   if(!rec.doneAt){
-    rec.doneAt=Date.now();const before=lvl();S.xp+=NODE_XP;
+    rec.doneAt=Date.now();const before=lvl();S.xp+=nodeXP(n);
     const d=today();
     if(S.streak.day!==d){S.streak.count=S.streak.day===yesterday()?S.streak.count+1:1;S.streak.day=d;S.bestStreak=Math.max(S.bestStreak||0,S.streak.count);}
     (S.days[d]=S.days[d]||{})[["A","B","C"].includes(n.track)?"light":"shadow"]=true;
     save();
-    toast(`+${NODE_XP} XP · “${n.title}” mastered`,true);
+    toast(`+${nodeXP(n)} XP · “${n.title}” mastered`,true);
     if(lvl()>before)setTimeout(()=>toast(`⬆ LEVEL ${lvl()} — ${lvlName()}`,true),750);
     checkAch();
   }

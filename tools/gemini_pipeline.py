@@ -76,6 +76,7 @@ HARD RULES:
    * Item 1 may check the core definition. Items 2 and 3 MUST be application: give a short concrete situation and ask which option correctly applies the idea (or which is an example of it / a violation of it). The answer must NOT be findable by copying a sentence from the passage.
    * Every WRONG option must be a PLAUSIBLE MISCONCEPTION a real learner actually holds — the common confusion, a near-miss that is true but irrelevant, a reversed cause and effect, or an adjacent idea. Same length and register as the correct option. NEVER a joke, nonsense, or obviously-wrong option.
    * The correct option must NOT be the longest or the most detailed one — give the distractors equal care.
+   * NEVER use "all of the above", "none of the above", "both A and B", or similar meta-options.
 - Ground everything in the passage; invent no facts. Plain text only, no markdown, no emphasis characters, never mention being an AI.
 
 PASSAGE:
@@ -170,6 +171,7 @@ def content_errors(n):
                 others = sorted(lens[j] for j in range(4) if j != q["a"])
                 med = others[len(others) // 2]
                 if med and lens[q["a"]] > 2.5 * med: e.append("quiz-giveaway")
+                if any(re.search(r"\b(all|none) of the (above|these)\b|both a( |nd )b", c, re.I) for c in q["c"]): e.append("meta-option")  # #6
         if not (n["apply"]["prompt"] and isinstance(n["apply"]["min"], int)): e.append("apply")
         if not n["whyreq"]: e.append("whyreq")
     except Exception as ex:
@@ -226,8 +228,8 @@ def merge_nodes(graph, track_meta, contents):
             "bridge": c["bridge"], "sources": c["sources"],
             "quiz": c["quiz"], "apply": c["apply"],
         }
-        if prev:                       # concrete, honest dependency reason referencing the actual prior lesson
-            node["whyreq"] = clean_text(f"Builds directly on “{contents[i-1]['title']}” — grasp that idea first, then this one follows.")
+        if prev:  # #60: prefer the model's specific reason; fall back to naming the prior lesson
+            node["whyreq"] = clean_text(c.get("whyreq") or f"Builds directly on “{contents[i-1]['title']}” — grasp that idea first, then this one follows.")
         g["nodes"].append(node)
         prev = nid
     return g
@@ -315,7 +317,7 @@ def run(book_id, track_name, track_glyph, track_accent, target_nodes, max_this_r
         print("no new nodes produced this run."); return
     tid = next_track_id(graph)
     tmeta = {"id": tid, "name": track_name, "glyph": track_glyph, "accent": track_accent,
-             "blurb": clean_text(f"AI-authored from {book['title']} — {len(contents)} ideas, dependency-locked.")}
+             "blurb": clean_text(f"{len(contents)} ideas distilled from {book['title']}, each unlocking the next.")}  # #61: reader-facing, no jargon
     merged = merge_nodes(graph, tmeta, contents)
     ok, msg = graph_ok(merged, books)
     print(f"trial-merge validation: {'PASS' if ok else 'FAIL — ' + msg}")
@@ -377,8 +379,9 @@ def append_to_track(graph, tmeta, contents):
         node = {"id": nid, "track": tid, "tier": base_tier + i,
                 "prereq": [prev] if prev else [], "glyph": c["glyph"], "title": c["title"],
                 "bridge": c["bridge"], "sources": c["sources"], "quiz": c["quiz"], "apply": c["apply"]}
-        if prev:
-            node["whyreq"] = clean_text(f"Builds directly on “{(contents[i-1]['title'] if i>0 else next(n['title'] for n in g['nodes'] if n['id']==prev))}” — grasp that first.")
+        if prev:  # #60
+            _prior = contents[i-1]['title'] if i>0 else next(n['title'] for n in g['nodes'] if n['id'] == prev)
+            node["whyreq"] = clean_text(c.get("whyreq") or f"Builds directly on “{_prior}” — grasp that first.")
         g["nodes"].append(node); prev = nid
     return g
 
