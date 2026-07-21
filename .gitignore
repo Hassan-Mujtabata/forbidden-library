@@ -6,5 +6,7 @@ tools/.gemini_keys
 tools/graph_preview.json
 tools/gemini_test_out.json
 tools/graph.json.bak
+tools/graph.json
+
 tools/queue/*
 !tools/queue/*.job.enc

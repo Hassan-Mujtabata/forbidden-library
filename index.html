@@ -230,6 +230,8 @@ header .brand span{color:var(--gold)}
 .track-h .tg{font-size:22px}
 .track-h .tn{font-family:var(--serif);font-size:15px;line-height:1.15}
 .track-h .tp{margin-left:auto;font-size:11px;color:var(--tx2);white-space:nowrap}
+.track-h.done{background:linear-gradient(90deg,rgba(78,205,196,.10),var(--card));border-left-color:var(--jade)}   /* #83 */
+.track-h.done .tp{color:var(--jade);font-weight:700}
 .track-blurb{font-size:11.5px;color:var(--tx2);line-height:1.45;margin:9px 4px 14px}
 .tnode{position:relative;display:flex;gap:11px;align-items:flex-start;width:100%;text-align:left;
   padding:12px;border-radius:13px;border:1px solid var(--line);background:var(--card);margin-bottom:20px;transition:.18s}
@@ -586,10 +588,14 @@ function loadS(){try{S=JSON.parse(localStorage.getItem(LS_ST))||{}}catch(e){S={}
   S.font??=17; S.wpm??=350; S.days??={}; S.mix??=null; S.node??={};}
 let _syncOn=false,_pushT=null,_syncInit=false;
 const save=()=>{S._mtime=Date.now();localStorage.setItem(LS_ST,JSON.stringify(S));
-  if(_syncOn&&localStorage.getItem("vault_gh")){clearTimeout(_pushT);_pushT=setTimeout(()=>pushState(),3000);}};
+  if(_syncOn&&localStorage.getItem("vault_gh")){clearTimeout(_pushT);_pushT=setTimeout(()=>{_pushT=null;pushState();},8000);}};  // #26: coalesce into fewer gist revisions
+// #26: flush a pending sync the moment the tab is hidden/closed, so the longer debounce never loses the last edit
+addEventListener("visibilitychange",()=>{if(document.hidden&&_pushT){clearTimeout(_pushT);_pushT=null;pushState();}});
+addEventListener("pagehide",()=>{if(_pushT){clearTimeout(_pushT);_pushT=null;pushState();}});
 const $=id=>document.getElementById(id);
 const esc=s=>{const d=document.createElement("div");d.textContent=s;return d.innerHTML};
 const bookById=id=>DATA.books.find(b=>b.id===id);
+const READ_WPM=230;   // #79: one reading-speed constant for every "N min" estimate
 const epWords=ep=>ep.p.reduce((n,p)=>n+p.split(" ").length,0);
 const epXP=ep=>Math.max(10,Math.round(epWords(ep)/10));
 const readSet=b=>new Set(S.read[b]||[]);
@@ -638,9 +644,18 @@ const ACH=[
  {id:"rite7",e:"🌟",n:"Devoted",d:"Complete 7 Daily Rites",c:()=>(S.ritesN||0)>=7},
  {id:"rite30",e:"☀️",n:"The Practice",d:"Complete 30 Daily Rites",c:()=>(S.ritesN||0)>=30},
 ];
-function checkAch(){for(const a of ACH){if(!S.ach.includes(a.id)&&a.c()){S.ach.push(a.id);toast(`${a.e} Achievement — ${a.n}`,true)}}save()}
-function toast(msg,big){const t=document.createElement("div");t.className="toast"+(big?" big":"");t.textContent=msg;
- $("toasts").appendChild(t);setTimeout(()=>{t.classList.add("fadeout");setTimeout(()=>t.remove(),500)},big?3400:2300)}
+function checkAch(){let granted=false;for(const a of ACH){if(!S.ach.includes(a.id)&&a.c()){S.ach.push(a.id);granted=true;toast(`${a.e} Achievement — ${a.n}`,true)}}if(granted)save();}  // #107: don't turn a read-only check into a sync-triggering write
+// #94: serialize toasts — at most 2 on screen, the rest queue, so mastering a node doesn't fire four overlapping banners
+let _toastQ=[],_toastActive=0;
+function toast(msg,big){_toastQ.push({msg,big});pumpToasts();}
+function pumpToasts(){
+  while(_toastActive<2&&_toastQ.length){
+    const {msg,big}=_toastQ.shift();_toastActive++;
+    const t=document.createElement("div");t.className="toast"+(big?" big":"");t.textContent=msg;
+    $("toasts").appendChild(t);
+    setTimeout(()=>{t.classList.add("fadeout");setTimeout(()=>{t.remove();_toastActive--;pumpToasts();},500)},big?3400:2300);
+  }
+}
 let _updChip=false;
 function showUpdateChip(){
   if(_updChip)return;_updChip=true;
@@ -666,8 +681,11 @@ async function boot(){
   $("loading").style.display="none";
   if(!k){showLock();return}
   $("loading").style.display="flex";
-  try{DATA=await tryLoad(k);localStorage.setItem(LS_KEY,k)}
-  catch(e){$("loading").style.display="none";showLock();$("keyerr").textContent=hashK?"That key doesn't fit this lock.":"";return}
+  try{DATA=await tryLoad(k);localStorage.setItem(LS_KEY,k);
+    if(hashK)history.replaceState(null,"",location.pathname+location.search);}   // #96: strip the key out of the address bar / history
+  catch(e){$("loading").style.display="none";showLock();
+    // #66: a network failure isn't a wrong key — only say "doesn't fit" when we actually reached the payload
+    $("keyerr").textContent=!navigator.onLine?"You're offline — can't reach the vault right now.":hashK?"That key doesn't fit this lock.":"";return}
   $("loading").style.display="none";
   await loadAccess();landing();checkAch();initSync();
   if("serviceWorker"in navigator){
@@ -703,8 +721,19 @@ function goRoot(nopush){
   else{renderPath();show("path",nopush)}
 }
 window.addEventListener("popstate",()=>{
+  // #68: a phone back-press should first dismiss any open overlay (Journal, Search, Sit, Account…), not leave the app
+  const open=[...document.querySelectorAll(".overlay.on")];
+  if(open.length){open.forEach(o=>o.classList.remove("on"));stopFlow();return;}
   if($("node").classList.contains("on")||$("reader").classList.contains("on"))goRoot(true);
 });
+// #68: give each overlay a history entry when it opens, so the back button has something to pop
+(function(){
+  const obs=new MutationObserver(recs=>{for(const r of recs){const o=r.target;
+    if(o.classList.contains("on")&&!o.dataset.hist){o.dataset.hist="1";history.pushState({ov:o.id},"");}
+    else if(!o.classList.contains("on")&&o.dataset.hist){delete o.dataset.hist;}
+  }});
+  document.querySelectorAll(".overlay").forEach(o=>obs.observe(o,{attributes:true,attributeFilter:["class"]}));
+})();
 function setNav(v){$("nav-path").classList.toggle("on",v==="path");$("nav-lib").classList.toggle("on",v==="home")}
 function renderTopbar(){
   $("streak").innerHTML=`🔥 ${S.streak.count} <small>${S.streak.day===today()?"today ✓":"streak"}</small>`;
@@ -724,7 +753,7 @@ function renderHome(){
   renderTopbar();
   // continue card
   const c=$("continue");
-  if(S.last&&S.pos[S.last]){const b=bookById(S.last);if(b){const ep=b.episodes[S.pos[S.last].ep];
+  if(S.last&&S.pos[S.last]){const b=bookById(S.last);if(b&&bookVisible(b.id)){const ep=b.episodes[S.pos[S.last].ep];   // #36: don't resume a hidden book
     c.style.display="block";
     c.innerHTML=`<div class="tag">▶ CONTINUE READING</div><div class="ct">${esc(ep.t)}</div>
       <div class="cs">${esc(b.title)} — episode ${S.pos[S.last].ep+1} of ${b.episodes.length}</div>
@@ -761,7 +790,7 @@ function buildMix(){
   for(let k=0;k<2&&nodePool.length;k++)
     items.push({n:nodePool.splice(Math.floor(rnd()*nodePool.length),1)[0].id});
   const pool={shadow:[],light:[]};
-  for(const b of DATA.books){const rs=readSet(b.id);
+  for(const b of DATA.books){if(!bookVisible(b.id))continue;const rs=readSet(b.id);   // #35: guests shouldn't get mix chips for hidden books
     for(let i=0;i<b.episodes.length;i++)if(!rs.has(i))pool[b.wing].push({b:b.id,e:i});}
   const order=rnd()<.5?["shadow","light","shadow","light"]:["light","shadow","light","shadow"];
   for(const w of order){if(items.length>=4)break;const p=pool[w];if(!p.length)continue;
@@ -780,12 +809,12 @@ function renderMix(){
       const nd=nodeById(it.n);if(!nd)continue;const tr=trackById(nd.track);
       const w=nd.bridge.join(" ").split(" ").length+(nd.sources||[]).reduce((s,x)=>s+x.quote.join(" ").split(" ").length,0);
       el.innerHTML=`<div class="g">${nd.glyph}</div><div><div class="t">${esc(nd.title)}</div>
-        <div class="b">PATH · ${esc(tr.name)} · ${Math.max(2,Math.round(w/200)+2)} min</div></div>${done?'<div class="ck">✓</div>':""}`;
+        <div class="b">PATH · ${esc(tr.name)} · ${Math.max(2,Math.round(w/READ_WPM)+2)} min</div></div>${done?'<div class="ck">✓</div>':""}`;
       el.onclick=()=>openNode(it.n);
     }else{
       const b=bookById(it.b);if(!b)continue;const ep=b.episodes[it.e];
       el.innerHTML=`<div class="g">${b.glyph}</div><div><div class="t">${esc(ep.t)}</div>
-        <div class="b">${esc(b.title)} · ${Math.max(1,Math.round(epWords(ep)/230))} min</div></div>${done?'<div class="ck">✓</div>':""}`;
+        <div class="b">${esc(b.title)} · ${Math.max(1,Math.round(epWords(ep)/READ_WPM))} min</div></div>${done?'<div class="ck">✓</div>':""}`;
       el.onclick=()=>openEp(it.b,it.e);
     }
     g.appendChild(el);
@@ -798,14 +827,17 @@ function openBook(id){const b=bookById(id);const rs=readSet(id);
   if(rs.has(e)){let n=b.episodes.findIndex((_,i)=>!rs.has(i));if(n>=0)e=n}
   openEp(id,e)}
 function openEp(id,e){
-  const b=bookById(id);if(!b)return;CUR={b:id,e};S.last=id;S.pos[id]={ep:e,scroll:0};save();
+  const b=bookById(id);if(!b)return;
+  // #65: keep the saved scroll when reopening the SAME episode; only reset when the episode changes
+  const prev=S.pos[id];const keepScroll=(prev&&prev.ep===e)?(prev.scroll||0):0;
+  CUR={b:id,e};S.last=id;S.pos[id]={ep:e,scroll:keepScroll};save();
   const ep=b.episodes[e];
   $("r-title").textContent=`${b.glyph} ${b.title} — ${e+1}/${b.episodes.length}`;
   const body=$("rbody");body.innerHTML="";body.style.fontSize=S.font+"px";
   const cv=document.createElement("canvas");cv.id="rbanner";body.appendChild(cv);
   const h=document.createElement("h1");h.textContent=ep.t;body.appendChild(h);
   const sub=document.createElement("div");sub.className="sub";
-  sub.textContent=`${b.title.toUpperCase()} · EPISODE ${e+1} OF ${b.episodes.length} · ${Math.max(1,Math.round(epWords(ep)/230))} MIN · +${epXP(ep)} XP`;
+  sub.textContent=`${b.title.toUpperCase()} · EPISODE ${e+1} OF ${b.episodes.length} · ${Math.max(1,Math.round(epWords(ep)/READ_WPM))} MIN · +${epXP(ep)} XP`;
   body.appendChild(sub);
   const pull=pickPull(ep);
   ep.p.forEach((p,i)=>{const el=document.createElement(i===pull?"blockquote":"p");
@@ -844,8 +876,9 @@ function complete(){
 // reveal fade-up elements once they're near the viewport (robust, no IntersectionObserver dependency)
 function revealVisible(factor){
   const h=window.innerHeight*(factor||1.05);
+  const doc=document.documentElement,short=doc.scrollHeight<=doc.clientHeight+4;  // #106: short lesson can't scroll → no later scroll event to reveal the tail, so reveal it now
   for(const el of document.querySelectorAll("#rbody p:not(.vis),#rbody blockquote:not(.vis),#nbody>p:not(.vis),#nbody .src:not(.vis),.rdbody figure.sidefig:not(.vis)"))
-    if(el.getBoundingClientRect().top<h)el.classList.add("vis");
+    if(short||el.getBoundingClientRect().top<h)el.classList.add("vis");
 }
 // scroll progress + position save (library reader AND path lessons)
 let scrollT;window.addEventListener("scroll",()=>{
@@ -916,7 +949,7 @@ function vaultDefine(term){
   return best;
 }
 async function defineTerm(term){
-  term=term.replace(/[^\p{L}\p{M}\s'-]/gu,"").trim();if(!term)return;
+  term=term.replace(/[^\p{L}\p{M}\p{N}\s'-]/gu,"").trim();if(!term)return;  // #69: keep digits so "System 1" is lookupable
   const pop=$("defpop");
   $("dp-word").textContent=term;$("dp-open").style.display="none";
   $("dp-src").textContent="LOOKING UP…";$("dp-body").textContent="…";pop.classList.add("on");
@@ -928,14 +961,15 @@ async function defineTerm(term){
   const v=vaultDefine(term);
   if(v&&v.score>=2){
     $("dp-src").textContent="✦ FROM YOUR VAULT";
-    const hl=v.snippet.replace(new RegExp("("+term.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")+")","ig"),"<mark>$1</mark>");
+    // #101: snippet is Gemini-authored from an untrusted PDF — escape BEFORE injecting, then mark
+    const hl=esc(v.snippet).replace(new RegExp("("+term.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")+")","ig"),"<mark>$1</mark>");
     $("dp-body").innerHTML="“"+hl+"”<div style='color:var(--tx2);font-size:12px;margin-top:8px'>"+esc(v.src)+"</div>";
     const ob=$("dp-open");if(v.node){ob.style.display="inline-block";ob.onclick=()=>{pop.classList.remove("on");openNode(v.node)}}
     return;
   }
-  if(term.split(/\s+/).length===1){
+  if(term.split(/\s+/).length===1&&navigator.onLine){   // #70: don't attempt the network dictionary when offline
     try{
-      const r=await fetch("https://api.dictionaryapi.dev/api/v2/entries/en/"+encodeURIComponent(term.toLowerCase()));
+      const r=await fetch("https://api.dictionaryapi.dev/api/v2/entries/en/"+encodeURIComponent(term.toLowerCase()),{signal:AbortSignal.timeout(8000)});  // #70: don't hang on a stalled lookup
       if(r.ok){const e=(await r.json())[0],out=[];
         for(const m of e.meanings.slice(0,2)){const d0=m.definitions[0];
           out.push("<b style='color:var(--jade)'>"+esc(m.partOfSpeech)+"</b> "+esc(d0.definition)+(d0.example?"<div style='color:var(--tx2);font-size:12.5px;margin-top:2px'>e.g. "+esc(d0.example)+"</div>":""));}
@@ -963,14 +997,17 @@ function saveVocab(term,ctx){
   save();$("dp-save").textContent="⭐ Saved";toast("⭐ Saved — review it in your Journal");
 }
 async function vocabQuiz(){
-  const words=(S.vocab||[]).slice(0,10);if(!words.length)return;
+  const all=(S.vocab||[]);if(!all.length)return;
+  // #72: least-recently-quizzed first so older words actually get tested; #19: 6 per batch fits the token budget
+  const words=[...all].sort((a,b)=>(a.qz||0)-(b.qz||0)).slice(0,6);
+  const now=Date.now();words.forEach(w=>w.qz=now);save();
   const pop=$("defpop");$("dp-word").textContent="Vocab check";$("dp-open").style.display="none";
   $("dp-explain").style.display="none";$("dp-save").style.display="none";
   $("dp-src").textContent="🎓 BUILDING QUESTIONS…";$("dp-body").textContent="…";pop.classList.add("on");
   const list=words.map(w=>`- "${w.t}"${w.ctx?` (context: ${w.ctx.slice(0,140)})`:""}`).join("\n");
   const prompt=`A learner saved these words/phrases while studying and wants to check they truly understood each idea (not just its dictionary meaning). For EACH item, write one short question that probes understanding, and a one-sentence model answer. Format EXACTLY, plain text, no markdown:\nQ: <question>\nA: <answer>\n\n(one blank line between items)\n\nItems:\n${list}`;
   try{
-    const txt=await geminiCall(prompt,700);
+    const txt=await geminiCall(prompt,900);   // #19: headroom so the last item isn't truncated
     const items=txt.split(/\n\s*\n/).map(b=>{const q=(b.match(/Q:\s*([\s\S]*?)(?:\nA:|$)/)||[])[1],a=(b.match(/A:\s*([\s\S]*)/)||[])[1];return q&&a?{q:q.trim(),a:a.trim()}:null}).filter(Boolean);
     if(!items.length)throw new Error("empty");
     $("dp-src").textContent="🎓 CHECK YOUR UNDERSTANDING";
@@ -992,6 +1029,8 @@ function journalText(){
     const src=h.n?(nodeById(h.n)||{}).title:(bookById(h.b)||{}).title;
     t+=`- “${h.t}” — ${src||"unknown"}\n`;
   }
+  if((S.vocab||[]).length){t+="\n## Saved words\n\n";   // #31: vocabulary was missing from the export
+    for(const v of S.vocab)t+=`- ${v.t}${v.ctx?` — “…${v.ctx.slice(0,80)}…”`:""}\n`;}
   return t;
 }
 async function copyJournal(){
@@ -1021,7 +1060,7 @@ function restoreVault(file){
 /* ---------- Gemini tutor: reviews your apply-notes (browser-side, your key, when online) ---------- */
 const geminiKeys=()=>(localStorage.getItem("vault_gemini")||"").split(/[\s,]+/).filter(Boolean);
 // free-tier quota is PER MODEL, so we try several models across every key until one answers
-const GEM_MODELS=["gemini-2.5-flash-lite","gemini-2.5-flash","gemini-flash-latest","gemini-2.0-flash"];
+const GEM_MODELS=["gemini-2.5-flash-lite","gemini-2.5-flash","gemini-flash-latest"];  // #14: dropped gemini-2.0-flash (zero free quota → always 429)
 async function geminiCall(prompt,maxTok=220){
   const keys=geminiKeys();if(!keys.length)throw new Error("no-key");
   let quota=false,reached=false;
@@ -1029,10 +1068,13 @@ async function geminiCall(prompt,maxTok=220){
     for(const k of keys){
       let r;
       try{
-        r=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(k)}`,
-          {method:"POST",headers:{"Content-Type":"application/json"},
-           body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{maxOutputTokens:maxTok,temperature:0.7}})});
-      }catch(e){continue;}                                  // network error -> next key
+        r=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
+          {method:"POST",
+           headers:{"Content-Type":"application/json","x-goog-api-key":k},   // #17: key in header, not the URL
+           signal:AbortSignal.timeout(20000),                               // #15: don't hang forever on a stalled connection
+           // #16: thinkingBudget:0 so reasoning tokens don't eat maxOutputTokens and return empty
+           body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{maxOutputTokens:maxTok,temperature:0.7,thinkingConfig:{thinkingBudget:0}}})});
+      }catch(e){continue;}                                  // network error / timeout -> next key
       reached=true;
       if(r.status===429){quota=true;continue;}              // this model+key spent -> next
       if(r.status===404)break;                              // model not available -> next model
@@ -1060,6 +1102,7 @@ async function reviewAllNotes(){
     if(btn)btn.textContent="Reviewing… "+(done+1)+"/"+pending.length;
     try{await reviewNote(node.id);done++;}
     catch(e){toast(e.message==="quota"?"Gemini quota spent — resets tomorrow":e.message==="no-key"?"Add a Gemini key first":"Tutor unreachable — check your connection");break;}
+    if(done<pending.length)await new Promise(r=>setTimeout(r,2000));   // #18: space requests so the free per-minute limit doesn't 429 mid-batch
   }
   renderJournal();
   if(done)toast("🎓 "+done+" reflection"+(done>1?"s":"")+" reviewed by your tutor");
@@ -1116,6 +1159,13 @@ function renderJournal(){
       rv.querySelector(".jr-re").onclick=async()=>{rv.classList.add("pending");rv.innerHTML="🎓 the tutor is re-reading…";
         try{await reviewNote(node.id)}catch(e){toast(e.message==="quota"?"Gemini quota spent — resets tomorrow":"Tutor unreachable")}renderJournal()};
       jn.appendChild(rv);
+    }else if(geminiKeys().length){
+      // #20: a note whose automatic review failed (offline / quota) can be retried by hand here
+      const gb=document.createElement("div");gb.className="jreview";gb.style.cursor="pointer";
+      gb.innerHTML=`🎓 <b>Get tutor feedback on this note</b> →`;
+      gb.onclick=async()=>{gb.innerHTML="🎓 the tutor is reading…";
+        try{await reviewNote(node.id)}catch(e){toast(e.message==="quota"?"Gemini quota spent — resets tomorrow":e.message==="no-key"?"Add a Gemini key first":"Tutor unreachable")}renderJournal();};
+      jn.appendChild(gb);
     }
   }
   const w=$("hlrows");w.innerHTML="";
@@ -1127,7 +1177,9 @@ function renderJournal(){
     if(!label)label="— source no longer in the vault";
     const el=document.createElement("div");el.className="hlrow";if(jump)el.style.cursor="pointer";
     el.innerHTML=`<div class="q">“${esc(h.t)}”</div><div class="m"><span>${esc(label)}${jump?" ›":""}</span><button style="color:var(--tx2)" data-del>remove</button></div>`;
-    el.querySelector("[data-del]").onclick=ev=>{ev.stopPropagation();S.hl=S.hl.filter(x=>x!==h);save();el.remove()};
+    el.querySelector("[data-del]").onclick=ev=>{ev.stopPropagation();
+      S.hlDel=[...new Set([...(S.hlDel||[]),hlKey(h)])];   // #108: tombstone so sync doesn't resurrect it
+      S.hl=S.hl.filter(x=>x!==h);save();el.remove()};
     if(jump)el.onclick=jump;
     w.appendChild(el)}
   // saved words
@@ -1151,7 +1203,8 @@ $("btn-search").onclick=()=>{$("search").classList.add("on");$("sinput").value="
 let sT;$("sinput").addEventListener("input",()=>{clearTimeout(sT);sT=setTimeout(doSearch,250)});
 function doSearch(){
   const q=$("sinput").value.trim().toLowerCase();const w=$("sres");w.innerHTML="";
-  if(q.length<3)return;let n=0;
+  if(q.length<3){w.innerHTML=q.length?'<p style="color:var(--tx2)">Type at least 3 characters…</p>':"";return}  // #76
+  let n=0;
   // path lessons first
   for(const nd of (DATA.nodes||[])){
     if(nd.stub||n>=10||!nodeVisible(nd))continue;
@@ -1175,6 +1228,7 @@ function doSearch(){
         el.onclick=()=>{$("search").classList.remove("on");openEp(b.id,e)};
         w.appendChild(el);break}}}}
   if(!n)w.innerHTML='<p style="color:var(--tx2)">Nothing in the vault matches that.</p>';
+  else w.insertAdjacentHTML("afterbegin",`<div style="color:var(--tx2);font-size:12px;margin-bottom:8px">${n}${n>=50?"+":""} result${n>1?"s":""}</div>`);  // #75
 }
 
 /* ---------- achievements ---------- */
@@ -1186,8 +1240,14 @@ $("btn-ach").onclick=()=>{const g=$("achgrid");g.innerHTML="";
   $("achs").classList.add("on")};
 
 /* ---------- patch notes ---------- */
-const APP_VER="3.16";
+const APP_VER="3.17";
 const PATCHES=[
+ {v:"3.17",n:"The Hardening",d:"21 Jul 2026",items:[
+  ["fix","A big correctness & security pass. The quiz no longer hands you the answer when you miss — it's closed-book now (the lesson tucks away, with a peek button), reshuffles on every retry, and passing it — not just opening the lesson — is what proves you learned."],
+  ["fix","Reading position in books actually restores now (it was silently resetting to the top every time). Saved words, reading spot, and the daily rite finally sync across your devices too."],
+  ["fix","Security: a malicious PDF can no longer smuggle code into a Define popup; your unlock key is stripped from the address bar after opening; and the full lesson text is no longer sitting in the public repo in the clear — it lives only inside the encrypted vault now."],
+  ["new","Lessons show what they unlock, finished tracks get a ✓, locked ideas show a one-line taste, and the phone back button now closes popups instead of leaving the app."],
+  ["polish","Battery: the banner animation pauses when you scroll past it. The tutor is faster and more reliable, the meditation end-bell rings even after the screen slept, and hidden-book sharing no longer leaves guests staring at un-openable locks."]]},
  {v:"3.16",n:"Broken Links",d:"14 Jul 2026",items:[
   ["fix","The “📖 Continue in the book →” links in AI-built lessons were silently broken when a book's title had a stray capital or messy auto-name (e.g. Man's Search). Fixed the titles, and the app now matches books forgivingly so a small typo never breaks the link again."]]},
  {v:"3.15",n:"One Web",d:"14 Jul 2026",items:[
@@ -1396,7 +1456,9 @@ function reviewStep(idx,gained){
     $("rvcount").textContent="";checkDaily();renderPath();return;
   }
   const n=nodeById(RQ[idx]),rv=rvState(n.id),tr=trackById(n.track);
-  const q=n.quiz[Math.floor(Math.random()*n.quiz.length)];
+  // #7: cycle through the node's questions across review sessions instead of re-rolling the same one
+  const rec2=(S.node[n.id]=S.node[n.id]||{});const qi=(rec2.rvQ||0)%n.quiz.length;rec2.rvQ=qi+1;
+  const q=n.quiz[qi];
   const card=document.createElement("div");card.className="gatecard";
   card.innerHTML=`<div style="font-size:11px;letter-spacing:.2em;color:${tr.accent};margin-bottom:6px">${tr.glyph} ${esc(tr.name.toUpperCase())}</div>
     <h3>${n.glyph} ${esc(n.title)}</h3><div class="gsub">${esc(q.q)}</div>`;
@@ -1497,9 +1559,11 @@ async function findSyncGist(h){
   if(r.ok){const g=(await r.json()).find(x=>x.files&&x.files["vault-progress.enc"]);if(g){localStorage.setItem("vault_gist",g.id);return g.id;}}
   return null;
 }
+const hlKey=h=>(h.n||("b"+h.b+"_"+h.e))+"|"+h.t;   // stable id for a highlight (shared by merge + delete tombstones)
 function mergeState(a,b){ // union merge — never loses progress from either device
   if(!b)return a;if(!a)return b;
   const m=JSON.parse(JSON.stringify(a));
+  const aNewer=(a._mtime||0)>=(b._mtime||0);   // which device touched state most recently
   m.xp=Math.max(a.xp||0,b.xp||0);m.bestStreak=Math.max(a.bestStreak||0,b.bestStreak||0);
   m.rvN=Math.max(a.rvN||0,b.rvN||0);m.ritesN=Math.max(a.ritesN||0,b.ritesN||0);
   if(((b.streak&&b.streak.day)||"")>((a.streak&&a.streak.day)||""))m.streak=b.streak;
@@ -1514,8 +1578,21 @@ function mergeState(a,b){ // union merge — never loses progress from either de
     if((x.doneAt||0)>=(y.doneAt||0)){if(x.level)z.level=x.level;if(x.rv)z.rv=x.rv;}
     m.node[id]=z;
   }
-  const kf=h=>(h.n||("b"+h.b+"_"+h.e))+"|"+h.t,seen=new Set();m.hl=[];
-  for(const h of [...(a.hl||[]),...(b.hl||[])]){const kk=kf(h);if(!seen.has(kk)){seen.add(kk);m.hl.push(h);}}
+  // #108: highlights are a union MINUS a tombstone set, so a delete on one device isn't resurrected by another
+  m.hlDel=[...new Set([...(a.hlDel||[]),...(b.hlDel||[])])];
+  const dead=new Set(m.hlDel),seen=new Set();m.hl=[];
+  for(const h of [...(a.hl||[]),...(b.hl||[])]){const kk=hlKey(h);if(!dead.has(kk)&&!seen.has(kk)){seen.add(kk);m.hl.push(h);}}
+  // #23: saved words sync too — union by lowercased term
+  const vseen=new Set();m.vocab=[];
+  for(const v of [...(a.vocab||[]),...(b.vocab||[])]){const kk=(v.t||"").toLowerCase();if(kk&&!vseen.has(kk)){vseen.add(kk);m.vocab.push(v);}}
+  // #24/#102: reading position + "continue" follow the most-recently-active device (union of books, conflicts to the newer one)
+  m.pos=aNewer?{...(b.pos||{}),...(a.pos||{})}:{...(a.pos||{}),...(b.pos||{})};
+  m.last=aNewer?(a.last!==undefined?a.last:b.last):(b.last!==undefined?b.last:a.last);
+  if(S&&S.nodePos)m.nodePos=aNewer?(a.nodePos||b.nodePos):(b.nodePos||a.nodePos);
+  // #25: the day's rite is OR-merged when both devices are on the same day, else the newer day wins
+  const ad=a.daily,bd=b.daily;
+  if(ad&&bd&&ad.day===bd.day)m.daily={day:ad.day,learn:ad.learn||bd.learn,sit:ad.sit||bd.sit,claimed:ad.claimed||bd.claimed};
+  else if((bd&&bd.day||"")>((ad&&ad.day)||""))m.daily=bd;
   m.days={...(b.days||{}),...(a.days||{})};for(const d in (b.days||{}))m.days[d]={...(b.days[d]||{}),...(m.days[d]||{})};
   const sa=new Set();m.sits=[];for(const s of [...(a.sits||[]),...(b.sits||[])])if(s&&!sa.has(s.at)){sa.add(s.at);m.sits.push(s);}
   m.ach=[...new Set([...(a.ach||[]),...(b.ach||[])])];
@@ -1524,7 +1601,14 @@ function mergeState(a,b){ // union merge — never loses progress from either de
 }
 async function pushState(){
   const h=ghHead();if(!h||!navigator.onLine||!localStorage.getItem(LS_KEY))return;
-  try{const content=await encState(),id=await findSyncGist(h),body={files:{"vault-progress.enc":{content}}};
+  try{
+    const id=await findSyncGist(h);
+    // #27: merge whatever's on the server right now BEFORE overwriting, so a concurrent device isn't clobbered
+    if(id){try{const r=await fetch("https://api.github.com/gists/"+id,{headers:h});
+      if(r.ok){const f=(await r.json()).files["vault-progress.enc"];
+        if(f&&f.content){let c=f.content;if(f.truncated&&f.raw_url)c=await(await fetch(f.raw_url,{headers:h})).text();
+          S=mergeState(S,await decState(c));localStorage.setItem(LS_ST,JSON.stringify(S));}}}catch(e){}}
+    const content=await encState(),body={files:{"vault-progress.enc":{content}}};
     if(id)await fetch("https://api.github.com/gists/"+id,{method:"PATCH",headers:h,body:JSON.stringify(body)});
     else{body.description="The Vault — encrypted progress (do not edit)";body.public=false;
       const r=await fetch("https://api.github.com/gists",{method:"POST",headers:h,body:JSON.stringify(body)});
@@ -1548,7 +1632,7 @@ async function initSync(announce){
     if(v&&v.id==='path')renderPath();else if(v&&v.id==='home')renderHome();
     if(announce)toast("☁️ Progress synced from your other devices");}
   pushState();
-  whoAmI().then(()=>{applyAccessToUI()});
+  whoAmI().then(()=>{if(ME.expired)toast("🔑 Your access token expired — open 👤 Account to sign in again");applyAccessToUI()});   // #40
 }
 
 /* ---------- accounts, roles & library access ----------
@@ -1560,14 +1644,17 @@ let ME={login:null,role:"guest"};   // resolved from the connected token
 let ACCESS=null;                     // {v,guestBooks,guestTracks,admins} from access.json, or null=all visible
 const privileged=()=>ME.role==="owner"||ME.role==="admin";
 async function loadAccess(){
-  try{const r=await fetch("access.json",{cache:"no-cache"});if(r.ok)ACCESS=await r.json();}catch(e){}
+  try{const r=await fetch("access.json",{cache:"no-cache"});if(r.ok){ACCESS=await r.json();localStorage.setItem("vault_access",JSON.stringify(ACCESS));}}catch(e){}
+  if(!ACCESS){try{ACCESS=JSON.parse(localStorage.getItem("vault_access"))||null}catch(e){}}   // #37: offline → fall back to the last-known rules instead of showing everything
   return ACCESS;
 }
 async function whoAmI(){
   const h=ghHead();
   if(!h){ME={login:null,role:"guest"};return ME;}
   try{
-    const u=await(await fetch("https://api.github.com/user",{headers:h})).json();
+    const r=await fetch("https://api.github.com/user",{headers:h});
+    if(r.status===401||r.status===403){ME={login:null,role:"guest",expired:true};return ME;}   // #40: token revoked/expired — flag it instead of silently degrading to guest
+    const u=await r.json();
     const login=u.login||null;
     if(!ACCESS)await loadAccess();
     let role="member";
@@ -1577,8 +1664,20 @@ async function whoAmI(){
   }catch(e){ME={login:null,role:"guest"};}
   return ME;
 }
-const bookVisible=id=>privileged()||!ACCESS||!Array.isArray(ACCESS.guestBooks)?true:ACCESS.guestBooks.includes(id);
-const trackVisible=tid=>privileged()||!ACCESS||!Array.isArray(ACCESS.guestTracks)?true:ACCESS.guestTracks.includes(tid);
+// #32: interpret access as a BLOCKLIST (hiddenBooks/hiddenTracks) so anything added later is visible by default.
+// Legacy allowlists (guestBooks/guestTracks) are still honoured for back-compat until re-saved.
+const bookVisible=id=>{
+  if(privileged()||!ACCESS)return true;
+  if(Array.isArray(ACCESS.hiddenBooks))return !ACCESS.hiddenBooks.includes(id);
+  if(Array.isArray(ACCESS.guestBooks))return ACCESS.guestBooks.includes(id);
+  return true;
+};
+const trackVisible=tid=>{
+  if(privileged()||!ACCESS)return true;
+  if(Array.isArray(ACCESS.hiddenTracks))return !ACCESS.hiddenTracks.includes(tid);
+  if(Array.isArray(ACCESS.guestTracks))return ACCESS.guestTracks.includes(tid);
+  return true;
+};
 const nodeVisible=n=>trackVisible(n.track);
 function applyAccessToUI(){
   const v=[...document.querySelectorAll('.view.on')][0];
@@ -1586,14 +1685,17 @@ function applyAccessToUI(){
   renderTopbar();
 }
 async function saveAccess(){
-  const h=ghHead();if(!h)return false;
-  const cfg={v:1,guestBooks:ACCESS.guestBooks||[],guestTracks:ACCESS.guestTracks||[],admins:ACCESS.admins||[]};
+  const h=ghHead();if(!h)return {ok:false,status:0};
+  const cfg={v:1,hiddenBooks:ACCESS.hiddenBooks||[],hiddenTracks:ACCESS.hiddenTracks||[],admins:ACCESS.admins||[]};   // #32: write the blocklist schema
   const url=`https://api.github.com/repos/${GH_REPO}/contents/access.json`;
-  let sha=null;try{const r=await fetch(url,{headers:h});if(r.ok)sha=(await r.json()).sha;}catch(e){}
-  const body={message:"access: update library visibility",content:bytesToB64(new TextEncoder().encode(JSON.stringify(cfg,null,1))),branch:"main"};
-  if(sha)body.sha=sha;
-  const r=await fetch(url,{method:"PUT",headers:h,body:JSON.stringify(body)});
-  return r.ok;
+  try{
+    let sha=null;const g=await fetch(url,{headers:h});if(g.ok)sha=(await g.json()).sha;
+    const body={message:"access: update library visibility",content:bytesToB64(new TextEncoder().encode(JSON.stringify(cfg,null,1))),branch:"main"};
+    if(sha)body.sha=sha;
+    const r=await fetch(url,{method:"PUT",headers:h,body:JSON.stringify(body)});
+    if(r.ok)localStorage.setItem("vault_access",JSON.stringify(cfg));   // keep the offline cache (#37) in step
+    return {ok:r.ok,status:r.status};   // #38: hand the status back so the caller can say what actually went wrong
+  }catch(e){return {ok:false,status:0};}
 }
 function renderAccount(){
   const b=$("acc-body");let h="";
@@ -1618,25 +1720,39 @@ function renderAccount(){
   if(privileged())renderAdminControls(b);
 }
 function renderAdminControls(b){
-  if(!ACCESS)ACCESS={v:1,guestBooks:DATA.books.map(x=>x.id),guestTracks:DATA.tracks.map(x=>x.id),admins:[]};
-  ACCESS.guestBooks=ACCESS.guestBooks||DATA.books.map(x=>x.id);
-  ACCESS.guestTracks=ACCESS.guestTracks||DATA.tracks.map(x=>x.id);
-  const gb=new Set(ACCESS.guestBooks),gt=new Set(ACCESS.guestTracks);
+  if(!ACCESS)ACCESS={v:1,hiddenBooks:[],hiddenTracks:[],admins:[]};
+  // #32: migrate a legacy allowlist to the blocklist once, so anything added later stays visible by default
+  if(Array.isArray(ACCESS.guestBooks)&&!Array.isArray(ACCESS.hiddenBooks))
+    ACCESS.hiddenBooks=DATA.books.map(x=>x.id).filter(id=>!ACCESS.guestBooks.includes(id));
+  if(Array.isArray(ACCESS.guestTracks)&&!Array.isArray(ACCESS.hiddenTracks))
+    ACCESS.hiddenTracks=DATA.tracks.map(x=>x.id).filter(id=>!ACCESS.guestTracks.includes(id));
+  ACCESS.hiddenBooks=ACCESS.hiddenBooks||[];ACCESS.hiddenTracks=ACCESS.hiddenTracks||[];
+  delete ACCESS.guestBooks;delete ACCESS.guestTracks;
+  const hb=new Set(ACCESS.hiddenBooks),ht=new Set(ACCESS.hiddenTracks);
   let h=`<div class="accsec">📚 What guests & members can see</div>
-    <div class="accnote">Toggle a book or track off to hide it from everyone who isn't an admin — their Library and Path shrink to match.</div>`;
-  h+=DATA.books.map(x=>`<label class="acctog"><span class="g">${x.glyph}</span><span class="t">${esc(x.title)}</span><input type="checkbox" data-book="${x.id}" ${gb.has(x.id)?"checked":""}></label>`).join("");
-  h+=`<div class="accsec">🗺️ Path tracks</div>`+DATA.tracks.map(t=>`<label class="acctog"><span class="g">${t.glyph}</span><span class="t">${esc(t.name)}</span><input type="checkbox" data-track="${t.id}" ${gt.has(t.id)?"checked":""}></label>`).join("");
+    <div class="accnote">Everything is visible by default. Toggle a book or track <b>off</b> to hide it from everyone who isn't an admin — their Library and Path shrink to match. Newly added books stay visible until you hide them.</div>`;
+  h+=DATA.books.map(x=>`<label class="acctog"><span class="g">${x.glyph}</span><span class="t">${esc(x.title)}</span><input type="checkbox" data-book="${x.id}" ${hb.has(x.id)?"":"checked"}></label>`).join("");
+  h+=`<div class="accsec">🗺️ Path tracks</div>`+DATA.tracks.map(t=>`<label class="acctog"><span class="g">${t.glyph}</span><span class="t">${esc(t.name)}</span><input type="checkbox" data-track="${t.id}" ${ht.has(t.id)?"":"checked"}></label>`).join("");
   h+=`<div class="accsec">🛡️ Admins</div><div class="adminrow">👑 ${OWNER}<span style="color:var(--gold);margin-left:auto;font-size:11px">MAIN · can't be removed</span></div>`;
   h+=(ACCESS.admins||[]).map(a=>`<div class="adminrow">🛡️ ${esc(a)}${ME.role==="owner"?`<span class="rm" data-rmadmin="${esc(a)}">remove</span>`:""}</div>`).join("");
   if(ME.role==="owner")h+=`<div style="display:flex;gap:8px;margin-top:8px"><input type="text" id="acc-newadmin" placeholder="github username to grant admin"><button class="ghostbtn" id="acc-addadmin" style="flex:0 0 auto;margin:0">Grant</button></div>`;
   h+=`<div style="text-align:center;margin-top:16px"><button class="goldbtn" id="acc-save">Save access settings</button></div>
     <div class="warn">⚠️ Honest limit: hiding books changes what the app <i>shows</i> — perfect for sharing with friends, but it isn't encryption. Anyone you give the unlock link to still technically downloads the whole library. What <b>is</b> truly locked to admins (by GitHub, on their servers): adding books, and changing these very settings.</div>`;
   const w=document.createElement("div");w.innerHTML=h;b.appendChild(w);
-  w.querySelectorAll("[data-book]").forEach(c=>c.onchange=()=>{c.checked?gb.add(c.dataset.book):gb.delete(c.dataset.book);ACCESS.guestBooks=[...gb]});
-  w.querySelectorAll("[data-track]").forEach(c=>c.onchange=()=>{c.checked?gt.add(c.dataset.track):gt.delete(c.dataset.track);ACCESS.guestTracks=[...gt]});
+  w.querySelectorAll("[data-book]").forEach(c=>c.onchange=()=>{c.checked?hb.delete(c.dataset.book):hb.add(c.dataset.book);ACCESS.hiddenBooks=[...hb]});   // checked = visible = not hidden
+  w.querySelectorAll("[data-track]").forEach(c=>c.onchange=()=>{c.checked?ht.delete(c.dataset.track):ht.add(c.dataset.track);ACCESS.hiddenTracks=[...ht]});
   w.querySelectorAll("[data-rmadmin]").forEach(x=>x.onclick=()=>{ACCESS.admins=(ACCESS.admins||[]).filter(a=>a!==x.dataset.rmadmin);renderAccount()});
-  if($("acc-addadmin"))$("acc-addadmin").onclick=()=>{const v=$("acc-newadmin").value.trim().replace(/^@/,"");if(v){ACCESS.admins=[...new Set([...(ACCESS.admins||[]),v])];renderAccount()}};
-  if($("acc-save"))$("acc-save").onclick=async()=>{const s=$("acc-save");s.textContent="Saving…";s.disabled=true;const ok=await saveAccess();toast(ok?"✅ Access saved — guests update within minutes":"⚠️ Save failed — token needs Contents: write");renderAccount();applyAccessToUI()};
+  if($("acc-addadmin"))$("acc-addadmin").onclick=async()=>{const v=$("acc-newadmin").value.trim().replace(/^@/,"");if(!v)return;
+    const ab=$("acc-addadmin");ab.textContent="…";ab.disabled=true;
+    let ok=true;try{const r=await fetch("https://api.github.com/users/"+encodeURIComponent(v),{headers:ghHead()});ok=r.ok;}catch(e){ok=false;}   // #41: don't grant admin to a username that doesn't exist
+    if(!ok){toast("No GitHub user “"+v+"”");ab.textContent="Grant";ab.disabled=false;return;}
+    ACCESS.admins=[...new Set([...(ACCESS.admins||[]),v])];renderAccount();};
+  if($("acc-save"))$("acc-save").onclick=async()=>{const s=$("acc-save");s.textContent="Saving…";s.disabled=true;const res=await saveAccess();
+    toast(res.ok?"✅ Access saved — guests update within minutes"
+      :res.status===403||res.status===404?"⚠️ Save failed — token needs Contents: write on this repo"
+      :res.status===409?"⚠️ Access changed elsewhere — reopen Account and try again"
+      :res.status===0?"⚠️ Can't reach GitHub — check your connection":"⚠️ Save failed (HTTP "+res.status+")");   // #38
+    renderAccount();applyAccessToUI()};
 }
 $("btn-account").onclick=async()=>{if(ghHead()&&!ME.login)await whoAmI();renderAccount();$("account").classList.add("on")};
 function nextTrackId(){
@@ -1659,7 +1775,7 @@ function cleanTitle(fname){
   t=t.replace(/[_\-]+/g," ").replace(/\s*[\(\[].*?[\)\]]\s*/g," ").replace(/\s{2,}/g," ").trim();
   if(t.includes(" - "))t=t.split(" - ")[0].trim();      // drop " - Author" tails
   t=t.replace(/^\d+\s+/,"");
-  return t.replace(/\b\w/g,c=>c.toUpperCase()).slice(0,60)||"New Book";
+  return t.replace(/(^|\s)(\w)/g,(m,a,c)=>a+c.toUpperCase()).slice(0,60)||"New Book";  // #42: only cap after space/start, so "man's" doesn't become "Man'S"
 }
 function renderAddBook(){
   const b=$("ab-body"),tok=localStorage.getItem("vault_gh")||"";
@@ -1695,6 +1811,7 @@ async function submitBook(){
   const name=$("ab-name").value.trim(),out=$("ab-out");
   if(!name){out.innerHTML='<div class="abprog" style="color:#e8b0b0">Give the track a name.</div>';return}
   if(!AB.file){out.innerHTML='<div class="abprog" style="color:#e8b0b0">Pick a PDF first.</div>';return}
+  if(AB.file.size>80*1024*1024){out.innerHTML='<div class="abprog" style="color:#e8b0b0">That PDF is over 80 MB — it may crash the tab. Try a smaller or compressed copy.</div>';return}  // #48
   AB.busy=true;$("ab-go").disabled=true;
   const setP=(t,pct)=>out.innerHTML=`<div class="abprog">${t}<div class="abbar"><div style="width:${pct}%"></div></div></div>`;
   try{
@@ -1708,7 +1825,9 @@ async function submitBook(){
     let hash=0;for(const ch of name)hash=(hash*31+ch.charCodeAt(0))>>>0;
     const glyphs=["📗","📘","📙","📕","📓","🧠","💡","🧭","🔑","⚙️","🪶","🧩"];
     const accents=["#5dade2","#e08a3c","#9b59b6","#27ae60","#c0a062","#16a085","#c0392b","#2980b9","#8e6f47","#d4a017","#7d8ca3","#5d6d7e"];
-    const glyph=glyphs[hash%glyphs.length], accent=accents[hash%accents.length];
+    const usedG=new Set((DATA.tracks||[]).map(t=>t.glyph));const freeG=glyphs.filter(g=>!usedG.has(g));  // #64: avoid a glyph an existing track already uses
+    const pool=freeG.length?freeG:glyphs;
+    const glyph=pool[hash%pool.length], accent=accents[hash%accents.length];
     const id=(name.toLowerCase().replace(/[^a-z0-9]+/g,"")+Date.now().toString(36)).slice(0,16);
     const job={id,title:name,author:"Unknown",track_id:nextTrackId(),
       name,glyph,accent,blurb:`AI-authored from ${name} — a dependency-locked track.`,chunks,done:0};
@@ -1742,7 +1861,11 @@ async function renderPipeStatus(){
     return;
   }
   const q=(PIPE&&PIPE.queue)||[];
-  if(!q.length){c.style.display="none";return;}
+  if(!q.length){   // #53: don't vanish when the queue empties — show what was last built, still tappable
+    if(PIPE&&PIPE.last_track){const tr=trackById(PIPE.last_track);c.style.display="flex";
+      c.innerHTML=`<span class="tag" style="color:#c084fc">🤖 AI PIPELINE · IDLE</span><span class="slimtxt">queue empty${tr?` · last built: ${esc(tr.name)}`:""} · tap to review</span>`;
+      c.onclick=()=>{renderQueue();$("queue").classList.add("on")};return;}
+    c.style.display="none";return;}
   const pending=q.filter(x=>x.state!=="complete");
   const working=q.find(x=>x.state==="in-progress");
   c.style.display="flex";
@@ -1804,16 +1927,19 @@ let BELL_CTX=null;
 function bell(){
   try{
     BELL_CTX=BELL_CTX||new (window.AudioContext||window.webkitAudioContext)();
-    if(BELL_CTX.state==="suspended")BELL_CTX.resume();
-    const t=BELL_CTX.currentTime;
-    [523.25,1046.5,1567.98].forEach((f,i)=>{
-      const o=BELL_CTX.createOscillator(),g=BELL_CTX.createGain();
-      o.type="sine";o.frequency.value=f;
-      g.gain.setValueAtTime(0.0001,t);
-      g.gain.exponentialRampToValueAtTime(0.32/(i+1),t+0.02);
-      g.gain.exponentialRampToValueAtTime(0.0001,t+4);
-      o.connect(g).connect(BELL_CTX.destination);o.start(t);o.stop(t+4.2);
-    });
+    // #88: schedule the tones AFTER the context is actually running, otherwise the end-bell (fired from a timer,
+    // not a tap) schedules against a frozen clock on iOS and never sounds.
+    const play=()=>{const t=BELL_CTX.currentTime;
+      [523.25,1046.5,1567.98].forEach((f,i)=>{
+        const o=BELL_CTX.createOscillator(),g=BELL_CTX.createGain();
+        o.type="sine";o.frequency.value=f;
+        g.gain.setValueAtTime(0.0001,t);
+        g.gain.exponentialRampToValueAtTime(0.32/(i+1),t+0.02);
+        g.gain.exponentialRampToValueAtTime(0.0001,t+4);
+        o.connect(g).connect(BELL_CTX.destination);o.start(t);o.stop(t+4.2);
+      });};
+    if(BELL_CTX.state==="suspended")BELL_CTX.resume().then(play).catch(()=>{});
+    else play();
   }catch(e){}
 }
 let SIT={end:0,min:0,timer:null,hintT:null,paused:false,left:0,wake:null};
@@ -1879,22 +2005,24 @@ document.addEventListener("visibilitychange",()=>{if(!document.hidden&&SIT.timer
 const sitTotalMin=()=>(S.sits||[]).reduce((n,x)=>n+x.d,0);
 
 /* ---------- flow mode (RSVP) ---------- */
-let F={words:[],i:0,timer:null,playing:false};
-function launchFlow(words){
+let F={words:[],i:0,timer:null,playing:false,key:null};
+const FLOWPOS={};   // #78: remember how far you got in each source so re-entering flow resumes
+function launchFlow(words,key){
   if(!words.length)return;
-  F.words=words;F.i=0;
+  F.words=words;F.key=key||null;
+  F.i=(F.key&&FLOWPOS[F.key]>0&&FLOWPOS[F.key]<words.length)?FLOWPOS[F.key]:0;
   $("f-wpm").value=S.wpm;$("f-wpmv").textContent=S.wpm;
   $("flow").classList.add("on");startFlow();
 }
 $("r-flow").onclick=()=>{const b=bookById(CUR.b);if(!b)return;
-  launchFlow(b.episodes[CUR.e].p.join(" ").split(/\s+/).filter(Boolean))};
+  launchFlow(b.episodes[CUR.e].p.join(" ").split(/\s+/).filter(Boolean),"b"+CUR.b+"_"+CUR.e)};
 $("n-flow").onclick=()=>{const n=nodeById(CURN);if(!n)return;
   const txt=[...(n.bridge||[]),...(n.sources||[]).flatMap(s=>s.quote)].join(" ");
-  launchFlow(txt.split(/\s+/).filter(Boolean))};
+  launchFlow(txt.split(/\s+/).filter(Boolean),"n"+CURN)};
 function startFlow(){F.playing=true;$("f-play").textContent="⏸ pause";tick()}
 function tick(){
   if(!F.playing)return;
-  if(F.i>=F.words.length){$("fword").innerHTML="— <b>fin</b> —";F.playing=false;$("f-play").textContent="↻ replay";F.i=0;return}
+  if(F.i>=F.words.length){$("fword").innerHTML="— <b>fin</b> —";F.playing=false;$("f-play").textContent="↻ replay";F.i=0;if(F.key)delete FLOWPOS[F.key];return}
   const w=F.words[F.i++];
   const mid=Math.max(0,Math.ceil(w.length/2)-1);
   $("fword").innerHTML=esc(w.slice(0,mid))+"<b>"+esc(w[mid]||"")+"</b>"+esc(w.slice(mid+1));
@@ -1903,7 +2031,7 @@ function tick(){
   if(w.length>8)ms*=1.4;if(/[.!?;:]$/.test(w))ms*=1.8;
   F.timer=setTimeout(tick,ms);
 }
-function stopFlow(){F.playing=false;clearTimeout(F.timer)}
+function stopFlow(){F.playing=false;clearTimeout(F.timer);if(F.key&&F.i>0&&F.i<F.words.length)FLOWPOS[F.key]=F.i;}   // #78: save resume point on exit
 $("f-play").onclick=()=>{if(F.playing){stopFlow();$("f-play").textContent="▶ play"}else startFlow()};
 $("f-wpm").oninput=e=>{S.wpm=+e.target.value;$("f-wpmv").textContent=S.wpm;save()};
 
@@ -1981,12 +2109,24 @@ const NODE_XP=80;
 const nodeById=id=>DATA.nodes.find(n=>n.id===id);
 const trackById=id=>DATA.tracks.find(t=>t.id===id);
 function nodeDone(id){return !!(DATA&&S.node[id]&&S.node[id].doneAt)}
-function nodeAvail(id){const n=nodeById(id);return !!n&&n.prereq.every(p=>nodeDone(p))}
+// #33: a guest can never complete a lesson inside a hidden track, so such a prereq is treated as satisfied for them —
+// otherwise a visible track anchored onto a hidden one is permanently, un-openably locked.
+function prereqSatisfied(pid){
+  if(nodeDone(pid))return true;
+  if(!privileged()){const pn=nodeById(pid);if(pn&&!trackVisible(pn.track))return true;}
+  return false;
+}
+function nodeAvail(id){const n=nodeById(id);return !!n&&n.prereq.every(prereqSatisfied)}
 function nodeStatus(id){return nodeDone(id)?"done":(nodeAvail(id)?"avail":"locked")}
 function nodesDone(){return (DATA&&DATA.nodes)?DATA.nodes.filter(n=>nodeDone(n.id)).length:0}
 function trackDone(tid){if(!DATA)return false;const ns=DATA.nodes.filter(n=>n.track===tid&&!n.stub);return ns.length>0&&ns.every(n=>nodeDone(n.id))}
-function nextAvailNode(){const o=[...DATA.nodes].sort((a,b)=>a.tier-b.tier);
-  return o.find(n=>!n.stub&&nodeStatus(n.id)==="avail")||o.find(n=>nodeStatus(n.id)==="avail")||null}
+function nextAvailNode(){
+  const o=[...DATA.nodes].sort((a,b)=>a.tier-b.tier);
+  const avail=o.filter(n=>!n.stub&&nodeStatus(n.id)==="avail");
+  // #80: keep the learner inside the track they're working rather than hopping to an unrelated one
+  if(S.lastTrack){const same=avail.filter(n=>n.track===S.lastTrack);if(same.length)return same[0];}
+  return avail[0]||o.find(n=>nodeStatus(n.id)==="avail")||null;
+}
 
 function renderPath(){
   renderTopbar();
@@ -2008,28 +2148,30 @@ function renderPath(){
     const col=document.createElement("div");col.className="track";col.style.setProperty("--tacc",tr.accent);
     const ns=DATA.nodes.filter(n=>n.track===tr.id).sort((a,b)=>a.tier-b.tier);
     const doneN=ns.filter(n=>nodeDone(n.id)).length;
-    let html=`<div class="track-h"><span class="tg">${tr.glyph}</span><span class="tn">${esc(tr.name)}</span><span class="tp">${doneN}/${ns.length}</span></div>
+    const trDone=ns.length>0&&doneN===ns.length;   // #83: mark a fully-mastered track
+    let html=`<div class="track-h${trDone?" done":""}"><span class="tg">${tr.glyph}</span><span class="tn">${esc(tr.name)}</span><span class="tp">${doneN}/${ns.length}${trDone?" ✓":""}</span></div>
       <div class="track-blurb">${esc(tr.blurb)}</div>`;
     ns.forEach((n,si)=>{
       const st=nodeStatus(n.id);
       const badge=st==="done"?"✓":st==="avail"?"▸":"🔒";
       let sub;
-      if(st==="locked"){const need=n.prereq.filter(p=>!nodeDone(p)).map(p=>{const x=nodeById(p);return x?x.title:p});
+      if(st==="locked"){const need=n.prereq.filter(p=>!prereqSatisfied(p)).map(p=>{const x=nodeById(p);return x?x.title:p});  // #34: don't name a lesson the guest can't see
         sub=`<div class="nsub" ${n.whyreq?`title="${esc(n.whyreq)}"`:""}>needs: ${esc(need.join(", "))}</div>`;}
       else if(st==="done"){const lm=levelMeta(levelOf(n.id));sub=`<div class="nsub">${lm.e?lm.e+" "+lm.l.toLowerCase():"done"}</div>`;}
       else if(n.stub) sub=`<div class="nsub">preview · full lesson next</div>`;
       else sub=`<div class="nsub">ready — tap to begin</div>`;
-      const just=(S._justUnlocked&&S._justUnlocked.includes(n.id))?" just":"";
+      const just=(JUST_UNLOCKED&&JUST_UNLOCKED.includes(n.id))?" just":"";
       html+=`<button class="tnode ${st}${just}" data-node="${n.id}"><span class="ng">${n.glyph}</span>`+
         `<span class="ntx"><span class="stg">STAGE ${si+1}</span><span class="nt">${esc(n.title)}</span>${sub}</span><span class="badge">${badge}</span></button>`;
     });
     col.innerHTML=html;tree.appendChild(col);
   }
-  S._justUnlocked=null;
+  JUST_UNLOCKED=null;
   tree.querySelectorAll("[data-node]").forEach(b=>b.onclick=()=>openNode(b.dataset.node));
 }
 
 let CURN=null;
+let JUST_UNLOCKED=null;   // #81: transient "flash the newly-unlocked node" hint — must NOT live in synced state S
 function nodeFigure(body,accent,seedId){
   const ps=[...body.querySelectorAll(":scope>p")];
   if(ps.length<2)return;
@@ -2052,7 +2194,7 @@ function openNode(id){
   const n=nodeById(id);if(!n)return;CURN=id;
   const tr=trackById(n.track),st=nodeStatus(id);
   $("n-title").textContent=`${tr.glyph} ${tr.name}`;
-  const body=$("nbody");body.style.fontSize=S.font+"px";body.innerHTML="";
+  const body=$("nbody");body.style.fontSize=S.font+"px";body.style.display="";body.innerHTML="";   // #2: always un-hide (a previous node's quiz may have collapsed it)
   const gate=$("ngate");gate.innerHTML="";
   const h=document.createElement("h1");h.textContent=n.title;body.appendChild(h);
   const tns=DATA.nodes.filter(x=>x.track===n.track).sort((a,b)=>a.tier-b.tier);
@@ -2060,9 +2202,17 @@ function openNode(id){
   const sub=document.createElement("div");sub.className="nsubh";
   sub.textContent=`${tr.name.toUpperCase()} · STAGE ${stg} OF ${tns.length} · ${st==="done"?"MASTERED ✓":st==="locked"?"LOCKED":"+"+NODE_XP+" XP TO MASTER"}`;
   body.appendChild(sub);
+  if(st==="avail"){   // #84: show what mastering this will open
+    const opens=DATA.nodes.filter(c=>c.prereq.includes(n.id)&&(privileged()||trackVisible(c.track)));
+    if(opens.length){const u=document.createElement("div");u.className="nsubh";u.style.cssText="margin-top:-2px;color:var(--jade);opacity:.85";
+      u.textContent="🔓 Opens: "+opens.slice(0,3).map(c=>c.title).join(", ")+(opens.length>3?` +${opens.length-3} more`:"");body.appendChild(u);}
+  }
   if(st==="locked"){
-    const need=n.prereq.filter(p=>!nodeDone(p)).map(p=>nodeById(p));
-    gate.innerHTML=`<div class="locknote">🔒 <b>This idea is locked.</b><br><br>First master:<br>`+
+    const need=n.prereq.filter(p=>!prereqSatisfied(p)).map(p=>nodeById(p)).filter(Boolean);  // #34/#104: skip hidden-track prereqs and never deref a missing node
+    const teaser=(n.bridge&&n.bridge[0])?n.bridge[0].slice(0,150).trim():"";   // #85: give the locked idea a one-line taste
+    gate.innerHTML=`<div class="locknote">🔒 <b>This idea is locked.</b>`+
+      (teaser?`<div style="margin:12px 0;color:var(--tx2);font-style:italic;font-size:13.5px;line-height:1.6">“${esc(teaser)}…”</div>`:"<br><br>")+
+      `First master:<br>`+
       need.map(x=>`${x.glyph} ${esc(x.title)}`).join("<br>")+
       (n.whyreq?`<div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--line);font-size:12.5px;line-height:1.6;text-align:left"><b style="color:var(--gold)">Why this lock is real:</b><br>${esc(n.whyreq)}</div>`:"")+
       `<br><button class="ghostbtn" id="lockback">← Back to the Path</button></div>`;
@@ -2071,8 +2221,8 @@ function openNode(id){
   }
   const g=document.createElement("div");g.className="lblrow guide";g.textContent="✦ Guide note — written for you";body.appendChild(g);
   for(const p of n.bridge){const el=document.createElement("p");el.textContent=p;body.appendChild(el)}
-  (S.node[id]=S.node[id]||{}).read=true;save();
-  if(!n.stub)markDaily("learn");
+  (S.node[id]=S.node[id]||{}).read=true;S.lastTrack=n.track;save();   // #80: remember the track being worked
+  // #10: opening a lesson no longer credits the daily "Learn" — that's earned by passing the quiz (gradeQuiz) or finishing an episode
   if(!n.stub&&n.sources){
     const sh=document.createElement("div");sh.className="lblrow books";sh.textContent="📖 From the books";body.appendChild(sh);
     for(const s of n.sources){const d=document.createElement("div");d.className="src";
@@ -2110,7 +2260,8 @@ function renderGate(n){
     const cc=document.createElement("div");cc.className="cc";const upd=()=>cc.textContent=ta.value.trim().length+" chars";ta.oninput=upd;upd();
     const btn=document.createElement("button");btn.className="goldbtn";btn.textContent="Update note";btn.style.marginTop="4px";
     btn.onclick=()=>{const t=ta.value.trim();if(t===(rec.applied||"")){toast("No changes");return;}
-      rec.applied=t;delete rec.review;delete rec.reviewAt;save();toast("✏️ Note updated");
+      // #21: keep the existing feedback until fresh feedback actually replaces it (offline no longer loses it)
+      rec.applied=t;save();toast("✏️ Note updated");
       if(t&&geminiKeys().length&&navigator.onLine){toast("🎓 Tutor is re-reading…");reviewNote(n.id).then(()=>renderGate(n)).catch(()=>renderGate(n));}
       else renderGate(n);};
     card.appendChild(ta);card.appendChild(cc);card.appendChild(btn);
@@ -2121,8 +2272,10 @@ function renderGate(n){
     gate.appendChild(card);return;
   }
   if(rec.quizBest>=100){renderApply(n);return;}
+  const nb=$("nbody");nb.style.display="";   // #2: lesson stays readable until the learner chooses to begin
   const card=document.createElement("div");card.className="gatecard";
-  card.innerHTML=`<h3>Check your understanding</h3><div class="gsub">Get all of them right to unlock the practice step. Retry as often as you like — this is for you.</div>`;
+  card.innerHTML=`<h3>Check your understanding</h3><div class="gsub">Read the lesson above, then begin — the quiz is <b>closed-book</b> (the lesson hides while you answer). Retry as often as you like.</div>`;
+  const quizWrap=document.createElement("div");quizWrap.style.display="none";   // built now, revealed when they begin
   n.quiz.forEach((q,qi)=>{
     const item=document.createElement("div");item.className="qitem";
     item.innerHTML=`<div class="qq"><span class="qnum">Q${qi+1}</span>${esc(q.q)}</div>`;
@@ -2137,30 +2290,44 @@ function renderGate(n){
       item.appendChild(b);
     });
     const why=document.createElement("div");why.className="qwhy";item.appendChild(why);
-    card.appendChild(item);
+    quizWrap.appendChild(item);
   });
   const submit=document.createElement("button");submit.className="goldbtn";submit.textContent="Submit answers";
   const msg=document.createElement("div");
   submit.onclick=()=>gradeQuiz(n,card,msg);
-  card.appendChild(submit);card.appendChild(msg);
+  quizWrap.appendChild(submit);quizWrap.appendChild(msg);
+  const begin=document.createElement("button");begin.className="goldbtn";begin.textContent="Begin quiz — closed book";
+  const peek=document.createElement("button");peek.className="ghostbtn";peek.style.cssText="margin:0 0 12px";peek.textContent="📖 Peek at the lesson";peek.style.display="none";
+  peek.onclick=()=>{const hidden=nb.style.display==="none";nb.style.display=hidden?"":"none";peek.textContent=hidden?"🙈 Hide the lesson":"📖 Peek at the lesson";};
+  begin.onclick=()=>{nb.style.display="none";begin.style.display="none";peek.style.display="";quizWrap.style.display="";window.scrollTo(0,0);};   // #2: hide the lesson only when they choose to start
+  card.appendChild(begin);card.appendChild(peek);card.appendChild(quizWrap);
   gate.appendChild(card);
 }
 function gradeQuiz(n,card,msg){
   const items=[...card.querySelectorAll(".qitem")];let correct=0,answered=true;
+  items.forEach(item=>{if(item.dataset.pick===undefined)answered=false;});
+  if(!answered){msg.className="gatemsg bad";msg.textContent="Answer every question first.";return;}
   items.forEach((item,qi)=>{
-    if(item.dataset.pick===undefined){answered=false;return;}
     const pick=+item.dataset.pick,good=+item.dataset.correct,q=n.quiz[qi],choices=[...item.querySelectorAll(".choice")];
     choices.forEach(c=>c.classList.remove("right","wrong"));
-    if(pick===good){choices[pick].classList.add("right");correct++;}
-    else{choices[pick].classList.add("wrong");choices[good].classList.add("right");}
-    const why=item.querySelector(".qwhy");why.innerHTML=`<b>Why:</b> ${esc(q.why)}`;why.classList.add("on");
+    if(pick===good){choices[pick].classList.add("right");correct++;
+      const why=item.querySelector(".qwhy");why.innerHTML=`<b>Why:</b> ${esc(q.why)}`;why.classList.add("on");}
+    else choices[pick].classList.add("wrong");   // #3: mark the miss, but never reveal the right option or its explanation
   });
-  if(!answered){msg.className="gatemsg bad";msg.textContent="Answer every question first.";return;}
   if(correct===n.quiz.length){
     (S.node[n.id]=S.node[n.id]||{}).quizBest=100;save();
+    $("nbody").style.display="";   // #2: passed → restore the lesson so it's visible while writing the application
+    markDaily("learn");   // #10: understanding is proven by passing, not by opening
     msg.className="gatemsg good";msg.textContent="All correct. The practice step is unlocked below ↓";
     toast("✓ Understanding confirmed");setTimeout(()=>renderApply(n),750);
-  }else{msg.className="gatemsg bad";msg.textContent=`${correct} of ${n.quiz.length} correct — read the explanations and try again.`;}
+  }else{
+    msg.className="gatemsg bad";
+    msg.innerHTML=`${correct} of ${n.quiz.length} correct. The ones you missed aren't marked — rethink those and retry.`;
+    const retry=document.createElement("button");retry.className="ghostbtn";retry.style.marginTop="10px";
+    retry.textContent="↻ Try again (reshuffled)";
+    retry.onclick=()=>renderGate(n);   // #4: rebuild the whole gate → fresh shuffle, no position to memorise
+    msg.appendChild(document.createElement("br"));msg.appendChild(retry);
+  }
 }
 function renderApply(n){
   const gate=$("ngate");gate.innerHTML="";const rec=S.node[n.id]||{};const min=(n.apply&&n.apply.min)||40;
@@ -2170,10 +2337,11 @@ function renderApply(n){
   const cc=document.createElement("div");cc.className="cc";
   const btn=document.createElement("button");btn.className="goldbtn";btn.textContent=`Master this idea  +${NODE_XP} XP`;
   let draftT;
-  const upd=()=>{const len=ta.value.trim().length;cc.textContent=len+" / "+min;btn.disabled=len<min;btn.style.opacity=len<min?.5:1;
+  const enough=v=>v.length>=min&&(v?v.split(/\s+/).length:0)>=8;   // #9: a real reflection, not mashed characters
+  const upd=()=>{const v=ta.value.trim();cc.textContent=v.length+" / "+min;const ok=enough(v);btn.disabled=!ok;btn.style.opacity=ok?1:.5;
     clearTimeout(draftT);draftT=setTimeout(()=>{(S.node[n.id]=S.node[n.id]||{}).draft=ta.value;save()},400);};
   ta.oninput=upd;
-  btn.onclick=()=>{if(ta.value.trim().length<min)return;(S.node[n.id]=S.node[n.id]||{}).applied=ta.value.trim();completeNode(n);};
+  btn.onclick=()=>{if(!enough(ta.value.trim()))return;(S.node[n.id]=S.node[n.id]||{}).applied=ta.value.trim();completeNode(n);};
   card.appendChild(ta);card.appendChild(cc);card.appendChild(btn);
   if(n.track==="A"||n.track==="B"){const sb=document.createElement("button");sb.className="ghostbtn";
     sb.textContent="🧘 Sit first, then write";sb.onclick=openSit;card.appendChild(sb);}
@@ -2198,7 +2366,7 @@ function completeNode(n){
   if(rec.applied&&!rec.review&&geminiKeys().length&&navigator.onLine)
     reviewNote(n.id).then(()=>{toast("🎓 Your tutor left feedback in the Journal");if($("hls").classList.contains("on"))renderJournal();}).catch(()=>{});
   const unlocked=DATA.nodes.filter(c=>c.prereq.includes(n.id)&&nodeAvail(c.id)&&!nodeDone(c.id));
-  S._justUnlocked=unlocked.map(u=>u.id);
+  JUST_UNLOCKED=unlocked.map(u=>u.id);
   if(!levelOf(n.id))rec.level=2;save();   // default to "getting it"; the picker lets them change it
   const gate=$("ngate");
   const card=document.createElement("div");card.className="gatecard";
@@ -2227,8 +2395,8 @@ function pickPull(ep){
 }
 
 /* ---------- generative episode art ---------- */
-let ART={raf:null};
-function stopArt(){if(ART.raf)cancelAnimationFrame(ART.raf);ART.raf=null}
+let ART={raf:null,io:null};
+function stopArt(){if(ART.raf)cancelAnimationFrame(ART.raf);ART.raf=null;if(ART.io){ART.io.disconnect();ART.io=null}}
 function drawArt(canvas,b,e){
   stopArt();
   if(!canvas.isConnected)return;
@@ -2244,7 +2412,17 @@ function drawArt(canvas,b,e){
   const P=[];for(let i=0;i<34;i++)P.push({x:rnd()*W,y:rnd()*H,r:1+rnd()*2.4,s:.2+rnd()*.8,ph:rnd()*6.28});
   const still=matchMedia("(prefers-reduced-motion: reduce)").matches;
   let t=rnd()*100;
+  // #91: only animate while the banner is actually on screen — no 60fps burn while you read the body below it
+  ART.visible=true;
+  if("IntersectionObserver"in window){
+    ART.io=new IntersectionObserver(es=>{const vis=es[0].isIntersecting;
+      if(vis&&ART.visible===false){ART.visible=true;if(!still&&!ART.raf)frame();}
+      else if(!vis&&ART.visible!==false){ART.visible=false;if(ART.raf){cancelAnimationFrame(ART.raf);ART.raf=null}}
+    },{threshold:0});
+    ART.io.observe(canvas);
+  }
   function frame(){
+    if(ART.visible===false)return;
     t+=.016;
     const g=ctx.createLinearGradient(0,0,W,H);
     g.addColorStop(0,shadow?"#151019":"#0d1517");g.addColorStop(1,"#0a0c12");
@@ -2279,7 +2457,7 @@ function drawArt(canvas,b,e){
       ctx.fillText(inhale?"breathe in":"breathe out",W/2,H-12);}
     ctx.globalAlpha=.15;ctx.font="60px serif";ctx.textAlign="right";ctx.textBaseline="middle";
     ctx.fillText(b.glyph,W-16,H/2);ctx.globalAlpha=1;
-    if(!still)ART.raf=requestAnimationFrame(frame);
+    if(!still&&ART.visible!==false)ART.raf=requestAnimationFrame(frame);
   }
   frame();
 }

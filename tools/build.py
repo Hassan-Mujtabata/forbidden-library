@@ -73,9 +73,22 @@ def validate(books, graph):
     return warns, roots
 
 
+def load_graph():
+    """#49: prefer local plaintext graph.json; if it's absent (it is no longer committed to the repo),
+    derive the graph from the encrypted content.enc so a fresh clone with the key can still rebuild."""
+    if os.path.exists(GRAPH):
+        return json.load(open(GRAPH, encoding="utf-8"))
+    key = base64.urlsafe_b64decode(open(KEYFILE).read().strip() + "==")
+    raw = open(DST, "rb").read()
+    pt = AESGCM(key).decrypt(raw[:12], raw[12:], None)
+    payload = json.loads(gzip.decompress(pt))
+    return {"tracks": payload["tracks"], "nodes": payload["nodes"]}
+
+
 def main():
+    check_only = "--check" in sys.argv                     # #56: validate the graph without needing the key / writing output
     books = json.load(open(BOOKS, encoding="utf-8"))
-    graph = json.load(open(GRAPH, encoding="utf-8"))
+    graph = load_graph()
     warns, roots = validate(books, graph)
 
     authored = [n for n in graph["nodes"] if not n.get("stub")]
@@ -85,6 +98,10 @@ def main():
     print("integrity: acyclic OK, all prereqs resolve OK, roots present OK")
     for w in warns:
         print("  note:", w)
+
+    if check_only:
+        print("check-only: graph is valid; not writing content.enc")
+        return
 
     payload = {"v": 2, "books": books["books"], "tracks": graph["tracks"], "nodes": graph["nodes"]}
     raw = json.dumps(payload, ensure_ascii=False, separators=(",", ":")).encode("utf-8")

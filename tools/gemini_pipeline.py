@@ -72,7 +72,10 @@ HARD RULES:
 - title: name the ACTUAL concept, concrete and specific ("The Habit Loop", "Loss Aversion", "The Window of Tolerance"). NEVER vague or poetic — titles like "The Mind's True Appeal" or "Cultivating Value Sensitivity" are FORBIDDEN. 2-6 words, Title Case.
 - bridge: EXACTLY 3 paragraphs, 45-110 words each, second person, calm and precise. Paragraph 1 must OPEN with the concept named and in action — a concrete instance, example, or the mechanism itself; NEVER a generic throat-clearing sentence like "Our minds are powerful" or "Human beings often...". Paragraph 2 gives the concrete mechanism (name it precisely). Paragraph 3 connects it to the reader's own life AND, where the link is genuine, to ideas the reader already knows in this app: {vault_ideas}. Name them naturally (e.g. "the feeling-tone you met earlier"). Never force a connection that isn't real.
 - sources: 1-2 items. book = "{title}". ref = a topical locator, not the author. quote = a faithful close paraphrase, NEVER a verbatim copyrighted sentence.
-- quiz: EXACTLY 3 items, each EXACTLY 4 distinct options, integer answer index in range, vary which position is correct, plausible distractors.
+- quiz: EXACTLY 3 items, each EXACTLY 4 distinct options, integer answer index in range, vary which position is correct. The quiz must TEST UNDERSTANDING, not recall of the wording:
+   * Item 1 may check the core definition. Items 2 and 3 MUST be application: give a short concrete situation and ask which option correctly applies the idea (or which is an example of it / a violation of it). The answer must NOT be findable by copying a sentence from the passage.
+   * Every WRONG option must be a PLAUSIBLE MISCONCEPTION a real learner actually holds — the common confusion, a near-miss that is true but irrelevant, a reversed cause and effect, or an adjacent idea. Same length and register as the correct option. NEVER a joke, nonsense, or obviously-wrong option.
+   * The correct option must NOT be the longest or the most detailed one — give the distractors equal care.
 - Ground everything in the passage; invent no facts. Plain text only, no markdown, no emphasis characters, never mention being an AI.
 
 PASSAGE:
@@ -161,6 +164,12 @@ def content_errors(n):
         if len(n["quiz"]) != 3: e.append("quiz#")
         for q in n["quiz"]:
             if not (q["q"] and len(q["c"]) == 4 and len(set(q["c"])) == 4 and isinstance(q["a"], int) and 0 <= q["a"] < 4 and q["why"]): e.append("quiz")
+            # #1/#110: reject a give-away quiz where the correct option dwarfs its distractors (a hollow gate)
+            elif len(q["c"]) == 4:
+                lens = [len(c) for c in q["c"]]
+                others = sorted(lens[j] for j in range(4) if j != q["a"])
+                med = others[len(others) // 2]
+                if med and lens[q["a"]] > 2.5 * med: e.append("quiz-giveaway")
         if not (n["apply"]["prompt"] and isinstance(n["apply"]["min"], int)): e.append("apply")
         if not n["whyreq"]: e.append("whyreq")
     except Exception as ex:
@@ -282,7 +291,7 @@ def write_status(**kw):
 
 def run(book_id, track_name, track_glyph, track_accent, target_nodes, max_this_run, dry=False):
     books = json.load(open(os.path.join(HERE, "books.json"), encoding="utf-8"))
-    graph = json.load(open(GRAPH, encoding="utf-8"))
+    graph = load_graph()
     book = next(b for b in books["books"] if b["id"] == book_id)
     seen = [n["title"] for n in graph["nodes"]]
     ideas = curated_ideas(graph)
@@ -343,6 +352,14 @@ def enc_obj(obj, path):
     iv = os.urandom(12)
     open(path, "wb").write(iv + AESGCM(vault_key()).encrypt(iv, data, None))
 
+def load_graph():
+    """#49: use the local plaintext graph.json in dev; in the repo it lives ONLY inside the encrypted
+    content.enc (never committed in the clear), so derive it from there when the plaintext file is absent."""
+    if os.path.exists(GRAPH):
+        return json.load(open(GRAPH, encoding="utf-8"))
+    payload = dec_enc(CONTENT)
+    return {"tracks": payload["tracks"], "nodes": payload["nodes"]}
+
 def append_to_track(graph, tmeta, contents):
     import copy
     g = copy.deepcopy(graph)
@@ -378,7 +395,7 @@ def run_queue(only=None):
     if not os.path.isdir(QUEUE):
         print("no queue dir; nothing to do"); return
     jobs = sorted(f for f in os.listdir(QUEUE) if f.endswith(".job.enc") and (not only or only in f))
-    graph = json.load(open(GRAPH, encoding="utf-8"))
+    graph = load_graph()                                   # #49: from graph.json locally, else from content.enc
     books = dec_enc(CONTENT)["books"]                      # library text, from the encrypted payload only
     seen = [n["title"] for n in graph["nodes"]]
     ideas = curated_ideas(graph)
@@ -414,10 +431,14 @@ def run_queue(only=None):
             if not ok:
                 print(f"  ABORT merge for {job['id']}: {msg}"); continue
             graph = merged
-            json.dump(graph, open(GRAPH, "w", encoding="utf-8"), ensure_ascii=False, indent=2)
+            if os.path.exists(GRAPH):                       # #49: keep the plaintext graph only in local dev; the repo holds content.enc alone
+                json.dump(graph, open(GRAPH, "w", encoding="utf-8"), ensure_ascii=False, indent=2)
             enc_obj({"v": 2, "books": books, "tracks": graph["tracks"], "nodes": graph["nodes"]}, CONTENT)
         job["done"] = i
-        enc_obj(job, jp)
+        if job["done"] >= len(job["chunks"]):
+            os.remove(jp)                                   # #55: finished job — remove it instead of leaving it in the queue
+        else:
+            enc_obj(job, jp)
         pct = round(100 * job["done"] / len(job["chunks"]))
         write_status(job=job["id"], title=job["title"], track=job["track_id"],
                      done=job["done"], total=len(job["chunks"]), percent=pct,
@@ -434,7 +455,16 @@ if __name__ == "__main__":
         only = None
         if "--job" in sys.argv:
             only = sys.argv[sys.argv.index("--job") + 1]
-        run_queue(only); raise SystemExit
+        try:
+            run_queue(only)
+        except Quota:
+            write_status(state="quota"); print("quota exhausted for today — resumes next run")
+        except Exception as e:                              # #52: never fail silently — record it so the app/owner can see it
+            import traceback; traceback.print_exc()
+            try: write_status(state="error", error=str(e)[:200])
+            except Exception: pass
+            raise SystemExit(1)
+        raise SystemExit
     ap = argparse.ArgumentParser()
     ap.add_argument("book"); ap.add_argument("--name", required=True)
     ap.add_argument("--glyph", default="🤖"); ap.add_argument("--accent", default="#5dade2")

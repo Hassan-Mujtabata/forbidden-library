@@ -37,11 +37,26 @@ jobs:
           git config user.email "vault-bot@users.noreply.github.com"
           # hard boundary: only these data files may ever be committed by the pipeline.
           # index.html / sw.js / tools/*.py are Claude's alone; any change to them here is discarded.
-          git add tools/graph.json content.enc status.json tools/queue/
+          # #49: graph.json is NOT committed — the graph lives only inside the encrypted content.enc.
+          git add content.enc status.json tools/queue/
           git checkout -- . 2>/dev/null || true
           if git diff --cached --quiet; then
             echo "no changes this run"
           else
             git commit -m "pipeline: book content update [skip ci]"
-            git push
+            # #51: a human push may have landed since checkout. Rebase and retry; if it truly conflicts
+            # (binary content.enc), abandon THIS run cleanly — next run resumes from remote job state, no corruption.
+            pushed=0
+            for attempt in 1 2 3; do
+              git fetch origin main
+              if git rebase origin/main; then
+                if git push; then pushed=1; break; fi
+              else
+                echo "rebase conflict — abandoning this run (next scheduled run resumes cleanly)"
+                git rebase --abort || true
+                break
+              fi
+              sleep 3
+            done
+            [ "$pushed" = 1 ] && echo "pushed" || echo "not pushed this run"
           fi

@@ -1,6 +1,10 @@
-const CACHE = "vault-v34";
+const CACHE = "vault-v35";
 const ASSETS = ["./", "./index.html", "./content.enc", "./manifest.json", "./icon.svg",
-  "./icon-192.png", "./icon-512.png", "./apple-touch-icon.png"];
+  "./icon-192.png", "./icon-512.png", "./apple-touch-icon.png",
+  // #89: precache access/status so the visibility rules and pipeline card survive offline (they're network-first below)
+  "./access.json", "./status.json",
+  // #90: precache the PDF reader so "add a book" works offline instead of throwing a raw load error
+  "./pdf.min.js", "./pdf.worker.min.js"];
 
 // On install, fetch every asset bypassing the HTTP cache ({cache:"reload"}) so a new
 // version always precaches the freshest files (otherwise a stale content.enc can pin).
