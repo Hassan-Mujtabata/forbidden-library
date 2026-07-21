@@ -1,40 +1,6 @@
 {
  "v": 1,
- "hiddenBooks": [
-  "meaning",
-  "likeswitch",
-  "winfriends",
-  "navarro",
-  "humannature",
-  "bodyscore",
-  "atomic",
-  "kahneman",
-  "rightconc",
-  "insight",
-  "persuasion",
-  "manip",
-  "deception",
-  "seduction",
-  "laws48",
-  "dark3in1",
-  "covert30",
-  "quietinf",
-  "beautiful"
- ],
- "hiddenTracks": [
-  "F",
-  "E",
-  "M",
-  "D",
-  "I",
-  "G",
-  "K",
-  "J",
-  "L",
-  "C",
-  "H",
-  "B",
-  "A"
- ],
+ "hiddenBooks": [],
+ "hiddenTracks": [],
  "admins": []
 }
