@@ -130,6 +130,14 @@ header .brand span{color:var(--gold)}
 .tu-ask{display:flex;gap:6px;margin-top:8px}
 .tu-ask input{flex:1;background:var(--bg2);border:1px solid var(--line);border-radius:10px;color:var(--tx);padding:8px 11px;font-size:13px;font-family:inherit;outline:none}
 .tu-ask #tutor-go{border:1px solid rgba(212,175,55,.4);border-radius:10px;background:var(--card);color:var(--gold);padding:0 14px;font-size:13px;cursor:pointer}
+/* priming, pre-glossary, per-paragraph explain (tutor-H #14/#35/#33) */
+.primebox{background:rgba(78,205,196,.06);border:1px solid rgba(78,205,196,.25);border-radius:12px;padding:12px 14px;margin:10px 0}
+.primeta{width:100%;min-height:56px;background:var(--bg2);border:1px solid var(--line);border-radius:10px;color:var(--tx);padding:10px;font-family:var(--serif);font-size:14px;line-height:1.5;resize:vertical;outline:none}
+.glossrow{display:flex;gap:7px;flex-wrap:wrap;align-items:center;margin:6px 0 14px}
+.glosslbl{font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--tx2)}
+.glosschip{border:1px solid var(--line);border-radius:99px;padding:5px 11px;font-size:12.5px;color:var(--jade);background:var(--card);cursor:pointer;font-family:var(--sans)}
+.paraex{font-size:11px;opacity:.35;cursor:pointer;vertical-align:middle;transition:opacity .15s;padding:0 3px}
+.paraex:hover{opacity:1}
 #defpop .dp-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
 #defpop .dp-actions button{border:1px solid var(--line);border-radius:99px;padding:8px 14px;font-size:12.5px;color:var(--tx);cursor:pointer;background:var(--card)}
 #defpop #dp-explain{border-color:rgba(78,205,196,.4);color:var(--jade)}
@@ -1032,6 +1040,34 @@ function coachMe(){   // tutor-F #17: knowledge is organised by book, but life a
   $("hls").classList.remove("on");
   openTutor("Coach me",ctxBlock,`I want to apply what I've learned to a real situation. First ask me — in one line — what situation I'm facing. Once I answer, tell me which of my mastered ideas apply and exactly how to use each, naming the ideas.`);
 }
+function synthesize(){   // tutor-J #18: force connections across recently mastered ideas from different tracks
+  const recent=journalNotes().slice(0,8).map(x=>x.node);
+  const ideas=recent.length>=3?recent:DATA.nodes.filter(x=>nodeDone(x.id)).slice(0,8);
+  if(ideas.length<3){toast("Master a few more ideas first");return;}
+  const ctx=ideas.map(n=>`• ${n.title} (${trackById(n.track).name}): ${((n.bridge&&n.bridge[0])||"").slice(0,110)}`).join("\n");
+  $("hls").classList.remove("on");
+  openTutor("Connect my ideas",ctx,"Ask me 3 short questions, ONE AT A TIME, that force me to connect these ideas ACROSS different tracks — how one deepens, contradicts, or completes another. Ask only the first question now; wait for my answer before the next.");
+}
+function contrastIdeas(){   // tutor-J #24: sharpen the distinction between two easily-confused ideas
+  const done=DATA.nodes.filter(x=>nodeDone(x.id));
+  if(done.length<2){toast("Master a couple more ideas first");return;}
+  const words=t=>new Set(t.toLowerCase().split(/\W+/).filter(w=>w.length>4));
+  let a=done[0],b=done[1],best=-1;
+  for(let i=0;i<done.length;i++)for(let j=i+1;j<done.length;j++){
+    if(done[i].track===done[j].track)continue;const wa=words(done[i].title),shared=[...words(done[j].title)].filter(w=>wa.has(w)).length;
+    if(shared>best){best=shared;a=done[i];b=done[j];}}
+  if(best<=0){a=done[Math.floor(Math.random()*done.length)];do{b=done[Math.floor(Math.random()*done.length)];}while(b===a&&done.length>1);}
+  const bit=n=>`"${n.title}" (${trackById(n.track).name}): ${((n.bridge&&n.bridge[0])||"").slice(0,140)}`;
+  $("hls").classList.remove("on");
+  openTutor("Tell them apart",`${bit(a)}\n\n${bit(b)}`,`These two ideas are easy to confuse. Explain the key DIFFERENCE between "${a.title}" and "${b.title}" in 2-3 sentences, then give me one concrete scenario and ask me which of the two applies.`);
+}
+function journalDigest(){   // tutor-J #43: a coach reads your whole journal and reflects the patterns back
+  const notes=journalNotes().slice(0,15);
+  if(notes.length<3){toast("Write a few apply-notes first");return;}
+  const ctx=notes.map(x=>`- "${x.node.title}": ${(x.rec.applied||"").slice(0,150)}`).join("\n");
+  $("hls").classList.remove("on");
+  openTutor("Journal reflection",ctx,"These are my reflections over time. Reflect BACK to me the recurring patterns, blind spots, and themes you notice across them — like a coach who's been paying close attention. 4-6 sentences, warm and specific.");
+}
 function saveVocab(term,ctx){
   S.vocab=S.vocab||[];
   if(S.vocab.some(x=>x.t.toLowerCase()===term.toLowerCase())){toast("Already in your saved words");return;}
@@ -1149,6 +1185,16 @@ function nodeText(n){return [...(n.bridge||[]),...(n.sources||[]).flatMap(s=>s.q
 function bookOfNode(n){const s=(n.sources||[])[0];if(!s)return null;const nb=x=>x.toLowerCase().replace(/[^a-z0-9]/g,"");
   return DATA.books.find(b=>b.title===s.book)||DATA.books.find(b=>nb(b.title)===nb(s.book))||null;}
 const masteredTitles=limit=>{const ts=DATA.nodes.filter(x=>nodeDone(x.id)).map(x=>x.title);return limit?ts.slice(0,limit):ts;};
+// tutor-H #35: a few key terms for a pre-glossary — source refs (concept locators) + any Title-Case phrases
+function keyTermsOf(n){
+  const terms=[];
+  for(const s of (n.sources||[])){const r=(s.ref||"").trim();if(r&&r.split(/\s+/).length<=5&&!/^\d/.test(r)&&!/^(law|chapter|part|ch\.?|p\.?|section)\b/i.test(r))terms.push(r);}
+  const text=(n.bridge||[]).join(" ");
+  const stop=new Set("The This These That Those Before Every Each Their When While Since Because Both Greene Cialdini Davis Mitnick Kahneman First Once".split(" "));
+  const re=/\b([A-Z][a-z]{2,}(?:\s[A-Z][a-z]{2,}){1,2})\b/g;let m;
+  while((m=re.exec(text))){const t=m[1];if(!stop.has(t.split(" ")[0]))terms.push(t);}
+  const seen=new Set();return terms.filter(t=>{const k=t.toLowerCase();if(seen.has(k))return false;seen.add(k);return true;}).slice(0,4);
+}
 // tutor-A #4: tiny retrieval — the top-k lesson snippets relevant to a query, to ground answers in your own material
 function vaultSnippets(query,k){k=k||3;const q=(query||"").toLowerCase().split(/\s+/).filter(w=>w.length>3);if(!q.length)return [];
   const scored=[];
@@ -1192,6 +1238,7 @@ function renderTutor(pending){
       <button class="tu-chip" data-q="Go deeper — the underlying mechanism, and a subtlety I might be missing.">deeper</button>
       <button class="tu-chip" data-q="Give me a concrete, everyday example of this.">example</button>
       <button class="tu-chip" data-q="Give me an analogy from video games or daily life.">analogy</button>
+      <button class="tu-chip" data-q="Draw this as a simple arrow diagram in plain text (like: cue -> craving -> response -> reward).">diagram</button>
     </div>
     <div class="tu-ask"><input id="tutor-in" placeholder="ask a follow-up…" autocomplete="off"><button id="tutor-go">ask</button></div>`;
   body.innerHTML=h;
@@ -1243,6 +1290,7 @@ function renderGemBox(){
 function renderJournal(){
   const stats=$("jstats");
   const notes=journalNotes();
+  const lt=(S.lessonTimes||[]).slice().sort((a,b)=>a-b);const medMin=lt.length?lt[Math.floor(lt.length/2)]:0;   // tutor-I #50
   stats.innerHTML=[
     ["🧭",nodesDone()+"/"+DATA.nodes.length,"ideas"],
     ["📖",totalRead(),"episodes"],
@@ -1251,15 +1299,26 @@ function renderJournal(){
     ["⭐",S.hl.length,"highlights"],
     ["🔥",Math.max(S.streak.count,S.bestStreak||0),"best streak"],
     ["🧘",sitTotalMin(),"min sat"],
+    ...(medMin?[["⏱️","~"+medMin,"min/lesson"]]:[]),   // tutor-I #50: your REAL median lesson time
     ["🌟",S.ritesN||0,"rites"],
     ["⚡",S.xp,"XP"],
   ].map(([e,v,l])=>`<span class="hstat">${e} <b>${v}</b> <small>${l}</small></span>`).join("");
+  // tutor-I #47: audit self-ratings — ideas you rated "Solid" that have since gone rusty
+  const solidFading=DATA.nodes.filter(x=>{const r=S.node[x.id];return r&&r.doneAt&&r.level===3&&r.rv&&r.rv.due<=Date.now();});
+  if(solidFading.length){const au=document.createElement("div");au.className="abnote";au.style.cssText="margin:8px 0;border-color:rgba(184,134,47,.4)";
+    au.innerHTML=`🪞 <b>${solidFading.length} idea${solidFading.length>1?"s":""} you rated “Solid” ${solidFading.length>1?"have":"has"} gone rusty.</b> Calibration is a skill — a quick 🔁 Sharpen will tell you if you really own them.`;
+    stats.appendChild(au);}
   $("jactions").innerHTML="";
   const mk=(txt,fn)=>{const b=document.createElement("button");b.className="ghostbtn";b.textContent=txt;b.onclick=fn;$("jactions").appendChild(b)};
   mk("📋 Copy all as text",copyJournal);
   mk("💾 Download backup",backupVault);
   mk("📥 Restore backup",()=>$("jfile").click());
-  if(geminiKeys().length&&nodesDone()>0)mk("🎓 Coach me on a situation",coachMe);   // tutor-F #17
+  if(geminiKeys().length&&nodesDone()>0){   // tutor study-sessions
+    mk("🎓 Coach me on a situation",coachMe);        // #17
+    mk("🎓 Connect my ideas",synthesize);            // #18
+    mk("🎓 Tell two apart",contrastIdeas);           // #24
+    if(journalNotes().length>=3)mk("🎓 Reflect on my journal",journalDigest);  // #43
+  }
   renderGemBox();
   const jn=$("jnotes");jn.innerHTML="";
   if(!notes.length)jn.innerHTML='<p style="color:var(--tx2);font-size:13px">Master ideas on the Path — everything you write in the “Apply it” step collects here.</p>';
@@ -1301,7 +1360,9 @@ function renderJournal(){
     w.appendChild(el)}
   // saved words
   const vw=$("jvocab");vw.innerHTML="";const vocab=S.vocab||[];
+  const vDue=vocab.filter(v=>!v.qz||Date.now()-v.qz>4*864e5).length;   // tutor-I #28: words that have gone quiet
   $("jvquiz").style.display=(vocab.length&&geminiKeys().length)?"inline-block":"none";$("jvquiz").onclick=vocabQuiz;
+  $("jvquiz").textContent=vDue?`🎓 Quiz me · ${vDue} due`:"🎓 Quiz me";
   if(!vocab.length)vw.innerHTML='<p style="color:var(--tx2);font-size:13px">While reading, highlight a word and tap 📖 Define → ⭐ Save word to collect vocabulary here for later.</p>';
   for(const vv of vocab){
     const el=document.createElement("div");el.className="hlrow";el.style.cursor="pointer";
@@ -1387,8 +1448,13 @@ $("btn-ach").onclick=()=>{const g=$("achgrid");g.innerHTML="";
   $("achs").classList.add("on")};
 
 /* ---------- patch notes ---------- */
-const APP_VER="3.19";
+const APP_VER="3.20";
 const PATCHES=[
+ {v:"3.20",n:"Study Deeper",d:"21 Jul 2026",items:[
+  ["new","Reviews are now interleaved across tracks (harder, and it forces you to tell similar ideas apart), and after a right answer you grade how it felt — Shaky / Good / Easy — which sets when it comes back. Miss one and you get a straight “📖 Re-read the idea” link plus your own old note to reconsider."],
+  ["new","Lessons open smarter: a quick guess before you read (guessing first makes it stick), tappable key terms up top, and a small 🎓 on each paragraph to explain just that bit — no fiddly text-selecting."],
+  ["new","New tutor sessions in your Journal: 🎓 Connect my ideas (across tracks), 🎓 Tell two apart, 🎓 Reflect on my journal. On any mastered idea: 🎓 Debate me (it argues the other side) and 🎓 Explain it back (teach it, it finds the gaps). Every explanation can now draw a quick arrow-diagram too."],
+  ["polish","The Path shows rusty vs solid ideas, your Journal shows your real median time per lesson and flags ideas you rated “Solid” that have gone quiet, and saved words show how many are due. New books will get sharper, more concrete “apply it” tasks."]]},
  {v:"3.19",n:"The Real Tutor",d:"21 Jul 2026",items:[
   ["new","The tutor now reads YOUR actual lesson — not generic pop-psych — and cites which lesson or book it drew on. It admits when it's unsure instead of making something up, and connects new ideas to ones you've already mastered."],
   ["new","Every explanation is now a conversation: ask follow-ups, or tap simpler / deeper / example / analogy. Highlight anything and 🎓 Explain opens the thread."],
@@ -1592,17 +1658,22 @@ function reviewDue(){if(!DATA.nodes)return[];const now=Date.now();
 function renderSharpen(){
   const due=reviewDue(),c=$("sharpen");
   if(!due.length){c.style.display="none";return}
+  const now=Date.now();   // tutor-F #30: how many more fade within the week — shows why review matters
+  const soon=DATA.nodes.filter(x=>{const rv=rvState(x.id);return rv&&rv.due>now&&rv.due<=now+7*864e5;}).length;
   c.style.display="block";
   c.innerHTML=`<div class="tag" style="color:var(--jade)">🔁 SHARPEN</div>
     <div style="font-family:var(--serif);font-size:20px;margin:2px 0 4px">${due.length} mastered idea${due.length>1?"s":""} due for review</div>
-    <div style="color:var(--tx2);font-size:13px">one question each · +${RV_XP} XP per sharp answer · keeps mastery from rusting</div>
+    <div style="color:var(--tx2);font-size:13px">interleaved across tracks · +${RV_XP} XP per sharp answer${soon?` · ${soon} more fading this week`:""}</div>
     <div class="glyphbg">🔁</div>`;
   c.onclick=startReview;
 }
 let RQ=[];
 function startReview(){
-  RQ=reviewDue().map(n=>n.id);
-  if(!RQ.length)return;
+  const due=reviewDue();if(!due.length)return;
+  // tutor-F #23: interleave across tracks — consecutive questions from different tracks force real discrimination
+  const byTrack={};for(const n of due)(byTrack[n.track]=byTrack[n.track]||[]).push(n.id);
+  const tracks=Object.keys(byTrack);RQ=[];let any=true;
+  while(any){any=false;for(const t of tracks)if(byTrack[t].length){RQ.push(byTrack[t].shift());any=true;}}
   $("review").classList.add("on");
   reviewStep(0,0);
 }
@@ -1625,7 +1696,8 @@ function reviewStep(idx,gained){
     <h3>${n.glyph} ${esc(n.title)}</h3><div class="gsub">${esc(q.q)}</div>`;
   const order=q.c.map((_,i)=>i);
   for(let i=order.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[order[i],order[j]]=[order[j],order[i]];}
-  let answered=false;
+  let answered=false;const k0=rv.k;
+  const advance=()=>{save();checkAch();reviewStep(idx+1,gained);};
   order.forEach(oi=>{
     const b=document.createElement("button");b.className="choice";b.textContent=q.c[oi];
     b.onclick=()=>{
@@ -1635,17 +1707,32 @@ function reviewStep(idx,gained){
       if(!right)[...card.querySelectorAll(".choice")][order.indexOf(q.a)].classList.add("right");
       const why=document.createElement("div");why.className="qwhy on";why.innerHTML=`<b>Why:</b> ${esc(q.why)}`;
       card.appendChild(why);
-      if(right){rv.k=Math.min(rv.k+1,RV_DAYS.length-1);rv.due=Date.now()+RV_DAYS[rv.k]*864e5;
-        S.xp+=RV_XP;S.rvN=(S.rvN||0)+1;gained+=RV_XP;clearError(n.id,q.q);   // tutor-G #48: got it — drop it from the error journal
-        why.insertAdjacentHTML("beforeend",`<br><b style="color:var(--jade)">+${RV_XP} XP</b> · next review in ${RV_DAYS[rv.k]} day${RV_DAYS[rv.k]>1?"s":""}`);}
-      else{rv.k=Math.max(0,rv.k-1);rv.due=Date.now()+864e5;
-        recordError(n.id,q.q,q.c[oi],q.c[q.a]);   // tutor-G #48
-        why.insertAdjacentHTML("beforeend",`<br><b style="color:#e8b0b0">back tomorrow</b> — worth a re-read of the idea`);}
-      save();checkAch();
-      const nx=document.createElement("button");nx.className="goldbtn";nx.style.marginTop="12px";
-      nx.textContent=idx+1<RQ.length?"Next →":"Finish";
-      nx.onclick=()=>reviewStep(idx+1,gained);
-      card.appendChild(nx);
+      // tutor-F #29: re-elaborate — surface the learner's own note about this idea
+      const rec=S.node[n.id]||{};
+      if(rec.applied){const nt=document.createElement("div");nt.className="qwhy on";nt.style.marginTop="8px";
+        nt.innerHTML=`<b style="color:var(--tx2)">You once wrote:</b> “${esc(rec.applied.slice(0,180))}${rec.applied.length>180?"…":""}” <span class="miniA" data-editnote>still true? refine →</span>`;
+        card.appendChild(nt);nt.querySelector("[data-editnote]").onclick=()=>{$("review").classList.remove("on");openNode(n.id);};}
+      if(right){
+        S.xp+=RV_XP;S.rvN=(S.rvN||0)+1;gained+=RV_XP;clearError(n.id,q.q);   // tutor-G #48
+        const setK=dk=>{rv.k=Math.max(0,Math.min(RV_DAYS.length-1,k0+dk));rv.due=Date.now()+RV_DAYS[rv.k]*864e5;save();};
+        setK(1);   // default (Good), already saved
+        why.insertAdjacentHTML("beforeend",`<br><b style="color:var(--jade)">+${RV_XP} XP</b> · how solid did that feel?`);
+        // tutor-F #27: you grade the difficulty; the next interval follows
+        const grades=document.createElement("div");grades.style.cssText="display:flex;gap:6px;margin-top:12px;flex-wrap:wrap";
+        const mk=(lbl,dk)=>{const gb=document.createElement("button");gb.className="ghostbtn";gb.textContent=lbl;
+          gb.onclick=()=>{setK(dk);toast("next review in "+RV_DAYS[rv.k]+" day"+(RV_DAYS[rv.k]>1?"s":""));advance();};grades.appendChild(gb);};
+        mk("😬 Shaky",0);mk("🙂 Good",1);mk("😎 Easy",2);
+        card.appendChild(grades);
+      }else{
+        rv.k=Math.max(0,rv.k-1);rv.due=Date.now()+864e5;recordError(n.id,q.q,q.c[oi],q.c[q.a]);save();   // tutor-G #48
+        why.insertAdjacentHTML("beforeend",`<br><b style="color:#e8b0b0">back tomorrow</b>`);
+        const row=document.createElement("div");row.style.marginTop="12px";
+        const rr=document.createElement("button");rr.className="ghostbtn";rr.textContent="📖 Re-read the idea";   // tutor-F #25
+        rr.onclick=()=>{$("review").classList.remove("on");openNode(n.id);};
+        const nx=document.createElement("button");nx.className="goldbtn";nx.style.marginLeft="6px";nx.textContent=idx+1<RQ.length?"Next →":"Finish";
+        nx.onclick=advance;
+        row.appendChild(rr);row.appendChild(nx);card.appendChild(row);
+      }
     };
     card.appendChild(b);
   });
@@ -2408,8 +2495,30 @@ function openNode(id){
     show("node");return;
   }
   const g=document.createElement("div");g.className="lblrow guide";g.textContent="✦ Guide note — written for you";body.appendChild(g);
-  for(const p of n.bridge){const el=document.createElement("p");el.textContent=p;body.appendChild(el)}
-  (S.node[id]=S.node[id]||{}).read=true;S.lastTrack=n.track;save();   // #80: remember the track being worked
+  const rec0=S.node[id]||{};
+  // tutor-H #14: pretest — commit a guess before reading; the retrieval attempt boosts encoding even when wrong
+  if(st==="avail"&&!nodeDone(id)&&!rec0.primed){
+    const pr=document.createElement("div");pr.className="primebox";
+    pr.innerHTML=`<div class="gsub" style="margin-bottom:6px">Before you read — what do you already think “${esc(n.title)}” means? (a guess is plenty; guessing first makes it stick)</div>`;
+    const pta=document.createElement("textarea");pta.placeholder="my guess…";pta.className="primeta";
+    const pb=document.createElement("button");pb.className="ghostbtn";pb.style.marginTop="6px";pb.textContent="Read on →";
+    pb.onclick=()=>{(S.node[id]=S.node[id]||{}).primed=true;save();pr.remove();};
+    pr.appendChild(pta);pr.appendChild(pb);body.appendChild(pr);
+  }
+  // tutor-H #35: a tiny pre-glossary — meet the vocabulary before the wall of text
+  const glossary=keyTermsOf(n);
+  if(glossary.length){const gl=document.createElement("div");gl.className="glossrow";
+    gl.innerHTML=`<span class="glosslbl">key terms</span>`+glossary.map(t=>`<button class="glosschip">${esc(t)}</button>`).join("");
+    gl.querySelectorAll(".glosschip").forEach(b=>b.onclick=()=>{SELCTX="";defineTerm(b.textContent);});body.appendChild(gl);}
+  for(const p of n.bridge){const el=document.createElement("p");el.textContent=p;
+    // tutor-H #33: per-paragraph explain — no fiddly text-selection needed
+    if(geminiKeys().length){const x=document.createElement("button");x.className="paraex";x.title="explain this paragraph";x.textContent="🎓";
+      x.onclick=()=>{const bk=bookOfNode(n);openTutor("Tutor",`Lesson: "${n.title}"${bk?` (from "${bk.title}")`:""}\n\n${nodeText(n)}`,`Explain this specific passage in plainer words, and why it matters here: "${p}"`);};
+      el.appendChild(document.createTextNode(" "));el.appendChild(x);}
+    body.appendChild(el);}
+  (S.node[id]=S.node[id]||{}).read=true;S.lastTrack=n.track;
+  if(st==="avail"&&!nodeDone(id))S.node[id].openAt=Date.now();   // tutor-I #50: time this session for a real per-lesson estimate
+  save();   // #80: remember the track being worked
   // #10: opening a lesson no longer credits the daily "Learn" — that's earned by passing the quiz (gradeQuiz) or finishing an episode
   if(!n.stub&&n.sources){
     const sh=document.createElement("div");sh.className="lblrow books";sh.textContent="📖 From the books";body.appendChild(sh);
@@ -2465,6 +2574,10 @@ function renderGate(n){
     const retest=document.createElement("button");retest.className="ghostbtn";retest.textContent="🔁 Test myself again";retest.style.marginTop="12px";
     retest.onclick=()=>{RQ=[n.id];$("review").classList.add("on");reviewStep(0,0);};   // #13: re-quiz via the Sharpen flow — doesn't touch mastery
     card.appendChild(retest);
+    if(geminiKeys().length){const dbt=document.createElement("button");dbt.className="ghostbtn";dbt.textContent="🎓 Debate me";dbt.style.marginTop="12px";dbt.style.marginLeft="6px";
+      const bk=bookOfNode(n);   // tutor-J #16: the tutor argues the OPPOSITE and you must defend the idea — deepest processing there is
+      dbt.onclick=()=>openTutor("Debate",`Idea: "${n.title}"${bk?` (from "${bk.title}")`:""}\n\n${nodeText(n)}`,`Take the OPPOSITE position to this idea and argue it genuinely well in 2-3 sentences, then challenge me to defend the idea. Be a worthy opponent, not a strawman — use real counterpoints.`);
+      card.appendChild(dbt);}
     const back=document.createElement("button");back.className="ghostbtn";back.textContent="← Back to the Path";back.style.marginTop="12px";back.style.marginLeft="6px";
     back.onclick=()=>{renderPath();show("path")};card.appendChild(back);
     gate.appendChild(card);return;
@@ -2574,7 +2687,11 @@ function renderApply(n){
   ta.oninput=upd;
   btn.onclick=()=>{if(!enough(ta.value.trim()))return;(S.node[n.id]=S.node[n.id]||{}).applied=ta.value.trim();completeNode(n);};
   card.appendChild(ta);card.appendChild(cc);card.appendChild(btn);
-  if(n.track==="A"||n.track==="B"){const sb=document.createElement("button");sb.className="ghostbtn";
+  if(geminiKeys().length){const fb=document.createElement("button");fb.className="ghostbtn";fb.textContent="🎓 Explain it back";fb.style.marginTop="10px";
+    // tutor-I #15: Feynman — teach it back in your own words; the tutor names what's missing
+    fb.onclick=()=>{const bk=bookOfNode(n);openTutor("Explain it back",`Lesson: "${n.title}"${bk?` (from "${bk.title}")`:""}\n\n${nodeText(n)}`,`Ask me to explain "${n.title}" in my own words as if teaching a friend. After I answer, tell me warmly what I nailed and what key piece I left out or got fuzzy — grounded in the lesson.`);};
+    card.appendChild(fb);}
+  if(n.track==="A"||n.track==="B"){const sb=document.createElement("button");sb.className="ghostbtn";sb.style.marginTop="10px";sb.style.marginLeft="6px";
     sb.textContent="🧘 Sit first, then write";sb.onclick=openSit;card.appendChild(sb);}
   gate.appendChild(card);upd();
 }
@@ -2582,6 +2699,8 @@ function completeNode(n){
   const rec=S.node[n.id]=S.node[n.id]||{};
   delete rec.draft;
   if(!rec.doneAt){
+    // tutor-I #50: log real minutes spent (capped so a lesson left open overnight doesn't skew it)
+    if(rec.openAt){const mins=Math.min(30,Math.max(1,Math.round((Date.now()-rec.openAt)/60000)));(S.lessonTimes=S.lessonTimes||[]).push(mins);if(S.lessonTimes.length>60)S.lessonTimes=S.lessonTimes.slice(-60);delete rec.openAt;}
     rec.doneAt=Date.now();const before=lvl();S.xp+=nodeXP(n);
     const d=today();
     if(S.streak.day!==d){S.streak.count=S.streak.day===yesterday()?S.streak.count+1:1;S.streak.day=d;S.bestStreak=Math.max(S.bestStreak||0,S.streak.count);}

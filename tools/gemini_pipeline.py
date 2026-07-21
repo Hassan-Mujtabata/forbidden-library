@@ -77,6 +77,7 @@ HARD RULES:
    * Every WRONG option must be a PLAUSIBLE MISCONCEPTION a real learner actually holds — the common confusion, a near-miss that is true but irrelevant, a reversed cause and effect, or an adjacent idea. Same length and register as the correct option. NEVER a joke, nonsense, or obviously-wrong option.
    * The correct option must NOT be the longest or the most detailed one — give the distractors equal care.
    * NEVER use "all of the above", "none of the above", "both A and B", or similar meta-options.
+- apply.prompt: a SPECIFIC action tied to a named trigger and a this-week timeframe (e.g. "The next time someone interrupts you, notice X and afterwards write what you felt"). It must name WHEN/WHERE to do it. NEVER vague introspection like "reflect on how this shows up in your life" or "think about a time when...".
 - Ground everything in the passage; invent no facts. Plain text only, no markdown, no emphasis characters, never mention being an AI.
 
 PASSAGE:
