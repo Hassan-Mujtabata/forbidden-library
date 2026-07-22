@@ -21,16 +21,18 @@
   --lh:1.75; --rw:660px;          /* reading line-height + column width (user-adjustable) */
   --read-font:var(--serif);       /* reading typeface (serif/sans) */
   --overlay:rgba(6,8,12,.92);     /* full-screen modal backdrop (theme-adaptive) */
+  --sticky:rgba(10,12,18,.88);    /* sticky reader/node bar */
+  --err:#e8b0b0; --ok:#a7dcc0;    /* feedback text (wrong / right) */
 }
 :root[data-theme="sepia"]{
-  --bg:#efe6d2; --bg2:#e8ddc6; --card:rgba(70,48,20,.05); --card2:rgba(70,48,20,.09);
-  --tx:#3a2f22; --tx2:#7c6a50; --gold:#8f6410; --jade:#256f66; --line:rgba(70,48,20,.16); --read:#3a2f22;
-  --overlay:rgba(236,227,206,.95);
+  --bg:#efe6d2; --bg2:#e8ddc6; --card:rgba(70,48,20,.06); --card2:rgba(70,48,20,.11);
+  --tx:#33291c; --tx2:#6b5a44; --gold:#8a5f10; --jade:#1f665d; --line:rgba(70,48,20,.18); --read:#33291c;
+  --overlay:rgba(236,227,206,.95); --sticky:rgba(236,227,206,.9); --err:#9a3324; --ok:#256b4a;
 }
 :root[data-theme="light"]{
-  --bg:#f6f4ee; --bg2:#ffffff; --card:rgba(0,0,0,.035); --card2:rgba(0,0,0,.07);
-  --tx:#1c1b18; --tx2:#635f56; --gold:#a3760f; --jade:#0f857c; --line:rgba(0,0,0,.12); --read:#26241f;
-  --overlay:rgba(246,244,238,.96);
+  --bg:#f6f4ee; --bg2:#ffffff; --card:rgba(0,0,0,.04); --card2:rgba(0,0,0,.08);
+  --tx:#1a1916; --tx2:#575349; --gold:#9a6f10; --jade:#0d7c73; --line:rgba(0,0,0,.14); --read:#22201b;
+  --overlay:rgba(246,244,238,.96); --sticky:rgba(246,244,238,.9); --err:#b3261e; --ok:#1a7a4f;
 }
 :root[data-theme="light"] body,:root[data-theme="sepia"] body{background-image:none}
 :root[data-font="sans"]{--read-font:var(--sans)}
@@ -109,7 +111,7 @@ header .brand span{color:var(--gold)}
 .bmeta .pct{font-size:10.5px;color:var(--tx2);margin-top:5px;display:flex;justify-content:space-between}
 
 /* ---------- reader ---------- */
-#rtop{position:sticky;top:0;z-index:10;background:rgba(10,12,18,.88);backdrop-filter:blur(10px);
+#rtop{position:sticky;top:0;z-index:10;background:var(--sticky);backdrop-filter:blur(10px);
   display:flex;align-items:center;gap:8px;padding:12px 4px;border-bottom:1px solid var(--line)}
 #rtop .bt{font-size:13px;color:var(--tx2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1}
 #rprog{position:fixed;top:0;left:0;height:3px;background:var(--gold);z-index:60;width:0}
@@ -128,7 +130,7 @@ header .brand span{color:var(--gold)}
 #hlbtn{position:absolute;z-index:70;display:none;gap:1px;border-radius:10px;overflow:hidden;box-shadow:0 6px 18px rgba(0,0,0,.55)}
 #hlbtn button{font-weight:700;font-size:12.5px;padding:8px 13px;border:none;cursor:pointer}
 #hlbtn #hl-save{background:var(--gold);color:#151006}
-#hlbtn #hl-def{background:#1c1a12;color:var(--gold);border-left:1px solid rgba(0,0,0,.3)}
+#hlbtn #hl-def{background:var(--bg2);color:var(--gold);border-left:1px solid var(--line)}
 #defpop{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);z-index:105;display:none;
   width:min(460px,92vw);background:var(--bg2);border:1px solid var(--gold);border-radius:16px;padding:16px 18px;
   box-shadow:0 16px 40px rgba(0,0,0,.6)}
@@ -184,6 +186,7 @@ header .brand span{color:var(--gold)}
 .hmgrid{display:grid;grid-template-rows:repeat(7,1fr);grid-auto-flow:column;gap:3px;max-width:100%}
 .hm-cell{aspect-ratio:1;border-radius:2px;background:var(--card2)}
 .hm-cell.on{background:var(--jade)}
+.hm-cell.future{visibility:hidden}
 .prach{display:flex;gap:11px;align-items:center;padding:7px 0}
 .prach .e{font-size:22px}.prach b{font-size:14px}.prach small{display:block;color:var(--tx2);font-size:12px}
 /* milestone celebration */
@@ -401,8 +404,8 @@ header .brand span{color:var(--gold)}
 #applybox textarea:focus{border-color:var(--gold)}
 #applybox .cc{font-size:11.5px;color:var(--tx2);margin-top:8px;text-align:right}
 .gatemsg{font-size:13px;margin-top:12px;padding:10px 14px;border-radius:10px}
-.gatemsg.bad{background:rgba(170,50,50,.14);color:#e8b0b0}
-.gatemsg.good{background:rgba(46,125,85,.16);color:#a7dcc0}
+.gatemsg.bad{background:rgba(170,50,50,.14);color:var(--err)}
+.gatemsg.good{background:rgba(46,125,85,.16);color:var(--ok)}
 .locknote{background:var(--card);border:1px dashed var(--line);border-radius:14px;padding:20px;text-align:center;color:var(--tx2);margin-top:16px}
 .stubnote{background:var(--card);border:1px dashed var(--gold);border-radius:14px;padding:22px;text-align:center;margin-top:16px}
 .stubnote .e{font-size:32px}
@@ -421,12 +424,12 @@ header .brand span{color:var(--gold)}
 .patch .pn{font-family:var(--serif);font-size:18px}
 .patch .pd{margin-left:auto;font-size:11px;color:var(--tx2)}
 .patch ul{list-style:none;margin-top:10px}
-.patch li{display:flex;gap:9px;align-items:baseline;font-size:13.5px;line-height:1.55;margin-bottom:7px;color:#d8d4cb}
+.patch li{display:flex;gap:9px;align-items:baseline;font-size:13.5px;line-height:1.55;margin-bottom:7px;color:var(--read)}
 .patch .tag{flex:0 0 auto;font-size:9.5px;font-weight:800;letter-spacing:.1em;padding:2px 7px;border-radius:5px;transform:translateY(-1px)}
 .tag.new{background:rgba(78,205,196,.16);color:var(--jade)}
 .tag.content{background:rgba(192,132,252,.16);color:#c084fc}
 .tag.fix{background:rgba(212,175,55,.16);color:var(--gold)}
-.tag.polish{background:rgba(255,255,255,.08);color:var(--tx2)}
+.tag.polish{background:var(--card2);color:var(--tx2)}
 
 /* ---------- lesson → book crossings ---------- */
 .srcgo{display:inline-block;margin-top:10px;font-size:12px;color:var(--jade);border:1px solid rgba(78,205,196,.35);
@@ -558,7 +561,7 @@ header .brand span{color:var(--gold)}
   <input id="keyin" placeholder="paste key…" autocomplete="off">
   <button class="go" id="keygo">UNLOCK</button>
   <button class="ghostbtn" id="keybio" style="display:none">👁️ Unlock with Windows Hello</button>
-  <p id="keyerr" style="color:#e74c3c;font-size:13px"></p>
+  <p id="keyerr" style="color:var(--err);font-size:13px"></p>
 </div>
 
 <div id="topbar">
@@ -826,7 +829,8 @@ async function boot(){
     }).catch(()=>{});
   }
 }
-function landing(){ if(DATA.nodes&&DATA.nodes.length){renderPath();show("path")} else {renderHome();show("home")} patchCheck(); if(!S.welcomed)setTimeout(showWelcome,700); }
+function landing(){ if(DATA.nodes&&DATA.nodes.length){renderPath();show("path")} else {renderHome();show("home")} patchCheck();
+  if(!S.welcomed&&totalRead()===0&&nodesDone()===0&&(S.hl||[]).length===0)setTimeout(showWelcome,700); else if(!S.welcomed){S.welcomed=true;save();} }   // #26: only greet genuinely-new keyholders
 $("keygo").onclick=async()=>{const k=$("keyin").value.trim();if(!k)return;
   try{DATA=await tryLoad(k);localStorage.setItem(LS_KEY,k);await loadAccess();landing();initSync()}
   catch(e){$("keyerr").textContent="That key doesn't fit this lock."}};
@@ -929,13 +933,18 @@ function renderBookLanding(id){
     `<div class="bl-actions"><button class="goldbtn" id="bl-start">${done===0?"Start reading":pct>=100?"Read again":"Continue"}</button><button class="ghostbtn" id="bl-fav">${fav?"★ Saved":"☆ Save"}</button></div>`+
     `<div class="prsec">Episodes</div><div class="bl-eps"></div>`;
   const w=bd.querySelector(".bl-eps");
-  b.episodes.forEach((ep,i)=>{const r=document.createElement("button");r.className="eprow"+(rs.has(i)?" read":"");
+  // #23: big books (hundreds of chapters) shouldn't render one giant list — cap and expand on demand
+  const CAP=40;let shown=Math.min(b.episodes.length,S._blExpand?b.episodes.length:CAP);
+  const addRow=(ep,i)=>{const r=document.createElement("button");r.className="eprow"+(rs.has(i)?" read":"");
     r.innerHTML=`<span class="n">${i+1}</span><span class="t">${esc(ep.t)}</span>${rs.has(i)?'<span class="ck">✓</span>':`<span class="mn">${Math.max(1,Math.round(epWords(ep)/READ_WPM))}m</span>`}`;
-    r.onclick=()=>{$("booklanding").classList.remove("on");openEp(id,i);};w.appendChild(r);});
+    r.onclick=()=>{$("booklanding").classList.remove("on");openEp(id,i);};w.appendChild(r);};
+  for(let i=0;i<shown;i++)addRow(b.episodes[i],i);
+  if(b.episodes.length>shown){const more=document.createElement("button");more.className="ghostbtn";more.style.marginTop="8px";
+    more.textContent=`Show all ${b.episodes.length} chapters`;more.onclick=()=>{S._blExpand=true;renderBookLanding(id);};w.appendChild(more);}
   $("bl-start").onclick=()=>{$("booklanding").classList.remove("on");openBook(id);};
   $("bl-fav").onclick=()=>{S.faves=S.faves||[];S.faves=fav?S.faves.filter(x=>x!==id):[id,...S.faves];save();renderBookLanding(id);};
 }
-function openBookLanding(id){renderBookLanding(id);$("booklanding").classList.add("on");}
+function openBookLanding(id){S._blExpand=false;renderBookLanding(id);$("booklanding").classList.add("on");}
 /* ---------- daily mix ---------- */
 function mulberry(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
 const mixItemDone=i=>i.n?nodeDone(i.n):isRead(i.b,i.e);
@@ -1143,10 +1152,14 @@ function renderProgress(){
   const best=Math.max(S.streak.count,S.bestStreak||0);
   const ring=(p,label,sub)=>`<div class="pring"><svg viewBox="0 0 44 44"><circle cx="22" cy="22" r="19" class="pr-bg"/><circle cx="22" cy="22" r="19" class="pr-fg" style="stroke-dasharray:${(p*1.194).toFixed(1)} 120"/></svg><div class="pr-c"><b>${label}</b><small>${sub}</small></div></div>`;
   const days=new Set(Object.keys(S.days||{}));let cells="";
-  const now=new Date();now.setHours(0,0,0,0);const start=new Date(now);start.setDate(start.getDate()-83);
-  for(let i=0;i<84;i++){const d=new Date(start);d.setDate(start.getDate()+i);
+  // #24: align columns to real weeks — last column is THIS week (today included), rows = weekdays Sun→Sat.
+  // Anchor at noon and step by whole days in ms to avoid setDate month-rollover and DST bugs.
+  const noon=new Date();noon.setHours(12,0,0,0);const todayKey=today();
+  const startMs=noon.getTime()-(noon.getDay()+77)*864e5;
+  for(let i=0;i<84;i++){const d=new Date(startMs+i*864e5);
     const key=d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
-    cells+=`<div class="hm-cell${days.has(key)?" on":""}" title="${key}"></div>`;}
+    const future=key>todayKey;
+    cells+=`<div class="hm-cell${days.has(key)?" on":""}${future?" future":""}" title="${key}"></div>`;}
   const locked=ACH.filter(a=>!S.ach.includes(a.id)).slice(0,3);
   b.innerHTML=
     `<div class="prlvl"><div class="prlv-n">LV ${l} · ${lvlName()}</div><div class="prlv-x">${S.xp-lo} / ${hi-lo} XP to level ${l+1}</div><div class="prlv-bar"><div style="width:${Math.min(100,pct)}%"></div></div></div>`+
@@ -1672,8 +1685,11 @@ $("btn-ach").onclick=()=>{const g=$("achgrid");g.innerHTML="";
   $("achs").classList.add("on")};
 
 /* ---------- patch notes ---------- */
-const APP_VER="3.22";
+const APP_VER="3.23";
 const PATCHES=[
+ {v:"3.23",n:"Legible in Every Light",d:"21 Jul 2026",items:[
+  ["fix","Fixed the light and sepia themes: text that was unreadable on the new backgrounds — the sticky reader bar, quiz feedback, patch notes, error messages, the highlight menu — now adapts to every theme, and muted text meets proper contrast."],
+  ["fix","The activity heatmap now lines up as real weeks with today in the last column; long books no longer render a giant chapter list (they cap at 40 with a “show all”); and Account shows a live, self-updating sync time."]]},
  {v:"3.22",n:"Momentum",d:"21 Jul 2026",items:[
   ["new","A short welcome walks you through the Path, the daily rite, the library and settings on your first visit."],
   ["new","Streaks are forgiving now: miss a day and a 🧊 freeze (you earn one every 7 days) keeps your streak alive. Finishing a whole book gets a real celebration, not just a toast."],
@@ -1958,7 +1974,7 @@ function reviewStep(idx,gained){
         card.appendChild(grades);
       }else{
         rv.k=Math.max(0,rv.k-1);rv.due=Date.now()+864e5;recordError(n.id,q.q,q.c[oi],q.c[q.a]);save();   // tutor-G #48
-        why.insertAdjacentHTML("beforeend",`<br><b style="color:#e8b0b0">back tomorrow</b>`);
+        why.insertAdjacentHTML("beforeend",`<br><b style="color:var(--err)">back tomorrow</b>`);
         const row=document.createElement("div");row.style.marginTop="12px";
         const rr=document.createElement("button");rr.className="ghostbtn";rr.textContent="📖 Re-read the idea";   // tutor-F #25
         rr.onclick=()=>{$("review").classList.remove("on");openNode(n.id);};
@@ -2103,6 +2119,7 @@ function syncLabel(){
   if(SYNCST==="error")return "⚠️ sync failed — will retry";
   return S._lastSync?"☁️ synced "+timeAgo(S._lastSync):"☁️ not synced yet";
 }
+setInterval(()=>{const el=$("sync-ind");if(el&&SYNCST!=="syncing")el.textContent=syncLabel();},30000);   // #27: keep "Xm ago" fresh
 async function pushState(overwrite){
   const h=ghHead();if(!h||!navigator.onLine||!localStorage.getItem(LS_KEY)){setSync(navigator.onLine?"idle":"offline");return;}
   setSync("syncing");
@@ -2316,9 +2333,9 @@ $("ab-file").onchange=e=>{if(e.target.files[0]){AB.file=e.target.files[0];const 
 async function submitBook(){
   if(AB.busy)return;
   const name=$("ab-name").value.trim(),out=$("ab-out");
-  if(!name){out.innerHTML='<div class="abprog" style="color:#e8b0b0">Give the track a name.</div>';return}
-  if(!AB.file){out.innerHTML='<div class="abprog" style="color:#e8b0b0">Pick a PDF first.</div>';return}
-  if(AB.file.size>80*1024*1024){out.innerHTML='<div class="abprog" style="color:#e8b0b0">That PDF is over 80 MB — it may crash the tab. Try a smaller or compressed copy.</div>';return}  // #48
+  if(!name){out.innerHTML='<div class="abprog" style="color:var(--err)">Give the track a name.</div>';return}
+  if(!AB.file){out.innerHTML='<div class="abprog" style="color:var(--err)">Pick a PDF first.</div>';return}
+  if(AB.file.size>80*1024*1024){out.innerHTML='<div class="abprog" style="color:var(--err)">That PDF is over 80 MB — it may crash the tab. Try a smaller or compressed copy.</div>';return}  // #48
   // #46: warn (don't block) if a track with this name already exists
   const nrm=x=>x.toLowerCase().replace(/[^a-z0-9]/g,"");
   if((DATA.tracks||[]).some(t=>nrm(t.name)===nrm(name))&&!confirm(`A track called “${name}” already exists on the Path. Add it again anyway?`)){return;}
@@ -2358,7 +2375,7 @@ async function submitBook(){
       out.innerHTML=`<div class="abprog" style="border-color:var(--gold)">📥 <b>Job file downloaded</b> (${esc(fname)}, ${chunks.length} chunks).<br>Drop it into <code>tools/queue/</code> in your repo and push — the pipeline takes it from there.<br><span class="miniA" id="ab-addtok">or connect a token to skip this step next time</span></div>`;
       const at=$("ab-addtok");if(at)at.onclick=()=>{$("ab-out").innerHTML="";document.querySelector("#ab-tokbox").scrollIntoView({block:"center"})};
     }
-  }catch(e){out.innerHTML=`<div class="abprog" style="color:#e8b0b0">⚠️ ${esc(e.message||"something went wrong")}</div>`;}
+  }catch(e){out.innerHTML=`<div class="abprog" style="color:var(--err)">⚠️ ${esc(e.message||"something went wrong")}</div>`;}
   AB.busy=false;$("ab-go").disabled=false;
 }
 $("btn-addbook").onclick=()=>{AB.file=null;renderAddBook();$("addbook").classList.add("on")};
