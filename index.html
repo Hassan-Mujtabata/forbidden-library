@@ -106,9 +106,14 @@ header .brand span{color:var(--gold)}
 .shelf{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:14px}
 .book{text-align:left;border-radius:14px;overflow:hidden;background:var(--card);border:1px solid var(--line);transition:.25s;display:flex;flex-direction:column}
 .book:hover{transform:translateY(-4px);border-color:var(--bc,var(--gold));box-shadow:0 12px 30px -12px rgba(0,0,0,.8)}
-.cover{aspect-ratio:2/2.6;display:flex;flex-direction:column;justify-content:space-between;padding:12px;position:relative}
-.cover .g{font-size:30px;filter:drop-shadow(0 2px 6px rgba(0,0,0,.5))}
-.cover .t{font-family:var(--serif);font-size:14.5px;line-height:1.25;text-shadow:0 1px 4px rgba(0,0,0,.6)}
+.cover{aspect-ratio:2/2.6;display:flex;flex-direction:column;justify-content:space-between;padding:12px 12px 12px 16px;position:relative;overflow:hidden}
+.cover::before{content:"";position:absolute;left:0;top:0;bottom:0;width:6px;background:linear-gradient(var(--bc,var(--gold)),rgba(0,0,0,.35));box-shadow:1px 0 3px rgba(0,0,0,.3) inset;z-index:1}
+.cover::after{content:"";position:absolute;left:0;right:0;bottom:0;height:56%;background:linear-gradient(transparent,rgba(0,0,0,.6));pointer-events:none}
+.cover-sheen{position:absolute;inset:0;background:linear-gradient(120deg,rgba(255,255,255,.16),transparent 42%);pointer-events:none}
+.cover .g{font-size:30px;filter:drop-shadow(0 2px 6px rgba(0,0,0,.5));position:relative;z-index:2}
+.cover-txt{position:relative;z-index:2}
+.cover .t{font-family:var(--serif);font-size:14.5px;line-height:1.25;color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.7)}
+.cover-a{font-size:10.5px;margin-top:4px;color:rgba(255,255,255,.82);text-shadow:0 1px 3px rgba(0,0,0,.8);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .bmeta{padding:9px 11px 11px}
 .bmeta .a{font-size:11px;color:var(--tx2);margin-bottom:7px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .pbar{height:4px;background:var(--card2);border-radius:99px;overflow:hidden}
@@ -577,6 +582,14 @@ header .brand span{color:var(--gold)}
   .shelf{grid-template-columns:repeat(auto-fill,minmax(118px,1fr))}
   header .brand{font-size:16px}
   #rbody{font-size:15px}
+  /* #45: bigger, thumb-friendly tap targets on phones */
+  .iconbtn{min-width:44px;min-height:44px;display:inline-flex;align-items:center;justify-content:center;padding:9px}
+  #rtop .iconbtn{min-width:40px;min-height:40px}
+  .navbtn{padding:9px 14px}
+  .jbtn{min-width:44px;min-height:42px}
+  .segbtn{padding:10px 14px}
+  /* keep the reader's action bar within thumb reach: sticky bottom mark-complete */
+  #rend,#ngate{scroll-margin-bottom:20px}
 }
 </style>
 </head>
@@ -948,8 +961,10 @@ function renderHome(){
   const bookCard=b=>{
     const done=readSet(b.id).size,pct=Math.round(done/b.episodes.length*100);
     const el=document.createElement("button");el.className="book";el.style.setProperty("--bc",b.accent);
-    el.innerHTML=`<div class="cover" style="background:linear-gradient(160deg,${b.accent}55,${b.accent}18 55%,rgba(0,0,0,.35))">
-        <div class="g">${b.glyph}</div><div class="t">${esc(b.title)}</div>${(S.faves||[]).includes(b.id)?'<div class="favdot">★</div>':""}</div>
+    el.innerHTML=`<div class="cover" style="background:linear-gradient(150deg,${b.accent}66,${b.accent}22 50%,${b.accent}0f)">
+        <div class="cover-sheen"></div><div class="g">${b.glyph}</div>
+        <div class="cover-txt"><div class="t">${esc(b.title)}</div>${b.author?`<div class="cover-a">${esc(b.author)}</div>`:""}</div>
+        ${(S.faves||[]).includes(b.id)?'<div class="favdot">★</div>':""}</div>
       <div class="bmeta">
         <div class="pbar"><div class="pfill" style="width:${pct}%"></div></div>
         <div class="pct"><span>${done}/${b.episodes.length} eps</span><span>${pct}%</span></div></div>`;
@@ -1469,17 +1484,24 @@ function journalNotes(){return DATA.nodes
   .filter(x=>S.node[x.id]&&S.node[x.id].applied)
   .map(x=>({node:x,rec:S.node[x.id]}))
   .sort((a,b)=>(b.rec.doneAt||0)-(a.rec.doneAt||0));}
-function journalText(){
-  let t="# The Vault — Journal\n\n## Apply notes\n\n";
-  for(const {node,rec} of journalNotes())
-    t+=`### ${node.title} (${trackById(node.track).name}${rec.doneAt?", "+fmtDate(rec.doneAt):""})\n> ${node.apply.prompt}\n\n${rec.applied}\n`+(rec.review?`\n🎓 Tutor: ${rec.review}\n`:"")+`\n`;
+function journalText(){   // #41: structured markdown export
+  const notes=journalNotes();
+  let t=`# The Vault — Journal\n\n*Exported ${fmtDate(Date.now())}*\n\n`;
+  t+=`> ${nodesDone()} ideas mastered · ${totalRead()} episodes read · ${notes.length} notes · ${S.hl.length} highlights · ${sitTotalMin()} min sat · level ${lvl()} (${lvlName().toLowerCase()})\n\n---\n\n`;
+  t+="## Apply notes\n\n";
+  if(!notes.length)t+="_None yet._\n\n";
+  for(const {node,rec} of notes)
+    t+=`### ${node.glyph} ${node.title}\n*${trackById(node.track).name}${rec.doneAt?" · "+fmtDate(rec.doneAt):""}*\n\n> ${node.apply.prompt}\n\n${rec.applied}\n`+(rec.review?`\n**🎓 Tutor:** ${rec.review}\n`:"")+`\n`;
+  // group highlights by source book/idea
   t+="## Highlights\n\n";
-  for(const h of S.hl){
-    const src=h.n?(nodeById(h.n)||{}).title:(bookById(h.b)||{}).title;
-    t+=`- “${h.t}” — ${src||"unknown"}\n`;
-  }
-  if((S.vocab||[]).length){t+="\n## Saved words\n\n";   // #31: vocabulary was missing from the export
-    for(const v of S.vocab)t+=`- ${v.t}${v.ctx?` — “…${v.ctx.slice(0,80)}…”`:""}\n`;}
+  const bySrc={};
+  for(const h of S.hl){const src=(h.n?(nodeById(h.n)||{}).title:(bookById(h.b)||{}).title)||"unknown";(bySrc[src]=bySrc[src]||[]).push(h.t);}
+  const srcKeys=Object.keys(bySrc);if(!srcKeys.length)t+="_None yet._\n\n";
+  for(const src of srcKeys){t+=`**${src}**\n`;for(const q of bySrc[src])t+=`- “${q}”\n`;t+="\n";}
+  if((S.vocab||[]).length){t+="## Saved words\n\n";
+    for(const v of S.vocab)t+=`- **${v.t}**${v.ctx?` — “…${v.ctx.slice(0,90)}…”`:""}\n`;t+="\n";}
+  if((S.errors||[]).length){t+="## Questions I've missed\n\n";
+    for(const e of S.errors.slice(0,50)){const nd=nodeById(e.node);t+=`- ${e.q}\n  - *my answer:* ${e.picked} · *correct:* ${e.correct}${nd?" · "+nd.title:""}\n`;}t+="\n";}
   return t;
 }
 async function shareInsight(text){   // #42: share a single highlight or idea outward
@@ -1835,8 +1857,12 @@ $("btn-ach").onclick=()=>{const g=$("achgrid");g.innerHTML="";
   $("achs").classList.add("on")};
 
 /* ---------- patch notes ---------- */
-const APP_VER="3.29";
+const APP_VER="3.30";
 const PATCHES=[
+ {v:"3.30",n:"Finishing Touches",d:"23 Jul 2026",items:[
+  ["polish","Book covers got a glow-up — a spine, a soft sheen, the author's name, and titles that stay legible on any cover."],
+  ["polish","Your journal export is now proper structured Markdown, with a summary, grouped highlights, saved words and your missed questions."],
+  ["polish","Bigger, thumb-friendly tap targets on phones."]]},
  {v:"3.29",n:"The Nudge",d:"23 Jul 2026",items:[
   ["new","🔔 Daily reminders — turn them on in ⚙️ Settings and pick a time. Installed to your home screen, the reminder arrives in the background; otherwise it greets you when you next open the app."]]},
  {v:"3.28",n:"Aim & Colour",d:"23 Jul 2026",items:[
