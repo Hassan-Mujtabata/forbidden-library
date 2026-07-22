@@ -658,6 +658,7 @@ header .brand span{color:var(--gold)}
   <h2>📓 JOURNAL <button class="x" data-close="hls">✕</button></h2>
   <div id="jstats"></div>
   <div id="jactions"></div>
+  <input id="jsearch" placeholder="🔍 search your notes, highlights & words…" autocomplete="off" style="width:100%;background:var(--bg2);border:1px solid var(--line);border-radius:10px;color:var(--tx);padding:10px 13px;font-size:13.5px;font-family:inherit;outline:none;margin:6px 0 4px">
   <div class="abtok" id="gembox" style="margin-top:8px"></div>
   <div class="jsec">✍️ YOUR APPLY NOTES</div><div id="jnotes"></div>
   <div class="jsec">📒 SAVED WORDS <button class="ghostbtn" id="jvquiz" style="float:right;padding:5px 12px;font-size:11.5px;margin:0;display:none">🎓 Quiz me</button></div><div id="jvocab"></div>
@@ -1656,6 +1657,11 @@ function renderJournal(){
     if(nd)el.onclick=()=>{$("hls").classList.remove("on");openNode(e.node);};
     ew.appendChild(el);
   }
+  // #38: live search across your notes, highlights, saved words and misses
+  const js=$("jsearch");js.value="";
+  js.oninput=()=>{const q=js.value.trim().toLowerCase();
+    document.querySelectorAll("#jnotes .jnote,#jnotes .jreview,#jvocab .hlrow,#hlrows .hlrow,#jerrors .hlrow").forEach(el=>{
+      el.style.display=!q||el.textContent.toLowerCase().includes(q)?"":"none";});};
   $("hls").classList.add("on");
 }
 function drillErrors(){   // tutor-G #48: send your recent misses to the tutor as one focused clinic
@@ -1720,8 +1726,10 @@ $("btn-ach").onclick=()=>{const g=$("achgrid");g.innerHTML="";
   $("achs").classList.add("on")};
 
 /* ---------- patch notes ---------- */
-const APP_VER="3.24";
+const APP_VER="3.25";
 const PATCHES=[
+ {v:"3.25",n:"Findable",d:"21 Jul 2026",items:[
+  ["new","🔍 Search your Journal — filter your apply-notes, highlights, saved words and past misses as you type."]]},
  {v:"3.24",n:"Read, Focus, Return",d:"21 Jul 2026",items:[
   ["new","🔊 Read aloud: tap the speaker in any lesson or episode and it reads to you, highlighting each paragraph — perfect for commutes or resting your eyes."],
   ["new","🎯 Focus mode dims everything but the paragraph you're on, following you as you read."],
