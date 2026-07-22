@@ -865,8 +865,15 @@ async function boot(){
     }).catch(()=>{});
   }
 }
-function landing(){ if(DATA.nodes&&DATA.nodes.length){renderPath();show("path")} else {renderHome();show("home")} patchCheck();
+function landing(){ if(DATA.nodes&&DATA.nodes.length){renderPath();show("path")} else {renderHome();show("home")} patchCheck(); initA11y();
   if(!S.welcomed&&totalRead()===0&&nodesDone()===0&&(S.hl||[]).length===0)setTimeout(showWelcome,700); else if(!S.welcomed){S.welcomed=true;save();} }   // #26: only greet genuinely-new keyholders
+// #44: accessibility — give icon-only controls names and hide decorative art from screen readers
+function initA11y(){
+  document.querySelectorAll("button[title]:not([aria-label])").forEach(b=>b.setAttribute("aria-label",b.title));
+  document.querySelectorAll(".sidefig svg,.iconbtn,.jbtn").forEach(el=>{if(el.tagName==="SVG"||el.closest(".sidefig"))el.setAttribute("aria-hidden","true");});
+  const nav=document.querySelector(".nav");if(nav)nav.setAttribute("role","tablist");
+  const tb=$("topbar");if(tb&&!tb.getAttribute("role"))tb.setAttribute("role","banner");
+}
 $("keygo").onclick=async()=>{const k=$("keyin").value.trim();if(!k)return;
   try{DATA=await tryLoad(k);localStorage.setItem(LS_KEY,k);await loadAccess();landing();initSync()}
   catch(e){$("keyerr").textContent="That key doesn't fit this lock."}};
@@ -1077,7 +1084,7 @@ function openEp(id,e){
   const ep=b.episodes[e];
   $("r-title").textContent=`${b.glyph} ${b.title} — ${e+1}/${b.episodes.length}`;
   const body=$("rbody");body.innerHTML="";body.style.fontSize=S.font+"px";
-  let cv=null;if(bannerOn()){cv=document.createElement("canvas");cv.id="rbanner";body.appendChild(cv);}   // #15: banner only in dark theme, if enabled
+  let cv=null;if(bannerOn()){cv=document.createElement("canvas");cv.id="rbanner";cv.setAttribute("aria-hidden","true");body.appendChild(cv);}   // #15/#44: decorative banner
   const h=document.createElement("h1");h.textContent=ep.t;body.appendChild(h);
   const sub=document.createElement("div");sub.className="sub";
   sub.textContent=`${b.title.toUpperCase()} · EPISODE ${e+1} OF ${b.episodes.length} · ${Math.max(1,Math.round(epWords(ep)/READ_WPM))} MIN · +${epXP(ep)} XP`;
@@ -1443,6 +1450,11 @@ function journalText(){
     for(const v of S.vocab)t+=`- ${v.t}${v.ctx?` — “…${v.ctx.slice(0,80)}…”`:""}\n`;}
   return t;
 }
+async function shareInsight(text){   // #42: share a single highlight or idea outward
+  if(navigator.share){try{await navigator.share({text});return;}catch(e){if(e&&e.name==="AbortError")return;}}
+  try{await navigator.clipboard.writeText(text);toast("📋 Copied — paste it anywhere");}
+  catch(e){const ta=document.createElement("textarea");ta.value=text;document.body.appendChild(ta);ta.select();document.execCommand("copy");ta.remove();toast("📋 Copied");}
+}
 async function copyJournal(){
   const t=journalText();
   try{await navigator.clipboard.writeText(t);toast("📋 Journal copied as text")}
@@ -1684,7 +1696,8 @@ function renderJournal(){
     else{const b=bookById(h.b);if(b){label=b.glyph+" "+b.title;jump=()=>openEp(h.b,h.e);}}
     if(!label)label="— source no longer in the vault";
     const el=document.createElement("div");el.className="hlrow";if(jump)el.style.cursor="pointer";
-    el.innerHTML=`<div class="q">“${esc(h.t)}”</div><div class="m"><span>${esc(label)}${jump?" ›":""}</span><button style="color:var(--tx2)" data-del>remove</button></div>`;
+    el.innerHTML=`<div class="q">“${esc(h.t)}”</div><div class="m"><span>${esc(label)}${jump?" ›":""}</span><span><button style="color:var(--tx2)" data-share>share</button> <button style="color:var(--tx2)" data-del>remove</button></span></div>`;
+    el.querySelector("[data-share]").onclick=ev=>{ev.stopPropagation();shareInsight("“"+h.t+"”"+(label?" — "+label.replace(/^\S+\s/,""):""));};   // #42
     el.querySelector("[data-del]").onclick=ev=>{ev.stopPropagation();
       S.hlDel=[...new Set([...(S.hlDel||[]),hlKey(h)])];   // #108: tombstone so sync doesn't resurrect it
       S.hl=S.hl.filter(x=>x!==h);save();el.remove()};
@@ -1786,8 +1799,12 @@ $("btn-ach").onclick=()=>{const g=$("achgrid");g.innerHTML="";
   $("achs").classList.add("on")};
 
 /* ---------- patch notes ---------- */
-const APP_VER="3.26";
+const APP_VER="3.27";
 const PATCHES=[
+ {v:"3.27",n:"Share & Settle",d:"23 Jul 2026",items:[
+  ["new","Share a highlight: every saved highlight has a “share” action to send a single insight out (or copy it)."],
+  ["new","After a sit, a gentle one-word reflection — calm, restless, focused — kept just for you."],
+  ["polish","An accessibility pass: icon buttons now announce themselves to screen readers, and the decorative artwork is hidden from them."]]},
  {v:"3.26",n:"Threads & Cards",d:"23 Jul 2026",items:[
   ["fix","Fixed the tutor's feedback being unreadable on the light and sepia themes (it was a hardcoded pale-teal), and the AI-pipeline label now has contrast in every theme."],
   ["new","🃏 Flashcards for your saved words — a quick offline flip-through, no tutor needed. And a book's page now shows which ideas on your Path it feeds, so you can jump straight across."],
@@ -2626,7 +2643,7 @@ function finishSit(early){
   bell();
   $("sit").classList.remove("on");
   if(doneMin<1){toast("🧘 Sit ended — under a minute, not logged");return}
-  (S.sits??=[]).push({d:doneMin,at:Date.now()});
+  const sitRec={d:doneMin,at:Date.now()};(S.sits??=[]).push(sitRec);
   const xp=Math.max(1,Math.round(doneMin*2));
   const before=lvl();S.xp+=xp;
   const dd=today();
@@ -2637,6 +2654,20 @@ function finishSit(early){
   if(lvl()>before)setTimeout(()=>toast(`⬆ LEVEL ${lvl()} — ${lvlName()}`,true),700);
   markDaily("sit");checkAch();
   renderPath();
+  setTimeout(()=>sitReflection(sitRec),500);   // #47
+}
+// #47: a gentle post-sit reflection — how was it?
+function sitReflection(rec){
+  const el=document.createElement("div");el.id="celebrate";
+  el.innerHTML=`<div class="cel-card"><div class="cel-burst">🧘</div><div class="cel-t">How was that sit?</div>
+    <div class="cel-s">one word — it's just for you</div>
+    <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:14px">
+      ${["😌 Calm","🌫️ Restless","🎯 Focused","😴 Sleepy","🌊 Deep"].map(m=>`<button class="ghostbtn cel-mood">${m}</button>`).join("")}</div>
+    <button class="fc-exit" id="cel-skip">skip</button></div>`;
+  document.body.appendChild(el);
+  const close=()=>el.remove();
+  el.querySelectorAll(".cel-mood").forEach(b=>b.onclick=()=>{rec.mood=b.textContent;save();close();toast("noted 🌱");});
+  el.querySelector("#cel-skip").onclick=close;el.onclick=e=>{if(e.target===el)close();};
 }
 $("sitcard").onclick=openSit;
 $("sit-start").onclick=()=>startSit(S.sitDur||15);
