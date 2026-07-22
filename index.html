@@ -273,7 +273,8 @@ header .brand span{color:var(--gold)}
 .srow .s mark{background:rgba(212,175,55,.3);color:var(--tx);border-radius:3px;padding:0 2px}
 .hlrow{background:var(--card);border-left:3px solid var(--gold);border-radius:8px;padding:13px 15px;margin-bottom:10px}
 .hlrow .q{font-family:var(--serif);font-size:14.5px;line-height:1.6}
-.hlrow .m{font-size:11.5px;color:var(--tx2);margin-top:7px;display:flex;justify-content:space-between}
+.hlrow .m{font-size:11.5px;color:var(--tx2);margin-top:7px;display:flex;justify-content:space-between;align-items:center}
+.hl-swatch{width:14px;height:14px;border-radius:50%;border:1px solid var(--line);vertical-align:middle;cursor:pointer;padding:0;margin-right:2px}
 .achgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
 .ach{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:15px;text-align:center}
 .ach.no{opacity:.3;filter:grayscale(1)}
@@ -621,6 +622,7 @@ header .brand span{color:var(--gold)}
   <div class="bigcard slim" id="pipestatus" style="display:none"></div>
   <button class="bigcard" id="pathcont" style="display:none"></button>
   <button class="bigcard" id="sharpen" style="display:none"></button>
+  <div class="bigcard" id="goalcard" style="display:none"></div>
   <div class="bigcard">
     <div class="tag">⚗️ TODAY'S MIX — <span id="mixsub"></span> <button id="mix-shuffle" title="Fresh blend" style="float:right;color:var(--tx2);font-size:15px">🔀</button></div>
     <div class="mixgrid" id="mixgrid"></div>
@@ -1696,7 +1698,11 @@ function renderJournal(){
     else{const b=bookById(h.b);if(b){label=b.glyph+" "+b.title;jump=()=>openEp(h.b,h.e);}}
     if(!label)label="— source no longer in the vault";
     const el=document.createElement("div");el.className="hlrow";if(jump)el.style.cursor="pointer";
-    el.innerHTML=`<div class="q">“${esc(h.t)}”</div><div class="m"><span>${esc(label)}${jump?" ›":""}</span><span><button style="color:var(--tx2)" data-share>share</button> <button style="color:var(--tx2)" data-del>remove</button></span></div>`;
+    el.style.borderLeftColor=h.c||"var(--gold)";   // #40
+    el.innerHTML=`<div class="q">“${esc(h.t)}”</div><div class="m"><span>${esc(label)}${jump?" ›":""}</span><span><button class="hl-swatch" data-color title="colour" style="background:${h.c||"var(--gold)"}"></button> <button style="color:var(--tx2)" data-share>share</button> <button style="color:var(--tx2)" data-del>remove</button></span></div>`;
+    el.querySelector("[data-color]").onclick=ev=>{ev.stopPropagation();   // #40: cycle highlight colour
+      const pal=["var(--gold)","var(--jade)","var(--ai)","#e07a5f","#5dade2"];const i=(pal.indexOf(h.c||"var(--gold)")+1)%pal.length;
+      h.c=pal[i];save();el.style.borderLeftColor=h.c;el.querySelector("[data-color]").style.background=h.c;};
     el.querySelector("[data-share]").onclick=ev=>{ev.stopPropagation();shareInsight("“"+h.t+"”"+(label?" — "+label.replace(/^\S+\s/,""):""));};   // #42
     el.querySelector("[data-del]").onclick=ev=>{ev.stopPropagation();
       S.hlDel=[...new Set([...(S.hlDel||[]),hlKey(h)])];   // #108: tombstone so sync doesn't resurrect it
@@ -1799,8 +1805,11 @@ $("btn-ach").onclick=()=>{const g=$("achgrid");g.innerHTML="";
   $("achs").classList.add("on")};
 
 /* ---------- patch notes ---------- */
-const APP_VER="3.27";
+const APP_VER="3.28";
 const PATCHES=[
+ {v:"3.28",n:"Aim & Colour",d:"23 Jul 2026",items:[
+  ["new","🎯 A weekly goal on the Path — set how many ideas you want to master this week and watch the bar fill. Hit it and there's a little celebration."],
+  ["new","Colour-code your highlights: tap the dot on any saved highlight to cycle its colour."]]},
  {v:"3.27",n:"Share & Settle",d:"23 Jul 2026",items:[
   ["new","Share a highlight: every saved highlight has a “share” action to send a single insight out (or copy it)."],
   ["new","After a sit, a gentle one-word reflection — calm, restless, focused — kept just for you."],
@@ -2032,6 +2041,31 @@ function rvState(id){const r=S.node[id];if(!r||!r.doneAt)return null;
   r.rv??={due:r.doneAt+864e5,k:0};return r.rv}
 function reviewDue(){if(!DATA.nodes)return[];const now=Date.now();
   return DATA.nodes.filter(x=>{const rv=rvState(x.id);return rv&&rv.due<=now})}
+// #39: a light weekly goal — master N ideas this week
+function weekStartMs(){const d=new Date();d.setHours(0,0,0,0);d.setDate(d.getDate()-d.getDay());return d.getTime();}
+function masteredThisWeek(){const ws=weekStartMs();return DATA.nodes.filter(n=>{const r=S.node[n.id];return r&&r.doneAt&&r.doneAt>=ws;}).length;}
+function renderGoal(){
+  const c=$("goalcard"),target=(S.goal&&S.goal.target)||0;
+  if(!target){
+    if(nodesDone()<1){c.style.display="none";return;}
+    c.style.display="block";c.className="bigcard";
+    c.innerHTML=`<div class="tag" style="color:var(--gold)">🎯 SET A WEEKLY GOAL</div>
+      <div style="color:var(--tx2);font-size:13px;margin:4px 0 10px">Aim for a few ideas a week — small and steady compounds.</div><div class="goalset"></div>`;
+    const gs=c.querySelector(".goalset");gs.style.cssText="display:flex;gap:8px;flex-wrap:wrap";
+    [3,5,7,10].forEach(t=>{const b=document.createElement("button");b.className="ghostbtn";b.textContent=t+" / week";b.onclick=()=>{S.goal={target:t};save();renderGoal();};gs.appendChild(b);});
+    return;
+  }
+  const done=masteredThisWeek(),pct=Math.min(100,Math.round(done/target*100)),hit=done>=target;
+  c.style.display="block";c.className="bigcard"+(hit?" alldone":"");
+  c.innerHTML=`<div class="tag" style="color:${hit?"var(--gold)":"var(--jade)"}">🎯 THIS WEEK${hit?" · GOAL REACHED 🎉":""}</div>
+    <div style="font-family:var(--serif);font-size:20px;margin:2px 0 7px">${done} / ${target} ideas mastered</div>
+    <div class="pbar" style="max-width:260px"><div class="pfill" style="width:${pct}%"></div></div>
+    <div style="margin-top:9px;font-size:12px"><span class="miniA" data-gd>− lower</span><span class="miniA" data-gu style="margin-left:12px">+ raise</span><span class="miniA" data-gc style="margin-left:12px">clear goal</span></div>`;
+  c.querySelector("[data-gd]").onclick=()=>{S.goal.target=Math.max(1,target-1);save();renderGoal();};
+  c.querySelector("[data-gu]").onclick=()=>{S.goal.target=target+1;save();renderGoal();};
+  c.querySelector("[data-gc]").onclick=()=>{S.goal=null;save();renderGoal();};
+  if(hit){const wk=weekStartMs();if(S.goal.hitWeek!==wk){S.goal.hitWeek=wk;save();setTimeout(()=>celebrate("🎯 Weekly goal reached!",target+" ideas mastered this week"),400);}}
+}
 function renderSharpen(){
   const due=reviewDue(),c=$("sharpen");
   if(!due.length){c.style.display="none";return}
@@ -2218,7 +2252,7 @@ function mergeState(a,b){ // union merge — never loses progress from either de
   if(m.errors.length>120)m.errors=m.errors.slice(0,120);
   m.faves=[...new Set([...(aNewer?(a.faves||[]):(b.faves||[])),...(a.faves||[]),...(b.faves||[])])];   // favorites union, newer device's order first
   m.lessonTimes=(aNewer?a.lessonTimes:b.lessonTimes)||a.lessonTimes||b.lessonTimes;   // real-time samples from the active device
-  for(const k of ["theme","readFont","lineH","readW","artOff","libSort","font","reminderH","mixNonce"])   // reading prefs follow the most-recent device
+  for(const k of ["theme","readFont","lineH","readW","artOff","libSort","font","reminderH","mixNonce","goal"])   // reading prefs + weekly goal follow the most-recent device
     if((aNewer?a:b)[k]!==undefined)m[k]=(aNewer?a:b)[k];
   m.booksFinished=[...new Set([...(a.booksFinished||[]),...(b.booksFinished||[])])];   // #21 celebrated-once markers
   m.freezes=Math.max(a.freezes||0,b.freezes||0);   // #18 streak freezes
@@ -2863,7 +2897,7 @@ function renderPath(){
       <div class="glyphbg">${tr.glyph}</div>`;
     c.onclick=()=>openNode(nx.id);
   } else c.style.display="none";
-  renderDaily();renderMix();renderSharpen();renderPipeStatus();
+  renderDaily();renderMix();renderSharpen();renderGoal();renderPipeStatus();
   const tm=sitTotalMin();
   $("sittxt").textContent=(S.sits&&S.sits.length?`${S.sits.length} sits · ${tm} min logged — `:"")+"begin a timed sit · bells at start & end";
   const tree=$("tree");tree.innerHTML="";
