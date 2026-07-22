@@ -999,7 +999,7 @@ function renderBookLanding(id){
     `<div class="bl-cover" style="background:linear-gradient(160deg,${b.accent}66,${b.accent}22 55%,var(--card2))"><div class="bl-g">${b.glyph}</div></div>`+
     `<div class="bl-title">${esc(b.title)}</div>`+(b.author?`<div class="bl-author">${esc(b.author)}</div>`:"")+
     `<div class="bl-prog"><div class="pbar"><div class="pfill" style="width:${pct}%"></div></div><div class="bl-progtxt">${done}/${b.episodes.length} episodes · ${pct}%${leftMin&&pct<100?` · ~${leftMin} min left`:pct>=100?" · finished ✓":""}</div></div>`+
-    `<div class="bl-actions"><button class="goldbtn" id="bl-start">${done===0?"Start reading":pct>=100?"Read again":"Continue"}</button><button class="ghostbtn" id="bl-fav">${fav?"★ Saved":"☆ Save"}</button></div>`+
+    `<div class="bl-actions"><button class="goldbtn" id="bl-start">${done===0?"Start reading":pct>=100?"Read again":"Continue"}</button><button class="ghostbtn" id="bl-fav">${fav?"★ Saved":"☆ Save"}</button>${pct<100?`<button class="ghostbtn" id="bl-allread" style="color:var(--tx2)">Mark all read</button>`:""}</div>`+
     `<div id="bl-path"></div>`+
     `<div class="prsec">Episodes</div><div class="bl-eps"></div>`;
   // #36: which Path ideas this book feeds — the missing book→Path link
@@ -1020,6 +1020,8 @@ function renderBookLanding(id){
   if(b.episodes.length>shown){const more=document.createElement("button");more.className="ghostbtn";more.style.marginTop="8px";
     more.textContent=`Show all ${b.episodes.length} chapters`;more.onclick=()=>{S._blExpand=true;renderBookLanding(id);};w.appendChild(more);}
   $("bl-start").onclick=()=>{$("booklanding").classList.remove("on");openBook(id);};
+  if($("bl-allread"))$("bl-allread").onclick=()=>{if(!confirm(`Mark all ${b.episodes.length} chapters of “${b.title}” as read?`))return;
+    S.read[id]=b.episodes.map((_,i)=>i);save();checkAch();renderBookLanding(id);toast("✓ Marked as read");};
   $("bl-fav").onclick=()=>{S.faves=S.faves||[];S.faves=fav?S.faves.filter(x=>x!==id):[id,...S.faves];save();renderBookLanding(id);};
 }
 function openBookLanding(id){S._blExpand=false;renderBookLanding(id);$("booklanding").classList.add("on");}
@@ -1264,6 +1266,25 @@ function checkReminder(){
   try{navigator.serviceWorker.ready.then(reg=>reg.showNotification("The Vault",{body:"Your daily rite is waiting — learn, sharpen, sit.",icon:"./icon-192.png",tag:"vault-rite"})).catch(()=>{});}catch(e){}
 }
 addEventListener("visibilitychange",()=>{if(!document.hidden)checkReminder();});
+// NEXT-BATCH: reader swipe (mobile) + keyboard shortcuts (desktop) + Escape closes overlays
+let _touch={x:0,y:0,t:0};
+(function(){const r=$("reader");if(!r)return;
+  r.addEventListener("touchstart",e=>{if(e.touches.length===1)_touch={x:e.touches[0].clientX,y:e.touches[0].clientY,t:Date.now()};},{passive:true});
+  r.addEventListener("touchend",e=>{const c=e.changedTouches[0];const dx=c.clientX-_touch.x,dy=c.clientY-_touch.y,dt=Date.now()-_touch.t;
+    if(getSelection&&String(getSelection()).length>1)return;   // don't hijack a text selection
+    if(dt<600&&Math.abs(dx)>70&&Math.abs(dx)>Math.abs(dy)*2){const b=bookById(CUR.b);if(!b)return;
+      if(dx<0&&CUR.e<b.episodes.length-1)openEp(CUR.b,CUR.e+1);else if(dx>0&&CUR.e>0)openEp(CUR.b,CUR.e-1);}
+  },{passive:true});
+})();
+addEventListener("keydown",e=>{
+  if(e.key==="Escape"){const ov=[...document.querySelectorAll(".overlay.on")];if(ov.length){ov.forEach(o=>o.classList.remove("on"));stopFlow();return;}
+    ["flashcards","celebrate","welcome"].forEach(id=>{const el=document.getElementById(id);if(el)el.remove();});
+    if($("defpop").classList.contains("on"))$("defpop").classList.remove("on");return;}
+  if(e.target.matches&&e.target.matches("input,textarea,select"))return;
+  if($("reader").classList.contains("on")){const b=bookById(CUR.b);if(!b)return;
+    if(e.key==="ArrowRight"&&CUR.e<b.episodes.length-1){e.preventDefault();openEp(CUR.b,CUR.e+1);}
+    else if(e.key==="ArrowLeft"&&CUR.e>0){e.preventDefault();openEp(CUR.b,CUR.e-1);}}
+});
 $("btn-settings").onclick=()=>{renderSettings();$("settings").classList.add("on")};
 /* ---------- progress dashboard (#24/#20/#26/#27) ---------- */
 function renderProgress(){
@@ -1857,8 +1878,12 @@ $("btn-ach").onclick=()=>{const g=$("achgrid");g.innerHTML="";
   $("achs").classList.add("on")};
 
 /* ---------- patch notes ---------- */
-const APP_VER="3.30";
+const APP_VER="3.31";
 const PATCHES=[
+ {v:"3.31",n:"Fingers & Keys",d:"23 Jul 2026",items:[
+  ["new","Swipe left/right in a book to flip between chapters, and on a computer the arrow keys do the same — Escape closes any popup."],
+  ["new","“Mark all read” on a book's page, for books you've already finished elsewhere."],
+  ["fix","Your recently-viewed list now syncs across devices."]]},
  {v:"3.30",n:"Finishing Touches",d:"23 Jul 2026",items:[
   ["polish","Book covers got a glow-up — a spine, a soft sheen, the author's name, and titles that stay legible on any cover."],
   ["polish","Your journal export is now proper structured Markdown, with a summary, grouped highlights, saved words and your missed questions."],
@@ -2309,6 +2334,9 @@ function mergeState(a,b){ // union merge — never loses progress from either de
   for(const e of [...(a.errors||[]),...(b.errors||[])].sort((x,y)=>(y.at||0)-(x.at||0))){if(e.key&&!eseen.has(e.key)){eseen.add(e.key);m.errors.push(e);}}
   if(m.errors.length>120)m.errors=m.errors.slice(0,120);
   m.faves=[...new Set([...(aNewer?(a.faves||[]):(b.faves||[])),...(a.faves||[]),...(b.faves||[])])];   // favorites union, newer device's order first
+  {const rseen=new Set();m.recent=[];   // recently-viewed: union by key, newest first, cap 12
+   for(const r of [...(a.recent||[]),...(b.recent||[])].sort((x,y)=>(y.at||0)-(x.at||0)))if(r.k&&!rseen.has(r.k)){rseen.add(r.k);m.recent.push(r);}
+   m.recent=m.recent.slice(0,12);}
   m.lessonTimes=(aNewer?a.lessonTimes:b.lessonTimes)||a.lessonTimes||b.lessonTimes;   // real-time samples from the active device
   for(const k of ["theme","readFont","lineH","readW","artOff","libSort","font","reminderH","reminderOn","mixNonce","goal"])   // reading prefs + weekly goal follow the most-recent device
     if((aNewer?a:b)[k]!==undefined)m[k]=(aNewer?a:b)[k];
