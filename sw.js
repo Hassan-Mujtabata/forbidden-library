@@ -1,4 +1,4 @@
-const CACHE = "vault-v46";
+const CACHE = "vault-v47";
 const ASSETS = ["./", "./index.html", "./content.enc", "./manifest.json", "./icon.svg",
   "./icon-192.png", "./icon-512.png", "./apple-touch-icon.png",
   // #89: precache access/status so the visibility rules and pipeline card survive offline (they're network-first below)
@@ -24,6 +24,21 @@ self.addEventListener("activate", e => {
       .then(keys => Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k))))
       .then(() => self.clients.claim())
   );
+});
+
+// #33: daily-rite reminder for installed PWAs (Chrome/Android). minInterval is a hint; the browser
+// decides when to fire, and only for installed apps with notification permission.
+self.addEventListener("periodicsync", e => {
+  if (e.tag === "vault-rite") {
+    e.waitUntil(self.registration.showNotification("The Vault", {
+      body: "Your daily rite is waiting — learn one idea, sharpen another, and sit.",
+      icon: "./icon-192.png", badge: "./icon-192.png", tag: "vault-rite", renotify: false
+    }));
+  }
+});
+self.addEventListener("notificationclick", e => {
+  e.notification.close();
+  e.waitUntil(self.clients.matchAll({ type: "window" }).then(cs => cs.length ? cs[0].focus() : self.clients.openWindow("./")));
 });
 
 // stale-while-revalidate: serve instantly from cache, refresh in the background

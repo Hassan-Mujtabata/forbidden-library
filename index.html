@@ -867,7 +867,7 @@ async function boot(){
     }).catch(()=>{});
   }
 }
-function landing(){ if(DATA.nodes&&DATA.nodes.length){renderPath();show("path")} else {renderHome();show("home")} patchCheck(); initA11y();
+function landing(){ if(DATA.nodes&&DATA.nodes.length){renderPath();show("path")} else {renderHome();show("home")} patchCheck(); initA11y(); setTimeout(checkReminder,1500);
   if(!S.welcomed&&totalRead()===0&&nodesDone()===0&&(S.hl||[]).length===0)setTimeout(showWelcome,700); else if(!S.welcomed){S.welcomed=true;save();} }   // #26: only greet genuinely-new keyholders
 // #44: accessibility — give icon-only controls names and hide decorative art from screen readers
 function initA11y(){
@@ -1208,8 +1208,11 @@ function renderSettings(){
     seg("Line spacing","lineH",[["1.5","Tight"],["1.75","Normal"],["2","Airy"]],String(S.lineH||1.75))+
     seg("Column width","readW",[["560","Narrow"],["660","Normal"],["820","Wide"]],String(S.readW||660))+
     `<label class="setrow settog"><span class="setlbl">Banner artwork (dark theme)</span><input type="checkbox" id="set-art" ${S.artOff?"":"checked"}></label>`+
-    `<div class="setnote">These apply everywhere you read, and sync across your devices.</div>`;
-  b.querySelectorAll(".setseg").forEach(sg=>{const key=sg.dataset.key;
+    // #33: daily reminder
+    `<div class="setrow"><div class="setlbl">Daily rite reminder</div><div class="setseg" id="remseg"><button class="segbtn${S.reminderOn?"":" on"}" data-rem="off">Off</button><button class="segbtn${S.reminderOn?" on":""}" data-rem="on">On</button></div></div>`+
+    `<div class="setrow" id="remtimerow" style="${S.reminderOn?"":"display:none"}"><div class="setlbl">Remind me at</div><select id="remtime" class="setseg" style="padding:8px 10px;color:var(--tx);font-family:inherit">${[7,8,9,12,17,18,19,20,21,22].map(hh=>`<option value="${hh}" ${(S.reminderH!=null?S.reminderH:19)==hh?"selected":""}>${hh}:00</option>`).join("")}</select></div>`+
+    `<div class="setnote">These apply everywhere you read, and sync across your devices. Reminders fire in the background when the app is installed to your home screen; otherwise you're nudged when you next open it.</div>`;
+  b.querySelectorAll(".setseg:not(#remseg)").forEach(sg=>{const key=sg.dataset.key;if(!key)return;
     sg.querySelectorAll(".segbtn").forEach(btn=>btn.onclick=()=>{
       const v=btn.dataset.v;
       if(key==="font"||key==="readW")S[key]=+v; else if(key==="lineH")S.lineH=+v; else S[key]=v;
@@ -1218,7 +1221,34 @@ function renderSettings(){
     });});
   $("set-art").onchange=e=>{S.artOff=!e.target.checked;save();
     if($("reader").classList.contains("on"))openEp(CUR.b,CUR.e);else if($("node").classList.contains("on")&&CURN)openNode(CURN);};
+  $("remseg").querySelectorAll("[data-rem]").forEach(btn=>btn.onclick=async()=>{
+    if(btn.dataset.rem==="on"){const ok=await enableReminder();if(!ok)return;}else await disableReminder();
+    renderSettings();});
+  $("remtime").onchange=e=>{S.reminderH=+e.target.value;save();};
 }
+// #33 reminders
+async function enableReminder(){
+  if(!("Notification"in window)){toast("Notifications aren't supported here");return false;}
+  let perm=Notification.permission;if(perm==="default")perm=await Notification.requestPermission();
+  if(perm!=="granted"){toast("Allow notifications to get reminders");return false;}
+  S.reminderOn=true;if(S.reminderH==null)S.reminderH=19;save();
+  try{const reg=await navigator.serviceWorker.ready;
+    if(reg&&"periodicSync"in reg){const st=await navigator.permissions.query({name:"periodic-background-sync"}).catch(()=>({state:"denied"}));
+      if(st.state==="granted")await reg.periodicSync.register("vault-rite",{minInterval:20*3600*1000}).catch(()=>{});}
+  }catch(e){}
+  toast("🔔 Daily reminder on");return true;
+}
+async function disableReminder(){S.reminderOn=false;save();
+  try{const reg=await navigator.serviceWorker.ready;if(reg&&reg.periodicSync)await reg.periodicSync.unregister("vault-rite").catch(()=>{});}catch(e){}
+  toast("Reminder off");}
+function checkReminder(){
+  if(!S.reminderOn||!("Notification"in window)||Notification.permission!=="granted")return;
+  const h=(S.reminderH!=null?S.reminderH:19);if(new Date().getHours()<h)return;
+  if(typeof dailyDone==="function"&&dailyDone())return;
+  const key=today();if(S._remindedDay===key)return;S._remindedDay=key;save();
+  try{navigator.serviceWorker.ready.then(reg=>reg.showNotification("The Vault",{body:"Your daily rite is waiting — learn, sharpen, sit.",icon:"./icon-192.png",tag:"vault-rite"})).catch(()=>{});}catch(e){}
+}
+addEventListener("visibilitychange",()=>{if(!document.hidden)checkReminder();});
 $("btn-settings").onclick=()=>{renderSettings();$("settings").classList.add("on")};
 /* ---------- progress dashboard (#24/#20/#26/#27) ---------- */
 function renderProgress(){
@@ -1805,8 +1835,10 @@ $("btn-ach").onclick=()=>{const g=$("achgrid");g.innerHTML="";
   $("achs").classList.add("on")};
 
 /* ---------- patch notes ---------- */
-const APP_VER="3.28";
+const APP_VER="3.29";
 const PATCHES=[
+ {v:"3.29",n:"The Nudge",d:"23 Jul 2026",items:[
+  ["new","🔔 Daily reminders — turn them on in ⚙️ Settings and pick a time. Installed to your home screen, the reminder arrives in the background; otherwise it greets you when you next open the app."]]},
  {v:"3.28",n:"Aim & Colour",d:"23 Jul 2026",items:[
   ["new","🎯 A weekly goal on the Path — set how many ideas you want to master this week and watch the bar fill. Hit it and there's a little celebration."],
   ["new","Colour-code your highlights: tap the dot on any saved highlight to cycle its colour."]]},
@@ -2252,7 +2284,7 @@ function mergeState(a,b){ // union merge — never loses progress from either de
   if(m.errors.length>120)m.errors=m.errors.slice(0,120);
   m.faves=[...new Set([...(aNewer?(a.faves||[]):(b.faves||[])),...(a.faves||[]),...(b.faves||[])])];   // favorites union, newer device's order first
   m.lessonTimes=(aNewer?a.lessonTimes:b.lessonTimes)||a.lessonTimes||b.lessonTimes;   // real-time samples from the active device
-  for(const k of ["theme","readFont","lineH","readW","artOff","libSort","font","reminderH","mixNonce","goal"])   // reading prefs + weekly goal follow the most-recent device
+  for(const k of ["theme","readFont","lineH","readW","artOff","libSort","font","reminderH","reminderOn","mixNonce","goal"])   // reading prefs + weekly goal follow the most-recent device
     if((aNewer?a:b)[k]!==undefined)m[k]=(aNewer?a:b)[k];
   m.booksFinished=[...new Set([...(a.booksFinished||[]),...(b.booksFinished||[])])];   // #21 celebrated-once markers
   m.freezes=Math.max(a.freezes||0,b.freezes||0);   // #18 streak freezes
