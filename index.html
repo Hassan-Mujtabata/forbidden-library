@@ -206,6 +206,17 @@ header .brand span{color:var(--gold)}
 .wc-dots span{width:7px;height:7px;border-radius:50%;background:var(--card2)}
 .wc-dots span.on{background:var(--gold)}
 .wc-skip{color:var(--tx2);font-size:12.5px;margin-top:14px;cursor:pointer}
+/* read-aloud + focus mode */
+.tts-now{background:rgba(78,205,196,.14);border-radius:6px;box-shadow:0 0 0 5px rgba(78,205,196,.14);transition:background .2s}
+.focusmode #rbody>p,.focusmode #rbody>blockquote,.focusmode #nbody>p{opacity:.26;transition:opacity .35s}
+.focusmode #rbody>p.focuspara,.focusmode #rbody>blockquote.focuspara,.focusmode #nbody>p.focuspara{opacity:1}
+/* recently viewed */
+.recrow{display:flex;gap:10px;overflow-x:auto;padding:2px 2px 6px;-webkit-overflow-scrolling:touch}
+.recchip{flex:0 0 auto;width:150px;text-align:left;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 12px;transition:.2s}
+.recchip:hover{background:var(--card2);transform:translateY(-2px)}
+.recchip .g{font-size:20px}
+.recchip .rt{display:block;font-size:13px;font-weight:600;line-height:1.3;margin-top:5px;-webkit-line-clamp:2;-webkit-box-orient:vertical;display:-webkit-box;overflow:hidden}
+.recchip .rs{display:block;font-size:11px;color:var(--tx2);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 /* book landing */
 .bl-cover{height:130px;border-radius:14px;display:flex;align-items:center;justify-content:center;margin:6px 0 16px}
 .bl-g{font-size:56px;filter:drop-shadow(0 4px 12px rgba(0,0,0,.4))}
@@ -323,6 +334,9 @@ header .brand span{color:var(--gold)}
 /* ---------- the path (skill tree) ---------- */
 #path{padding-top:6px}
 #tree{display:flex;gap:16px;overflow-x:auto;padding:8px 2px 24px}
+#trackjump{gap:6px;overflow-x:auto;padding:6px 2px 10px;-webkit-overflow-scrolling:touch}
+.jbtn{flex:0 0 auto;width:40px;height:38px;border-radius:10px;border:1px solid var(--line);background:var(--card);font-size:18px;cursor:pointer;transition:.15s}
+.jbtn:hover{background:var(--card2);transform:translateY(-1px)}
 .track{min-width:250px;max-width:290px;flex:0 0 auto}
 .track-h{display:flex;align-items:center;gap:9px;padding:11px 13px;border-radius:13px;background:var(--card);
   border:1px solid var(--line);border-left:3px solid var(--tacc,var(--gold))}
@@ -597,11 +611,13 @@ header .brand span{color:var(--gold)}
     <div class="mixgrid" id="mixgrid"></div>
   </div>
   <button class="bigcard slim" id="sitcard"><span class="tag" style="color:var(--jade)">🧘 SIT</span><span class="slimtxt" id="sittxt"></span></button>
+  <div id="trackjump" style="display:none"></div>
   <div id="tree"></div>
 </div>
 
 <div id="home" class="view">
   <button class="bigcard" id="continue" style="display:none"></button>
+  <div id="recent" style="display:none;margin-bottom:16px"></div>
   <div id="shelves"></div>
 </div>
 
@@ -612,6 +628,8 @@ header .brand span{color:var(--gold)}
     <div class="bt" id="r-title"></div>
     <button class="iconbtn" id="r-fminus" title="Smaller text">A−</button>
     <button class="iconbtn" id="r-fplus" title="Bigger text">A+</button>
+    <button class="iconbtn" id="r-tts" title="Read aloud">🔊</button>
+    <button class="iconbtn" id="r-focus" title="Focus mode">🎯</button>
     <button class="iconbtn" id="r-flow" title="Flow mode">⚡</button>
     <button class="iconbtn" id="r-list" title="Episodes">☰</button>
   </div>
@@ -626,6 +644,8 @@ header .brand span{color:var(--gold)}
     <div class="bt" id="n-title"></div>
     <button class="iconbtn" id="n-fminus" title="Smaller text">A−</button>
     <button class="iconbtn" id="n-fplus" title="Bigger text">A+</button>
+    <button class="iconbtn" id="n-tts" title="Read aloud">🔊</button>
+    <button class="iconbtn" id="n-focus" title="Focus mode">🎯</button>
     <button class="iconbtn" id="n-flow" title="Flow mode">⚡</button>
   </div>
   <div id="nbody" class="rdbody"></div>
@@ -840,6 +860,8 @@ let LAST_ROOT="path";
 function show(v,nopush){for(const el of document.querySelectorAll(".view"))el.classList.remove("on");
   for(const el of document.querySelectorAll(".overlay"))el.classList.remove("on");
   if(v!=="reader")stopArt();
+  if(typeof stopTTS==="function")stopTTS();   // #46: never keep reading after leaving the page
+  if(v!=="reader"&&v!=="node"){FOCUS=false;$("reader").classList.remove("focusmode");$("node").classList.remove("focusmode");}   // #49
   $("topbar").style.display=(v==="home"||v==="path")?"flex":"none";
   if(v==="home"||v==="path"){setNav(v);LAST_ROOT=v;}
   // one history entry while inside a lesson/episode so the phone back button exits to the map, not the app
@@ -890,6 +912,13 @@ function renderHome(){
       <div class="cs">${esc(b.title)} — episode ${S.pos[S.last].ep+1} of ${b.episodes.length}</div>
       <div class="glyphbg">${b.glyph}</div>`;
     c.onclick=()=>openEp(b.id,S.pos[S.last].ep);}}
+  // #35: recently viewed — jump back into anything
+  const rc=$("recent");const recents=(S.recent||[]).filter(r=>r.type==="node"?nodeById(r.id):(bookById(r.id)&&bookVisible(r.id)));
+  if(recents.length>1){rc.style.display="block";
+    rc.innerHTML=`<div class="tag" style="margin:0 0 8px 2px">↩ JUMP BACK IN</div><div class="recrow">`+
+      recents.slice(0,10).map((r,i)=>`<button class="recchip" data-ri="${i}"><span class="g">${r.glyph||"📖"}</span><span class="rt">${esc(r.title)}</span><span class="rs">${esc(r.sub||"")}</span></button>`).join("")+`</div>`;
+    rc.querySelectorAll("[data-ri]").forEach(b=>b.onclick=()=>{const r=recents[+b.dataset.ri];r.type==="ep"?openEp(r.id,r.ep):openNode(r.id);});
+  } else rc.style.display="none";
   const sh=$("shelves");sh.innerHTML="";
   const bookCard=b=>{
     const done=readSet(b.id).size,pct=Math.round(done/b.episodes.length*100);
@@ -996,11 +1025,17 @@ function openBook(id){const b=bookById(id);const rs=readSet(id);
   let e=S.pos[id]?S.pos[id].ep:0;
   if(rs.has(e)){let n=b.episodes.findIndex((_,i)=>!rs.has(i));if(n>=0)e=n}
   openEp(id,e)}
+function pushRecent(item){   // #35: recently-viewed lessons & books
+  S.recent=(S.recent||[]).filter(r=>r.k!==item.k);
+  S.recent.unshift(item);if(S.recent.length>12)S.recent=S.recent.slice(0,12);
+}
 function openEp(id,e){
   const b=bookById(id);if(!b)return;
   // #65: keep the saved scroll when reopening the SAME episode; only reset when the episode changes
   const prev=S.pos[id];const keepScroll=(prev&&prev.ep===e)?(prev.scroll||0):0;
-  CUR={b:id,e};S.last=id;S.pos[id]={ep:e,scroll:keepScroll};save();
+  CUR={b:id,e};S.last=id;S.pos[id]={ep:e,scroll:keepScroll};
+  pushRecent({k:"b:"+id,type:"ep",id,ep:e,title:b.episodes[e].t,sub:b.title,glyph:b.glyph,at:Date.now()});
+  save();
   const ep=b.episodes[e];
   $("r-title").textContent=`${b.glyph} ${b.title} — ${e+1}/${b.episodes.length}`;
   const body=$("rbody");body.innerHTML="";body.style.fontSize=S.font+"px";
@@ -1090,7 +1125,7 @@ function revealVisible(factor){
 let scrollT;window.addEventListener("scroll",()=>{
   const inReader=$("reader").classList.contains("on"),inNode=$("node").classList.contains("on");
   if(!inReader&&!inNode)return;
-  revealVisible();
+  revealVisible();updateFocusPara();   // #49
   const h=document.documentElement,max=h.scrollHeight-h.clientHeight;
   const pct=(max>0?h.scrollTop/max*100:0)+"%";
   if(inReader)$("rprog").style.width=pct;else $("rprog2").style.width=pct;
@@ -1685,8 +1720,12 @@ $("btn-ach").onclick=()=>{const g=$("achgrid");g.innerHTML="";
   $("achs").classList.add("on")};
 
 /* ---------- patch notes ---------- */
-const APP_VER="3.23";
+const APP_VER="3.24";
 const PATCHES=[
+ {v:"3.24",n:"Read, Focus, Return",d:"21 Jul 2026",items:[
+  ["new","🔊 Read aloud: tap the speaker in any lesson or episode and it reads to you, highlighting each paragraph — perfect for commutes or resting your eyes."],
+  ["new","🎯 Focus mode dims everything but the paragraph you're on, following you as you read."],
+  ["new","↩ Jump back in: a “recently viewed” row on the Library home takes you straight to your last lessons and books. And the Path has a track jump-bar to hop anywhere in one tap."]]},
  {v:"3.23",n:"Legible in Every Light",d:"21 Jul 2026",items:[
   ["fix","Fixed the light and sepia themes: text that was unreadable on the new backgrounds — the sticky reader bar, quiz feedback, patch notes, error messages, the highlight menu — now adapts to every theme, and muted text meets proper contrast."],
   ["fix","The activity heatmap now lines up as real weeks with today in the last column; long books no longer render a giant chapter list (they cap at 40 with a “show all”); and Account shows a live, self-updating sync time."]]},
@@ -2567,6 +2606,52 @@ function stopFlow(){F.playing=false;clearTimeout(F.timer);if(F.key&&F.i>0&&F.i<F
 $("f-play").onclick=()=>{if(F.playing){stopFlow();$("f-play").textContent="▶ play"}else startFlow()};
 $("f-wpm").oninput=e=>{S.wpm=+e.target.value;$("f-wpmv").textContent=S.wpm;save()};
 
+/* ---------- #46 read-aloud (Web Speech API) ---------- */
+let TTS={paras:[],i:0,on:false};
+function ttsParas(){
+  if($("reader").classList.contains("on")){const b=bookById(CUR.b);return b?b.episodes[CUR.e].p.slice():[];}
+  if($("node").classList.contains("on")&&CURN){const n=nodeById(CURN);return n?[...(n.bridge||[]),...(n.sources||[]).flatMap(s=>s.quote||[])]:[];}
+  return [];
+}
+function stopTTS(){try{speechSynthesis.cancel();}catch(e){}TTS.on=false;
+  document.querySelectorAll(".tts-now").forEach(el=>el.classList.remove("tts-now"));
+  ["r-tts","n-tts"].forEach(id=>{const b=$(id);if(b)b.textContent="🔊";});}
+function toggleTTS(id){
+  if(!("speechSynthesis"in window)){toast("Read-aloud isn't supported on this device");return;}
+  if(TTS.on){stopTTS();return;}
+  TTS.paras=ttsParas();if(!TTS.paras.length)return;TTS.i=0;TTS.on=true;
+  const btn=$(id);if(btn)btn.textContent="⏹";
+  const body=$("reader").classList.contains("on")?$("rbody"):$("nbody");
+  const pEls=[...body.querySelectorAll(":scope>p, :scope>blockquote")];
+  const next=()=>{
+    if(!TTS.on||TTS.i>=TTS.paras.length){stopTTS();return;}
+    document.querySelectorAll(".tts-now").forEach(el=>el.classList.remove("tts-now"));
+    const el=pEls[TTS.i];if(el){el.classList.add("tts-now");el.scrollIntoView({block:"center",behavior:"smooth"});}
+    const u=new SpeechSynthesisUtterance(TTS.paras[TTS.i]);u.rate=1;u.onend=()=>{TTS.i++;next();};u.onerror=()=>{TTS.i++;next();};
+    speechSynthesis.speak(u);
+  };
+  next();
+}
+$("r-tts").onclick=()=>toggleTTS("r-tts");
+$("n-tts").onclick=()=>toggleTTS("n-tts");
+/* ---------- #49 focus mode ---------- */
+let FOCUS=false;
+function focusSel(){return $("reader").classList.contains("on")?"#rbody>p,#rbody>blockquote":"#nbody>p";}
+function updateFocusPara(){
+  if(!FOCUS)return;const mid=window.innerHeight*0.42;let best=null,bd=1e9;
+  document.querySelectorAll(focusSel()).forEach(p=>{const r=p.getBoundingClientRect();const c=r.top+r.height/2;const d=Math.abs(c-mid);if(d<bd){bd=d;best=p;}});
+  document.querySelectorAll(focusSel()).forEach(p=>p.classList.toggle("focuspara",p===best));
+}
+function toggleFocus(){
+  FOCUS=!FOCUS;
+  $("reader").classList.toggle("focusmode",FOCUS&&$("reader").classList.contains("on"));
+  $("node").classList.toggle("focusmode",FOCUS&&$("node").classList.contains("on"));
+  if(FOCUS){updateFocusPara();toast("🎯 Focus mode — tap again to turn off");}
+  else document.querySelectorAll(".focuspara").forEach(p=>p.classList.remove("focuspara"));
+}
+$("r-focus").onclick=toggleFocus;
+$("n-focus").onclick=toggleFocus;
+
 /* ---------- side illustrations: concept -> animated SVG ---------- */
 const wrap=(A,inner)=>`<svg viewBox="0 0 100 100" fill="none" stroke="${A}" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">${inner}</svg>`;
 const FIGURES=[
@@ -2681,9 +2766,14 @@ function renderPath(){
   const tree=$("tree");tree.innerHTML="";
   // #82: on first paint, collapse fully-mastered tracks so 13 tracks isn't one endless scroll
   if(!_collapseInit){_collapseInit=true;for(const tr of DATA.tracks){const tn=DATA.nodes.filter(n=>n.track===tr.id);if(tn.length&&tn.every(n=>nodeDone(n.id)))COLLAPSED.add(tr.id);}}
+  // #34: track jump-nav — a row of glyphs to hop to any track
+  const jump=$("trackjump");const visTracks=DATA.tracks.filter(t=>trackVisible(t.id));
+  if(visTracks.length>3){jump.style.display="flex";jump.innerHTML=visTracks.map(t=>`<button class="jbtn" data-jt="${t.id}" title="${esc(t.name)}">${t.glyph}</button>`).join("");
+    jump.querySelectorAll("[data-jt]").forEach(b=>b.onclick=()=>{const c=document.getElementById("trk-"+b.dataset.jt);if(c){COLLAPSED.delete(b.dataset.jt);c.classList.remove("collapsed");c.scrollIntoView({behavior:"smooth",inline:"start",block:"nearest"});}});
+  } else jump.style.display="none";
   for(const tr of DATA.tracks){
     if(!trackVisible(tr.id))continue;
-    const col=document.createElement("div");col.className="track"+(COLLAPSED.has(tr.id)?" collapsed":"");col.style.setProperty("--tacc",tr.accent);
+    const col=document.createElement("div");col.id="trk-"+tr.id;col.className="track"+(COLLAPSED.has(tr.id)?" collapsed":"");col.style.setProperty("--tacc",tr.accent);
     const ns=DATA.nodes.filter(n=>n.track===tr.id).sort((a,b)=>a.tier-b.tier);
     const doneN=ns.filter(n=>nodeDone(n.id)).length;
     const trDone=ns.length>0&&doneN===ns.length;   // #83: mark a fully-mastered track
@@ -2789,6 +2879,7 @@ function openNode(id){
       el.appendChild(document.createTextNode(" "));el.appendChild(x);}
     body.appendChild(el);}
   (S.node[id]=S.node[id]||{}).read=true;S.lastTrack=n.track;
+  pushRecent({k:"n:"+id,type:"node",id,title:n.title,sub:trackById(n.track).name,glyph:n.glyph,at:Date.now()});   // #35
   if(st==="avail"&&!nodeDone(id))S.node[id].openAt=Date.now();   // tutor-I #50: time this session for a real per-lesson estimate
   save();   // #80: remember the track being worked
   // #10: opening a lesson no longer credits the daily "Learn" — that's earned by passing the quiz (gradeQuiz) or finishing an episode
