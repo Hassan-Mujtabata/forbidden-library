@@ -158,6 +158,7 @@ header .brand span{color:var(--gold)}
 .tu-ask{display:flex;gap:6px;margin-top:8px}
 .tu-ask input{flex:1;background:var(--bg2);border:1px solid var(--line);border-radius:10px;color:var(--tx);padding:8px 11px;font-size:13px;font-family:inherit;outline:none}
 .tu-ask #tutor-go{border:1px solid rgba(212,175,55,.4);border-radius:10px;background:var(--card);color:var(--gold);padding:0 14px;font-size:13px;cursor:pointer}
+.tu-ask #tutor-mic{border:1px solid var(--line);border-radius:10px;background:var(--card);padding:0 11px;font-size:14px;cursor:pointer}
 .thist{padding:11px 12px;border:1px solid var(--line);border-radius:10px;margin-bottom:8px;cursor:pointer;background:var(--card)}
 .thist:hover{background:var(--card2)}
 #rtime{position:fixed;bottom:16px;right:14px;z-index:15;background:var(--card2);border:1px solid var(--line);border-radius:99px;padding:5px 12px;font-size:11.5px;color:var(--tx2);backdrop-filter:blur(6px);pointer-events:none}
@@ -202,6 +203,13 @@ header .brand span{color:var(--gold)}
 .hm-cell.future{visibility:hidden}
 .prach{display:flex;gap:11px;align-items:center;padding:7px 0}
 .prach .e{font-size:22px}.prach b{font-size:14px}.prach small{display:block;color:var(--tx2);font-size:12px}
+.prtrk{display:flex;gap:10px;align-items:center;padding:6px 0}
+.prtg{font-size:19px}
+.prtmid{flex:1;min-width:0}
+.prtname{font-size:13px;display:flex;justify-content:space-between;gap:8px;margin-bottom:5px}
+.prtn{color:var(--tx2);font-size:11.5px;white-space:nowrap}
+.prtbar{height:6px;background:var(--card2);border-radius:99px;overflow:hidden}
+.prtbar>div{height:100%;border-radius:99px}
 /* milestone celebration */
 #celebrate{position:fixed;inset:0;z-index:200;display:flex;align-items:center;justify-content:center;background:var(--overlay);backdrop-filter:blur(6px);animation:pop .3s}
 .cel-card{text-align:center;padding:34px 30px;max-width:400px}
@@ -283,6 +291,7 @@ header .brand span{color:var(--gold)}
 .hlrow .q{font-family:var(--serif);font-size:14.5px;line-height:1.6}
 .hlrow .m{font-size:11.5px;color:var(--tx2);margin-top:7px;display:flex;justify-content:space-between;align-items:center}
 .hl-swatch{width:14px;height:14px;border-radius:50%;border:1px solid var(--line);vertical-align:middle;cursor:pointer;padding:0;margin-right:2px}
+.hlnote{font-size:12.5px;color:var(--tx2);font-style:italic;margin-top:6px;line-height:1.5;border-top:1px dashed var(--line);padding-top:7px}
 .achgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
 .ach{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:15px;text-align:center}
 .ach.no{opacity:.5;filter:grayscale(.7)}
@@ -1335,6 +1344,11 @@ function renderProgress(){
     `<div class="prrings">${ring(Math.round(ideasDone/ideasTotal*100),ideasDone+"/"+ideasTotal,"ideas")}${ring(Math.round(epsDone/(epsTotal||1)*100),epsDone,"episodes")}${ring(Math.round(booksDone/DATA.books.length*100),booksDone+"/"+DATA.books.length,"books")}${ring(Math.round(S.ach.length/ACH.length*100),S.ach.length+"/"+ACH.length,"badges")}</div>`+
     `<div class="prstats"><span>⏱️ <b>${hrs}</b> invested</span><span>🔥 <b>${best}</b> best streak</span><span>🗺️ <b>${tracksDone}</b> tracks done</span><span>🌟 <b>${S.ritesN||0}</b> rites</span></div>`+
     `<div class="prsec">Activity · last 12 weeks</div><div class="hmgrid">${cells}</div>`+
+    // per-track progress breakdown
+    (()=>{const trs=DATA.tracks.filter(t=>privileged()||trackVisible(t.id));if(!trs.length)return "";
+      return `<div class="prsec">By track</div>`+trs.map(t=>{const ns=DATA.nodes.filter(n=>n.track===t.id&&!n.stub);if(!ns.length)return "";
+        const d=ns.filter(n=>nodeDone(n.id)).length,p=Math.round(d/ns.length*100);
+        return `<div class="prtrk"><span class="prtg">${t.glyph}</span><div class="prtmid"><div class="prtname">${esc(t.name)}<span class="prtn">${d}/${ns.length}</span></div><div class="prtbar"><div style="width:${p}%;background:${p>=100?"var(--gold)":"var(--jade)"}"></div></div></div></div>`;}).join("");})()+
     (locked.length?`<div class="prsec">Next badges to earn</div>`+locked.map(a=>`<div class="prach"><span class="e">${a.e}</span><div><b>${esc(a.n)}</b><small>${esc(a.d)}</small></div></div>`).join(""):"");
 }
 $("xpwrap").style.cursor="pointer";$("xpwrap").title="Your progress";
@@ -1707,12 +1721,22 @@ function renderTutor(pending){
       <button class="tu-chip" data-q="Give me an analogy from video games or daily life.">analogy</button>
       <button class="tu-chip" data-q="Draw this as a simple arrow diagram in plain text (like: cue -> craving -> response -> reward).">diagram</button>
     </div>
-    <div class="tu-ask"><input id="tutor-in" placeholder="ask a follow-up…" autocomplete="off"><button id="tutor-go">ask</button></div>`;
+    <div class="tu-ask"><input id="tutor-in" placeholder="ask a follow-up…" autocomplete="off">${(window.SpeechRecognition||window.webkitSpeechRecognition)?`<button id="tutor-mic" title="Speak your question">🎤</button>`:""}<button id="tutor-go">ask</button></div>`;
   body.innerHTML=h;
   body.querySelectorAll(".tu-chip").forEach(b=>b.onclick=()=>{if(!pending)tutorSend(b.dataset.q);});
   const inp=$("tutor-in");if(inp){$("tutor-go").onclick=()=>{const v=inp.value.trim();if(v){inp.value="";tutorSend(v);}};
-    inp.onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();$("tutor-go").click();}};}
+    inp.onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();$("tutor-go").click();}};
+    if($("tutor-mic"))$("tutor-mic").onclick=()=>voiceInput(inp,$("tutor-mic"));}
   body.scrollTop=body.scrollHeight;
+}
+function voiceInput(inputEl,btn){   // tutor voice input (Web Speech Recognition)
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR){toast("Voice input isn't supported here");return;}
+  const rec=new SR();rec.lang="en-US";rec.interimResults=false;rec.maxAlternatives=1;
+  if(btn)btn.textContent="🔴";
+  rec.onresult=e=>{const t=e.results[0][0].transcript;inputEl.value=(inputEl.value?inputEl.value+" ":"")+t;inputEl.focus();};
+  rec.onend=()=>{if(btn)btn.textContent="🎤";};
+  rec.onerror=ev=>{if(btn)btn.textContent="🎤";if(ev.error==="not-allowed")toast("Allow microphone access for voice input");};
+  try{rec.start();}catch(e){if(btn)btn.textContent="🎤";}
 }
 async function reviewNote(nodeId){
   const n=nodeById(nodeId),rec=S.node[nodeId];if(!n||!rec||!rec.applied)return;
@@ -1821,11 +1845,13 @@ function renderJournal(){
     if(!label)label="— source no longer in the vault";
     const el=document.createElement("div");el.className="hlrow";if(jump)el.style.cursor="pointer";
     el.style.borderLeftColor=h.c||"var(--gold)";   // #40
-    el.innerHTML=`<div class="q">“${esc(h.t)}”</div><div class="m"><span>${esc(label)}${jump?" ›":""}</span><span><button class="hl-swatch" data-color title="colour" style="background:${h.c||"var(--gold)"}"></button> <button style="color:var(--tx2)" data-share>share</button> <button style="color:var(--tx2)" data-del>remove</button></span></div>`;
+    el.innerHTML=`<div class="q">“${esc(h.t)}”</div>${h.note?`<div class="hlnote">✎ ${esc(h.note)}</div>`:""}<div class="m"><span>${esc(label)}${jump?" ›":""}</span><span><button class="hl-swatch" data-color title="colour" style="background:${h.c||"var(--gold)"}"></button> <button style="color:var(--tx2)" data-note>note</button> <button style="color:var(--tx2)" data-share>share</button> <button style="color:var(--tx2)" data-del>remove</button></span></div>`;
     el.querySelector("[data-color]").onclick=ev=>{ev.stopPropagation();   // #40: cycle highlight colour
       const pal=["var(--gold)","var(--jade)","var(--ai)","#e07a5f","#5dade2"];const i=(pal.indexOf(h.c||"var(--gold)")+1)%pal.length;
       h.c=pal[i];save();el.style.borderLeftColor=h.c;el.querySelector("[data-color]").style.background=h.c;};
-    el.querySelector("[data-share]").onclick=ev=>{ev.stopPropagation();shareInsight("“"+h.t+"”"+(label?" — "+label.replace(/^\S+\s/,""):""));};   // #42
+    el.querySelector("[data-note]").onclick=ev=>{ev.stopPropagation();   // personal note on a highlight
+      const t=prompt("Your note on this highlight:",h.note||"");if(t===null)return;h.note=t.trim()||undefined;save();renderJournal();};
+    el.querySelector("[data-share]").onclick=ev=>{ev.stopPropagation();shareInsight("“"+h.t+"”"+(h.note?" — "+h.note:"")+(label?" ("+label.replace(/^\S+\s/,"")+")":""));};   // #42
     el.querySelector("[data-del]").onclick=ev=>{ev.stopPropagation();
       S.hlDel=[...new Set([...(S.hlDel||[]),hlKey(h)])];   // #108: tombstone so sync doesn't resurrect it
       S.hl=S.hl.filter(x=>x!==h);save();el.remove()};
@@ -1939,8 +1965,12 @@ $("btn-ach").onclick=()=>{const g=$("achgrid");g.innerHTML="";
   $("achs").classList.add("on")};
 
 /* ---------- patch notes ---------- */
-const APP_VER="3.35";
+const APP_VER="3.36";
 const PATCHES=[
+ {v:"3.36",n:"By Track & By Voice",d:"23 Jul 2026",items:[
+  ["new","Your progress dashboard now breaks down completion track by track."],
+  ["new","Add a personal note to any saved highlight — jot what it meant to you."],
+  ["new","🎤 Speak your questions to the tutor instead of typing (where your device supports it)."]]},
  {v:"3.35",n:"Almost There",d:"23 Jul 2026",items:[
   ["new","🏆 Achievements now show a progress bar toward each locked badge, and sort the ones you've earned to the top."],
   ["fix","More light/sepia legibility fixes — the STAGE labels on the Path and the accent-coloured card headings now read clearly in every theme."]]},
