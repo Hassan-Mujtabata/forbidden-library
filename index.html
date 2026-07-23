@@ -285,7 +285,10 @@ header .brand span{color:var(--gold)}
 .hl-swatch{width:14px;height:14px;border-radius:50%;border:1px solid var(--line);vertical-align:middle;cursor:pointer;padding:0;margin-right:2px}
 .achgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
 .ach{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:15px;text-align:center}
-.ach.no{opacity:.3;filter:grayscale(1)}
+.ach.no{opacity:.5;filter:grayscale(.7)}
+.ach .achbar{height:5px;background:var(--card2);border-radius:99px;overflow:hidden;margin:8px 2px 4px}
+.ach .achbar>div{height:100%;background:var(--jade);border-radius:99px}
+.ach .achp{font-size:10px;color:var(--tx2)}
 .ach .e{font-size:28px}
 .ach .n{font-weight:700;font-size:13px;margin:7px 0 3px}
 .ach .d{font-size:11px;color:var(--tx2);line-height:1.4}
@@ -383,6 +386,9 @@ header .brand span{color:var(--gold)}
 .tnode .ntx{flex:1;min-width:0}
 .tnode .stg{display:block;font-size:9.5px;letter-spacing:.24em;color:var(--tacc,var(--gold));opacity:.8;margin-bottom:3px}
 .tnode.locked .stg{color:var(--tx2)}
+/* track accents are tuned for the dark canvas; on light/sepia use readable muted text */
+:root[data-theme="light"] .tnode .stg,:root[data-theme="sepia"] .tnode .stg{color:var(--tx2);opacity:1}
+.miniA{color:var(--jade);cursor:pointer;font-size:12px;text-decoration:underline}
 .tnode .nt{font-size:13.5px;font-weight:600;line-height:1.3}
 .tnode .nsub{font-size:11px;color:var(--tx2);margin-top:4px;line-height:1.35}
 .tnode .badge{flex:0 0 auto;font-size:15px;margin-left:4px}
@@ -1217,6 +1223,7 @@ $("r-fminus").onclick=()=>{S.font=Math.max(14,S.font-1);applyFontLive();save()};
 $("r-fplus").onclick=()=>{S.font=Math.min(24,S.font+1);applyFontLive();save()};
 /* ---------- reading & appearance (theme, font, spacing, width, banner) ---------- */
 const readTheme=()=>S.theme||"dark";
+const tagColor=a=>readTheme()==="dark"?a:"var(--gold)";   // track accents read fine on dark; on light/sepia fall back to the theme-tuned gold
 function applyReadingPrefs(){
   const root=document.documentElement,th=readTheme();
   if(th==="dark")root.removeAttribute("data-theme");else root.setAttribute("data-theme",th);
@@ -1912,16 +1919,31 @@ function doSearch(){
 }
 
 /* ---------- achievements ---------- */
+// progress toward the countable, still-locked achievements
+const ACH_PROGRESS={
+  ep10:()=>[totalRead(),10],ep50:()=>[totalRead(),50],ep100:()=>[totalRead(),100],
+  streak3:()=>[Math.max(S.streak.count,S.bestStreak||0),3],streak7:()=>[Math.max(S.streak.count,S.bestStreak||0),7],streak30:()=>[Math.max(S.streak.count,S.bestStreak||0),30],
+  hl25:()=>[S.hl.length,25],path10:()=>[nodesDone(),10],whet:()=>[S.rvN||0,10],razor:()=>[S.rvN||0,50],
+  sit10:()=>[(S.sits||[]).length,10],sit300:()=>[sitTotalMin(),300],rite7:()=>[S.ritesN||0,7],rite30:()=>[S.ritesN||0,30],
+  lvl5:()=>[lvl(),5],lvl10:()=>[lvl(),10]};
 $("btn-ach").onclick=()=>{const g=$("achgrid");g.innerHTML="";
-  for(const a of ACH){const has=S.ach.includes(a.id);
+  // unlocked first, then those closest to completion
+  const prog=a=>{const p=ACH_PROGRESS[a.id];return p?Math.min(1,p()[0]/p()[1]):0;};
+  const sorted=[...ACH].sort((a,b)=>{const ha=S.ach.includes(a.id),hb=S.ach.includes(b.id);if(ha!==hb)return ha?-1:1;return prog(b)-prog(a);});
+  for(const a of sorted){const has=S.ach.includes(a.id);
     const el=document.createElement("div");el.className="ach"+(has?"":" no");
-    el.innerHTML=`<div class="e">${a.e}</div><div class="n">${a.n}</div><div class="d">${a.d}</div>`;g.appendChild(el)}
+    let bar="";if(!has&&ACH_PROGRESS[a.id]){const[c,t]=ACH_PROGRESS[a.id]();const pct=Math.min(100,Math.round(c/t*100));
+      bar=`<div class="achbar"><div style="width:${pct}%"></div></div><div class="achp">${Math.min(c,t)}/${t}</div>`;}
+    el.innerHTML=`<div class="e">${a.e}</div><div class="n">${a.n}</div><div class="d">${a.d}</div>${bar}`;g.appendChild(el)}
   $("achcount").textContent=`${S.ach.length}/${ACH.length}`;
   $("achs").classList.add("on")};
 
 /* ---------- patch notes ---------- */
-const APP_VER="3.34";
+const APP_VER="3.35";
 const PATCHES=[
+ {v:"3.35",n:"Almost There",d:"23 Jul 2026",items:[
+  ["new","🏆 Achievements now show a progress bar toward each locked badge, and sort the ones you've earned to the top."],
+  ["fix","More light/sepia legibility fixes — the STAGE labels on the Path and the accent-coloured card headings now read clearly in every theme."]]},
  {v:"3.34",n:"Kept & Timed",d:"23 Jul 2026",items:[
   ["new","🎓 Past tutor chats — your recent tutor conversations are saved and can be reopened from the Journal to keep going."],
   ["new","A quiet “N min left” appears as you read a longer episode."]]},
@@ -2238,7 +2260,7 @@ function reviewStep(idx,gained){
   const rec2=(S.node[n.id]=S.node[n.id]||{});const qi=(rec2.rvQ||0)%n.quiz.length;rec2.rvQ=qi+1;
   const q=n.quiz[qi];
   const card=document.createElement("div");card.className="gatecard";
-  card.innerHTML=`<div style="font-size:11px;letter-spacing:.2em;color:${tr.accent};margin-bottom:6px">${tr.glyph} ${esc(tr.name.toUpperCase())}</div>
+  card.innerHTML=`<div style="font-size:11px;letter-spacing:.2em;color:${tagColor(tr.accent)};margin-bottom:6px">${tr.glyph} ${esc(tr.name.toUpperCase())}</div>
     <h3>${n.glyph} ${esc(n.title)}</h3><div class="gsub">${esc(q.q)}</div>`;
   const order=q.c.map((_,i)=>i);
   for(let i=order.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[order[i],order[j]]=[order[j],order[i]];}
@@ -3038,7 +3060,7 @@ function renderPath(){
     // #22: next-best-action — if finishing this track is close, say so
     const trNodes=DATA.nodes.filter(n=>n.track===nx.track&&!n.stub),trLeft=trNodes.filter(n=>!nodeDone(n.id)).length;
     const nudge=(trLeft>0&&trLeft<=2)?`just ${trLeft} more to finish ${tr.name} 🏁`:(resume?"pick up where you left off":nx.stub?"preview":"read → quiz → apply to unlock what comes next");
-    c.innerHTML=`<div class="tag" style="color:${tr.accent}">▶ ${resume?"RESUME LESSON":"CONTINUE THE PATH"}</div>
+    c.innerHTML=`<div class="tag" style="color:${tagColor(tr.accent)}">▶ ${resume?"RESUME LESSON":"CONTINUE THE PATH"}</div>
       <div style="font-family:var(--serif);font-size:20px;margin:2px 0 4px">${nx.glyph} ${esc(nx.title)}</div>
       <div style="color:var(--tx2);font-size:13px">${esc(tr.name)} · ${nudge}</div>
       <div class="glyphbg">${tr.glyph}</div>`;
