@@ -1884,8 +1884,11 @@ $("btn-ach").onclick=()=>{const g=$("achgrid");g.innerHTML="";
   $("achs").classList.add("on")};
 
 /* ---------- patch notes ---------- */
-const APP_VER="3.32";
+const APP_VER="3.33";
 const PATCHES=[
+ {v:"3.33",n:"Chance & Chime",d:"23 Jul 2026",items:[
+  ["new","🎲 on the Path opens a random ready lesson — for when you can't decide where to start."],
+  ["new","Longer sits (20 min+) now get a soft interval chime every 10 minutes."]]},
  {v:"3.32",n:"Focus the Path",d:"23 Jul 2026",items:[
   ["new","Filter the Path to just what's ▸ ready or what's gone 🔸 rusty, so you always know what to do next."],
   ["new","Tap your 🔥 streak to jump to your activity calendar."],
@@ -2746,7 +2749,7 @@ function openSit(){
   $("sit").classList.add("on");
 }
 async function startSit(min){
-  SIT.min=min;SIT.end=Date.now()+min*60000;SIT.paused=false;
+  SIT.min=min;SIT.end=Date.now()+min*60000;SIT.paused=false;SIT.lastChime=0;
   bell();
   try{SIT.wake=await navigator.wakeLock.request("screen")}catch(e){SIT.wake=null}
   $("sit-setup").style.display="none";$("sit-run").style.display="block";
@@ -2761,6 +2764,9 @@ function sitTick(){
   if(ms<=0){finishSit(false);return}
   const s=Math.ceil(ms/1000);
   $("sit-left").textContent=Math.floor(s/60)+":"+String(s%60).padStart(2,"0");
+  // interval bell: a soft chime every 10 min during longer sits (never within a minute of the end)
+  if(SIT.min>=20){const elapsedMin=Math.floor((SIT.min*60000-(SIT.end-Date.now()))/60000);
+    if(elapsedMin>0&&elapsedMin%10===0&&elapsedMin!==SIT.lastChime&&(SIT.min-elapsedMin)>=1){SIT.lastChime=elapsedMin;bell();}}
 }
 function stopSitMachinery(){
   clearInterval(SIT.timer);clearInterval(SIT.hintT);SIT.timer=SIT.hintT=null;
@@ -2972,6 +2978,11 @@ function nodeAvail(id){const n=nodeById(id);return !!n&&n.prereq.every(prereqSat
 function nodeStatus(id){return nodeDone(id)?"done":(nodeAvail(id)?"avail":"locked")}
 function nodesDone(){return (DATA&&DATA.nodes)?DATA.nodes.filter(n=>nodeDone(n.id)).length:0}
 function trackDone(tid){if(!DATA)return false;const ns=DATA.nodes.filter(n=>n.track===tid&&!n.stub);return ns.length>0&&ns.every(n=>nodeDone(n.id))}
+function surpriseMe(){   // open a random ready lesson
+  const avail=DATA.nodes.filter(n=>!n.stub&&nodeVisible(n)&&nodeStatus(n.id)==="avail");
+  if(!avail.length){toast("Nothing new is unlocked right now — sharpen or read a book");return;}
+  openNode(avail[Math.floor(Math.random()*avail.length)].id);
+}
 function nextAvailNode(){
   const o=[...DATA.nodes].sort((a,b)=>a.tier-b.tier);
   const avail=o.filter(n=>!n.stub&&nodeStatus(n.id)==="avail");
@@ -3002,8 +3013,10 @@ function renderPath(){
   if(!_collapseInit){_collapseInit=true;for(const tr of DATA.tracks){const tn=DATA.nodes.filter(n=>n.track===tr.id);if(tn.length&&tn.every(n=>nodeDone(n.id)))COLLAPSED.add(tr.id);}}
   // #34: track jump-nav — a row of glyphs to hop to any track
   const jump=$("trackjump");const visTracks=DATA.tracks.filter(t=>trackVisible(t.id));
-  if(visTracks.length>3){jump.style.display="flex";jump.innerHTML=visTracks.map(t=>`<button class="jbtn" data-jt="${t.id}" title="${esc(t.name)}">${t.glyph}</button>`).join("");
+  if(visTracks.length>3){jump.style.display="flex";
+    jump.innerHTML=`<button class="jbtn" id="jsurprise" title="Open a random ready lesson">🎲</button>`+visTracks.map(t=>`<button class="jbtn" data-jt="${t.id}" title="${esc(t.name)}">${t.glyph}</button>`).join("");
     jump.querySelectorAll("[data-jt]").forEach(b=>b.onclick=()=>{const c=document.getElementById("trk-"+b.dataset.jt);if(c){COLLAPSED.delete(b.dataset.jt);c.classList.remove("collapsed");c.scrollIntoView({behavior:"smooth",inline:"start",block:"nearest"});}});
+    $("jsurprise").onclick=surpriseMe;
   } else jump.style.display="none";
   // Path filter — focus on what's ready or what's gone rusty
   const pf=$("pathfilter");const filters=[["all","All"],["ready","▸ Ready"],["rusty","🔸 Rusty"]];
