@@ -158,6 +158,9 @@ header .brand span{color:var(--gold)}
 .tu-ask{display:flex;gap:6px;margin-top:8px}
 .tu-ask input{flex:1;background:var(--bg2);border:1px solid var(--line);border-radius:10px;color:var(--tx);padding:8px 11px;font-size:13px;font-family:inherit;outline:none}
 .tu-ask #tutor-go{border:1px solid rgba(212,175,55,.4);border-radius:10px;background:var(--card);color:var(--gold);padding:0 14px;font-size:13px;cursor:pointer}
+.thist{padding:11px 12px;border:1px solid var(--line);border-radius:10px;margin-bottom:8px;cursor:pointer;background:var(--card)}
+.thist:hover{background:var(--card2)}
+#rtime{position:fixed;bottom:16px;right:14px;z-index:15;background:var(--card2);border:1px solid var(--line);border-radius:99px;padding:5px 12px;font-size:11.5px;color:var(--tx2);backdrop-filter:blur(6px);pointer-events:none}
 /* priming, pre-glossary, per-paragraph explain (tutor-H #14/#35/#33) */
 .primebox{background:rgba(78,205,196,.06);border:1px solid rgba(78,205,196,.25);border-radius:12px;padding:12px 14px;margin:10px 0}
 .primeta{width:100%;min-height:56px;background:var(--bg2);border:1px solid var(--line);border-radius:10px;color:var(--tx);padding:10px;font-family:var(--serif);font-size:14px;line-height:1.5;resize:vertical;outline:none}
@@ -656,6 +659,7 @@ header .brand span{color:var(--gold)}
 
 <div id="reader" class="view">
   <div id="rprog"></div>
+  <div id="rtime" style="display:none"></div>
   <div id="rtop">
     <button class="iconbtn" id="r-back" title="Library">←</button>
     <div class="bt" id="r-title"></div>
@@ -1115,6 +1119,7 @@ function openEp(id,e){
   ep.p.forEach((p,i)=>{const el=document.createElement(i===pull?"blockquote":"p");
     if(i===pull)el.className="pull";el.textContent=p;body.appendChild(el)});
   injectFigures(body,ep,b);
+  $("rtime").style.display="none";
   renderEnd();show("reader");
   const sv=S.pos[id];window.scrollTo(0,sv&&sv.scroll?sv.scroll:0);
   revealVisible(1.3);
@@ -1195,8 +1200,13 @@ let scrollT;window.addEventListener("scroll",()=>{
   if(!inReader&&!inNode)return;
   revealVisible();updateFocusPara();   // #49
   const h=document.documentElement,max=h.scrollHeight-h.clientHeight;
-  const pct=(max>0?h.scrollTop/max*100:0)+"%";
-  if(inReader)$("rprog").style.width=pct;else $("rprog2").style.width=pct;
+  const frac=max>0?h.scrollTop/max:0;const pct=(frac*100)+"%";
+  if(inReader){$("rprog").style.width=pct;
+    // time-remaining indicator (fades in once you've started, hides near the end)
+    const b=bookById(CUR.b),rt=$("rtime");
+    if(b){const total=Math.max(1,Math.round(epWords(b.episodes[CUR.e])/READ_WPM)),left=Math.max(0,Math.round(total*(1-frac)));
+      if(total>=4&&frac>0.03&&frac<0.97){rt.style.display="block";rt.textContent=left<=1?"almost done":left+" min left";}else rt.style.display="none";}
+  }else $("rprog2").style.width=pct;
   clearTimeout(scrollT);scrollT=setTimeout(()=>{
     if(inReader&&CUR.b){S.pos[CUR.b]={ep:CUR.e,scroll:h.scrollTop};save()}
     else if(inNode&&CURN){S.nodePos={id:CURN,scroll:h.scrollTop};save()}
@@ -1632,7 +1642,7 @@ function vaultSnippets(query,k){k=k||3;const q=(query||"").toLowerCase().split(/
 /* ---------- tutor conversation: a real grounded thread, with follow-ups (tutor-A #9/#10/#36/#37) ---------- */
 let TUTOR={ctx:"",thread:[],title:"Tutor"};
 function openTutor(title,ctxBlock,firstMsg){
-  TUTOR={ctx:ctxBlock||"",thread:[],title:title||"Tutor"};
+  TUTOR={ctx:ctxBlock||"",thread:[],title:title||"Tutor",id:Date.now()};
   const pop=$("defpop");$("dp-word").textContent=title||"Tutor";$("dp-open").style.display="none";
   $("dp-explain").style.display="none";$("dp-save").style.display="none";
   pop.classList.add("on");renderTutor();
@@ -1647,9 +1657,34 @@ async function tutorSend(userMsg){
   const sys=`You are a sharp, warm study tutor inside someone's private learning app. Ground every answer in THE LEARNER'S MATERIAL below — use its framing and wording, not generic textbook knowledge. If the answer isn't in the material, say so in a few words, then give your best general reading clearly flagged as outside their books. If you're unsure, say so plainly rather than guessing confidently. When you draw on the material, name which lesson or book it came from. Plain text, no markdown, 2-4 sentences unless the learner asks for more. Never mention being an AI.\n\n=== THE LEARNER'S MATERIAL ===\n${TUTOR.ctx||"(no specific lesson attached)"}\n=== END MATERIAL ===`
     +(known.length?`\n\nIdeas the learner has already mastered — connect to these BY NAME when it genuinely helps: ${known.join("; ")}`:"");
   const convo=TUTOR.thread.map(m=>`${m.role==="user"?"LEARNER":"TUTOR"}: ${m.text}`).join("\n\n");
-  try{const fb=await geminiCall(sys+"\n\n"+convo+"\n\nTUTOR:",420,0.3);TUTOR.thread.push({role:"tutor",text:fb});}
+  try{const fb=await geminiCall(sys+"\n\n"+convo+"\n\nTUTOR:",420,0.3);TUTOR.thread.push({role:"tutor",text:fb});saveTutorThread();}
   catch(e){TUTOR.thread.push({role:"tutor",text:e&&e.message==="quota"?"(Gemini quota is spent for now — it resets daily.)":e&&e.message==="no-key"?"(Connect a Gemini key first.)":"(Couldn't reach the tutor — check your connection.)"});}
   renderTutor();
+}
+// tutor conversation history — save & revisit past chats
+function saveTutorThread(){
+  if(!TUTOR.id||TUTOR.thread.length<2)return;
+  S.tutorLog=S.tutorLog||[];
+  const entry={id:TUTOR.id,title:TUTOR.title,ctx:TUTOR.ctx,thread:JSON.parse(JSON.stringify(TUTOR.thread)),at:Date.now()};
+  const i=S.tutorLog.findIndex(x=>x.id===TUTOR.id);
+  if(i>=0)S.tutorLog[i]=entry; else S.tutorLog.unshift(entry);
+  if(S.tutorLog.length>15)S.tutorLog=S.tutorLog.slice(0,15);
+  save();
+}
+function reopenTutorThread(entry){
+  TUTOR={ctx:entry.ctx||"",thread:JSON.parse(JSON.stringify(entry.thread)),title:entry.title||"Tutor",id:entry.id};
+  const pop=$("defpop");$("dp-word").textContent=TUTOR.title;$("dp-open").style.display="none";
+  $("dp-explain").style.display="none";$("dp-save").style.display="none";
+  $("hls").classList.remove("on");pop.classList.add("on");renderTutor();
+}
+function showTutorHistory(){
+  const log=S.tutorLog||[];if(!log.length){toast("No tutor chats yet");return;}
+  const pop=$("defpop");$("dp-word").textContent="Past tutor chats";$("dp-src").textContent="🎓 HISTORY";
+  $("dp-open").style.display="none";$("dp-explain").style.display="none";$("dp-save").style.display="none";
+  $("dp-body").innerHTML=log.map((e,i)=>{const first=(e.thread.find(m=>m.role==="user")||{}).text||"";
+    return `<div class="thist" data-ti="${i}"><b>${esc(e.title)}</b> <span style="color:var(--tx2);font-size:11px">${fmtDate(e.at)}</span><div style="color:var(--tx2);font-size:12.5px;margin-top:2px">${esc(first.slice(0,80))}…</div></div>`;}).join("");
+  $("dp-body").querySelectorAll(".thist").forEach(el=>el.onclick=()=>reopenTutorThread(log[+el.dataset.ti]));
+  $("hls").classList.remove("on");pop.classList.add("on");
 }
 function renderTutor(pending){
   $("dp-src").textContent="🎓 "+(TUTOR.title||"TUTOR").toUpperCase();
@@ -1744,6 +1779,7 @@ function renderJournal(){
     mk("🎓 Tell two apart",contrastIdeas);           // #24
     if(journalNotes().length>=3)mk("🎓 Reflect on my journal",journalDigest);  // #43
   }
+  if((S.tutorLog||[]).length)mk("🎓 Past tutor chats",showTutorHistory);   // conversation history
   renderGemBox();
   const jn=$("jnotes");jn.innerHTML="";
   if(!notes.length)jn.innerHTML='<p style="color:var(--tx2);font-size:13px">Master ideas on the Path — everything you write in the “Apply it” step collects here.</p>';
@@ -1884,8 +1920,11 @@ $("btn-ach").onclick=()=>{const g=$("achgrid");g.innerHTML="";
   $("achs").classList.add("on")};
 
 /* ---------- patch notes ---------- */
-const APP_VER="3.33";
+const APP_VER="3.34";
 const PATCHES=[
+ {v:"3.34",n:"Kept & Timed",d:"23 Jul 2026",items:[
+  ["new","🎓 Past tutor chats — your recent tutor conversations are saved and can be reopened from the Journal to keep going."],
+  ["new","A quiet “N min left” appears as you read a longer episode."]]},
  {v:"3.33",n:"Chance & Chime",d:"23 Jul 2026",items:[
   ["new","🎲 on the Path opens a random ready lesson — for when you can't decide where to start."],
   ["new","Longer sits (20 min+) now get a soft interval chime every 10 minutes."]]},
