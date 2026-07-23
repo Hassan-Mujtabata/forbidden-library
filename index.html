@@ -1231,8 +1231,10 @@ $("r-back").onclick=()=>goRoot();
 $("r-fminus").onclick=()=>{S.font=Math.max(14,S.font-1);applyFontLive();save()};
 $("r-fplus").onclick=()=>{S.font=Math.min(24,S.font+1);applyFontLive();save()};
 /* ---------- reading & appearance (theme, font, spacing, width, banner) ---------- */
-const readTheme=()=>S.theme||"dark";
+// default to the OS preference until the user explicitly picks a theme
+const readTheme=()=>S.theme||(matchMedia&&matchMedia("(prefers-color-scheme: light)").matches?"light":"dark");
 const tagColor=a=>readTheme()==="dark"?a:"var(--gold)";   // track accents read fine on dark; on light/sepia fall back to the theme-tuned gold
+if(window.matchMedia)matchMedia("(prefers-color-scheme: light)").addEventListener("change",()=>{if(!S||!S.theme)applyReadingPrefs();});
 function applyReadingPrefs(){
   const root=document.documentElement,th=readTheme();
   if(th==="dark")root.removeAttribute("data-theme");else root.setAttribute("data-theme",th);
@@ -1258,7 +1260,7 @@ function renderSettings(){
     // #33: daily reminder
     `<div class="setrow"><div class="setlbl">Daily rite reminder</div><div class="setseg" id="remseg"><button class="segbtn${S.reminderOn?"":" on"}" data-rem="off">Off</button><button class="segbtn${S.reminderOn?" on":""}" data-rem="on">On</button></div></div>`+
     `<div class="setrow" id="remtimerow" style="${S.reminderOn?"":"display:none"}"><div class="setlbl">Remind me at</div><select id="remtime" class="setseg" style="padding:8px 10px;color:var(--tx);font-family:inherit">${[7,8,9,12,17,18,19,20,21,22].map(hh=>`<option value="${hh}" ${(S.reminderH!=null?S.reminderH:19)==hh?"selected":""}>${hh}:00</option>`).join("")}</select></div>`+
-    `<div class="setnote">These apply everywhere you read, and sync across your devices. Reminders fire in the background when the app is installed to your home screen; otherwise you're nudged when you next open it.</div>`;
+    `<div class="setnote">These apply everywhere you read, and sync across your devices. Reminders fire in the background when the app is installed to your home screen; otherwise you're nudged when you next open it. <span class="miniA" id="set-reset">reset to defaults</span></div>`;
   b.querySelectorAll(".setseg:not(#remseg)").forEach(sg=>{const key=sg.dataset.key;if(!key)return;
     sg.querySelectorAll(".segbtn").forEach(btn=>btn.onclick=()=>{
       const v=btn.dataset.v;
@@ -1272,6 +1274,8 @@ function renderSettings(){
     if(btn.dataset.rem==="on"){const ok=await enableReminder();if(!ok)return;}else await disableReminder();
     renderSettings();});
   $("remtime").onchange=e=>{S.reminderH=+e.target.value;save();};
+  if($("set-reset"))$("set-reset").onclick=()=>{if(!confirm("Reset theme, font and reading settings to defaults?"))return;
+    ["theme","readFont","lineH","readW","font","artOff"].forEach(k=>delete S[k]);save();applyReadingPrefs();applyFontLive();renderSettings();toast("Reset to defaults");};
 }
 // #33 reminders
 async function enableReminder(){
@@ -1965,8 +1969,11 @@ $("btn-ach").onclick=()=>{const g=$("achgrid");g.innerHTML="";
   $("achs").classList.add("on")};
 
 /* ---------- patch notes ---------- */
-const APP_VER="3.36";
+const APP_VER="3.37";
 const PATCHES=[
+ {v:"3.37",n:"Your System, Your Rules",d:"24 Jul 2026",items:[
+  ["new","The Vault now matches your device's light or dark mode automatically — until you pick a theme yourself."],
+  ["new","New “reset to defaults” link in Settings puts theme, font and reading layout back the way they started."]]},
  {v:"3.36",n:"By Track & By Voice",d:"23 Jul 2026",items:[
   ["new","Your progress dashboard now breaks down completion track by track."],
   ["new","Add a personal note to any saved highlight — jot what it meant to you."],
