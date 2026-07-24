@@ -1,6 +1,8 @@
 {
  "v": 1,
  "hiddenBooks": [],
- "hiddenTracks": [],
+ "hiddenTracks": [
+  "I"
+ ],
  "admins": []
 }
