@@ -20,7 +20,10 @@
  *      right after flipping the theme catches elements mid-transition still holding the old
  *      theme's colours -> ~300 phantom failures. We inject transition:none first.
  *   2. GRADIENTS. A walk-up-for-background cannot composite a linear-gradient. .goldbtn read
- *      as 1.06 but is black-on-gold-gradient and perfectly legible. We skip gradient-backed text.
+ *      as 1.06 but is black-on-gold-gradient and perfectly legible. We skip text whose
+ *      background IS a gradient -- but NOT text merely descended from one. body carries a
+ *      decorative wash over an opaque colour, and skipping on that alone measured 0 elements
+ *      across the whole app while cheerfully reporting "0 failures". See effBg.
  *   3. BLIND SPOTS. Only offsetParent-visible nodes get measured, so closed overlays and
  *      inactive state branches are never tested. A hardcoded #d4af37 hid in the daily-rite
  *      "complete" banner for several releases that way. We force every overlay open.
@@ -54,16 +57,25 @@
   }
 
   // Walk up compositing every semi-transparent background until we hit an opaque one.
-  // Returns null if any ancestor uses a gradient (fix #2 — we cannot composite those).
+  // Returns null only when a gradient genuinely IS the background (fix #2).
+  //
+  // The rule has to distinguish two very different cases, and getting this wrong silently
+  // voids the entire audit:
+  //   - .goldbtn: linear-gradient with a transparent background-color. The gradient is the
+  //     only background there is, so the composite is unknowable -> skip.
+  //   - body: a decorative 7%-alpha radial wash layered OVER an opaque rgb(10,12,18). Bailing
+  //     here skips every element in the app, because everything inherits from body. Composite
+  //     onto the opaque colour and accept the tiny error the wash introduces.
   function effBg(el) {
     var stack = [], n = el;
     while (n && n !== document.documentElement) {
       var cs = getComputedStyle(n);
-      if (cs.backgroundImage && cs.backgroundImage !== "none") return null;
       var bg = parse(cs.backgroundColor);
+      var opaque = bg && bg[3] === 1;
+      if (cs.backgroundImage && cs.backgroundImage !== "none" && !opaque) return null;
       if (bg && bg[3] > 0) {
         stack.push(bg);
-        if (bg[3] === 1) break;
+        if (opaque) break;
       }
       n = n.parentElement;
     }
@@ -96,8 +108,15 @@
   }
 
   var killer = null;
+
+  function dropKillers() {                      // a re-paste of this file orphans the old one,
+    var k = document.querySelectorAll("#va-killer");   // which would freeze transitions for good
+    for (var i = 0; i < k.length; i++) k[i].remove();
+  }
+
   function killMotion() {                       // fix #1 — must run BEFORE any measurement
     if (killer) return;
+    dropKillers();
     killer = document.createElement("style");
     killer.id = "va-killer";
     killer.textContent = "*,*::before,*::after{transition:none!important;animation:none!important}";
@@ -158,7 +177,9 @@
     sit:      function () { call("openSit"); },
     review:   function () { call("startReview"); },   // no-ops when nothing is due -> reported unmeasured
     booklanding: function () {
-      var d = window.DATA;
+      // DATA is a top-level `const`, so it lives in the global LEXICAL scope and is NOT a
+      // property of window -- window.DATA is undefined. Reference the binding directly.
+      var d = (typeof DATA !== "undefined") ? DATA : null;
       if (d && d.books && d.books.length) call("openBookLanding", d.books[0].id);
     }
     // eplist and flow need a specific book / word list. Rather than fake them, they get
@@ -182,13 +203,32 @@
     return { checked: checked, unmeasured: unmeasured };
   }
 
-  var original = null;
+  var original = null, hadTheme = false;
+
+  // fix #4 — switch themes the way the APP does, not by poking the attribute.
+  // Colours baked into inline styles at render time (the continue-card accent) only refresh
+  // when refreshRoot() re-renders. Setting data-theme directly leaves them stale, and the
+  // audit then reports a colour the user can never actually see -- 2.09 for a tag that is
+  // really 5.1. Note S.theme must be the literal "dark", never "" : the app treats "" as
+  // "follow the OS", which on a light-mode machine silently audits the wrong palette.
+  function setTheme(t) {
+    if (typeof S === "object" && S && typeof applyReadingPrefs === "function") {
+      S.theme = t;
+      applyReadingPrefs();
+      if (typeof refreshRoot === "function") refreshRoot();
+    } else {
+      document.documentElement.dataset.theme = t;            // plain page / test fixture
+    }
+  }
 
   window.VA = {
     run: function (theme) {
-      if (original === null) original = document.documentElement.dataset.theme || "";
+      if (original === null) {
+        hadTheme = (typeof S === "object" && S && "theme" in S);
+        original = hadTheme ? S.theme : (document.documentElement.dataset.theme || "");
+      }
       killMotion();
-      document.documentElement.dataset.theme = theme;
+      setTheme(theme);
       void document.documentElement.offsetHeight;            // force a synchronous reflow
       var out = [], seen = {};
       var base = scan(out, seen);
@@ -202,10 +242,12 @@
       };
     },
     restore: function () {
-      if (original !== null) document.documentElement.dataset.theme = original;
-      var k = document.getElementById("va-killer");
-      if (k) k.remove();
-      killer = null; original = null;
+      if (original !== null) {
+        if (hadTheme) setTheme(original);
+        else document.documentElement.dataset.theme = original;
+      }
+      dropKillers();
+      killer = null; original = null; hadTheme = false;
       return "restored";
     }
   };

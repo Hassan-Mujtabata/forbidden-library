@@ -28,12 +28,15 @@
 }
 :root[data-theme="sepia"]{
   --bg:#efe6d2; --bg2:#e8ddc6; --card:rgba(70,48,20,.06); --card2:rgba(70,48,20,.11);
-  --tx:#33291c; --tx2:#6b5a44; --gold:#7d540d; --jade:#1f665d; --line:rgba(70,48,20,.18); --read:#33291c;
+  /* #110: tx2/gold/jade are darker than the page background alone needs, because the labels that
+     use them sit on --card2 (a raised surface), which costs ~0.5 of contrast. Safe to darken:
+     --gold/--jade only ever back textless fills, and filled buttons use --goldbtn. */
+  --tx:#33291c; --tx2:#5f4f3a; --gold:#6d480a; --jade:#17564e; --line:rgba(70,48,20,.18); --read:#33291c;
   --overlay:rgba(236,227,206,.95); --sticky:rgba(236,227,206,.9); --err:#9a3324; --ok:#256b4a; --ai:#6d28d9;
 }
 :root[data-theme="light"]{
   --bg:#f6f4ee; --bg2:#ffffff; --card:rgba(0,0,0,.04); --card2:rgba(0,0,0,.08);
-  --tx:#1a1916; --tx2:#575349; --gold:#7f5a0e; --jade:#0a6a62; --line:rgba(0,0,0,.14); --read:#22201b;
+  --tx:#1a1916; --tx2:#4c4840; --gold:#6f4e0c; --jade:#085a53; --line:rgba(0,0,0,.14); --read:#22201b;
   --overlay:rgba(246,244,238,.96); --sticky:rgba(246,244,238,.9); --err:#b3261e; --ok:#1a7a4f; --ai:#6d28d9;
 }
 :root[data-theme="light"] body,:root[data-theme="sepia"] body{background-image:none}
@@ -93,7 +96,9 @@ header .brand span{color:var(--gold)}
 .mixchip.done{opacity:.45}
 .mixwrap{position:relative}
 .mixwrap .mixchip{width:100%;padding-right:34px}
-.mixskip{position:absolute;top:7px;right:8px;width:26px;height:26px;border-radius:8px;background:var(--card2);border:1px solid var(--line);color:var(--tx2);font-size:14px;line-height:1;cursor:pointer;opacity:.65;transition:.15s}
+/* #110: opacity multiplies against an already-muted --tx2 and pushed this under AA; the button
+   still reads as secondary via size and placement, so it uses full --tx at a gentler fade */
+.mixskip{position:absolute;top:7px;right:8px;width:26px;height:26px;border-radius:8px;background:var(--card2);border:1px solid var(--line);color:var(--tx);font-size:14px;line-height:1;cursor:pointer;opacity:.85;transition:.15s}
 .mixskip:hover{opacity:1;color:var(--gold)}
 .mixchip .g{font-size:22px}
 .mixchip .t{font-size:13px;font-weight:600;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
@@ -808,6 +813,20 @@ const $=id=>document.getElementById(id);
 const esc=s=>{const d=document.createElement("div");d.textContent=s;return d.innerHTML};
 const bookById=id=>DATA.books.find(b=>b.id===id);
 const READ_WPM=230;   // #79: one reading-speed constant for every "N min" estimate
+// #109: the estimates learn your real pace. Completing a lesson logs {m:minutes,w:words}; once
+// there are enough samples the median words-per-minute replaces the generic constant, so "6 min"
+// means six of YOUR minutes. Builds before 3.41 logged a bare number — sampleMin reads both.
+function nodeWords(n){return (n.bridge||[]).join(" ").split(/\s+/).filter(Boolean).length
+  +(n.sources||[]).reduce((s,x)=>s+(x.quote||[]).join(" ").split(/\s+/).filter(Boolean).length,0);}
+function sampleMin(s){return typeof s==="number"?s:(s&&s.m)||0;}
+function paceWPM(){
+  const r=(S.lessonTimes||[]).filter(s=>s&&s.w>0&&s.m>0).map(s=>s.w/s.m).sort((a,b)=>a-b);
+  if(r.length<5)return READ_WPM;   // too few samples for a median to mean anything
+  // clamp: a lesson left open in a background tab reads absurdly slow, one skimmed absurdly fast
+  return Math.min(600,Math.max(100,Math.round(r[Math.floor(r.length/2)])));
+}
+function paceLearned(){return (S.lessonTimes||[]).filter(s=>s&&s.w>0&&s.m>0).length>=5;}
+function estMin(w){return Math.max(1,Math.round(w/paceWPM()));}
 const epWords=ep=>ep.p.reduce((n,p)=>n+p.split(" ").length,0);
 const epXP=ep=>Math.max(10,Math.round(epWords(ep)/10));
 const readSet=b=>new Set(S.read[b]||[]);
@@ -1038,7 +1057,7 @@ function renderHome(){
 }
 function renderBookLanding(id){
   const b=bookById(id);if(!b)return;const rs=readSet(id),done=rs.size,pct=Math.round(done/b.episodes.length*100);
-  const leftMin=b.episodes.reduce((n,ep,i)=>rs.has(i)?n:n+Math.max(1,Math.round(epWords(ep)/READ_WPM)),0);
+  const leftMin=b.episodes.reduce((n,ep,i)=>rs.has(i)?n:n+estMin(epWords(ep)),0);
   const fav=(S.faves||[]).includes(id),bd=$("bl-body");
   bd.innerHTML=
     `<div class="bl-cover" style="background:linear-gradient(160deg,${b.accent}66,${b.accent}22 55%,var(--card2))"><div class="bl-g">${b.glyph}</div></div>`+
@@ -1059,7 +1078,7 @@ function renderBookLanding(id){
   // #23: big books (hundreds of chapters) shouldn't render one giant list — cap and expand on demand
   const CAP=40;let shown=Math.min(b.episodes.length,S._blExpand?b.episodes.length:CAP);
   const addRow=(ep,i)=>{const r=document.createElement("button");r.className="eprow"+(rs.has(i)?" read":"");
-    r.innerHTML=`<span class="n">${i+1}</span><span class="t">${esc(ep.t)}</span>${rs.has(i)?'<span class="ck">✓</span>':`<span class="mn">${Math.max(1,Math.round(epWords(ep)/READ_WPM))}m</span>`}`;
+    r.innerHTML=`<span class="n">${i+1}</span><span class="t">${esc(ep.t)}</span>${rs.has(i)?'<span class="ck">✓</span>':`<span class="mn">${estMin(epWords(ep))}m</span>`}`;
     r.onclick=()=>{$("booklanding").classList.remove("on");openEp(id,i);};w.appendChild(r);};
   for(let i=0;i<shown;i++)addRow(b.episodes[i],i);
   if(b.episodes.length>shown){const more=document.createElement("button");more.className="ghostbtn";more.style.marginTop="8px";
@@ -1103,14 +1122,14 @@ function renderMix(){
     const el=document.createElement("button");el.className="mixchip"+(done?" done":"");
     if(it.n){
       const nd=nodeById(it.n);if(!nd)continue;const tr=trackById(nd.track);
-      const w=nd.bridge.join(" ").split(" ").length+(nd.sources||[]).reduce((s,x)=>s+x.quote.join(" ").split(" ").length,0);
+      const w=nodeWords(nd);
       el.innerHTML=`<div class="g">${nd.glyph}</div><div><div class="t">${esc(nd.title)}</div>
-        <div class="b">PATH · ${esc(tr.name)} · ${Math.max(2,Math.round(w/READ_WPM)+2)} min</div></div>${done?'<div class="ck">✓</div>':""}`;
+        <div class="b">PATH · ${esc(tr.name)} · ${Math.max(2,estMin(w)+2)} min</div></div>${done?'<div class="ck">✓</div>':""}`;
       el.onclick=()=>openNode(it.n);
     }else{
       const b=bookById(it.b);if(!b)continue;const ep=b.episodes[it.e];
       el.innerHTML=`<div class="g">${b.glyph}</div><div><div class="t">${esc(ep.t)}</div>
-        <div class="b">${esc(b.title)} · ${Math.max(1,Math.round(epWords(ep)/READ_WPM))} min</div></div>${done?'<div class="ck">✓</div>':""}`;
+        <div class="b">${esc(b.title)} · ${estMin(epWords(ep))} min</div></div>${done?'<div class="ck">✓</div>':""}`;
       el.onclick=()=>openEp(it.b,it.e);
     }
     wrap.appendChild(el);
@@ -1151,7 +1170,7 @@ function openEp(id,e){
   let cv=null;if(bannerOn()){cv=document.createElement("canvas");cv.id="rbanner";cv.setAttribute("aria-hidden","true");body.appendChild(cv);}   // #15/#44: decorative banner
   const h=document.createElement("h1");h.textContent=ep.t;body.appendChild(h);
   const sub=document.createElement("div");sub.className="sub";
-  sub.textContent=`${b.title.toUpperCase()} · EPISODE ${e+1} OF ${b.episodes.length} · ${Math.max(1,Math.round(epWords(ep)/READ_WPM))} MIN · +${epXP(ep)} XP`;
+  sub.textContent=`${b.title.toUpperCase()} · EPISODE ${e+1} OF ${b.episodes.length} · ${estMin(epWords(ep))} MIN · +${epXP(ep)} XP`;
   body.appendChild(sub);
   const pull=pickPull(ep);
   ep.p.forEach((p,i)=>{const el=document.createElement(i===pull?"blockquote":"p");
@@ -1242,7 +1261,7 @@ let scrollT;window.addEventListener("scroll",()=>{
   if(inReader){$("rprog").style.width=pct;
     // time-remaining indicator (fades in once you've started, hides near the end)
     const b=bookById(CUR.b),rt=$("rtime");
-    if(b){const total=Math.max(1,Math.round(epWords(b.episodes[CUR.e])/READ_WPM)),left=Math.max(0,Math.round(total*(1-frac)));
+    if(b){const total=estMin(epWords(b.episodes[CUR.e])),left=Math.max(0,Math.round(total*(1-frac)));
       if(total>=4&&frac>0.03&&frac<0.97){rt.style.display="block";rt.textContent=left<=1?"almost done":left+" min left";}else rt.style.display="none";}
   }else $("rprog2").style.width=pct;
   clearTimeout(scrollT);scrollT=setTimeout(()=>{
@@ -1380,8 +1399,8 @@ function renderProgress(){
   const epsTotal=DATA.books.reduce((n,x)=>n+x.episodes.length,0),epsDone=totalRead();
   const ideasDone=nodesDone(),ideasTotal=DATA.nodes.length||1;
   const tracksDone=DATA.tracks.filter(t=>trackDone(t.id)).length;
-  const sitMin=sitTotalMin(),lessonMin=(S.lessonTimes||[]).reduce((a,c)=>a+c,0);
-  const readMin=DATA.books.reduce((n,x)=>{let m=0;readSet(x.id).forEach(i=>{if(x.episodes[i])m+=Math.round(epWords(x.episodes[i])/READ_WPM);});return n+m;},0);
+  const sitMin=sitTotalMin(),lessonMin=(S.lessonTimes||[]).reduce((a,c)=>a+sampleMin(c),0);
+  const readMin=DATA.books.reduce((n,x)=>{let m=0;readSet(x.id).forEach(i=>{if(x.episodes[i])m+=estMin(epWords(x.episodes[i]));});return n+m;},0);
   const totalMin=sitMin+lessonMin+readMin,hrs=totalMin>=90?(totalMin/60).toFixed(1)+" h":totalMin+" min";
   const best=Math.max(S.streak.count,S.bestStreak||0);
   const ring=(p,label,sub)=>`<div class="pring"><svg viewBox="0 0 44 44"><circle cx="22" cy="22" r="19" class="pr-bg"/><circle cx="22" cy="22" r="19" class="pr-fg" style="stroke-dasharray:${(p*1.194).toFixed(1)} 120"/></svg><div class="pr-c"><b>${label}</b><small>${sub}</small></div></div>`;
@@ -1837,7 +1856,7 @@ function renderGemBox(){
 function renderJournal(){
   const stats=$("jstats");
   const notes=journalNotes();
-  const lt=(S.lessonTimes||[]).slice().sort((a,b)=>a-b);const medMin=lt.length?lt[Math.floor(lt.length/2)]:0;   // tutor-I #50
+  const lt=(S.lessonTimes||[]).map(sampleMin).sort((a,b)=>a-b);const medMin=lt.length?lt[Math.floor(lt.length/2)]:0;   // tutor-I #50
   stats.innerHTML=[
     ["🧭",nodesDone()+"/"+DATA.nodes.length,"ideas"],
     ["📖",totalRead(),"episodes"],
@@ -1847,6 +1866,7 @@ function renderJournal(){
     ["🔥",Math.max(S.streak.count,S.bestStreak||0),"best streak"],
     ["🧘",sitTotalMin(),"min sat"],
     ...(medMin?[["⏱️","~"+medMin,"min/lesson"]]:[]),   // tutor-I #50: your REAL median lesson time
+    ...(paceLearned()?[["🏃",paceWPM(),"words/min"]]:[]),   // #109: shown only once it's measured, not the 230 default
     ["🌟",S.ritesN||0,"rites"],
     ["⚡",S.xp,"XP"],
   ].map(([e,v,l])=>`<span class="hstat">${e} <b>${v}</b> <small>${l}</small></span>`).join("");
@@ -2029,8 +2049,12 @@ $("btn-ach").onclick=()=>{const g=$("achgrid");g.innerHTML="";
   $("achs").classList.add("on")};
 
 /* ---------- patch notes ---------- */
-const APP_VER="3.40";
+const APP_VER="3.41";
 const PATCHES=[
+ {v:"3.41",n:"Your Own Clock",d:"27 Jul 2026",items:[
+  ["new","Time estimates now learn your actual reading speed. After five lessons the app stops guessing and starts using your own pace, so “6 min” means six of your minutes."],
+  ["polish","Your measured speed appears in the journal stats once there's enough to measure — until then, estimates use a sensible default."],
+  ["fix","Small labels on the sepia and light themes — patch tags, the selected theme button, the skip arrow, lesson subtitles — were slightly too faint to read comfortably. Darkened."]]},
  {v:"3.40",n:"Hands on the Keys",d:"24 Jul 2026",items:[
   ["new","Keyboard shortcuts on desktop: press ? for the full list. / or S searches, J opens your journal, A achievements, G appearance, P patch notes."],
   ["polish","Shortcuts stay out of your way — they never fire while you're typing, and never override your browser's own Ctrl/⌘ keys."]]},
@@ -3491,7 +3515,7 @@ function completeNode(n){
   delete rec.draft;
   if(!rec.doneAt){
     // tutor-I #50: log real minutes spent (capped so a lesson left open overnight doesn't skew it)
-    if(rec.openAt){const mins=Math.min(30,Math.max(1,Math.round((Date.now()-rec.openAt)/60000)));(S.lessonTimes=S.lessonTimes||[]).push(mins);if(S.lessonTimes.length>60)S.lessonTimes=S.lessonTimes.slice(-60);delete rec.openAt;}
+    if(rec.openAt){const mins=Math.min(30,Math.max(1,Math.round((Date.now()-rec.openAt)/60000)));(S.lessonTimes=S.lessonTimes||[]).push({m:mins,w:nodeWords(n)});if(S.lessonTimes.length>60)S.lessonTimes=S.lessonTimes.slice(-60);delete rec.openAt;}
     rec.doneAt=Date.now();const before=lvl();S.xp+=nodeXP(n);
     const d=today();
     bumpStreak();
