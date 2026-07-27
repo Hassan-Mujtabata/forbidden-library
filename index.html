@@ -827,6 +827,8 @@ function paceWPM(){
 }
 function paceLearned(){return (S.lessonTimes||[]).filter(s=>s&&s.w>0&&s.m>0).length>=5;}
 function estMin(w){return Math.max(1,Math.round(w/paceWPM()));}
+// a lesson is read + quizzed + written about, so it costs a couple of minutes beyond the words
+function nodeMin(n){return Math.max(2,estMin(nodeWords(n))+2);}
 const epWords=ep=>ep.p.reduce((n,p)=>n+p.split(" ").length,0);
 const epXP=ep=>Math.max(10,Math.round(epWords(ep)/10));
 const readSet=b=>new Set(S.read[b]||[]);
@@ -1122,9 +1124,8 @@ function renderMix(){
     const el=document.createElement("button");el.className="mixchip"+(done?" done":"");
     if(it.n){
       const nd=nodeById(it.n);if(!nd)continue;const tr=trackById(nd.track);
-      const w=nodeWords(nd);
       el.innerHTML=`<div class="g">${nd.glyph}</div><div><div class="t">${esc(nd.title)}</div>
-        <div class="b">PATH · ${esc(tr.name)} · ${Math.max(2,estMin(w)+2)} min</div></div>${done?'<div class="ck">✓</div>':""}`;
+        <div class="b">PATH · ${esc(tr.name)} · ${nodeMin(nd)} min</div></div>${done?'<div class="ck">✓</div>':""}`;
       el.onclick=()=>openNode(it.n);
     }else{
       const b=bookById(it.b);if(!b)continue;const ep=b.episodes[it.e];
@@ -2049,8 +2050,10 @@ $("btn-ach").onclick=()=>{const g=$("achgrid");g.innerHTML="";
   $("achs").classList.add("on")};
 
 /* ---------- patch notes ---------- */
-const APP_VER="3.41";
+const APP_VER="3.42";
 const PATCHES=[
+ {v:"3.42",n:"Got a Minute?",d:"27 Jul 2026",items:[
+  ["polish","Every ready lesson on the Path now shows roughly how long it takes — in your reading speed — so you can tell before you commit whether it fits the time you have."]]},
  {v:"3.41",n:"Your Own Clock",d:"27 Jul 2026",items:[
   ["new","Time estimates now learn your actual reading speed. After five lessons the app stops guessing and starts using your own pace, so “6 min” means six of your minutes."],
   ["polish","Your measured speed appears in the journal stats once there's enough to measure — until then, estimates use a sensible default."],
@@ -3240,7 +3243,7 @@ function renderPath(){
         const rv=S.node[n.id]&&S.node[n.id].rv;const due=rv&&rv.due<=Date.now();strength=due?" rusty":(rv&&rv.k>=3?" strong":"");
         sub=`<div class="nsub">${due?"🔸 due for review":(lm.e?lm.e+" "+lm.l.toLowerCase():"done")}</div>`;}
       else if(n.stub) sub=`<div class="nsub">preview · full lesson next</div>`;
-      else sub=`<div class="nsub">ready — tap to begin</div>`;
+      else sub=`<div class="nsub">ready — about ${nodeMin(n)} min</div>`;   // #111: makes the Short filter legible
       const just=(JUST_UNLOCKED&&JUST_UNLOCKED.includes(n.id))?" just":"";
       const pfh=(filtered&&!pfMatch(n))?" pf-hide":"";
       html+=`<button class="tnode ${st}${just}${strength}${pfh}" data-node="${n.id}"><span class="ng">${n.glyph}</span>`+
