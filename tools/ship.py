@@ -185,6 +185,9 @@ def push():
                        capture_output=True, text=True, encoding="utf-8", errors="replace")
     if p.returncode != 0:
         die("push failed:\n" + (p.stderr or "").replace(token, "<token>")[:400])
+    # Pushing to an explicit URL does not move origin/main, so every check afterwards would
+    # report "1 ahead" on an already-pushed commit. Refresh the tracking ref.
+    run(["git", "fetch", "origin"], check=False)
 
 
 def main():
