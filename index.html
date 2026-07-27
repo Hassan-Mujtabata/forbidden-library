@@ -593,6 +593,11 @@ header .brand span{color:var(--gold)}
 .toast{background:#1a1608;border:1px solid var(--gold);color:#f0ede6;padding:12px 22px;border-radius:99px;
   font-size:13.5px;font-weight:600;box-shadow:0 10px 30px rgba(0,0,0,.6);animation:pop .3s ease-out}
 .toast.big{font-size:16px;padding:16px 30px;border-radius:16px;text-align:center}
+/* the toast keeps a fixed dark background in every theme, so Undo uses the theme-independent
+   bright gold — var(--gold) darkens on the light theme and would wash out here */
+.tundo{background:none;border:none;color:var(--goldbtn);font:inherit;font-weight:800;cursor:pointer;
+  text-decoration:underline;padding:2px 4px;margin-left:4px;min-height:24px}
+.tundo:hover{color:#f0d98a}
 @keyframes pop{from{transform:scale(.8) translateY(14px);opacity:0}to{transform:scale(1);opacity:1}}
 .fadeout{animation:fout .5s forwards}
 @keyframes fout{to{opacity:0;transform:translateY(10px)}}
@@ -856,6 +861,17 @@ function pumpToasts(){
     $("toasts").appendChild(t);
     setTimeout(()=>{t.classList.add("fadeout");setTimeout(()=>{t.remove();_toastActive--;pumpToasts();},500)},big?3400:2300);
   }
+}
+// undoable delete: shows a toast with an Undo button so a mis-tapped "remove" never loses a highlight/word/question
+function toastUndo(msg,undo){
+  const t=document.createElement("div");t.className="toast";
+  t.append(msg+" ");
+  const b=document.createElement("button");b.className="tundo";b.textContent="Undo";
+  let done=false;
+  const close=()=>{if(done)return;done=true;t.classList.add("fadeout");setTimeout(()=>t.remove(),500);};
+  b.onclick=()=>{if(done)return;undo();close();};
+  t.appendChild(b);$("toasts").appendChild(t);
+  setTimeout(close,6000);   // longer than a normal toast — you need a moment to notice the mistake
 }
 let _updChip=false;
 function showUpdateChip(){
@@ -1862,8 +1878,12 @@ function renderJournal(){
       const t=prompt("Your note on this highlight:",h.note||"");if(t===null)return;h.note=t.trim()||undefined;save();renderJournal();};
     el.querySelector("[data-share]").onclick=ev=>{ev.stopPropagation();shareInsight("“"+h.t+"”"+(h.note?" — "+h.note:"")+(label?" ("+label.replace(/^\S+\s/,"")+")":""));};   // #42
     el.querySelector("[data-del]").onclick=ev=>{ev.stopPropagation();
-      S.hlDel=[...new Set([...(S.hlDel||[]),hlKey(h)])];   // #108: tombstone so sync doesn't resurrect it
-      S.hl=S.hl.filter(x=>x!==h);save();el.remove()};
+      const key=hlKey(h),at=S.hl.indexOf(h);
+      S.hlDel=[...new Set([...(S.hlDel||[]),key])];   // #108: tombstone so sync doesn't resurrect it
+      S.hl=S.hl.filter(x=>x!==h);save();el.remove();
+      toastUndo("Highlight removed.",()=>{   // undo must also lift the tombstone, or sync would delete it again
+        S.hlDel=(S.hlDel||[]).filter(k=>k!==key);
+        S.hl.splice(at<0?S.hl.length:at,0,h);save();renderJournal();});};
     if(jump)el.onclick=jump;
     w.appendChild(el)}
   // saved words
@@ -1876,7 +1896,9 @@ function renderJournal(){
   for(const vv of vocab){
     const el=document.createElement("div");el.className="hlrow";el.style.cursor="pointer";
     el.innerHTML=`<div class="q" style="font-family:var(--sans);font-size:14px">${esc(vv.t)}</div><div class="m"><span>${vv.ctx?"“…"+esc(vv.ctx.slice(0,54))+"…”":"tap to look up"}</span><button style="color:var(--tx2)" data-del>remove</button></div>`;
-    el.querySelector("[data-del]").onclick=ev=>{ev.stopPropagation();S.vocab=S.vocab.filter(x=>x!==vv);save();el.remove()};
+    el.querySelector("[data-del]").onclick=ev=>{ev.stopPropagation();const at=S.vocab.indexOf(vv);
+      S.vocab=S.vocab.filter(x=>x!==vv);save();el.remove();
+      toastUndo("Word removed.",()=>{S.vocab.splice(at<0?S.vocab.length:at,0,vv);save();renderJournal();});};
     el.onclick=()=>{SELCTX=vv.ctx||"";$("hls").classList.remove("on");defineTerm(vv.t)};
     vw.appendChild(el);
   }
@@ -1889,7 +1911,9 @@ function renderJournal(){
     const nd=nodeById(e.node);
     const el=document.createElement("div");el.className="hlrow";if(nd)el.style.cursor="pointer";
     el.innerHTML=`<div class="q" style="font-size:13.5px">${esc(e.q)}</div><div class="m"><span>you chose “${esc((e.picked||"").slice(0,40))}” · correct: “${esc((e.correct||"").slice(0,40))}”${nd?" · "+esc(nd.title):""}</span><button style="color:var(--tx2)" data-del>remove</button></div>`;
-    el.querySelector("[data-del]").onclick=ev=>{ev.stopPropagation();S.errors=S.errors.filter(x=>x!==e);save();el.remove();if(!S.errors.length)$("jerrsec").style.display="none";};
+    el.querySelector("[data-del]").onclick=ev=>{ev.stopPropagation();const at=S.errors.indexOf(e);
+      S.errors=S.errors.filter(x=>x!==e);save();el.remove();if(!S.errors.length)$("jerrsec").style.display="none";
+      toastUndo("Question removed.",()=>{S.errors.splice(at<0?S.errors.length:at,0,e);save();renderJournal();});};
     if(nd)el.onclick=()=>{$("hls").classList.remove("on");openNode(e.node);};
     ew.appendChild(el);
   }
@@ -1974,8 +1998,11 @@ $("btn-ach").onclick=()=>{const g=$("achgrid");g.innerHTML="";
   $("achs").classList.add("on")};
 
 /* ---------- patch notes ---------- */
-const APP_VER="3.38";
+const APP_VER="3.39";
 const PATCHES=[
+ {v:"3.39",n:"Second Thoughts",d:"24 Jul 2026",items:[
+  ["new","Removed a highlight, saved word or missed question by mistake? An Undo button now appears for a few seconds — nothing is lost to a stray tap."],
+  ["fix","The “Daily Rite complete” banner was almost invisible on the light and sepia themes. Fixed."]]},
  {v:"3.38",n:"Readable in Every Light",d:"24 Jul 2026",items:[
   ["fix","Accent labels (like “Continue the Path”) now recolour instantly when you switch theme, instead of staying stuck in the old colour."],
   ["fix","Tuned the gold and jade accents on the light & sepia themes so every tag, badge and button meets readable-contrast standards."]]},
@@ -2813,7 +2840,7 @@ function renderDaily(){
   ];
   const done=objs.filter(o=>o[2]).length,all=done===3;
   const c=$("daily");c.className="bigcard daily"+(all?" alldone":"");
-  c.innerHTML=`<div class="tag" style="color:${all?"#d4af37":"var(--jade)"}">${all?(x.claimed?"🌟 DAILY RITE COMPLETE":"🌟 RITE READY"):"🌅 TODAY'S RITE — "+done+"/3"}</div>
+  c.innerHTML=`<div class="tag" style="color:${all?"var(--gold)":"var(--jade)"}">${all?(x.claimed?"🌟 DAILY RITE COMPLETE":"🌟 RITE READY"):"🌅 TODAY'S RITE — "+done+"/3"}</div>
     <div style="color:var(--tx2);font-size:12.5px;margin-top:2px">${all?"a full day: you learned, sharpened, and sat · +"+DAILY_XP+" XP":"learn something, clear your reviews, and sit — a complete day"}</div>
     <div class="dailyobjs"></div>`;
   const row=c.querySelector(".dailyobjs");
