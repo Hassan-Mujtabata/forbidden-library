@@ -16,6 +16,7 @@
 :root{
   --bg:#0a0c12; --bg2:#10131d; --card:rgba(255,255,255,.045); --card2:rgba(255,255,255,.08);
   --tx:#e8e6df; --tx2:#9a97a5; --gold:#d4af37; --jade:#4ecdc4; --line:rgba(255,255,255,.09);
+  --goldbtn:#d9b23e;              /* bright gold for filled gold CTA buttons (black text) — kept vivid in every theme so contrast holds, unlike --gold which darkens for text-on-light */
   --serif:Georgia,'Times New Roman',serif; --sans:system-ui,-apple-system,'Segoe UI',sans-serif;
   --read:#ded9cf;                 /* reading-text colour (theme-adaptive) */
   --lh:1.75; --rw:660px;          /* reading line-height + column width (user-adjustable) */
@@ -27,12 +28,12 @@
 }
 :root[data-theme="sepia"]{
   --bg:#efe6d2; --bg2:#e8ddc6; --card:rgba(70,48,20,.06); --card2:rgba(70,48,20,.11);
-  --tx:#33291c; --tx2:#6b5a44; --gold:#8a5f10; --jade:#1f665d; --line:rgba(70,48,20,.18); --read:#33291c;
+  --tx:#33291c; --tx2:#6b5a44; --gold:#7d540d; --jade:#1f665d; --line:rgba(70,48,20,.18); --read:#33291c;
   --overlay:rgba(236,227,206,.95); --sticky:rgba(236,227,206,.9); --err:#9a3324; --ok:#256b4a; --ai:#6d28d9;
 }
 :root[data-theme="light"]{
   --bg:#f6f4ee; --bg2:#ffffff; --card:rgba(0,0,0,.04); --card2:rgba(0,0,0,.08);
-  --tx:#1a1916; --tx2:#575349; --gold:#9a6f10; --jade:#0d7c73; --line:rgba(0,0,0,.14); --read:#22201b;
+  --tx:#1a1916; --tx2:#575349; --gold:#7f5a0e; --jade:#0a6a62; --line:rgba(0,0,0,.14); --read:#22201b;
   --overlay:rgba(246,244,238,.96); --sticky:rgba(246,244,238,.9); --err:#b3261e; --ok:#1a7a4f; --ai:#6d28d9;
 }
 :root[data-theme="light"] body,:root[data-theme="sepia"] body{background-image:none}
@@ -139,7 +140,7 @@ header .brand span{color:var(--gold)}
 .ghostbtn:hover{background:var(--card2)}
 #hlbtn{position:absolute;z-index:70;display:none;gap:1px;border-radius:10px;overflow:hidden;box-shadow:0 6px 18px rgba(0,0,0,.55)}
 #hlbtn button{font-weight:700;font-size:12.5px;padding:8px 13px;border:none;cursor:pointer}
-#hlbtn #hl-save{background:var(--gold);color:#151006}
+#hlbtn #hl-save{background:var(--goldbtn);color:#151006}
 #hlbtn #hl-def{background:var(--bg2);color:var(--gold);border-left:1px solid var(--line)}
 #defpop{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);z-index:105;display:none;
   width:min(460px,92vw);background:var(--bg2);border:1px solid var(--gold);border-radius:16px;padding:16px 18px;
@@ -585,7 +586,7 @@ header .brand span{color:var(--gold)}
 #updchip{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);z-index:120;background:#1a1608;
   border:1px solid var(--gold);color:#f0ede6;padding:9px 10px 9px 16px;border-radius:99px;font-size:13px;font-weight:600;
   display:flex;align-items:center;gap:10px;box-shadow:0 10px 30px rgba(0,0,0,.6);animation:pop .3s ease-out}
-#updchip button{background:var(--gold);color:#151006;border:none;border-radius:99px;padding:6px 15px;font-weight:800;cursor:pointer;font-size:12.5px}
+#updchip button{background:var(--goldbtn);color:#151006;border:none;border-radius:99px;padding:6px 15px;font-weight:800;cursor:pointer;font-size:12.5px}
 
 /* ---------- toasts ---------- */
 #toasts{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);z-index:100;display:flex;flex-direction:column;gap:8px;align-items:center}
@@ -1234,7 +1235,7 @@ $("r-fplus").onclick=()=>{S.font=Math.min(24,S.font+1);applyFontLive();save()};
 // default to the OS preference until the user explicitly picks a theme
 const readTheme=()=>S.theme||(matchMedia&&matchMedia("(prefers-color-scheme: light)").matches?"light":"dark");
 const tagColor=a=>readTheme()==="dark"?a:"var(--gold)";   // track accents read fine on dark; on light/sepia fall back to the theme-tuned gold
-if(window.matchMedia)matchMedia("(prefers-color-scheme: light)").addEventListener("change",()=>{if(!S||!S.theme)applyReadingPrefs();});
+if(window.matchMedia)matchMedia("(prefers-color-scheme: light)").addEventListener("change",()=>{if(!S||!S.theme){applyReadingPrefs();if(typeof refreshRoot==="function")refreshRoot();}});
 function applyReadingPrefs(){
   const root=document.documentElement,th=readTheme();
   if(th==="dark")root.removeAttribute("data-theme");else root.setAttribute("data-theme",th);
@@ -1244,6 +1245,9 @@ function applyReadingPrefs(){
   const tc={dark:"#0a0c12",sepia:"#efe6d2",light:"#f6f4ee"}[th]||"#0a0c12";
   const meta=document.querySelector('meta[name="theme-color"]');if(meta)meta.content=tc;
 }
+// re-render the underlying root view so render-time theme-dependent inline colors (e.g. the
+// continue-card / review-header accent tags) refresh on a live theme switch, without closing any open overlay
+function refreshRoot(){try{if((typeof LAST_ROOT!=="undefined"&&LAST_ROOT==="path"))renderPath();else renderHome();}catch(_){}}
 function applyFontLive(){const px=(S.font||17)+"px";if($("rbody"))$("rbody").style.fontSize=px;if($("nbody"))$("nbody").style.fontSize=px;}
 const bannerOn=()=>!S.artOff&&readTheme()==="dark";   // #15: banner art only suits the dark theme
 function renderSettings(){
@@ -1267,6 +1271,7 @@ function renderSettings(){
       if(key==="font"||key==="readW")S[key]=+v; else if(key==="lineH")S.lineH=+v; else S[key]=v;
       sg.querySelectorAll(".segbtn").forEach(x=>x.classList.toggle("on",x===btn));
       save();applyReadingPrefs();applyFontLive();
+      if(key==="theme")refreshRoot();   // refresh baked accent colors on the view underneath
     });});
   $("set-art").onchange=e=>{S.artOff=!e.target.checked;save();
     if($("reader").classList.contains("on"))openEp(CUR.b,CUR.e);else if($("node").classList.contains("on")&&CURN)openNode(CURN);};
@@ -1275,7 +1280,7 @@ function renderSettings(){
     renderSettings();});
   $("remtime").onchange=e=>{S.reminderH=+e.target.value;save();};
   if($("set-reset"))$("set-reset").onclick=()=>{if(!confirm("Reset theme, font and reading settings to defaults?"))return;
-    ["theme","readFont","lineH","readW","font","artOff"].forEach(k=>delete S[k]);save();applyReadingPrefs();applyFontLive();renderSettings();toast("Reset to defaults");};
+    ["theme","readFont","lineH","readW","font","artOff"].forEach(k=>delete S[k]);save();applyReadingPrefs();applyFontLive();refreshRoot();renderSettings();toast("Reset to defaults");};
 }
 // #33 reminders
 async function enableReminder(){
@@ -1969,8 +1974,11 @@ $("btn-ach").onclick=()=>{const g=$("achgrid");g.innerHTML="";
   $("achs").classList.add("on")};
 
 /* ---------- patch notes ---------- */
-const APP_VER="3.37";
+const APP_VER="3.38";
 const PATCHES=[
+ {v:"3.38",n:"Readable in Every Light",d:"24 Jul 2026",items:[
+  ["fix","Accent labels (like “Continue the Path”) now recolour instantly when you switch theme, instead of staying stuck in the old colour."],
+  ["fix","Tuned the gold and jade accents on the light & sepia themes so every tag, badge and button meets readable-contrast standards."]]},
  {v:"3.37",n:"Your System, Your Rules",d:"24 Jul 2026",items:[
   ["new","The Vault now matches your device's light or dark mode automatically — until you pick a theme yourself."],
   ["new","New “reset to defaults” link in Settings puts theme, font and reading layout back the way they started."]]},
