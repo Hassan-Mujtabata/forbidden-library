@@ -6,8 +6,12 @@
  *
  *     VA.run("dark")     VA.run("sepia")     VA.run("light")     VA.restore()
  *
- * Returns a terse {theme, checked, failed, fails:[...]} so the result costs ~20 tokens
- * instead of dumping every computed style through the conversation.
+ * Returns a terse {theme, checked, failed, unmeasured, fails:[...]} so the result costs ~20
+ * tokens instead of dumping every computed style through the conversation.
+ *
+ * ALWAYS read `unmeasured`. It lists overlays that rendered no text, meaning they were not
+ * actually audited -- eplist and flow need a book/word-list argument, and review no-ops when
+ * nothing is due. A "0 failures" run with a long unmeasured list is not a clean run.
  *
  * This encodes three fixes for bugs that were in the AUDIT, not the app — each one cost
  * real debugging time. Do not "simplify" them away:
@@ -100,8 +104,8 @@
     document.head.appendChild(killer);
   }
 
-  function scan(out, seen) {
-    var els = document.body.querySelectorAll("*");
+  function scan(out, seen, root) {
+    var els = (root || document.body).querySelectorAll("*");
     var checked = 0;
     for (var i = 0; i < els.length; i++) {
       var el = els[i];
@@ -130,27 +134,52 @@
     return checked;
   }
 
+  function click(id) { var b = document.getElementById(id); if (b) b.click(); }
+
+  function call(fn) {
+    var a = [].slice.call(arguments, 1);
+    if (typeof window[fn] === "function") { try { window[fn].apply(null, a); } catch (e) {} }
+  }
+
   // fix #3 — force-open every overlay so closed surfaces get measured too.
-  // Renderers are called when they exist; an overlay with stale content is still worth scanning.
-  var RENDERERS = {
-    hls: "renderJournal", ach: "renderAch", settings: "renderSettings", patch: "renderPatch",
-    account: "renderAccount", progress: "renderProgress", queue: "renderQueue",
-    addbook: "renderAddBook", search: "renderSearch", sit: "openSit", cards: "renderCards"
+  // Open by the real UI path where one exists: several overlays (achs, search, hls) are populated
+  // by an inline onclick handler, NOT by a named render function, so clicking the button is the
+  // only way to fill them. Guessing render-fn names silently yields an empty overlay.
+  var OPENERS = {
+    hls:      function () { click("btn-hl"); },
+    achs:     function () { click("btn-ach"); },
+    settings: function () { click("btn-settings"); },
+    patches:  function () { click("btn-patch"); },
+    search:   function () { click("btn-search"); },
+    account:  function () { click("btn-account"); },
+    progress: function () { call("renderProgress"); },
+    queue:    function () { call("renderQueue"); },
+    addbook:  function () { call("renderAddBook"); },
+    sit:      function () { call("openSit"); },
+    review:   function () { call("startReview"); },   // no-ops when nothing is due -> reported unmeasured
+    booklanding: function () {
+      var d = window.DATA;
+      if (d && d.books && d.books.length) call("openBookLanding", d.books[0].id);
+    }
+    // eplist and flow need a specific book / word list. Rather than fake them, they get
+    // reported in `unmeasured` so a false clean is visible instead of silent.
   };
 
   function sweepOverlays(out, seen) {
-    var ovs = document.querySelectorAll(".overlay"), checked = 0;
+    var ovs = document.querySelectorAll(".overlay"), checked = 0, unmeasured = [];
     for (var i = 0; i < ovs.length; i++) {
       var o = ovs[i], was = o.classList.contains("on");
       if (!was) {
-        var fn = RENDERERS[o.id];
-        if (fn && typeof window[fn] === "function") { try { window[fn](); } catch (e) {} }
+        if (OPENERS[o.id]) { try { OPENERS[o.id](); } catch (e) {} }
         o.classList.add("on");
       }
-      try { checked += scan(out, seen); } catch (e) {}
+      var n = 0;
+      try { n = scan(out, seen, o); } catch (e) {}   // scoped to THIS overlay, not the whole body
+      if (!n) unmeasured.push(o.id);
+      checked += n;
       if (!was) o.classList.remove("on");
     }
-    return checked;
+    return { checked: checked, unmeasured: unmeasured };
   }
 
   var original = null;
@@ -162,9 +191,13 @@
       document.documentElement.dataset.theme = theme;
       void document.documentElement.offsetHeight;            // force a synchronous reflow
       var out = [], seen = {};
-      var checked = scan(out, seen) + sweepOverlays(out, seen);
+      var base = scan(out, seen);
+      var ov = sweepOverlays(out, seen);
       return {
-        theme: theme, checked: checked, failed: out.length,
+        theme: theme, checked: base + ov.checked, failed: out.length,
+        // overlays that rendered no measurable text -- these were NOT audited. A clean run
+        // with a long unmeasured list is not a clean run; open those by hand and re-check.
+        unmeasured: ov.unmeasured,
         fails: out.sort(function (a, b) { return a.r - b.r; }).slice(0, MAX_REPORT)
       };
     },
