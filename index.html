@@ -827,9 +827,14 @@ const save=()=>{S._mtime=Date.now();
   if(S.hl&&S.hl.length>600)S.hl=S.hl.slice(0,600);              // #30: bound the unbounded lists
   if(S.vocab&&S.vocab.length>600)S.vocab=S.vocab.slice(0,600);
   if(S.hlDel&&S.hlDel.length>1500)S.hlDel=S.hlDel.slice(-1500);
+  if(S.readDel&&S.readDel.length>3000)S.readDel=S.readDel.slice(-3000);   // #118: one undo of a
+  // 323-chapter "mark all read" writes 323 tombstones at once, so this bound sits well above hlDel's
   try{localStorage.setItem(LS_ST,JSON.stringify(S));}
   catch(e){if(!_quotaWarned){_quotaWarned=true;toast("⚠️ Device storage is full — some new items may not save. Try removing old highlights.");}return;}
-  if(_syncOn&&localStorage.getItem("vault_gh")){clearTimeout(_pushT);_pushT=setTimeout(()=>{_pushT=null;pushState();},8000);}};  // #26: coalesce into fewer gist revisions
+  if(canPush()){clearTimeout(_pushT);_pushT=setTimeout(()=>{_pushT=null;pushState();},8000);}};  // #26: coalesce into fewer gist revisions
+// One definition of "this device can actually reach the server", so callers that need to know
+// whether a change has escaped locally can't drift from the condition that schedules the push.
+function canPush(){return _syncOn&&!!localStorage.getItem("vault_gh");}
 // #26: flush a pending sync the moment the tab is hidden/closed, so the longer debounce never loses the last edit
 addEventListener("visibilitychange",()=>{if(document.hidden&&_pushT){clearTimeout(_pushT);_pushT=null;pushState();}});
 addEventListener("pagehide",()=>{if(_pushT){clearTimeout(_pushT);_pushT=null;pushState();}});
@@ -888,9 +893,35 @@ const epWords=ep=>ep.p.reduce((n,p)=>n+p.split(" ").length,0);
 const _bwCache={};
 const bookWords=b=>_bwCache[b.id]??=b.episodes.reduce((n,ep)=>n+epWords(ep),0);
 const fmtWords=w=>w>=1000?Math.round(w/1000).toLocaleString()+"k words":w+" words";
+// "~890 min left" is a number nobody can picture. Hours are the unit a reader actually plans in.
+const fmtDur=m=>m>=60?(m%60?`${Math.floor(m/60)}h ${m%60}m`:`${Math.floor(m/60)}h`):`${m} min`;
 const epXP=ep=>Math.max(10,Math.round(epWords(ep)/10));
 const readSet=b=>new Set(S.read[b]||[]);
 const isRead=(b,e)=>readSet(b).has(e);
+// #118: progress could only ever go forwards — "Mark all read" was one tap, one confirm, and 323
+// chapters were read for good. Un-marking needs tombstones for the same reason deleting a
+// highlight does: mergeState unions S.read across devices, so a plain removal is resurrected by
+// the next sync from any other device. Every re-read must LIFT the tombstone or the union
+// subtracts it right back off again.
+const readKey=(b,e)=>b+"|"+e;
+// Tombstones carry the moment they were made ("laws48|7@1722…"). A plain tombstone is too blunt:
+// undoing "mark all read" tombstones every chapter the tap added, and a flat subtraction would
+// then also wipe chapters another device had genuinely read. With a timestamp, mergeState can ask
+// the only question that matters — did that device read it BEFORE or AFTER the un-mark? Earlier
+// means the un-mark supersedes it; later means it is real progress and must survive.
+const tombKey=t=>{const i=t.lastIndexOf("@");return i<0?t:t.slice(0,i);};
+const tombAt=t=>{const i=t.lastIndexOf("@");return i<0?0:(+t.slice(i+1)||0);};
+function markUnread(bk,eps){
+  const ds=new Set(eps.map(e=>readKey(bk,e))),now=Date.now();
+  S.read[bk]=(S.read[bk]||[]).filter(e=>!ds.has(readKey(bk,e)));
+  S.readDel=[...(S.readDel||[]).filter(t=>!ds.has(tombKey(t))),...[...ds].map(k=>k+"@"+now)];
+  if(S.readDel.length>3000)S.readDel=S.readDel.slice(-3000);
+}
+function markRead(bk,eps){
+  const live=new Set(eps.map(e=>readKey(bk,e)));
+  S.read[bk]=[...new Set([...(S.read[bk]||[]),...eps])];
+  S.readDel=(S.readDel||[]).filter(t=>!live.has(tombKey(t)));
+}
 const totalRead=()=>Object.values(S.read).reduce((n,a)=>n+a.length,0);
 
 /* ============ gamification ============ */
@@ -1123,7 +1154,7 @@ function renderBookLanding(id){
     `<div class="bl-cover" style="background:linear-gradient(160deg,${b.accent}66,${b.accent}22 55%,var(--card2))"><div class="bl-g">${b.glyph}</div></div>`+
     `<div class="bl-title">${esc(b.title)}</div>`+(b.author?`<div class="bl-author">${esc(b.author)}</div>`:"")+
     `<div class="bl-len${b.partial?" partial":""}">${fmtWords(bookWords(b))} · ${b.partial?"⚠ "+esc(b.partial):"complete book"}</div>`+
-    `<div class="bl-prog"><div class="pbar"><div class="pfill" style="width:${pct}%"></div></div><div class="bl-progtxt">${done}/${b.episodes.length} episodes · ${pct}%${leftMin&&pct<100?` · ~${leftMin} min left`:pct>=100?" · finished ✓":""}</div></div>`+
+    `<div class="bl-prog"><div class="pbar"><div class="pfill" style="width:${pct}%"></div></div><div class="bl-progtxt">${done}/${b.episodes.length} episodes · ${pct}%${leftMin&&pct<100?` · ~${fmtDur(leftMin)} left`:pct>=100?" · finished ✓":""}</div></div>`+
     `<div class="bl-actions"><button class="goldbtn" id="bl-start">${done===0?"Start reading":pct>=100?"Read again":"Continue"}</button><button class="ghostbtn" id="bl-fav">${fav?"★ Saved":"☆ Save"}</button>${pct<100?`<button class="ghostbtn" id="bl-allread" style="color:var(--tx2)">Mark all read</button>`:""}</div>`+
     `<div id="bl-path"></div>`+
     `<div id="bl-hl"></div>`+
@@ -1180,7 +1211,20 @@ function renderBookLanding(id){
   paintEps();
   $("bl-start").onclick=()=>{$("booklanding").classList.remove("on");openBook(id);};
   if($("bl-allread"))$("bl-allread").onclick=()=>{if(!confirm(`Mark all ${b.episodes.length} chapters of “${b.title}” as read?`))return;
-    S.read[id]=b.episodes.map((_,i)=>i);save();checkAch();renderBookLanding(id);toast("✓ Marked as read");};
+    // #118: remember exactly what was read before, so Undo restores that state rather than
+    // clearing the book — someone 200 chapters in must not lose 200 chapters to one mis-tap.
+    const was=[...(S.read[id]||[])],added=b.episodes.map((_,i)=>i).filter(i=>!was.includes(i));
+    markRead(id,b.episodes.map((_,i)=>i));save();checkAch();renderBookLanding(id);
+    toastUndo(`✓ Marked ${b.episodes.length} chapters read.`,()=>{
+      // A plain local restore is enough while the change is still on this device: the sync push
+      // coalesces for 8s and this undo expires at 6s, so normally nothing has left yet. Tombstone
+      // only in the case that actually needs it — the push already went out — because tombstoning
+      // all 300-odd chapters would also suppress ones another device had genuinely read.
+      S.read[id]=was;
+      // !_pushT alone is not "already pushed" — it is also the resting state of a device that
+      // has no sync configured and never schedules a push at all.
+      if(canPush()&&!_pushT)markUnread(id,added);
+      save();renderBookLanding(id);});};
   $("bl-fav").onclick=()=>{S.faves=S.faves||[];S.faves=fav?S.faves.filter(x=>x!==id):[id,...S.faves];save();renderBookLanding(id);};
 }
 function openBookLanding(id){S._blExpand=false;renderBookLanding(id);$("booklanding").classList.add("on");}
@@ -1278,7 +1322,15 @@ function openEp(id,e){
 }
 function renderEnd(){
   const b=bookById(CUR.b),ep=b.episodes[CUR.e],end=$("rend");end.innerHTML="";
-  if(isRead(CUR.b,CUR.e)){const d=document.createElement("div");d.className="done-line";d.textContent="— ✓ COMPLETED —";end.appendChild(d)}
+  if(isRead(CUR.b,CUR.e)){const d=document.createElement("div");d.className="done-line";d.textContent="— ✓ COMPLETED —";end.appendChild(d);
+    // #118: completing was a one-way door. A mis-tap on the wrong chapter had no way back.
+    const u=document.createElement("button");u.className="miniA";u.style.cssText="display:block;margin:8px auto 0";
+    u.textContent="mark unread";
+    // Hand back the XP too, or un-marking and re-completing would mint XP on a loop.
+    u.onclick=()=>{const bk=CUR.b,e=CUR.e,xp=epXP(ep);
+      markUnread(bk,[e]);S.xp=Math.max(0,(S.xp||0)-xp);save();renderEnd();renderTopbar();
+      toastUndo("Marked unread.",()=>{markRead(bk,[e]);S.xp=(S.xp||0)+xp;save();renderEnd();renderTopbar();});};
+    end.appendChild(u);}
   else{const btn=document.createElement("button");btn.className="goldbtn";btn.textContent=`MARK COMPLETE  +${epXP(ep)} XP`;
     btn.onclick=()=>complete();end.appendChild(btn)}
   const nav=document.createElement("div");nav.style.marginTop="14px";
@@ -1296,7 +1348,7 @@ function recapEpisode(b,ep){   // tutor-E #34: 3-bullet summary + one recall que
 function complete(){
   const b=bookById(CUR.b),ep=b.episodes[CUR.e];
   if(isRead(CUR.b,CUR.e))return;
-  (S.read[CUR.b]??=[]).push(CUR.e);
+  markRead(CUR.b,[CUR.e]);   // lifts any tombstone, so re-reading a chapter you un-marked sticks
   const finishedBook=readSet(CUR.b).size>=b.episodes.length&&!(S.booksFinished||[]).includes(CUR.b);   // #21
   const before=lvl();S.xp+=epXP(ep);
   const d=today();
@@ -2147,8 +2199,13 @@ $("btn-ach").onclick=()=>{const g=$("achgrid");g.innerHTML="";
   $("achs").classList.add("on")};
 
 /* ---------- patch notes ---------- */
-const APP_VER="3.45";
+const APP_VER="3.46";
 const PATCHES=[
+ {v:"3.46",n:"Take It Back",d:"28 Jul 2026",items:[
+  ["new","Progress can go backwards now. A finished chapter has a “mark unread” link, and its XP goes back too — so re-reading something doesn't quietly farm points."],
+  ["new","“Mark all read” can be undone. It used to be one tap, one confirm, and 323 chapters were read forever; now you get six seconds to take it back, and it restores exactly what you had read before rather than clearing the book."],
+  ["fix","Un-marking survives syncing between your devices. Progress merges by union, so without this the other device simply put the chapter straight back."],
+  ["polish","Time left on a book reads “~17h 7m” instead of “~1027 min”."]]},
  {v:"3.45",n:"Find Your Place",d:"28 Jul 2026",items:[
   ["new","Books with lots of chapters now have a filter box — type part of a title, or just a number, and jump straight there. Accents are ignored, so “jhana” finds “Jhāna”."],
   ["new","The chapter list now opens where you actually are instead of at chapter 1, and your next unread chapter is marked ▶ NEXT. In a 323-chapter book that is the difference between scrolling and arriving."],
@@ -2630,7 +2687,21 @@ function mergeState(a,b){ // union merge — never loses progress from either de
   m.xp=Math.max(a.xp||0,b.xp||0);m.bestStreak=Math.max(a.bestStreak||0,b.bestStreak||0);
   m.rvN=Math.max(a.rvN||0,b.rvN||0);m.ritesN=Math.max(a.ritesN||0,b.ritesN||0);
   if(((b.streak&&b.streak.day)||"")>((a.streak&&a.streak.day)||""))m.streak=b.streak;
-  m.read=m.read||{};for(const k in (b.read||{}))m.read[k]=[...new Set([...(m.read[k]||[]),...(b.read[k]||[])])];
+  // #118: un-marking a chapter has to survive a sync, or the union below simply resurrects it from
+  // whichever device still lists it as read. Each side's claim is judged against the tombstone:
+  // a device that read the chapter AFTER the un-mark keeps it, one whose snapshot predates the
+  // un-mark does not. That distinction is what stops an undo from erasing another device's work.
+  m.readDel=[...new Set([...(a.readDel||[]),...(b.readDel||[])])];
+  const tomb={};
+  for(const t of m.readDel){const k=tombKey(t),ts=tombAt(t);if(!(k in tomb)||ts>tomb[k])tomb[k]=ts;}
+  m.read={};
+  for(const k of new Set([...Object.keys(a.read||{}),...Object.keys(b.read||{})])){
+    const keep=new Set();
+    for(const[side,arr]of[[a,(a.read||{})[k]||[]],[b,(b.read||{})[k]||[]]])
+      for(const e of arr){const t=tomb[k+"|"+e];
+        if(t===undefined||(side._mtime||0)>t)keep.add(e);}
+    m.read[k]=[...keep];
+  }
   m.node=m.node||{};
   for(const id in (b.node||{})){const x=m.node[id],y=b.node[id];
     if(!x){m.node[id]=y;continue;}
