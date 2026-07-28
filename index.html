@@ -47,6 +47,19 @@ body{background:var(--bg);color:var(--tx);font-family:var(--sans);min-height:100
   background-image:radial-gradient(1200px 600px at 70% -10%,rgba(212,175,55,.07),transparent),
                    radial-gradient(900px 500px at 0% 100%,rgba(78,205,196,.05),transparent)}
 button{font-family:inherit;color:inherit;background:none;border:none;cursor:pointer}
+/* #116: every placeholder in the app was the browser's default grey (#757575) — a fixed colour
+   that ignores the theme entirely: 3.42:1 on sepia and 4.02:1 on dark, both below AA. No DOM
+   contrast sweep can catch this, because a placeholder is not a text node and has no element of
+   its own; it only shows up if you ask for the ::placeholder pseudo-style explicitly.
+   opacity:1 is required — Firefox dims placeholders by default, which would undo the fix. */
+input::placeholder,textarea::placeholder{color:var(--tx2);opacity:1}
+/* #117: a bare <input> falls back to the UA's white-background/black-text default — in dark mode
+   that is a glaring white box inside a dark panel, which is what #gem-key had always been. Give
+   every text-like input the themed look by default. :where() keeps the specificity at zero, so
+   any input with its own rule (#sinput, .bl-q, #jsearch's inline styles) still wins outright. */
+input:where([type="text"],[type="password"],[type="search"],[type="email"],[type="url"],:not([type])){
+  background:var(--bg2);border:1px solid var(--line);border-radius:10px;color:var(--tx);
+  padding:9px 12px;font-size:13px;font-family:inherit;outline:none}
 .view{display:none;max-width:1060px;margin:0 auto;padding:20px 18px 90px}
 .view.on{display:block}
 .overlay{display:none;position:fixed;inset:0;background:var(--overlay);backdrop-filter:blur(8px);z-index:50;overflow-y:auto}
@@ -266,6 +279,15 @@ header .brand span{color:var(--gold)}
 .bl-pathrow{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:6px}
 .bl-eps .eprow.read .t{color:var(--tx2)}
 .bl-eps .eprow .mn{color:var(--tx2);font-size:11.5px;margin-left:auto}
+.bl-q{width:100%;background:var(--bg2);border:1px solid var(--line);border-radius:10px;color:var(--tx);
+  padding:9px 12px;font-size:13px;font-family:inherit;outline:none;margin-bottom:8px}
+/* .t is flex:1 and absorbs the free space, so the badge lands beside the minutes without its own
+   auto margin — a second margin-left:auto here would split the gap and float it mid-row. */
+.eprow .nx{color:var(--gold);font-size:10.5px;letter-spacing:.14em;white-space:nowrap}
+.bl-hlrow{display:block;width:100%;text-align:left;background:var(--card);border-left:3px solid var(--gold);
+  border-radius:8px;padding:11px 13px;margin-bottom:8px}
+.bl-hlrow .q{font-family:var(--serif);font-size:13.5px;line-height:1.55;display:block}
+.bl-hlrow .e{font-size:11px;color:var(--tx2);margin-top:6px;display:block}
 .favdot{position:absolute;top:7px;right:9px;color:var(--gold);font-size:14px;text-shadow:0 1px 3px rgba(0,0,0,.6)}
 .book .cover{position:relative}
 .libsort{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:4px 0 18px}
@@ -1104,7 +1126,10 @@ function renderBookLanding(id){
     `<div class="bl-prog"><div class="pbar"><div class="pfill" style="width:${pct}%"></div></div><div class="bl-progtxt">${done}/${b.episodes.length} episodes · ${pct}%${leftMin&&pct<100?` · ~${leftMin} min left`:pct>=100?" · finished ✓":""}</div></div>`+
     `<div class="bl-actions"><button class="goldbtn" id="bl-start">${done===0?"Start reading":pct>=100?"Read again":"Continue"}</button><button class="ghostbtn" id="bl-fav">${fav?"★ Saved":"☆ Save"}</button>${pct<100?`<button class="ghostbtn" id="bl-allread" style="color:var(--tx2)">Mark all read</button>`:""}</div>`+
     `<div id="bl-path"></div>`+
-    `<div class="prsec">Episodes</div><div class="bl-eps"></div>`;
+    `<div id="bl-hl"></div>`+
+    `<div class="prsec">Episodes</div>`+
+    (b.episodes.length>12?`<input id="bl-q" class="bl-q" placeholder="🔍 filter chapters — title or number…" autocomplete="off">`:"")+
+    `<div class="bl-eps"></div>`;
   // #36: which Path ideas this book feeds — the missing book→Path link
   const nb=x=>x.toLowerCase().replace(/[^a-z0-9]/g,"");
   const fedNodes=DATA.nodes.filter(n=>!n.stub&&(n.sources||[]).some(s=>nb(s.book)===nb(b.title))&&(privileged()||nodeVisible(n)));
@@ -1113,15 +1138,46 @@ function renderBookLanding(id){
     const pr=pw.querySelector(".bl-pathrow");
     fedNodes.slice(0,8).forEach(n=>{const c=document.createElement("button");c.className="glosschip";c.innerHTML=`${n.glyph} ${esc(n.title)}${nodeDone(n.id)?" ✓":""}`;
       c.onclick=()=>{$("booklanding").classList.remove("on");openNode(n.id);};pr.appendChild(c);});}
-  const w=bd.querySelector(".bl-eps");
+  // #115: your own highlights from this book, gathered where you'd look for them
+  const mine=(S.hl||[]).filter(h=>h.b===id&&h.t);
+  if(mine.length){const hw=bd.querySelector("#bl-hl");
+    hw.innerHTML=`<div class="prsec">Your ${mine.length} highlight${mine.length>1?"s":""} from this book</div>`;
+    mine.slice(0,6).forEach(h=>{const el=document.createElement("button");el.className="bl-hlrow";
+      el.innerHTML=`<span class="q">“${esc(h.t.slice(0,160))}${h.t.length>160?"…":""}”</span><span class="e">episode ${(h.e|0)+1}</span>`;
+      el.onclick=()=>{$("booklanding").classList.remove("on");openEp(id,h.e|0);};hw.appendChild(el);});}
+  const w=bd.querySelector(".bl-eps"),qbox=bd.querySelector("#bl-q");
+  const nextI=b.episodes.findIndex((_,i)=>!rs.has(i));   // -1 once the book is finished
   // #23: big books (hundreds of chapters) shouldn't render one giant list — cap and expand on demand
-  const CAP=40;let shown=Math.min(b.episodes.length,S._blExpand?b.episodes.length:CAP);
-  const addRow=(ep,i)=>{const r=document.createElement("button");r.className="eprow"+(rs.has(i)?" read":"");
-    r.innerHTML=`<span class="n">${i+1}</span><span class="t">${esc(ep.t)}</span>${rs.has(i)?'<span class="ck">✓</span>':`<span class="mn">${estMin(epWords(ep))}m</span>`}`;
-    r.onclick=()=>{$("booklanding").classList.remove("on");openEp(id,i);};w.appendChild(r);};
-  for(let i=0;i<shown;i++)addRow(b.episodes[i],i);
-  if(b.episodes.length>shown){const more=document.createElement("button");more.className="ghostbtn";more.style.marginTop="8px";
-    more.textContent=`Show all ${b.episodes.length} chapters`;more.onclick=()=>{S._blExpand=true;renderBookLanding(id);};w.appendChild(more);}
+  const CAP=40;
+  function paintEps(){
+    const raw=qbox?(qbox.value||"").trim():"",q=fold(raw),num=/^\d+$/.test(raw);
+    w.innerHTML="";
+    // #114: filter by chapter title OR by number — "200" jumps straight to chapter 200, which is
+    // the only practical way to reach the middle of a 323-chapter book. Titles fold accents.
+    const hits=[];
+    for(let i=0;i<b.episodes.length;i++)
+      if(!raw||(num?String(i+1).startsWith(raw):fold(b.episodes[i].t).includes(q)))hits.push(i);
+    if(!hits.length){w.innerHTML='<p style="color:var(--tx2);font-size:13px">No chapter matches that.</p>';return;}
+    let list=hits;
+    if(!S._blExpand&&hits.length>CAP){
+      // Opening a 323-chapter book at chapter 1 is useless once you're 200 in, so when you are
+      // further along than the cap, window the list around where you actually are.
+      let from=0;
+      if(!raw){const at=hits.indexOf(nextI);if(at>CAP-8)from=Math.max(0,at-8);}
+      list=hits.slice(from,from+CAP);
+    }
+    for(const i of list){const ep=b.episodes[i],isNext=i===nextI;
+      const r=document.createElement("button");r.className="eprow"+(rs.has(i)?" read":"")+(isNext?" cur":"");
+      r.innerHTML=`<span class="n">${i+1}</span><span class="t">${esc(ep.t)}</span>`+
+        (isNext?`<span class="nx">▶ NEXT</span>`:"")+
+        (rs.has(i)?'<span class="ck">✓</span>':`<span class="mn">${estMin(epWords(ep))}m</span>`);
+      r.onclick=()=>{$("booklanding").classList.remove("on");openEp(id,i);};w.appendChild(r);}
+    if(list.length<hits.length){const more=document.createElement("button");more.className="ghostbtn";more.style.marginTop="8px";
+      more.textContent=raw?`Show all ${hits.length} matches`:`Show all ${b.episodes.length} chapters`;
+      more.onclick=()=>{S._blExpand=true;paintEps();};w.appendChild(more);}
+  }
+  if(qbox)qbox.oninput=paintEps;
+  paintEps();
   $("bl-start").onclick=()=>{$("booklanding").classList.remove("on");openBook(id);};
   if($("bl-allread"))$("bl-allread").onclick=()=>{if(!confirm(`Mark all ${b.episodes.length} chapters of “${b.title}” as read?`))return;
     S.read[id]=b.episodes.map((_,i)=>i);save();checkAch();renderBookLanding(id);toast("✓ Marked as read");};
@@ -2091,8 +2147,14 @@ $("btn-ach").onclick=()=>{const g=$("achgrid");g.innerHTML="";
   $("achs").classList.add("on")};
 
 /* ---------- patch notes ---------- */
-const APP_VER="3.44";
+const APP_VER="3.45";
 const PATCHES=[
+ {v:"3.45",n:"Find Your Place",d:"28 Jul 2026",items:[
+  ["new","Books with lots of chapters now have a filter box — type part of a title, or just a number, and jump straight there. Accents are ignored, so “jhana” finds “Jhāna”."],
+  ["new","The chapter list now opens where you actually are instead of at chapter 1, and your next unread chapter is marked ▶ NEXT. In a 323-chapter book that is the difference between scrolling and arriving."],
+  ["new","Every book page now gathers your own highlights from that book, and tapping one takes you back to the episode it came from."],
+  ["fix","Placeholder text — “search all books…”, and 13 others — used the browser's fixed grey, which was too faint to read against the dark and sepia themes. It follows the theme now."],
+  ["fix","The tutor's API-key box was an unstyled white rectangle in dark mode. It matches the app now."]]},
  {v:"3.44",n:"Close Enough",d:"28 Jul 2026",items:[
   ["fix","Search now ignores accents, so typing “jhana” finds the 558 passages that spell it “jhāna” — it used to find exactly one. Same for “sila”, “metta”, “Peron” and every other word among the 63 accented letters in your library. The result still shows the real spelling."],
   ["fix","Tapping a word for a definition, and the journal search, ignore accents too."],

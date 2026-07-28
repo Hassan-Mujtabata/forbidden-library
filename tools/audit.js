@@ -153,6 +153,37 @@
     return checked;
   }
 
+  // Placeholder text is structurally invisible to the sweep above: it lives in a pseudo-element
+  // with no node of its own, so querySelectorAll can never return it and every "0 failures" run
+  // was silently ignoring it. All 14 placeholders in this app sat at the UA default grey
+  // (#757575) -- 3.42:1 on sepia, 4.02:1 on dark, both below AA -- through every previous audit.
+  // Ask for the ::placeholder computed style explicitly, and honour its opacity: Firefox dims
+  // placeholders by default, so the colour alone overstates the real contrast.
+  function scanPlaceholders(out, seen, root) {
+    var els = (root || document.body).querySelectorAll("input[placeholder],textarea[placeholder]");
+    var n = 0;
+    for (var i = 0; i < els.length; i++) {
+      var el = els[i];
+      if (!visible(el)) continue;
+      var bg = effBg(el);
+      if (!bg) continue;
+      var cs = getComputedStyle(el, "::placeholder");
+      var fg = parse(cs.color);
+      if (!fg) continue;
+      var op = parseFloat(cs.opacity);
+      if (!isNaN(op) && op < 1) fg = [fg[0], fg[1], fg[2], fg[3] * op];
+      n++;
+      var r = ratio(fg[3] < 1 ? over(fg, bg) : fg, bg);
+      if (r < AA) {
+        var s = sel(el) + "::placeholder";
+        if (seen[s]) continue;
+        seen[s] = 1;
+        out.push({ sel: s, r: +r.toFixed(2), need: AA, text: (el.getAttribute("placeholder") || "").slice(0, 40) });
+      }
+    }
+    return n;
+  }
+
   function click(id) { var b = document.getElementById(id); if (b) b.click(); }
 
   function call(fn) {
@@ -199,10 +230,11 @@
         if (OPENERS[o.id]) { try { OPENERS[o.id](); } catch (e) {} }
         o.classList.add("on");
       }
-      var n = 0;
+      var n = 0, ph = 0;
       try { n = scan(out, seen, o); } catch (e) {}   // scoped to THIS overlay, not the whole body
-      if (!n) unmeasured.push(o.id);
-      checked += n;
+      try { ph = scanPlaceholders(out, seen, o); } catch (e) {}
+      if (!n) unmeasured.push(o.id);                 // judged on real text only: an overlay whose
+      checked += n + ph;                             // only content is a placeholder is still empty
       if (!was) o.classList.remove("on");
     }
     return { checked: checked, unmeasured: unmeasured };
@@ -236,7 +268,7 @@
       setTheme(theme);
       void document.documentElement.offsetHeight;            // force a synchronous reflow
       var out = [], seen = {};
-      var base = scan(out, seen);
+      var base = scan(out, seen) + scanPlaceholders(out, seen);
       var ov = sweepOverlays(out, seen);
       return {
         theme: theme, checked: base + ov.checked, failed: out.length,
