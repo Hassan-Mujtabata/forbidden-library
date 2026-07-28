@@ -835,6 +835,11 @@ const save=()=>{S._mtime=Date.now();
 // One definition of "this device can actually reach the server", so callers that need to know
 // whether a change has escaped locally can't drift from the condition that schedules the push.
 function canPush(){return _syncOn&&!!localStorage.getItem("vault_gh");}
+// Has a just-made change plausibly already left this device? Only then does undoing it need
+// tombstones rather than a plain local restore. Named, because the obvious test is wrong: a null
+// _pushT is not "already pushed", it is also the resting state of a device with no sync at all —
+// and reading it that way made every ordinary undo write 320 needless tombstones.
+function pushEscaped(){return canPush()&&!_pushT;}
 // #26: flush a pending sync the moment the tab is hidden/closed, so the longer debounce never loses the last edit
 addEventListener("visibilitychange",()=>{if(document.hidden&&_pushT){clearTimeout(_pushT);_pushT=null;pushState();}});
 addEventListener("pagehide",()=>{if(_pushT){clearTimeout(_pushT);_pushT=null;pushState();}});
@@ -861,7 +866,10 @@ const esc=s=>{const d=document.createElement("div");d.textContent=sane(s);return
 const fold=s=>{const f=s.normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase();
   return f.length===s.length?f:s.toLowerCase();};
 // Folding the whole 13-million-character library costs real time, so do it once per episode and
-// keep it on the episode. Cached lazily: a reader who never searches never pays for it.
+// keep it on the episode. Cached lazily: a reader who never searches never pays for it, and the
+// n<50 result cap means a search with plenty of hits stops early and folds only part of the shelf.
+// Fully populated the cache holds ~13M characters — stored one byte each, since folding strips the
+// accents that would force UTF-16. That buys 42ms -> 6ms per search; measured, not assumed.
 const epFold=ep=>ep._fold||(ep._fold=ep.p.map(fold));
 // One definition of the node haystack, used for both the raw and folded copies — searching the
 // folded array but slicing snippets out of the raw one only works while the two line up index
@@ -1221,9 +1229,7 @@ function renderBookLanding(id){
       // only in the case that actually needs it — the push already went out — because tombstoning
       // all 300-odd chapters would also suppress ones another device had genuinely read.
       S.read[id]=was;
-      // !_pushT alone is not "already pushed" — it is also the resting state of a device that
-      // has no sync configured and never schedules a push at all.
-      if(canPush()&&!_pushT)markUnread(id,added);
+      if(pushEscaped())markUnread(id,added);
       save();renderBookLanding(id);});};
   $("bl-fav").onclick=()=>{S.faves=S.faves||[];S.faves=fav?S.faves.filter(x=>x!==id):[id,...S.faves];save();renderBookLanding(id);};
 }
@@ -2199,8 +2205,10 @@ $("btn-ach").onclick=()=>{const g=$("achgrid");g.innerHTML="";
   $("achs").classList.add("on")};
 
 /* ---------- patch notes ---------- */
-const APP_VER="3.46";
+const APP_VER="3.47";
 const PATCHES=[
+ {v:"3.47",n:"Proof",d:"28 Jul 2026",items:[
+  ["polish","Nothing visible changed. There is now a self-test suite covering the parts of the app that decide what counts as read and how two devices merge progress — 43 checks, including the ones that would have caught the sync bugs fixed in the last release. It exists so the next change can't quietly undo them."]]},
  {v:"3.46",n:"Take It Back",d:"28 Jul 2026",items:[
   ["new","Progress can go backwards now. A finished chapter has a “mark unread” link, and its XP goes back too — so re-reading something doesn't quietly farm points."],
   ["new","“Mark all read” can be undone. It used to be one tap, one confirm, and 323 chapters were read forever; now you get six seconds to take it back, and it restores exactly what you had read before rather than clearing the book."],

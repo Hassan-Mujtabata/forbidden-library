@@ -1,0 +1,343 @@
+/* Logic self-test for The Vault.
+ *
+ * Paste into the browser once (javascript_tool), with the vault UNLOCKED, then:
+ *
+ *     VT.run()          // -> {passed, failed, ms, failures:[...]}
+ *
+ * WHY THIS EXISTS. tools/audit.js checks how the app LOOKS. Nothing checked how it THINKS, and
+ * the bugs that actually shipped were all logic: a merge that resurrected un-marked chapters, a
+ * guard that fired on every device without sync, a text repair that invented a letter. Each was
+ * caught by hand, once, and then never checked again. These assertions are the ones I had to
+ * reason through anyway -- written down so a later change that breaks them says so immediately.
+ *
+ * It mutates S (progress state) while running and restores the snapshot afterwards, even if an
+ * assertion throws. It never calls save() mid-run, so nothing partial can reach localStorage or
+ * sync; it saves once at the end, after the original state is back.
+ *
+ * Top-level `const` in the app lives in the global LEXICAL scope, not on window, so this file has
+ * to be evaluated as global code (indirect eval) to see fold/sane/mergeState/DATA at all.
+ */
+(function () {
+  var out = [], t0;
+
+  function check(name, fn) {
+    try {
+      var r = fn();
+      if (r === true) out.push({ name: name, ok: true });
+      else out.push({ name: name, ok: false, detail: String(r) });
+    } catch (e) {
+      out.push({ name: name, ok: false, detail: "threw: " + (e && e.message || e) });
+    }
+  }
+
+  // Report the actual values on failure -- "expected X, got Y" is the whole value of a suite like
+  // this. A bare `false` would send the next reader straight back to the console.
+  function is(actual, expected, label) {
+    var a = JSON.stringify(actual), b = JSON.stringify(expected);
+    return a === b ? true : (label || "") + " expected " + b + ", got " + a;
+  }
+
+  function st(o) { return JSON.parse(JSON.stringify(o)); }
+
+  /* ---------------------------------------------------------------- fold() */
+
+  function foldTests() {
+    check("fold: strips accents", function () {
+      return is(fold("Jhāna"), "jhana");
+    });
+    check("fold: preserves length (offsets index the ORIGINAL string)", function () {
+      var s = "Viññāṇa — Ñāṇamoli’s Pāli";
+      return fold(s).length === s.length ? true : "len " + fold(s).length + " vs " + s.length;
+    });
+    check("fold: idempotent", function () {
+      return is(fold(fold("Jhāna")), fold("Jhāna"));
+    });
+    check("fold: a lone combining mark falls back rather than shortening", function () {
+      var s = "a\u0336b";                      // combining long stroke with no precomposed form
+      return fold(s).length === s.length ? true : "len " + fold(s).length + " vs " + s.length;
+    });
+    check("fold: substring offset lands on the accented original", function () {
+      var p = "Entering the Jhānas is the point.", q = fold("jhanas");
+      var i = fold(p).indexOf(q);
+      if (i < 0) return "query not found";
+      // This is the invariant the search snippet depends on: slicing the RAW paragraph at an
+      // offset found in the FOLDED copy must return the same word, accents intact.
+      return fold(p.slice(i, i + q.length)) === q ? true : "sliced " + JSON.stringify(p.slice(i, i + q.length));
+    });
+  }
+
+  /* ---------------------------------------------------------------- sane() */
+
+  function saneTests() {
+    check("sane: strips control bytes", function () {
+      return is(sane("a\u0000b\u0001c"), "abc");
+    });
+    check("sane: private-use ligature becomes Th, not nothing", function () {
+      // Dropping it instead of mapping it is the bug that made "Then" read as "en".
+      return is(sane("\ue053en he paused"), "Then he paused");
+    });
+    check("sane: all three PUA code points map", function () {
+      return is(sane("\ue002e \ue04ee \ue053e"), "The The The");
+    });
+    check("sane: leaves ordinary prose untouched", function () {
+      var s = "Ordinary — text, with “quotes” and jhāna.";
+      return is(sane(s), s);
+    });
+    check("sane: esc() runs text through it", function () {
+      return esc("x\u0000y") === "xy" ? true : "got " + JSON.stringify(esc("x\u0000y"));
+    });
+  }
+
+  /* ------------------------------------------------------- read tombstones */
+
+  function readTests() {
+    check("tombstone: key/time round-trip", function () {
+      var k = readKey("laws48", 7), t = k + "@" + 1730000000000;
+      return tombKey(t) === k && tombAt(t) === 1730000000000
+        ? true : "tombKey=" + tombKey(t) + " tombAt=" + tombAt(t);
+    });
+    check("tombstone: a legacy entry with no @ parses as time 0", function () {
+      return tombKey("laws48|7") === "laws48|7" && tombAt("laws48|7") === 0 ? true : "parsed wrong";
+    });
+    check("markUnread: removes the chapter and records a timestamped tombstone", function () {
+      S.read.laws48 = [0, 1, 2]; S.readDel = [];
+      markUnread("laws48", [1]);
+      if (S.read.laws48.indexOf(1) >= 0) return "chapter still marked read";
+      if (S.readDel.length !== 1) return "expected 1 tombstone, got " + S.readDel.length;
+      return tombAt(S.readDel[0]) > 0 ? true : "tombstone carries no timestamp";
+    });
+    check("markRead: lifts the tombstone, or the merge would delete it again", function () {
+      S.read.laws48 = [0, 2]; S.readDel = ["laws48|1@" + Date.now()];
+      markRead("laws48", [1]);
+      return S.readDel.length === 0 && S.read.laws48.indexOf(1) >= 0
+        ? true : "readDel=" + JSON.stringify(S.readDel);
+    });
+    check("markRead: never duplicates an already-read chapter", function () {
+      S.read.laws48 = [0, 1]; S.readDel = [];
+      markRead("laws48", [1]);
+      return is(S.read.laws48.slice().sort(), [0, 1]);
+    });
+  }
+
+  /* ---------------------------------------------------------- mergeState() */
+
+  function mergeTests() {
+    var NOW = Date.now();
+
+    check("merge: plain union when nothing is tombstoned", function () {
+      var a = { read: { laws48: [0, 1] }, _mtime: NOW };
+      var b = { read: { laws48: [2] }, _mtime: NOW };
+      return is(mergeState(a, b).read.laws48.slice().sort(function (x, y) { return x - y; }), [0, 1, 2]);
+    });
+
+    check("merge: a stale device does NOT resurrect an un-marked chapter", function () {
+      var a = { read: { laws48: [0, 2] }, readDel: ["laws48|1@" + NOW], _mtime: NOW };
+      var b = { read: { laws48: [0, 1, 2] }, readDel: [], _mtime: NOW - 60000 };
+      return mergeState(a, b).read.laws48.indexOf(1) < 0 ? true : "chapter 1 came back";
+    });
+
+    check("merge: that same stale device keeps its OWN unrelated progress", function () {
+      // The bug this pins down: tombstoning the chapters an undo touched must not also delete
+      // chapters another device genuinely read.
+      var a = { read: { laws48: [0, 2] }, readDel: ["laws48|1@" + NOW], _mtime: NOW };
+      var b = { read: { laws48: [0, 1, 2, 50] }, readDel: [], _mtime: NOW - 60000 };
+      return mergeState(a, b).read.laws48.indexOf(50) >= 0 ? true : "chapter 50 was wrongly dropped";
+    });
+
+    check("merge: a device that read it AFTER the un-mark wins", function () {
+      var a = { read: { laws48: [0, 2] }, readDel: ["laws48|1@" + NOW], _mtime: NOW };
+      var b = { read: { laws48: [1] }, readDel: [], _mtime: NOW + 60000 };
+      return mergeState(a, b).read.laws48.indexOf(1) >= 0 ? true : "later real progress was lost";
+    });
+
+    check("merge: books present on only one side survive", function () {
+      var a = { read: { laws48: [0] }, _mtime: NOW };
+      var b = { read: { bliss: [3] }, _mtime: NOW };
+      var m = mergeState(a, b);
+      return m.read.laws48 && m.read.bliss ? true : "lost a book: " + JSON.stringify(m.read);
+    });
+
+    check("merge: missing read/readDel fields don't throw", function () {
+      var m = mergeState({ _mtime: NOW }, { _mtime: NOW });
+      return m && typeof m.read === "object" ? true : "no read map produced";
+    });
+
+    check("merge: highlight tombstones still respected (pre-existing behaviour)", function () {
+      var h = { b: "laws48", e: 1, t: "kept" }, g = { b: "laws48", e: 2, t: "deleted" };
+      var a = { hl: [h], hlDel: [hlKey(g)], _mtime: NOW };
+      var b = { hl: [h, g], hlDel: [], _mtime: NOW };
+      var m = mergeState(a, b);
+      return m.hl.length === 1 && m.hl[0].t === "kept" ? true : "hl=" + JSON.stringify(m.hl);
+    });
+
+    check("merge: favourites are unioned", function () {
+      var m = mergeState({ faves: ["a"], _mtime: NOW }, { faves: ["b"], _mtime: NOW });
+      return m.faves.indexOf("a") >= 0 && m.faves.indexOf("b") >= 0 ? true : JSON.stringify(m.faves);
+    });
+
+    check("merge: xp takes the higher value, never the sum", function () {
+      return is(mergeState({ xp: 500, _mtime: NOW }, { xp: 700, _mtime: NOW }).xp, 700);
+    });
+
+    // Pinning an accepted trade-off rather than a nice property. Once a chapter IS tombstoned,
+    // an older device's claim on it loses -- including chapters it genuinely read. That is why
+    // the mass "mark all read" undo must not tombstone unless the change already escaped the
+    // device (see pushEscaped): the protection lives in the caller, not here.
+    check("merge: a tombstoned chapter beats an older device, by design", function () {
+      var a = { read: { laws48: [0] }, readDel: ["laws48|50@" + NOW], _mtime: NOW };
+      var b = { read: { laws48: [0, 50] }, readDel: [], _mtime: NOW - 60000 };
+      return mergeState(a, b).read.laws48.indexOf(50) < 0
+        ? true : "expected the tombstone to win over the stale claim";
+    });
+  }
+
+  /* ------------------------------------------------- when a change has escaped */
+
+  function pushTests() {
+    var token = localStorage.getItem("vault_gh"), wasSync = _syncOn, wasT = _pushT;
+    try {
+      check("canPush: false with sync on but no token", function () {
+        _syncOn = true; localStorage.removeItem("vault_gh");
+        return canPush() === false ? true : "canPush() was true without a token";
+      });
+      check("canPush: true only with sync on AND a token", function () {
+        _syncOn = true; localStorage.setItem("vault_gh", "x");
+        return canPush() === true ? true : "canPush() was false with both present";
+      });
+      check("canPush: false when sync is off", function () {
+        _syncOn = false; localStorage.setItem("vault_gh", "x");
+        return canPush() === false ? true : "canPush() ignored sync being off";
+      });
+      // The bug this pins: an unsynced device rests at _pushT === null forever, so treating that
+      // as "already pushed" made every undo tombstone hundreds of chapters for no reason.
+      // The exact configuration that shipped broken: sync flagged on, no token, so no push is
+      // ever scheduled and _pushT rests at null forever. Testing this with _syncOn=false instead
+      // passes under the buggy predicate too, and pins nothing.
+      check("pushEscaped: false when sync is on but has no token and nothing is pending", function () {
+        _syncOn = true; localStorage.removeItem("vault_gh"); _pushT = null;
+        return pushEscaped() === false ? true : "a device that cannot push claimed its change had escaped";
+      });
+      check("pushEscaped: false when sync is off entirely", function () {
+        _syncOn = false; localStorage.removeItem("vault_gh"); _pushT = null;
+        return pushEscaped() === false ? true : "sync off still claimed the change had escaped";
+      });
+      check("pushEscaped: false while a push is still pending", function () {
+        _syncOn = true; localStorage.setItem("vault_gh", "x"); _pushT = 1;
+        return pushEscaped() === false ? true : "claimed escaped while still coalescing";
+      });
+      check("pushEscaped: true once the pending push has fired", function () {
+        _syncOn = true; localStorage.setItem("vault_gh", "x"); _pushT = null;
+        return pushEscaped() === true ? true : "missed a change that had already gone out";
+      });
+    } finally {
+      _syncOn = wasSync; _pushT = wasT;
+      if (token === null) localStorage.removeItem("vault_gh"); else localStorage.setItem("vault_gh", token);
+    }
+  }
+
+  /* ------------------------------------------------- search index alignment */
+
+  function indexTests() {
+    check("epFold: folded copy lines up with the raw paragraphs", function () {
+      // Sampled, not exhaustive: folding all 2,716 episodes here would populate the cache for the
+      // whole library and make the suite pay for memory the app has not asked for yet.
+      var bad = [], n = 0;
+      for (var i = 0; i < DATA.books.length; i++) {
+        var eps = DATA.books[i].episodes;
+        for (var j = 0; j < eps.length; j += 17) {
+          var f = epFold(eps[j]); n++;
+          if (f.length !== eps[j].p.length) { bad.push(DATA.books[i].id + "/" + j + " count"); continue; }
+          for (var k = 0; k < f.length; k++)
+            if (f[k].length !== eps[j].p[k].length) { bad.push(DATA.books[i].id + "/" + j + "/" + k); break; }
+        }
+      }
+      return bad.length ? bad.length + " misaligned (" + bad.slice(0, 3).join(", ") + ") of " + n
+        : true;
+    });
+
+    check("nodeFold: folded copy lines up with nodeHay", function () {
+      var bad = [];
+      for (var i = 0; i < DATA.nodes.length; i++) {
+        var nd = DATA.nodes[i], hay = nodeHay(nd), f = nodeFold(nd);
+        if (hay.length !== f.length) { bad.push(nd.id + " count"); continue; }
+        for (var k = 0; k < hay.length; k++)
+          if (hay[k].length !== f[k].length) { bad.push(nd.id + "/" + k); break; }
+      }
+      return bad.length ? bad.length + " misaligned: " + bad.slice(0, 3).join(", ") : true;
+    });
+
+    check("library text carries no unprintable code points", function () {
+      var RE = new RegExp("[\\u0000-\\u0008\\u000b\\u000c\\u000e-\\u001f\\u007f-\\u009f" +
+        "\\ue000-\\uf8ff\\ufb00-\\ufb06]");
+      if (!RE.test("a\u0000b") || RE.test("clean text")) return "the probe regex itself is wrong";
+      var hits = [];
+      for (var i = 0; i < DATA.books.length; i++) {
+        var eps = DATA.books[i].episodes;
+        for (var j = 0; j < eps.length && hits.length < 3; j++)
+          for (var k = 0; k < eps[j].p.length; k++)
+            if (RE.test(eps[j].p[k])) { hits.push(DATA.books[i].id + "/" + j); break; }
+      }
+      return hits.length ? "damaged text in " + hits.join(", ") : true;
+    });
+  }
+
+  /* -------------------------------------------------------------- formatting */
+
+  function fmtTests() {
+    check("fmtDur: hours and minutes", function () { return is(fmtDur(1027), "17h 7m"); });
+    check("fmtDur: whole hours drop the minutes", function () { return is(fmtDur(120), "2h"); });
+    check("fmtDur: under an hour stays in minutes", function () { return is(fmtDur(59), "59 min"); });
+    check("fmtWords: thousands", function () { return is(fmtWords(235156), "235k words"); });
+    check("bookWords: cache agrees with a fresh count", function () {
+      var b = DATA.books[0];
+      var fresh = b.episodes.reduce(function (n, ep) { return n + epWords(ep); }, 0);
+      return is(bookWords(b), fresh);
+    });
+  }
+
+  /* ------------------------------------------------------ library integrity */
+
+  function libraryTests() {
+    check("every book flagged partial carries a reason string", function () {
+      var bad = DATA.books.filter(function (b) { return b.partial && !String(b.partial).trim(); });
+      return bad.length ? bad.length + " partial books with an empty reason" : true;
+    });
+    check("no episode is empty", function () {
+      var bad = [];
+      for (var i = 0; i < DATA.books.length; i++)
+        for (var j = 0; j < DATA.books[i].episodes.length; j++)
+          if (!DATA.books[i].episodes[j].p.length) bad.push(DATA.books[i].id + "/" + j);
+      return bad.length ? bad.length + " empty: " + bad.slice(0, 3).join(", ") : true;
+    });
+    check("every highlight points at a book and episode that exist", function () {
+      var bad = (S.hl || []).filter(function (h) {
+        if (h.n) return false;                                  // Path highlights key off node id
+        var b = bookById(h.b);
+        return !b || !(h.e >= 0 && h.e < b.episodes.length);
+      });
+      return bad.length ? bad.length + " dangling highlight(s)" : true;
+    });
+  }
+
+  window.VT = {
+    run: function () {
+      out = []; t0 = performance.now();
+      var snap = st(S);                       // progress state is real data -- never leave it edited
+      try {
+        foldTests(); saneTests(); readTests(); mergeTests(); pushTests();
+        indexTests(); fmtTests(); libraryTests();
+      } finally {
+        S = snap;
+        if (typeof save === "function") save();
+      }
+      var fails = out.filter(function (r) { return !r.ok; });
+      return {
+        passed: out.length - fails.length,
+        failed: fails.length,
+        ms: Math.round(performance.now() - t0),
+        failures: fails.map(function (f) { return f.name + " -- " + f.detail; })
+      };
+    }
+  };
+  return "VT ready -- VT.run()";
+})();

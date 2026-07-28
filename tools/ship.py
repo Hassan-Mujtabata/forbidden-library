@@ -266,7 +266,8 @@ def main():
     if dry:
         print("\nAll checks passed. %d file(s) ready. Nothing was changed." % len(files))
         if release:
-            print("Browser check still owed: paste tools/audit.js, run VA.run() per theme.")
+            print("Browser checks still owed: tools/selftest.js -> VT.run(), "
+                  "then tools/audit.js -> VA.run() per theme.")
         return
 
     if release:

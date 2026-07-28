@@ -16,6 +16,7 @@ Single-file encrypted reading PWA. Hassan's books become gamified ~1,200-word le
 | `content.enc` | AES-256-GCM(gzip(books + graph)). The only place lesson text exists publicly. |
 | `tools/ship.py` | **Release command.** Checks, bumps, commits, pushes. Use this, not manual steps. |
 | `tools/audit.js` | Browser-side contrast audit. Paste into `javascript_tool`. Returns terse JSON. |
+| `tools/selftest.js` | Browser-side logic suite — `VT.run()`. Merge/tombstone/fold/sane invariants. |
 | `tools/bump.py` | Bumps `APP_VER` + `CACHE` together. `ship.py` calls it; rarely run directly. |
 | `tools/build.py` | Validates the graph (acyclic, prereqs resolve) → rebuilds `content.enc`. |
 | `tools/cleantext.py` | Repairs PDF-extraction damage in `books.json`. Run `--fix` then `build.py`. |
@@ -72,6 +73,14 @@ live `index.html` or decrypt live `content.enc` — never trust the Pages build-
 browser pane keeps its own HTTP disk cache and runs no SW. To see fresh code: unregister the SW,
 clear caches, reload — or serve on a fresh port (which is a new origin the pane must approve;
 `preview_start {url}` reopens the pane after a reset).
+
+**A green check you cannot make go red is worth nothing.** Both browser tools have now reported a
+clean pass while measuring nothing at all — the audit once swept 0 elements and said "0 failures",
+and a stale service-worker copy of `audit.js` later passed a placeholder bug it could not see. So
+after touching either tool, break the thing on purpose and confirm the tool says so. Writing the
+assertion is the easy half. `tools/selftest.js` was mutation-tested this way, and it caught a test
+of mine that pinned nothing: it set `_syncOn=false` when the real bug was `_syncOn=true` with no
+token, so the broken predicate passed it.
 
 **Contrast audits lie in three specific ways.** Use `tools/audit.js`, which handles all three:
 transitions must be killed before measuring (mid-transition reads produced ~300 phantom failures),
