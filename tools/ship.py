@@ -15,8 +15,9 @@ Checks, in order, all of which abort before anything is committed:
   1. no secret or gitignored-plaintext file is about to be committed
   2. access.json is untouched  (Hassan's config -- off limits)
   3. no API-token-shaped strings in the staged text
-  4. every inline <script> in index.html passes `node --check`
-  5. a PATCHES entry exists for the version being shipped
+  4. no unprintable / private-use code points in the shipped source
+  5. every inline <script> in index.html passes `node --check`
+  6. a PATCHES entry exists for the version being shipped
 
 What this CANNOT check is the browser: run tools/audit.js for contrast and click through
 the feature before shipping. Everything else is mechanical, so it lives here.
@@ -33,9 +34,11 @@ TOKEN_FILE = r"C:\Users\sands\.secrets\github_token.txt"
 
 # Files that must never reach the public repo. Plaintext lesson content in a public repo
 # would defeat the whole point of encrypting content.enc.
+# Deliberately NOT anchored with $: a .bak/.tmp/.orig suffix is still the same plaintext.
+# cleantext.py writes books.json.bak, which the old `books\.json$` pattern sailed straight past.
 FORBIDDEN = [
-    re.compile(r"(^|/)key\.txt$"),
-    re.compile(r"(^|/)books\.json$"),
+    re.compile(r"(^|/)key\.txt"),
+    re.compile(r"(^|/)books\.json"),
     re.compile(r"(^|/)graph\.json"),
     re.compile(r"(^|/)\.gemini_keys$"),
     re.compile(r"\.pdf$", re.I),
@@ -114,6 +117,39 @@ def check_secrets(files):
         die("token-shaped string found in:\n    " + "\n    ".join(hits) +
             "\n  Move it to an env var or a gitignored file.")
     ok("no token-shaped strings")
+
+
+def check_glyphs(files):
+    """No unprintable code points in the shipped source.
+
+    Added after writing literal NUL bytes and private-use characters straight into index.html
+    while building the regex meant to strip them -- twice. A control byte in source survives
+    every other check here: node --check parses it fine, and it is invisible in every editor.
+    Private-use code points are worse than invisible: they render as whatever glyph the current
+    font happens to define, so they look like a font bug and hide as a rendering quirk.
+    """
+    hits = []
+    for f in files:
+        if not f.endswith((".html", ".js", ".css", ".json", ".py", ".md")):
+            continue
+        full = os.path.join(ROOT, f)
+        if not os.path.isfile(full) or os.path.getsize(full) > 4_000_000:
+            continue
+        try:
+            body = open(full, encoding="utf-8", errors="strict").read()
+        except (OSError, UnicodeDecodeError):
+            continue
+        for i, ch in enumerate(body):
+            cp = ord(ch)
+            if (cp < 9 or cp in (11, 12) or 14 <= cp <= 31 or cp == 127
+                    or 0xE000 <= cp <= 0xF8FF):
+                line = body.count("\n", 0, i) + 1
+                hits.append("%s:%d  U+%04X" % (f, line, cp))
+                break                                  # one report per file is enough
+    if hits:
+        die("unprintable code point in source:\n    " + "\n    ".join(hits) +
+            "\n  Write it as an escape (\\u0000) instead of the literal character.")
+    ok("no unprintable code points in source")
 
 
 def check_syntax():
@@ -223,6 +259,7 @@ def main():
 
     check_files(files)
     check_secrets(files)
+    check_glyphs(files)
     check_syntax()
     name = patch_entry(version) if release else None
 

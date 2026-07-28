@@ -180,7 +180,12 @@
       // DATA is a top-level `const`, so it lives in the global LEXICAL scope and is NOT a
       // property of window -- window.DATA is undefined. Reference the binding directly.
       var d = (typeof DATA !== "undefined") ? DATA : null;
-      if (d && d.books && d.books.length) call("openBookLanding", d.books[0].id);
+      if (!d || !d.books || !d.books.length) return;
+      // Prefer a book flagged `partial`: its landing page renders everything a normal book
+      // does PLUS the .bl-len.partial warning. Opening books[0] measured the common case only
+      // and reported a clean sweep while never touching that label at all.
+      var pick = d.books.filter(function (b) { return b.partial; })[0] || d.books[0];
+      call("openBookLanding", pick.id);
     }
     // eplist and flow need a specific book / word list. Rather than fake them, they get
     // reported in `unmeasured` so a false clean is visible instead of silent.

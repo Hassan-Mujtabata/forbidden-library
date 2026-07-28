@@ -18,6 +18,7 @@ Single-file encrypted reading PWA. Hassan's books become gamified ~1,200-word le
 | `tools/audit.js` | Browser-side contrast audit. Paste into `javascript_tool`. Returns terse JSON. |
 | `tools/bump.py` | Bumps `APP_VER` + `CACHE` together. `ship.py` calls it; rarely run directly. |
 | `tools/build.py` | Validates the graph (acyclic, prereqs resolve) → rebuilds `content.enc`. |
+| `tools/cleantext.py` | Repairs PDF-extraction damage in `books.json`. Run `--fix` then `build.py`. |
 | `tools/extract.py`, `add_book.py` | PDF → text → queued job. |
 | `tools/gemini_pipeline.py` | Cloud cron that turns queued books into lessons. |
 
@@ -33,6 +34,14 @@ Single-file encrypted reading PWA. Hassan's books become gamified ~1,200-word le
    commit whitelist, not `git add -A`.
 4. **Fidelity rule:** never blend the books' methods. Where traditions differ (Goldstein noting-first
    vs Brasington jhāna-first vs Culadasa unified), the lesson says so explicitly.
+5. **Never type a control or private-use character into source. Write `\u0000`, not the byte.**
+   A literal one is invisible in every editor, survives `node --check`, and — for the private-use
+   range — renders as a *different glyph in every font*, so it reads as a font bug rather than
+   bad data. `ship.py` blocks these now (`check_glyphs`).
+   Related trap: **the Bash heredoc eats one level of backslashes.** Writing `"\\ue053"` through
+   it lands a real PUA character in the file. Use `r"..."` raw strings, then re-read the file and
+   verify — and always `flush()`/`fsync()`, because an unclosed write here does not reach disk
+   before the next read (this produced two "the fix didn't apply" false alarms).
 
 ## Releasing
 

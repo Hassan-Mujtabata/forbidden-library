@@ -258,6 +258,8 @@ header .brand span{color:var(--gold)}
 .bl-g{font-size:56px;filter:drop-shadow(0 4px 12px rgba(0,0,0,.4))}
 .bl-title{font-family:var(--serif);font-size:24px;line-height:1.2}
 .bl-author{color:var(--tx2);font-size:13px;margin-top:3px}
+.bl-len{color:var(--tx2);font-size:12px;margin-top:5px;letter-spacing:.04em}
+.bl-len.partial{color:var(--err)}   /* #112: an excerpt or a summary must not read as the whole book */
 .bl-prog{margin:16px 0}
 .bl-progtxt{font-size:12.5px;color:var(--tx2);margin-top:7px}
 .bl-actions{display:flex;gap:10px;align-items:center;margin:14px 0 4px}
@@ -810,7 +812,18 @@ const save=()=>{S._mtime=Date.now();
 addEventListener("visibilitychange",()=>{if(document.hidden&&_pushT){clearTimeout(_pushT);_pushT=null;pushState();}});
 addEventListener("pagehide",()=>{if(_pushT){clearTimeout(_pushT);_pushT=null;pushState();}});
 const $=id=>document.getElementById(id);
-const esc=s=>{const d=document.createElement("div");d.textContent=s;return d.innerHTML};
+// #111: never render a code point the font has no glyph for. PDF extraction emits control bytes
+// and private-use ligatures; the private-use ones are the nastiest class of bug, because the
+// symbol they draw CHANGES with the reading typeface — every font invents its own pictures for
+// that range — so bad DATA looks exactly like a broken FONT. tools/cleantext.py repairs the
+// library at the source; this is the guard for a stale cached content.enc or a future import.
+// U+E002/E04E/E053 are a subset font's "Th" ligature (proven in cleantext.py), so they carry
+// real letters and must be restored, not dropped, or "Then" silently reads as "en".
+const JUNK=/[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f-\u009f\ue000-\uf8ff]/;
+const sane=s=>(typeof s==="string"&&JUNK.test(s))
+  ?s.replace(/[\ue002\ue04e\ue053]/g,"Th").replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f-\u009f\ue000-\uf8ff]/g,"")
+  :s;
+const esc=s=>{const d=document.createElement("div");d.textContent=sane(s);return d.innerHTML};
 const bookById=id=>DATA.books.find(b=>b.id===id);
 const READ_WPM=230;   // #79: one reading-speed constant for every "N min" estimate
 // #109: the estimates learn your real pace. Completing a lesson logs {m:minutes,w:words}; once
@@ -830,6 +843,12 @@ function estMin(w){return Math.max(1,Math.round(w/paceWPM()));}
 // a lesson is read + quizzed + written about, so it costs a couple of minutes beyond the words
 function nodeMin(n){return Math.max(2,estMin(nodeWords(n))+2);}
 const epWords=ep=>ep.p.reduce((n,p)=>n+p.split(" ").length,0);
+// #112: the library never said how BIG a book is, so a 700-word chapter out of 323 read as
+// "this app only has fragments" rather than "you are 1/323 of the way through the whole thing".
+// Cached per book: summing 235k words on every landing render is wasted work.
+const _bwCache={};
+const bookWords=b=>_bwCache[b.id]??=b.episodes.reduce((n,ep)=>n+epWords(ep),0);
+const fmtWords=w=>w>=1000?Math.round(w/1000).toLocaleString()+"k words":w+" words";
 const epXP=ep=>Math.max(10,Math.round(epWords(ep)/10));
 const readSet=b=>new Set(S.read[b]||[]);
 const isRead=(b,e)=>readSet(b).has(e);
@@ -1064,6 +1083,7 @@ function renderBookLanding(id){
   bd.innerHTML=
     `<div class="bl-cover" style="background:linear-gradient(160deg,${b.accent}66,${b.accent}22 55%,var(--card2))"><div class="bl-g">${b.glyph}</div></div>`+
     `<div class="bl-title">${esc(b.title)}</div>`+(b.author?`<div class="bl-author">${esc(b.author)}</div>`:"")+
+    `<div class="bl-len${b.partial?" partial":""}">${fmtWords(bookWords(b))} · ${b.partial?"⚠ "+esc(b.partial):"complete book"}</div>`+
     `<div class="bl-prog"><div class="pbar"><div class="pfill" style="width:${pct}%"></div></div><div class="bl-progtxt">${done}/${b.episodes.length} episodes · ${pct}%${leftMin&&pct<100?` · ~${leftMin} min left`:pct>=100?" · finished ✓":""}</div></div>`+
     `<div class="bl-actions"><button class="goldbtn" id="bl-start">${done===0?"Start reading":pct>=100?"Read again":"Continue"}</button><button class="ghostbtn" id="bl-fav">${fav?"★ Saved":"☆ Save"}</button>${pct<100?`<button class="ghostbtn" id="bl-allread" style="color:var(--tx2)">Mark all read</button>`:""}</div>`+
     `<div id="bl-path"></div>`+
@@ -1169,13 +1189,13 @@ function openEp(id,e){
   $("r-title").textContent=`${b.glyph} ${b.title} — ${e+1}/${b.episodes.length}`;
   const body=$("rbody");body.innerHTML="";body.style.fontSize=S.font+"px";
   let cv=null;if(bannerOn()){cv=document.createElement("canvas");cv.id="rbanner";cv.setAttribute("aria-hidden","true");body.appendChild(cv);}   // #15/#44: decorative banner
-  const h=document.createElement("h1");h.textContent=ep.t;body.appendChild(h);
+  const h=document.createElement("h1");h.textContent=sane(ep.t);body.appendChild(h);
   const sub=document.createElement("div");sub.className="sub";
   sub.textContent=`${b.title.toUpperCase()} · EPISODE ${e+1} OF ${b.episodes.length} · ${estMin(epWords(ep))} MIN · +${epXP(ep)} XP`;
   body.appendChild(sub);
   const pull=pickPull(ep);
   ep.p.forEach((p,i)=>{const el=document.createElement(i===pull?"blockquote":"p");
-    if(i===pull)el.className="pull";el.textContent=p;body.appendChild(el)});
+    if(i===pull)el.className="pull";el.textContent=sane(p);body.appendChild(el)});
   injectFigures(body,ep,b);
   $("rtime").style.display="none";
   renderEnd();show("reader");
@@ -2050,8 +2070,13 @@ $("btn-ach").onclick=()=>{const g=$("achgrid");g.innerHTML="";
   $("achs").classList.add("on")};
 
 /* ---------- patch notes ---------- */
-const APP_VER="3.42";
+const APP_VER="3.43";
 const PATCHES=[
+ {v:"3.43",n:"Clean Type",d:"28 Jul 2026",items:[
+  ["fix","Fixed the stray symbols that changed shape when you switched the reading typeface. They were never a font problem — the PDF extraction had left 43,000 unprintable code points in the library, including a private-use “Th” ligature that had silently eaten the Th from every “The”, “This” and “They” in The Like Switch. All repaired at the source."],
+  ["fix","Right Concentration was missing every accented letter (“jhna” instead of “jhāna”) — part of that book had been decoded as raw UTF-16. Restored."],
+  ["fix","1,415 words like “ﬁrst” and “diﬀerent” were stored as single typographic ligatures, so searching for “first” never found them. They are ordinary letters now, and searchable."],
+  ["new","Every book now shows its length and whether it is the complete text. Two are not, and now say so: Mindfulness, Bliss and Beyond is chapters 1–4, and Right Concentration is a publisher summary rather than the book."]]},
  {v:"3.42",n:"Got a Minute?",d:"27 Jul 2026",items:[
   ["polish","Every ready lesson on the Path now shows roughly how long it takes — in your reading speed — so you can tell before you commit whether it fits the time you have."]]},
  {v:"3.41",n:"Your Own Clock",d:"27 Jul 2026",items:[
