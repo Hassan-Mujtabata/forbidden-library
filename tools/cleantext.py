@@ -73,6 +73,13 @@ def plausible(cp):
     return 0x20 <= cp <= 0x2FF or 0x1E00 <= cp <= 0x1EFF
 
 
+# A genuine mis-decode runs for whole sentences (the shortest in this corpus is dozens of
+# characters). Two ADJACENT stray control bytes would also pair into a "plausible" code point --
+# \x01\x02 decodes to "A-breve" -- which would invent a letter that was never in the book. Require
+# a real run so isolated damage falls through to being stripped instead of reinterpreted.
+MIN_RUN = 4
+
+
 def repair_utf16(s):
     """Decode mis-decoded UTF-16BE runs in place, leaving correctly-decoded text alone."""
     if not TRIGGER.search(s):
@@ -87,7 +94,7 @@ def repair_utf16(s):
                     break
                 buf.append(chr(cp))
                 j += 2
-            if buf:                       # consumed a real run
+            if len(buf) >= MIN_RUN:       # consumed a real run
                 out.append("".join(buf))
                 i = j
                 continue

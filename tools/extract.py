@@ -2,6 +2,7 @@
 """Extract text from the vault PDFs into episode-structured books.json."""
 import fitz, json, re, os, sys
 from collections import Counter
+from cleantext import clean as repair_text
 
 ROOT = r"C:\Users\sands\OneDrive\Desktop\forbidden"
 OUT = os.path.join(ROOT, "vault", "tools", "books.json")
@@ -90,6 +91,12 @@ HEAD_RE = re.compile(
 
 
 def clean(t):
+    # Repair extraction damage FIRST, while the raw shape is still intact: mis-decoded UTF-16
+    # runs, private-use ligatures that eat the "Th" off a word, control bytes, and ﬁ/ﬂ ligatures
+    # that silently defeat search. 43,000 of these reached the shipped library before anyone
+    # noticed, because they are invisible in a diff and look like a font problem on screen.
+    # repair_text keeps \n and \t, so the line-joining below still works.
+    t = repair_text(t)
     t = t.replace("­", "")
     t = re.sub(r"-\n(?=[a-z])", "", t)
     t = re.sub(r"\s*\n\s*", " ", t)

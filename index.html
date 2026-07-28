@@ -824,6 +824,23 @@ const sane=s=>(typeof s==="string"&&JUNK.test(s))
   ?s.replace(/[\ue002\ue04e\ue053]/g,"Th").replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f-\u009f\ue000-\uf8ff]/g,"")
   :s;
 const esc=s=>{const d=document.createElement("div");d.textContent=sane(s);return d.innerHTML};
+// #113: search folds accents, so typing "jhana" finds the 558 paragraphs spelling it "jhāna".
+// Repairing the mangled text in 3.43 is what made this matter — the letters are correct now, so
+// they no longer match what a keyboard produces. 63 distinct accented letters sit in the library.
+// The folded copy MUST stay the same length as the original: every snippet offset below indexes
+// the original string, so a shorter fold slides the <mark> onto the wrong letters. Stripping
+// combining marks after NFD is length-preserving for precomposed letters, but a lone combining
+// mark (one paragraph has U+0336) collapses to nothing — fall back rather than mis-highlight.
+const fold=s=>{const f=s.normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase();
+  return f.length===s.length?f:s.toLowerCase();};
+// Folding the whole 13-million-character library costs real time, so do it once per episode and
+// keep it on the episode. Cached lazily: a reader who never searches never pays for it.
+const epFold=ep=>ep._fold||(ep._fold=ep.p.map(fold));
+// One definition of the node haystack, used for both the raw and folded copies — searching the
+// folded array but slicing snippets out of the raw one only works while the two line up index
+// for index, so they must never be built from two separately-maintained expressions.
+const nodeHay=nd=>[nd.title,...(nd.bridge||[]),...(nd.sources||[]).flatMap(s=>s.quote||[])];
+const nodeFold=nd=>nd._fold||(nd._fold=nodeHay(nd).map(fold));
 const bookById=id=>DATA.books.find(b=>b.id===id);
 const READ_WPM=230;   // #79: one reading-speed constant for every "N min" estimate
 // #109: the estimates learn your real pace. Completing a lesson logs {m:minutes,w:words}; once
@@ -1489,16 +1506,19 @@ $("hl-def").onclick=()=>{const t=SELTEXT.trim();if(t){hlBtn.style.display="none"
 
 /* ---------- vocab lookup: vault first, dictionary if online ---------- */
 function vaultDefine(term){
-  const tl=term.toLowerCase(), esc2=term.replace(/[.*+?^${}()|[\]\\]/g,"\\$&");
+  const tl=fold(term), esc2=tl.replace(/[.*+?^${}()|[\]\\]/g,"\\$&");
   const re=new RegExp("[^.!?]*\\b"+esc2+"\\b[^.!?]*[.!?]","i");
   const cue=/\b(is|are|means?|refers to|called|defined as|known as|is a|is the|is when)\b/i;
   let best=null;
   for(const nd of DATA.nodes){
-    const text=[nd.title,...(nd.bridge||[]),...(nd.sources||[]).flatMap(s=>s.quote)].join("  ");
-    if(text.toLowerCase().indexOf(tl)<0)continue;
-    const m=text.match(re);if(!m)continue;
-    const s=m[0].trim();
-    const score=(cue.test(s)?2:1)+(nd.title.toLowerCase().includes(tl)?2:0);
+    const text=nodeHay(nd).join("  "),textF=fold(text);
+    if(textF.indexOf(tl)<0)continue;
+    // match on the folded copy so "jhana" reaches "jhāna", but cut the quote out of the ORIGINAL
+    // so the definition Hassan reads keeps its real spelling. fold() preserves length, so the
+    // match offset is valid in both.
+    const m=textF.match(re);if(!m)continue;
+    const s=text.slice(m.index,m.index+m[0].length).trim();
+    const score=(cue.test(s)?2:1)+(fold(nd.title).includes(tl)?2:0);
     if(!best||score>best.score)best={src:"Explained in your Path · "+nd.title,node:nd.id,snippet:s,score};
     if(best.score>=4)break;
   }
@@ -1748,10 +1768,10 @@ function keyTermsOf(n){
   const seen=new Set();return terms.filter(t=>{const k=t.toLowerCase();if(seen.has(k))return false;seen.add(k);return true;}).slice(0,4);
 }
 // tutor-A #4: tiny retrieval — the top-k lesson snippets relevant to a query, to ground answers in your own material
-function vaultSnippets(query,k){k=k||3;const q=(query||"").toLowerCase().split(/\s+/).filter(w=>w.length>3);if(!q.length)return [];
+function vaultSnippets(query,k){k=k||3;const q=fold(query||"").split(/\s+/).filter(w=>w.length>3);if(!q.length)return [];
   const scored=[];
-  for(const nd of DATA.nodes){const text=[nd.title,...(nd.bridge||[]),...(nd.sources||[]).flatMap(s=>s.quote||[])].join(" ");
-    const tl=text.toLowerCase();let s=0;for(const w of q)if(tl.includes(w))s++;
+  for(const nd of DATA.nodes){const text=nodeHay(nd).join(" ");
+    const tl=fold(text);let s=0;for(const w of q)if(tl.includes(w))s++;
     if(s)scored.push({s,title:nd.title,text});}
   scored.sort((a,b)=>b.s-a.s);
   return scored.slice(0,k).map(x=>({title:x.title,snippet:x.text.slice(0,480)}));
@@ -1991,9 +2011,9 @@ function renderJournal(){
   }
   // #38: live search across your notes, highlights, saved words and misses
   const js=$("jsearch");js.value="";
-  js.oninput=()=>{const q=js.value.trim().toLowerCase();
+  js.oninput=()=>{const q=fold(js.value.trim());
     document.querySelectorAll("#jnotes .jnote,#jnotes .jreview,#jvocab .hlrow,#hlrows .hlrow,#jerrors .hlrow").forEach(el=>{
-      el.style.display=!q||el.textContent.toLowerCase().includes(q)?"":"none";});};
+      el.style.display=!q||fold(el.textContent).includes(q)?"":"none";});};
   $("hls").classList.add("on");
 }
 function drillErrors(){   // tutor-G #48: send your recent misses to the tutor as one focused clinic
@@ -2010,14 +2030,14 @@ $("jfile").onchange=e=>{if(e.target.files[0])restoreVault(e.target.files[0]);e.t
 $("btn-search").onclick=()=>{$("search").classList.add("on");$("sinput").value="";$("sres").innerHTML="";setTimeout(()=>$("sinput").focus(),50)};
 let sT;$("sinput").addEventListener("input",()=>{clearTimeout(sT);sT=setTimeout(doSearch,250)});
 function doSearch(){
-  const q=$("sinput").value.trim().toLowerCase();const w=$("sres");w.innerHTML="";
+  const q=fold($("sinput").value.trim());const w=$("sres");w.innerHTML="";
   if(q.length<3){w.innerHTML=q.length?'<p style="color:var(--tx2)">Type at least 3 characters…</p>':"";return}  // #76
   let n=0;
   // path lessons first
   for(const nd of (DATA.nodes||[])){
     if(nd.stub||n>=10||!nodeVisible(nd))continue;
-    const hay=[nd.title,...(nd.bridge||[]),...(nd.sources||[]).flatMap(s=>s.quote)];
-    for(const p of hay){const i=p.toLowerCase().indexOf(q);
+    const hay=nodeHay(nd),hayF=nodeFold(nd);
+    for(let k=0;k<hay.length;k++){const p=hay[k],i=hayF[k].indexOf(q);
       if(i>=0){n++;
         const tr=trackById(nd.track),st=nodeStatus(nd.id);
         const el=document.createElement("button");el.className="srow";
@@ -2027,7 +2047,8 @@ function doSearch(){
         el.onclick=()=>{$("search").classList.remove("on");openNode(nd.id)};
         w.appendChild(el);break;}}}
   for(const b of DATA.books){if(!bookVisible(b.id))continue;for(let e=0;e<b.episodes.length&&n<50;e++){
-    for(const p of b.episodes[e].p){const i=p.toLowerCase().indexOf(q);
+    const ps=b.episodes[e].p,psF=epFold(b.episodes[e]);
+    for(let k=0;k<ps.length;k++){const p=ps[k],i=psF[k].indexOf(q);
       if(i>=0){n++;
         const el=document.createElement("button");el.className="srow";
         const pre=p.slice(Math.max(0,i-70),i),hit=p.slice(i,i+q.length),post=p.slice(i+q.length,i+q.length+90);
@@ -2037,10 +2058,10 @@ function doSearch(){
         w.appendChild(el);break}}}}
   // #77: your own material — highlights, saved words, apply-notes
   const yours=[];
-  for(const h of (S.hl||[]))if(h.t&&h.t.toLowerCase().includes(q)){const src=h.n?(nodeById(h.n)||{}).title:(bookById(h.b)||{}).title;yours.push({label:"⭐ Highlight · "+(src||""),text:h.t,go:h.n?()=>openNode(h.n):()=>openEp(h.b,h.e)});}
-  for(const v of (S.vocab||[]))if((v.t+" "+(v.ctx||"")).toLowerCase().includes(q))yours.push({label:"📒 Saved word",text:v.t+(v.ctx?" — "+v.ctx:""),go:()=>{SELCTX=v.ctx||"";defineTerm(v.t)}});
-  for(const nd of (DATA.nodes||[])){const rec=S.node[nd.id];if(rec&&rec.applied&&rec.applied.toLowerCase().includes(q))yours.push({label:"✍️ Your note · "+nd.title,text:rec.applied,go:()=>openNode(nd.id)});}
-  for(const y of yours.slice(0,15)){n++;const i=y.text.toLowerCase().indexOf(q);
+  for(const h of (S.hl||[]))if(h.t&&fold(h.t).includes(q)){const src=h.n?(nodeById(h.n)||{}).title:(bookById(h.b)||{}).title;yours.push({label:"⭐ Highlight · "+(src||""),text:h.t,go:h.n?()=>openNode(h.n):()=>openEp(h.b,h.e)});}
+  for(const v of (S.vocab||[]))if(fold(v.t+" "+(v.ctx||"")).includes(q))yours.push({label:"📒 Saved word",text:v.t+(v.ctx?" — "+v.ctx:""),go:()=>{SELCTX=v.ctx||"";defineTerm(v.t)}});
+  for(const nd of (DATA.nodes||[])){const rec=S.node[nd.id];if(rec&&rec.applied&&fold(rec.applied).includes(q))yours.push({label:"✍️ Your note · "+nd.title,text:rec.applied,go:()=>openNode(nd.id)});}
+  for(const y of yours.slice(0,15)){n++;const i=fold(y.text).indexOf(q);
     const el=document.createElement("button");el.className="srow";
     const pre=i>=0?y.text.slice(Math.max(0,i-60),i):"",hit=i>=0?y.text.slice(i,i+q.length):"",post=i>=0?y.text.slice(i+q.length,i+q.length+80):y.text.slice(0,90);
     el.innerHTML=`<div class="w">${esc(y.label)}</div><div class="s">…${esc(pre)}<mark>${esc(hit)}</mark>${esc(post)}…</div>`;
@@ -2070,8 +2091,12 @@ $("btn-ach").onclick=()=>{const g=$("achgrid");g.innerHTML="";
   $("achs").classList.add("on")};
 
 /* ---------- patch notes ---------- */
-const APP_VER="3.43";
+const APP_VER="3.44";
 const PATCHES=[
+ {v:"3.44",n:"Close Enough",d:"28 Jul 2026",items:[
+  ["fix","Search now ignores accents, so typing “jhana” finds the 558 passages that spell it “jhāna” — it used to find exactly one. Same for “sila”, “metta”, “Peron” and every other word among the 63 accented letters in your library. The result still shows the real spelling."],
+  ["fix","Tapping a word for a definition, and the journal search, ignore accents too."],
+  ["polish","Books imported from now on are repaired automatically — the damage fixed in 3.43 can no longer reach the library in the first place."]]},
  {v:"3.43",n:"Clean Type",d:"28 Jul 2026",items:[
   ["fix","Fixed the stray symbols that changed shape when you switched the reading typeface. They were never a font problem — the PDF extraction had left 43,000 unprintable code points in the library, including a private-use “Th” ligature that had silently eaten the Th from every “The”, “This” and “They” in The Like Switch. All repaired at the source."],
   ["fix","Right Concentration was missing every accented letter (“jhna” instead of “jhāna”) — part of that book had been decoded as raw UTF-16. Restored."],
