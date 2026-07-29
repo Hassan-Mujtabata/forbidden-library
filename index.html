@@ -337,6 +337,7 @@ header .brand span{color:var(--gold)}
 .lure-row .e{display:block;font-size:11px;color:var(--tx2);margin-top:5px}
 .lure-row.seen .q{color:var(--tx2)}
 .lure-n{float:right;letter-spacing:.1em;color:var(--gold)}
+.lure-f{color:var(--jade);letter-spacing:.1em}
 /* ---------- gemini key panel ---------- */
 .kchips{display:flex;gap:7px;flex-wrap:wrap;margin:8px 0}
 .kchip{font-size:11.5px;padding:5px 10px;border-radius:99px;border:1px solid var(--line);
@@ -1101,6 +1102,7 @@ async function boot(){
   }
 }
 function landing(){ if(DATA.nodes&&DATA.nodes.length){renderPath();show("path")} else {renderHome();show("home")} patchCheck(); initA11y(); setTimeout(checkReminder,1500);
+  setTimeout(autoRefreshHooks,4000);   // #121: quietly read a few more books, once a day, on its own
   if(!S.welcomed&&totalRead()===0&&nodesDone()===0&&(S.hl||[]).length===0)setTimeout(showWelcome,700); else if(!S.welcomed){S.welcomed=true;save();} }   // #26: only greet genuinely-new keyholders
 // #44: accessibility — give icon-only controls names and hide decorative art from screen readers
 function initA11y(){
@@ -1566,7 +1568,9 @@ function checkReminder(){
   const key=today();if(S._remindedDay===key)return;S._remindedDay=key;save();
   try{navigator.serviceWorker.ready.then(reg=>reg.showNotification("The Vault",{body:"Your daily rite is waiting — learn, sharpen, sit.",icon:"./icon-192.png",tag:"vault-rite"})).catch(()=>{});}catch(e){}
 }
-addEventListener("visibilitychange",()=>{if(!document.hidden)checkReminder();});
+addEventListener("visibilitychange",()=>{if(!document.hidden){checkReminder();
+  if(typeof autoRefreshHooks==="function")setTimeout(autoRefreshHooks,2500);}});   // #121: a PWA left
+  // open overnight never re-runs landing(), so the day would otherwise roll over without a refresh
 // NEXT-BATCH: reader swipe (mobile) + keyboard shortcuts (desktop) + Escape closes overlays
 let _touch={x:0,y:0,t:0};
 (function(){const r=$("reader");if(!r)return;
@@ -2230,16 +2234,25 @@ const saveHooks=()=>{try{localStorage.setItem(HOOKS_LS,JSON.stringify(HOOKS))}ca
 const hookCount=()=>Object.keys(HOOKS).reduce((n,k)=>n+((HOOKS[k]&&HOOKS[k].items)||[]).length,0);
 
 // Sample ACROSS the whole book, not the first pages: the opening of most non-fiction is throat
-// clearing, and hooks drawn only from it would all sound the same. One meaty paragraph per stride.
-function hookSample(b,n){
+// clearing, and hooks drawn only from it would all sound the same.
+//
+// The seed matters more than it looks. The first version always took the LONGEST paragraph of every
+// nth episode, which is deterministic — so re-mining a book returned the same passages and therefore
+// the same five facts, forever. A library that mines once and caches is just a slower way of storing
+// something static. Seeding by day moves the window every time, so each refresh reads parts of the
+// book it has never sent before and the shelf keeps producing things you have not seen.
+function hookSample(b,n,seed){
+  let h=(seed|0);for(const c of b.id)h=(h*31+c.charCodeAt(0))|0;
+  const rnd=mulberry(h);
   const picks=[],step=Math.max(1,Math.floor(b.episodes.length/n));
-  for(let e=0;e<b.episodes.length&&picks.length<n;e+=step){
-    const ps=b.episodes[e].p;let best=-1,bl=0;
-    for(let k=0;k<ps.length;k++)if(ps[k].length>bl&&ps[k].length<1500){bl=ps[k].length;best=k;}
-    if(best>=0&&bl>220)picks.push({e:e,text:ps[best]});
+  for(let e=Math.floor(rnd()*step);e<b.episodes.length&&picks.length<n;e+=step){
+    const ps=b.episodes[e].p,ok=[];
+    for(let k=0;k<ps.length;k++)if(ps[k].length>220&&ps[k].length<1500)ok.push(k);
+    if(ok.length)picks.push({e:e,text:ps[ok[Math.floor(rnd()*ok.length)]]});
   }
   return picks;
 }
+const daySeed=()=>{let s=0;for(const c of today())s=(s*31+c.charCodeAt(0))|0;return s;};
 
 function hookPrompt(b,picks){
   const body=picks.map((p,i)=>`[${i+1}] ${p.text.slice(0,900)}`).join("\n\n");
@@ -2267,9 +2280,56 @@ function parseHooks(text,picks){
   return out;
 }
 
-let MINING=false;
+let MINING=false,AUTOMINING=false;
+
+// One mining pass over a list of books, shared by the manual run and the silent daily refresh so
+// both inherit the same throttling. Books that come back empty are simply left alone — mining is
+// incremental, and the next day's rotation will reach them again.
+async function mineBooks(list,seed,onDone){
+  const picks=list.map(b=>hookSample(b,8,seed));
+  await geminiParallel(list.map((b,i)=>({prompt:hookPrompt(b,picks[i]),maxTok:420,temp:0.9,
+    gap:700,opts:{maxKeys:2,maxModels:2}})),
+    (i,r)=>{
+      if(r.ok){const items=parseHooks(r.text,picks[i]);
+        if(items.length)HOOKS[list[i].id]={at:Date.now(),items:items};}
+      if(onDone)onDone(i,r);
+      saveHooks();                       // survive a mid-run reload without redoing the whole pass
+    });
+  saveHooks();
+}
+
+/* #121: THE SHELF REFRESHES ITSELF.
+ * Mining once and caching the result is still a static library — the keys do one day's work and
+ * then sit idle forever. This rotates a few books every day, seeded by the date, so it reads parts
+ * of each book it has never sent before and the hooks are genuinely new rather than redisplayed.
+ * Six books a day cycles the whole shelf every four days and stays far inside the free tier.
+ * Silent by design: it must never interrupt whatever you opened the app to do.
+ */
+const HOOK_BATCH=6;
+async function autoRefreshHooks(){
+  if(MINING||AUTOMINING||!geminiKeys().length||!navigator.onLine)return;
+  const meta=HOOKS._meta||(HOOKS._meta={});
+  if(meta.day===today())return;                    // already refreshed today
+  const books=DATA.books.filter(b=>bookVisible(b.id));
+  if(!books.length)return;
+  meta.day=today();                                // claim the day up front, so a reload mid-run
+  const start=(meta.cursor||0)%books.length;       // doesn't start a second pass over the same books
+  const batch=[];
+  for(let i=0;i<Math.min(HOOK_BATCH,books.length);i++)batch.push(books[(start+i)%books.length]);
+  meta.cursor=(start+batch.length)%books.length;
+  saveHooks();
+  AUTOMINING=true;
+  try{
+    await mineBooks(batch,daySeed());
+    meta.fresh=batch.map(b=>b.id);meta.at=Date.now();saveHooks();
+    LURE_NONCE++;
+    if($("home")&&$("home").classList.contains("on"))renderLure();
+  }catch(e){}
+  finally{AUTOMINING=false;}
+}
+
 async function mineHooks(force){
-  if(MINING)return;
+  if(MINING||AUTOMINING)return;
   if(!geminiKeys().length){toast("Add a Gemini key in 📓 Journal first");return;}
   if(!navigator.onLine){toast("Mining needs a connection.");return;}
   const books=DATA.books.filter(b=>bookVisible(b.id)&&(force||!(HOOKS[b.id]&&HOOKS[b.id].items.length)));
@@ -2284,18 +2344,7 @@ async function mineHooks(force){
   // 8 passages, not 12: the first run sent ~10KB per book and the free tier throttled half the
   // shelf. Smaller prompts, no cascade across keys, and a small gap between waves keeps a 22-book
   // run inside the per-minute limits.
-  const pass=async list=>{
-    const picks=list.map(b=>hookSample(b,8));
-    await geminiParallel(list.map((b,i)=>({prompt:hookPrompt(b,picks[i]),maxTok:420,temp:0.9,
-      gap:700,opts:{maxKeys:2,maxModels:2}})),
-      (i,r)=>{
-        if(r.ok){const items=parseHooks(r.text,picks[i]);
-          if(items.length)HOOKS[list[i].id]={at:Date.now(),items:items};}
-        done++;paint();
-        if(done%4===0)saveHooks();                 // survive a mid-run reload without redoing it all
-      });
-    saveHooks();
-  };
+  const pass=list=>mineBooks(list,daySeed()+done,()=>{done++;paint();});
   try{
     await pass(books);
     // Whatever the rate limiter refused, come back for once after a breather rather than leaving
@@ -2351,8 +2400,8 @@ function renderLure(){
   if(!hookCount()){
     w.innerHTML=keys
       ? `<div class="lure empty"><div class="lure-h">💡 WHAT'S ACTUALLY IN THESE BOOKS?</div>`+
-        `<div class="lure-t">Let the tutor read all ${DATA.books.filter(b=>bookVisible(b.id)).length} of your books and pull out the most arresting thing in each — then the shelf can tell you why to open one.</div>`+
-        `<button class="goldbtn" id="lure-mine">💡 Read my shelves</button></div>`
+        `<div class="lure-t">The tutor reads a few of your ${DATA.books.filter(b=>bookVisible(b.id)).length} books every day and pulls out the most arresting thing in each — different pages each time, so there's always something new. Start it off now, or just leave it; it runs on its own from here.</div>`+
+        `<button class="goldbtn" id="lure-mine">💡 Read my shelves now</button></div>`
       : "";
     if($("lure-mine"))$("lure-mine").onclick=()=>mineHooks(false);
     return;
@@ -2360,7 +2409,8 @@ function renderLure(){
   const pick=pickLure();
   if(!pick){w.innerHTML="";return;}
   const ep=pick.b.episodes[pick.h.e],rs=readSet(pick.b.id),tot=hookCount(),got=hooksFound();
-  w.innerHTML=`<div class="lure"><div class="lure-h">💡 FROM YOUR SHELVES <span class="lure-n">${got}/${tot} followed</span></div>`+
+  const meta=HOOKS._meta||{},fresh=meta.day===today()&&(meta.fresh||[]).indexOf(pick.b.id)>=0;
+  w.innerHTML=`<div class="lure"><div class="lure-h">💡 FROM YOUR SHELVES${fresh?" · <span class='lure-f'>read fresh today</span>":""} <span class="lure-n">${got}/${tot} followed</span></div>`+
     `<div class="lure-q">${esc(pick.h.t)}</div>`+
     `<div class="lure-m">${pick.b.glyph} ${esc(pick.b.title)} · ${esc(ep?ep.t:"")}${rs.has(pick.h.e)?" · you've read this one":""}</div>`+
     `<div class="lure-a"><button class="goldbtn" id="lure-go">Read it →</button>`+
@@ -2747,8 +2797,13 @@ $("btn-ach").onclick=()=>{const g=$("achgrid");g.innerHTML="";
   $("achs").classList.add("on")};
 
 /* ---------- patch notes ---------- */
-const APP_VER="3.49";
+const APP_VER="3.50";
 const PATCHES=[
+ {v:"3.50",n:"Every Day",d:"29 Jul 2026",items:[
+  ["new","The shelf now reads itself, every day, on its own. Six books each morning — quietly, in the background, no button — cycling the whole library every four days and then starting again."],
+  ["fix","And it reads DIFFERENT PAGES each time. The first version always sent the same passages, so re-reading a book returned the same five facts forever — mining once and caching is just a slower way of storing something static. The pages it samples now move with the date, so the same book gives you genuinely new material every time it comes round."],
+  ["new","A hook pulled today is marked “read fresh today”, so you can tell what's new."],
+  ["polish","Left the app open overnight? It notices the day turned and refreshes when you come back to it."]]},
  {v:"3.49",n:"The Lure",d:"29 Jul 2026",items:[
   ["new","💡 Your shelf now argues for itself. The tutor reads all 22 books and pulls out the most arresting thing in each — “Play the fool to hide dangerous ambitions and gain power”, “William the Conqueror lured his enemy downhill to victory”, “Blocking dopamine made rats lose all will to live and die of thirst”. One waits for you on the home screen, and it opens the exact chapter it came from."],
   ["new","105 hooks across your library, and it counts how many you've followed. 🎲 Another rerolls; the shelf pushes ones you haven't chased yet, and leans on books you haven't started."],

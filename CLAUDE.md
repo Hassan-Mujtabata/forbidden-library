@@ -99,6 +99,13 @@ keys' quota and the run finishes half the shelf. Bulk callers pass `{maxKeys:2,m
 `gap`, keep prompts small (~4KB, not 10KB), and treat a partial result as normal: mining is
 incremental, so re-running only fetches what's missing.
 
+**Generate on a schedule, not once.** A feature that calls Gemini once and caches the result forever
+is a static feature with an API bill — Hassan's actual complaint, twice. `autoRefreshHooks()` rotates
+six books a day from `landing()` and on `visibilitychange`, claiming the day in `_meta.day` *before*
+the run so a reload can't double-fire. Crucially the sampler is **seeded by the date**: deterministic
+sampling would re-send identical passages and get identical output back, spending quota to look busy.
+Verified end-to-end — the same book on two days returned five hooks each with zero overlap.
+
 **Derived AI content goes in its own localStorage key, never in `S`.** `vault_hooks` is ~20KB of
 regenerable text; `S` is real progress and is pushed to the sync gist on every save. What the user
 *did* with that content (`S.hookSeen`) is progress and does belong in `S`.

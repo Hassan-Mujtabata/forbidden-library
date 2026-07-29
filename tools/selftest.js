@@ -325,6 +325,24 @@
       var last = s[s.length - 1].e;
       return last > b.episodes.length / 2 ? true : "last sample at episode " + last + " of " + b.episodes.length;
     });
+    // The whole point of the daily refresh. If hookSample ever goes back to being deterministic —
+    // "take the longest paragraph of every nth episode" — then every refresh re-sends the same
+    // pages, the model returns the same five facts, and the library is static again while still
+    // spending quota to look busy. This is the assertion that catches that.
+    check("hookSample: a different day reads different pages", function () {
+      var b = DATA.books.reduce(function (a, x) { return x.episodes.length > a.episodes.length ? x : a; });
+      var d1 = hookSample(b, 8, 1001).map(function (p) { return p.e; });
+      var d2 = hookSample(b, 8, 2002).map(function (p) { return p.e; });
+      if (!d1.length || !d2.length) return "no samples produced";
+      var same = d1.filter(function (e) { return d2.indexOf(e) >= 0; }).length;
+      return same < d1.length ? true : "both days sampled identical episodes: " + d1.join(",");
+    });
+    check("hookSample: the same day is stable, so the shelf doesn't churn on every render", function () {
+      var b = DATA.books[0];
+      var a1 = hookSample(b, 6, 777).map(function (p) { return p.e + ":" + p.text.slice(0, 12); }).join("|");
+      var a2 = hookSample(b, 6, 777).map(function (p) { return p.e + ":" + p.text.slice(0, 12); }).join("|");
+      return a1 === a2 ? true : "same seed produced different passages";
+    });
     check("hookId: stable for the same hook, distinct across books", function () {
       var h = { e: 3, t: "Play the fool to hide dangerous ambitions." };
       return hookId("laws48", h) === hookId("laws48", h) && hookId("laws48", h) !== hookId("atomic", h)
