@@ -295,6 +295,46 @@
     });
   }
 
+  /* -------------------------------------------------------- lure / hooks */
+
+  function hookTests() {
+    check("parseHooks: reads '<n> :: <hook>' and maps back to the right episode", function () {
+      var picks = [{ e: 4, text: "a" }, { e: 91, text: "b" }];
+      var got = parseHooks("1 :: Power is taken, never given away quietly.\n2 :: The mind wanders because it is unpractised.", picks);
+      if (got.length !== 2) return "parsed " + got.length + " of 2";
+      return got[0].e === 4 && got[1].e === 91 ? true : "episodes " + got[0].e + "," + got[1].e;
+    });
+    check("parseHooks: drops malformed lines rather than showing them", function () {
+      // A half-parsed lure on the home screen reads as a broken app, so anything odd is dropped.
+      var got = parseHooks("here is some preamble\n1 :: A genuinely arresting claim about power.\n99 :: out of range\nno number here", [{ e: 2, text: "a" }]);
+      return got.length === 1 ? true : "kept " + got.length + ": " + JSON.stringify(got);
+    });
+    check("parseHooks: rejects a hook citing a passage that was never sent", function () {
+      return parseHooks("7 :: invented from nowhere at all", [{ e: 1, text: "a" }]).length === 0
+        ? true : "accepted a hook for a passage index that does not exist";
+    });
+    check("parseHooks: de-duplicates repeats", function () {
+      var p = [{ e: 1, text: "a" }, { e: 2, text: "b" }];
+      return parseHooks("1 :: The very same arresting line here.\n2 :: The very same arresting line here.", p).length === 1
+        ? true : "duplicate hook kept";
+    });
+    check("hookSample: spreads across the whole book, not just the opening", function () {
+      var b = DATA.books.reduce(function (a, x) { return x.episodes.length > a.episodes.length ? x : a; });
+      var s = hookSample(b, 8);
+      if (s.length < 2) return "only " + s.length + " samples";
+      var last = s[s.length - 1].e;
+      return last > b.episodes.length / 2 ? true : "last sample at episode " + last + " of " + b.episodes.length;
+    });
+    check("hookId: stable for the same hook, distinct across books", function () {
+      var h = { e: 3, t: "Play the fool to hide dangerous ambitions." };
+      return hookId("laws48", h) === hookId("laws48", h) && hookId("laws48", h) !== hookId("atomic", h)
+        ? true : "ids collided or drifted";
+    });
+    check("hooks live outside S, so sync never carries them", function () {
+      return S.hooks === undefined ? true : "hooks leaked into synced state";
+    });
+  }
+
   /* ------------------------------------------------------ library integrity */
 
   function libraryTests() {
@@ -325,7 +365,7 @@
       var snap = st(S);                       // progress state is real data -- never leave it edited
       try {
         foldTests(); saneTests(); readTests(); mergeTests(); pushTests();
-        indexTests(); fmtTests(); libraryTests();
+        indexTests(); fmtTests(); hookTests(); libraryTests();
       } finally {
         S = snap;
         if (typeof save === "function") save();

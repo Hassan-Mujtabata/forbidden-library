@@ -93,6 +93,16 @@ for a per-key health check, or a dead key passes on someone else's quota). Calls
 `GEM_CURSOR` — before that the loop always began at `keys[0]`, so five extra keys did nothing but
 sit there as failover. Anything expensive and fan-out-shaped belongs on this path, not in a loop.
 
+**Bulk jobs must not cascade.** By default `geminiCall` retries a failed request across every key
+*and* every model — fine for one call, ruinous for 22, where a single throttled book spends all five
+keys' quota and the run finishes half the shelf. Bulk callers pass `{maxKeys:2,maxModels:2}` plus a
+`gap`, keep prompts small (~4KB, not 10KB), and treat a partial result as normal: mining is
+incremental, so re-running only fetches what's missing.
+
+**Derived AI content goes in its own localStorage key, never in `S`.** `vault_hooks` is ~20KB of
+regenerable text; `S` is real progress and is pushed to the sync gist on every save. What the user
+*did* with that content (`S.hookSeen`) is progress and does belong in `S`.
+
 **Never feed the model `ep.t` blindly.** Most episode titles are `"Episode 133"` — this app's own
 chunk numbering — and a model handed one cites it back at the reader as a source. Pass chapter
 titles only when they are real. Strip markdown on render too (`demd`); asking for plain prose in the

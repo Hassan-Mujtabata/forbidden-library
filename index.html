@@ -322,6 +322,21 @@ header .brand span{color:var(--gold)}
   border-radius:10px;padding:10px 13px;margin-bottom:7px}
 .cn-old .q{display:block;font-family:var(--serif);font-size:13.5px;line-height:1.4}
 .cn-old .m{display:block;font-size:11px;color:var(--tx2);margin-top:4px}
+/* ---------- 💡 the lure ---------- */
+.lure{background:var(--card2);border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin-bottom:18px;position:relative}
+.lure-h{font-size:10px;letter-spacing:.2em;color:var(--tx2);margin-bottom:9px}
+.lure-q{font-family:var(--serif);font-size:19px;line-height:1.4;color:var(--tx)}
+.lure-m{font-size:12px;color:var(--tx2);margin-top:9px}
+.lure-t{font-size:13px;color:var(--tx2);line-height:1.6;margin-bottom:12px}
+.lure-a{display:flex;gap:9px;align-items:center;margin-top:14px;flex-wrap:wrap}
+.lure-bar{height:5px;background:var(--card);border-radius:99px;overflow:hidden;margin-top:4px}
+.lure-bar span{display:block;height:100%;background:var(--goldbtn);transition:width .3s}
+.lure-row{display:block;width:100%;text-align:left;background:var(--card);border:1px solid var(--line);
+  border-radius:10px;padding:11px 13px;margin-bottom:7px}
+.lure-row .q{display:block;font-size:13.5px;line-height:1.5}
+.lure-row .e{display:block;font-size:11px;color:var(--tx2);margin-top:5px}
+.lure-row.seen .q{color:var(--tx2)}
+.lure-n{float:right;letter-spacing:.1em;color:var(--gold)}
 /* ---------- gemini key panel ---------- */
 .kchips{display:flex;gap:7px;flex-wrap:wrap;margin:8px 0}
 .kchip{font-size:11.5px;padding:5px 10px;border-radius:99px;border:1px solid var(--line);
@@ -750,6 +765,7 @@ header .brand span{color:var(--gold)}
 <div id="home" class="view">
   <button class="bigcard" id="continue" style="display:none"></button>
   <div id="recent" style="display:none;margin-bottom:16px"></div>
+  <div id="lure"></div>
   <div id="shelves"></div>
 </div>
 
@@ -1161,6 +1177,7 @@ function renderHome(){
       recents.slice(0,10).map((r,i)=>`<button class="recchip" data-ri="${i}"><span class="g">${r.glyph||"📖"}</span><span class="rt">${esc(r.title)}</span><span class="rs">${esc(r.sub||"")}</span></button>`).join("")+`</div>`;
     rc.querySelectorAll("[data-ri]").forEach(b=>b.onclick=()=>{const r=recents[+b.dataset.ri];r.type==="ep"?openEp(r.id,r.ep):openNode(r.id);});
   } else rc.style.display="none";
+  renderLure();                       // #120: the shelf makes its case before you see the spines
   const sh=$("shelves");sh.innerHTML="";
   const bookCard=b=>{
     const done=readSet(b.id).size,pct=Math.round(done/b.episodes.length*100);
@@ -1225,6 +1242,17 @@ function renderBookLanding(id){
     mine.slice(0,6).forEach(h=>{const el=document.createElement("button");el.className="bl-hlrow";
       el.innerHTML=`<span class="q">“${esc(h.t.slice(0,160))}${h.t.length>160?"…":""}”</span><span class="e">episode ${(h.e|0)+1}</span>`;
       el.onclick=()=>{$("booklanding").classList.remove("on");openEp(id,h.e|0);};hw.appendChild(el);});}
+  // #120: the mined hooks for THIS book, as the argument for opening it
+  const hk=((HOOKS[id]||{}).items)||[];
+  if(hk.length){const hw=document.createElement("div");
+    hw.innerHTML=`<div class="prsec">Why open this one</div>`;
+    hk.slice(0,5).forEach(h=>{const el=document.createElement("button");el.className="lure-row";
+      const ep=b.episodes[h.e];
+      el.innerHTML=`<span class="q">💡 ${esc(h.t)}</span><span class="e">${esc(ep?ep.t:"")}</span>`;
+      if(hookSeen(id,h))el.classList.add("seen");
+      el.onclick=()=>{markHookSeen(id,h);$("booklanding").classList.remove("on");openEp(id,h.e);};
+      hw.appendChild(el);});
+    bd.querySelector("#bl-hl").insertAdjacentElement("afterend",hw);}
   const w=bd.querySelector(".bl-eps"),qbox=bd.querySelector("#bl-q");
   const nextI=b.episodes.findIndex((_,i)=>!rs.has(i));   // -1 once the book is finished
   // #23: big books (hundreds of chapters) shouldn't render one giant list — cap and expand on demand
@@ -1888,11 +1916,16 @@ async function geminiCall(prompt,maxTok=260,temp=0.3,opts){
   const start=(opts.startAt!=null?opts.startAt:GEM_CURSOR++)%all.length;
   // opts.only pins the call to exactly one key with no fallback — without it a per-key test would
   // quietly succeed on a different key and report a dead one as healthy.
-  const keys=opts.only?[all[start]]:all.map((_,i)=>all[(start+i)%all.length]);
+  let keys=opts.only?[all[start]]:all.map((_,i)=>all[(start+i)%all.length]);
+  // A bulk job must NOT cascade. One throttled request retrying every key against every model
+  // spends all five keys' quota to answer one prompt, which is how a 22-book mining run managed
+  // to 429 twenty-four times and finish half the shelf. Bulk callers cap both.
+  if(opts.maxKeys)keys=keys.slice(0,Math.max(1,opts.maxKeys));
+  const models=opts.maxModels?GEM_MODELS.slice(0,Math.max(1,opts.maxModels)):GEM_MODELS;
   const gen={maxOutputTokens:maxTok,temperature:temp,thinkingConfig:{thinkingBudget:0}};   // #16
   const url=m=>`https://generativelanguage.googleapis.com/v1beta/models/${m}:generateContent`;
   let quota=false,reached=false;
-  for(const model of GEM_MODELS){
+  for(const model of models){
     for(const k of keys){
       const hdr={"Content-Type":"application/json","x-goog-api-key":k};   // #17: key in header
       let r;
@@ -1941,7 +1974,9 @@ async function geminiParallel(jobs,onEach){
     for(;;){
       const i=next++;if(i>=jobs.length)return;
       const t0=performance.now();
-      try{results[i]={ok:true,text:await geminiCall(jobs[i].prompt,jobs[i].maxTok||340,jobs[i].temp||0.4,{startAt:n})};}
+      if(jobs[i].gap&&i>=width)await new Promise(r=>setTimeout(r,jobs[i].gap));   // pace a bulk run
+      try{results[i]={ok:true,text:await geminiCall(jobs[i].prompt,jobs[i].maxTok||340,jobs[i].temp||0.4,
+        Object.assign({startAt:n},jobs[i].opts||{}))};}
       catch(e){results[i]={ok:false,error:(e&&e.message)||"failed"};}
       results[i].ms=Math.round(performance.now()-t0);
       results[i].lane=n;
@@ -2178,6 +2213,162 @@ async function convene(q){
   }finally{
     COUNCIL_BUSY=false;$("cn-go").disabled=false;$("cn-go").textContent="⚖️ Convene";
   }
+}
+
+/* ============ #120 💡 THE LURE — the shelf tries to hook you ============
+ * A shelf of 22 spines tells you nothing about why any of them is worth opening. So the tutor reads
+ * every book once, in parallel across all your keys, and pulls out the handful of genuinely
+ * arresting things in each — a startling claim, a story with teeth, a rule you'd argue with. Those
+ * become the lure on the home screen, and every one deep-links to the exact chapter it came from.
+ *
+ * Kept in its OWN localStorage key, not in S: it is derived content, regenerable at any time, and
+ * pushing ~20KB of it through the sync gist alongside real progress would be wrong.
+ */
+const HOOKS_LS="vault_hooks";
+let HOOKS=(()=>{try{return JSON.parse(localStorage.getItem(HOOKS_LS))||{}}catch(e){return{}}})();
+const saveHooks=()=>{try{localStorage.setItem(HOOKS_LS,JSON.stringify(HOOKS))}catch(e){}};
+const hookCount=()=>Object.keys(HOOKS).reduce((n,k)=>n+((HOOKS[k]&&HOOKS[k].items)||[]).length,0);
+
+// Sample ACROSS the whole book, not the first pages: the opening of most non-fiction is throat
+// clearing, and hooks drawn only from it would all sound the same. One meaty paragraph per stride.
+function hookSample(b,n){
+  const picks=[],step=Math.max(1,Math.floor(b.episodes.length/n));
+  for(let e=0;e<b.episodes.length&&picks.length<n;e+=step){
+    const ps=b.episodes[e].p;let best=-1,bl=0;
+    for(let k=0;k<ps.length;k++)if(ps[k].length>bl&&ps[k].length<1500){bl=ps[k].length;best=k;}
+    if(best>=0&&bl>220)picks.push({e:e,text:ps[best]});
+  }
+  return picks;
+}
+
+function hookPrompt(b,picks){
+  const body=picks.map((p,i)=>`[${i+1}] ${p.text.slice(0,900)}`).join("\n\n");
+  return `Numbered passages from "${b.title}"${b.author?` by ${b.author}`:""}:\n\n${body}\n\n`+
+    `Pick the FIVE most arresting things here — a startling claim, a vivid story, a counterintuitive `+
+    `finding, or a rule with teeth. For each write ONE line in exactly this form:\n\n`+
+    `<passage number> :: <hook, at most 20 words>\n\n`+
+    `The hook should make someone want to read that passage immediately. Write it as a statement or `+
+    `a question, never as "this passage discusses…". Do not summarise the book as a whole. No quotes, `+
+    `no markdown, no numbering beyond the passage number, no other lines.`;
+}
+
+// The model is asked for "<n> :: <hook>" and mostly complies; anything that doesn't parse is dropped
+// rather than shown, because a malformed lure on the home screen looks like a broken app.
+function parseHooks(text,picks){
+  const out=[],seen={};
+  demd(text).split(/\n+/).forEach(line=>{
+    const m=/^\s*\[?(\d{1,2})\]?\s*(?:::|[-–—:])\s*(.+)$/.exec(line.trim());
+    if(!m)return;
+    const p=picks[+m[1]-1];if(!p)return;
+    const t=m[2].trim().replace(/^["“']+|["”']+$/g,"");
+    if(t.length<15||t.length>190||seen[t])return;
+    seen[t]=1;out.push({e:p.e,t:t});
+  });
+  return out;
+}
+
+let MINING=false;
+async function mineHooks(force){
+  if(MINING)return;
+  if(!geminiKeys().length){toast("Add a Gemini key in 📓 Journal first");return;}
+  if(!navigator.onLine){toast("Mining needs a connection.");return;}
+  const books=DATA.books.filter(b=>bookVisible(b.id)&&(force||!(HOOKS[b.id]&&HOOKS[b.id].items.length)));
+  if(!books.length){toast("Every book is already mined — reroll for a new lure.");return;}
+  MINING=true;
+  let done=0,total=books.length,label="";
+  const paint=()=>{const w=$("lure");if(w)w.innerHTML=
+    `<div class="lure mining"><div class="lure-h">💡 READING YOUR SHELVES</div>`+
+    `<div class="lure-t">${done} of ${total} books mined${label} · ${Math.min(total,geminiKeys().length)} keys working in parallel</div>`+
+    `<div class="lure-bar"><span style="width:${Math.round(done/Math.max(1,total)*100)}%"></span></div></div>`;};
+  paint();
+  // 8 passages, not 12: the first run sent ~10KB per book and the free tier throttled half the
+  // shelf. Smaller prompts, no cascade across keys, and a small gap between waves keeps a 22-book
+  // run inside the per-minute limits.
+  const pass=async list=>{
+    const picks=list.map(b=>hookSample(b,8));
+    await geminiParallel(list.map((b,i)=>({prompt:hookPrompt(b,picks[i]),maxTok:420,temp:0.9,
+      gap:700,opts:{maxKeys:2,maxModels:2}})),
+      (i,r)=>{
+        if(r.ok){const items=parseHooks(r.text,picks[i]);
+          if(items.length)HOOKS[list[i].id]={at:Date.now(),items:items};}
+        done++;paint();
+        if(done%4===0)saveHooks();                 // survive a mid-run reload without redoing it all
+      });
+    saveHooks();
+  };
+  try{
+    await pass(books);
+    // Whatever the rate limiter refused, come back for once after a breather rather than leaving
+    // the shelf half-mined and making Hassan notice and re-tap it himself.
+    let left=books.filter(b=>!(HOOKS[b.id]&&HOOKS[b.id].items.length));
+    if(left.length){
+      label=" · waiting out the rate limit";total=books.length+left.length;paint();
+      await new Promise(r=>setTimeout(r,20000));
+      label=" · second pass";paint();
+      await pass(left);
+    }
+    const missed=books.filter(b=>!(HOOKS[b.id]&&HOOKS[b.id].items.length)).length;
+    const n=hookCount();
+    toast(!n?"Nothing came back — try again in a minute"
+      :missed?`💡 ${n} hooks · ${missed} book${missed>1?"s":""} throttled, tap ↻ later to finish`
+             :`💡 ${n} hooks pulled from your shelves`);
+  }finally{MINING=false;LURE_NONCE++;renderLure();}
+}
+
+// Which hooks you've actually chased. Kept in S (unlike the hooks themselves) because this IS your
+// history — 105 of them across the shelf makes the lure a collection worth finishing.
+const hookId=(id,h)=>id+"|"+h.e+"|"+h.t.slice(0,24);
+const hookSeen=(id,h)=>(S.hookSeen||[]).indexOf(hookId(id,h))>=0;
+function markHookSeen(id,h){const k=hookId(id,h);
+  if((S.hookSeen||[]).indexOf(k)<0){S.hookSeen=[...(S.hookSeen||[]),k].slice(-400);save();}}
+const hooksFound=()=>{let n=0;for(const id in HOOKS)for(const h of (HOOKS[id].items||[]))if(hookSeen(id,h))n++;return n;};
+
+// Weighted pick: an unread book is the whole point of a lure, a finished one is a curiosity, and a
+// hook you've already chased drops to the bottom so the shelf keeps showing you something new.
+let LURE_NONCE=0;
+function pickLure(){
+  const pool=[];
+  for(const id in HOOKS){
+    const b=bookById(id);if(!b||!bookVisible(id))continue;
+    const rs=readSet(id);
+    let w=rs.size>=b.episodes.length?1:(rs.size?3:6);
+    for(const h of (HOOKS[id].items||[])){
+      const ww=hookSeen(id,h)?1:w*3;
+      for(let i=0;i<ww;i++)pool.push({b:b,h:h});
+    }
+  }
+  if(!pool.length)return null;
+  // Stable through the day, so the shelf has a "today's lure" rather than reshuffling on every
+  // render; the reroll button bumps the nonce to deliberately move it on.
+  let seed=LURE_NONCE*7919;for(const c of today())seed=seed*31+c.charCodeAt(0)|0;
+  return pool[Math.abs(seed)%pool.length];
+}
+
+function renderLure(){
+  const w=$("lure");if(!w)return;
+  if(MINING)return;
+  const keys=geminiKeys().length;
+  if(!hookCount()){
+    w.innerHTML=keys
+      ? `<div class="lure empty"><div class="lure-h">💡 WHAT'S ACTUALLY IN THESE BOOKS?</div>`+
+        `<div class="lure-t">Let the tutor read all ${DATA.books.filter(b=>bookVisible(b.id)).length} of your books and pull out the most arresting thing in each — then the shelf can tell you why to open one.</div>`+
+        `<button class="goldbtn" id="lure-mine">💡 Read my shelves</button></div>`
+      : "";
+    if($("lure-mine"))$("lure-mine").onclick=()=>mineHooks(false);
+    return;
+  }
+  const pick=pickLure();
+  if(!pick){w.innerHTML="";return;}
+  const ep=pick.b.episodes[pick.h.e],rs=readSet(pick.b.id),tot=hookCount(),got=hooksFound();
+  w.innerHTML=`<div class="lure"><div class="lure-h">💡 FROM YOUR SHELVES <span class="lure-n">${got}/${tot} followed</span></div>`+
+    `<div class="lure-q">${esc(pick.h.t)}</div>`+
+    `<div class="lure-m">${pick.b.glyph} ${esc(pick.b.title)} · ${esc(ep?ep.t:"")}${rs.has(pick.h.e)?" · you've read this one":""}</div>`+
+    `<div class="lure-a"><button class="goldbtn" id="lure-go">Read it →</button>`+
+    `<button class="ghostbtn" id="lure-roll">🎲 Another</button>`+
+    `<button class="ghostbtn" id="lure-more" title="Re-read every book for fresh hooks">↻</button></div></div>`;
+  $("lure-go").onclick=()=>{markHookSeen(pick.b.id,pick.h);openEp(pick.b.id,pick.h.e);};
+  $("lure-roll").onclick=()=>{LURE_NONCE++;renderLure();};
+  $("lure-more").onclick=()=>mineHooks(true);
 }
 /* ---------- tutor grounding: feed Gemini YOUR books, not generic pop-psych ---------- */
 function nodeText(n){return [...(n.bridge||[]),...(n.sources||[]).flatMap(s=>s.quote||[])].join("\n\n");}
@@ -2556,8 +2747,14 @@ $("btn-ach").onclick=()=>{const g=$("achgrid");g.innerHTML="";
   $("achs").classList.add("on")};
 
 /* ---------- patch notes ---------- */
-const APP_VER="3.48";
+const APP_VER="3.49";
 const PATCHES=[
+ {v:"3.49",n:"The Lure",d:"29 Jul 2026",items:[
+  ["new","💡 Your shelf now argues for itself. The tutor reads all 22 books and pulls out the most arresting thing in each — “Play the fool to hide dangerous ambitions and gain power”, “William the Conqueror lured his enemy downhill to victory”, “Blocking dopamine made rats lose all will to live and die of thirst”. One waits for you on the home screen, and it opens the exact chapter it came from."],
+  ["new","105 hooks across your library, and it counts how many you've followed. 🎲 Another rerolls; the shelf pushes ones you haven't chased yet, and leans on books you haven't started."],
+  ["new","Every book page now has a “Why open this one” section — the five most interesting things in that book, each a direct link into the chapter."],
+  ["new","Reading all 22 books takes about 15 seconds, because your keys work at the same time rather than one after another."],
+  ["fix","A throttled request used to retry every key against every model, so one rate-limited book could spend all five keys' quota. The first mining run finished only 11 of 22 books because of it; it now does 20 on the first pass and comes back for the stragglers by itself."]]},
  {v:"3.48",n:"The Council",d:"29 Jul 2026",items:[
   ["new","⚖️ THE COUNCIL — ask your library one real question and five books answer it at the same time, each speaking only from its own pages. Then a verdict tells you where they agree, where they genuinely clash, and what to actually do. The Shadow and Light wings are always both seated, so you get the argument, not a consensus."],
   ["new","Your Gemini keys now work in parallel. Five books answered a question in 3.5 seconds — the same work took over ten seconds' worth of requests, run one at a time."],
