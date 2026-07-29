@@ -175,6 +175,50 @@
       return m.faves.indexOf("a") >= 0 && m.faves.indexOf("b") >= 0 ? true : JSON.stringify(m.faves);
     });
 
+    // THE CLASS GUARD. mergeState carries only the fields it names, so any field added to S later
+    // is silently dropped the first time another device syncs. Five had piled up before anyone
+    // noticed — forged lessons, gauntlet scores, council sittings, followed hooks, dispatch state.
+    // ADD NEW S FIELDS TO THIS FIXTURE when you add them to the app; that is what makes this fail.
+    check("merge: no field from the other device is silently dropped", function () {
+      var b = { _mtime: 2, xp: 7, bestStreak: 3, rvN: 2, ritesN: 1,
+                streak: { count: 2, day: "2026-07-29" },
+                faves: ["laws48"], hl: [{ b: "laws48", e: 1, t: "a kept highlight" }], hlDel: [],
+                vocab: [{ t: "jhana" }], read: { laws48: [3] }, readDel: [],
+                node: { n1: { quizBest: 2 } },
+                forged: [{ id: "fg1", at: 9, title: "Forged lesson" }],
+                council: [{ q: "why do I procrastinate", at: 9, seats: [] }],
+                gauntlet: { best: 4, played: 2, streak: 1 },
+                hookSeen: ["laws48|1|something"], dispatchSeen: "2026-07-29" };
+      var m = mergeState({ _mtime: 1 }, b);
+      var dropped = Object.keys(b).filter(function (k) {
+        if (k === "_mtime") return false;
+        var v = m[k];
+        if (v === undefined || v === null) return true;
+        if (Array.isArray(v)) return b[k].length > 0 && v.length === 0;
+        if (typeof v === "object") return Object.keys(b[k]).length > 0 && Object.keys(v).length === 0;
+        return false;
+      });
+      return dropped.length ? "dropped from sync: " + dropped.join(", ") : true;
+    });
+
+    check("merge: forged lessons from both devices are kept, newest first", function () {
+      var m = mergeState({ forged: [{ id: "x", at: 1 }], _mtime: 1 },
+                         { forged: [{ id: "y", at: 2 }], _mtime: 2 });
+      return m.forged.length === 2 && m.forged[0].id === "y"
+        ? true : "got " + JSON.stringify(m.forged.map(function (f) { return f.id; }));
+    });
+    check("merge: a forged lesson is never duplicated by its own id", function () {
+      var n = { id: "same", at: 5 };
+      return mergeState({ forged: [n], _mtime: 1 }, { forged: [n], _mtime: 2 }).forged.length === 1
+        ? true : "duplicated";
+    });
+    check("merge: the gauntlet keeps the better score, not the newer one", function () {
+      var m = mergeState({ gauntlet: { best: 5, played: 9 }, _mtime: 2 },
+                         { gauntlet: { best: 2, played: 1 }, _mtime: 1 });
+      return m.gauntlet.best === 5 && m.gauntlet.played === 9
+        ? true : "got " + JSON.stringify(m.gauntlet);
+    });
+
     check("merge: xp takes the higher value, never the sum", function () {
       return is(mergeState({ xp: 500, _mtime: NOW }, { xp: 700, _mtime: NOW }).xp, 700);
     });

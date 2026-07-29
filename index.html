@@ -772,6 +772,7 @@ header .brand span{color:var(--gold)}
     <button class="iconbtn" id="btn-gauntlet" title="The Gauntlet — five books, five questions">🧩</button>
     <button class="iconbtn" id="btn-dispatch" title="The Dispatch — written for you each morning">📰</button>
     <button class="iconbtn" id="btn-forge" title="The Forge — have a new lesson written for your Path">⚗️</button>
+    <button class="iconbtn" id="btn-ask" title="Ask the vault — a tutor that knows everything you've read">🎓</button>
     <button class="iconbtn" id="btn-search" title="Search">🔍</button>
     <button class="iconbtn" id="btn-hl" title="Journal — notes, highlights, backup">📓</button>
     <button class="iconbtn" id="btn-ach" title="Achievements">🏆</button>
@@ -2920,6 +2921,58 @@ function vaultSnippets(query,k){k=k||3;const q=fold(query||"").split(/\s+/).filt
   scored.sort((a,b)=>b.s-a.s);
   return scored.slice(0,k).map(x=>({title:x.title,snippet:x.text.slice(0,480)}));
 }
+/* ============ #127 🎓 ASK THE VAULT — a tutor that knows everything you've done ============
+ * The tutor could only ever be opened attached to one lesson or one word, so it knew that fragment
+ * and nothing else. This hands it the whole picture — what's on the shelf, how far into each book
+ * you are, which ideas you've mastered, what you highlighted, which questions you got wrong — so
+ * "what should I read next" and "what am I weakest on" become answerable.
+ */
+function vaultContext(){
+  const books=DATA.books.filter(b=>bookVisible(b.id));
+  const started=books.filter(b=>readSet(b.id).size>0);
+  const L=[];
+  L.push("BOOKS ON THEIR SHELF: "+books.map(b=>b.title).join("; "));
+  if(started.length)L.push("HOW FAR THEY ARE: "+started.map(b=>
+    `${b.title} ${readSet(b.id).size}/${b.episodes.length}`).join("; "));
+  const mast=(typeof masteredTitles==="function")?masteredTitles(30):[];
+  if(mast.length)L.push("IDEAS THEY HAVE MASTERED: "+mast.join("; "));
+  const hl=(S.hl||[]).slice(0,8).filter(h=>h.t).map(h=>`"${h.t.slice(0,170)}"`);
+  if(hl.length)L.push("WHAT THEY CHOSE TO KEEP: "+hl.join(" | "));
+  const errs=(S.errors||[]).slice(0,5).map(e=>e.q).filter(Boolean);
+  if(errs.length)L.push("QUESTIONS THEY GOT WRONG: "+errs.join(" | "));
+  const fg=(S.forged||[]).map(n=>n.title);
+  if(fg.length)L.push("LESSONS THEY ASKED TO HAVE WRITTEN: "+fg.join("; "));
+  const un=books.filter(b=>!readSet(b.id).size).map(b=>b.title);
+  if(un.length)L.push("NOT STARTED YET: "+un.join("; "));
+  return L.join("\n\n");
+}
+
+function askTheVault(){
+  if(!geminiKeys().length){toast("Add a Gemini key in 📓 Journal first");return;}
+  openTutor("Your vault",vaultContext(),"");
+  TUTOR.chips=["What should I read next?","What am I weakest on?","Connect two things I've read"];
+  TUTOR.thread.push({role:"tutor",text:"I can see your whole shelf — what you've read, what you've kept, and what you've got wrong. Ask me anything."});
+  renderTutor();
+}
+$("btn-ask").onclick=askTheVault;
+
+// Follow-ups written from the answer that just landed, rather than the same five buttons forever.
+// One extra call per turn, and it makes the thread feel like it is actually listening.
+async function suggestFollowups(){
+  const last=TUTOR.thread[TUTOR.thread.length-1];
+  if(!last||last.role!=="tutor"||!last.text||last.text.length<60)return;
+  const mine=TUTOR.id;
+  try{
+    const t=await geminiCall(`A tutor just told a learner:\n\n"${last.text.slice(0,700)}"\n\n`+
+      `Write THREE very short follow-up questions the learner would plausibly ask next. At most six `+
+      `words each, one per line, no numbering, no markdown, no trailing punctuation.`,120,0.85);
+    if(TUTOR.id!==mine)return;                    // they moved on to another thread meanwhile
+    const chips=demd(t).split(/\n+/).map(s=>s.replace(/^[-•*\d.)\s]+/,"").trim())
+      .filter(s=>s.length>4&&s.length<52).slice(0,3);
+    if(chips.length){TUTOR.chips=chips;renderTutor();}
+  }catch(e){}
+}
+
 /* ---------- tutor conversation: a real grounded thread, with follow-ups (tutor-A #9/#10/#36/#37) ---------- */
 let TUTOR={ctx:"",thread:[],title:"Tutor"};
 function openTutor(title,ctxBlock,firstMsg){
@@ -2951,6 +3004,7 @@ async function tutorSend(userMsg){
       partial=>{TUTOR.thread[slot].text=partial;const el=bubble();if(el)el.textContent=partial;},420,0.3);
     TUTOR.thread[slot].text=fb;saveTutorThread();}
   catch(e){TUTOR.thread[slot].text=e&&e.message==="quota"?"(Gemini quota is spent for now — it resets daily.)":e&&e.message==="no-key"?"(Connect a Gemini key first.)":"(Couldn't reach the tutor — check your connection.)";}
+  suggestFollowups();   // #127: fire-and-forget; the answer is already on screen
   renderTutor();
 }
 // tutor conversation history — save & revisit past chats
@@ -2985,13 +3039,15 @@ function renderTutor(pending){
     ?`<div class="tu-you">you: ${esc(m.text)}</div>`
     :`<div class="tu-t">${esc(m.text)}</div>`).join("");
   if(pending)h+=`<div class="tu-t" style="color:var(--tx2)">…</div>`;
-  h+=`<div class="tu-chips">
-      <button class="tu-chip" data-q="Explain that again more simply, in plainer words.">simpler</button>
+  // #127: chips written from the last answer when we have them, the fixed set otherwise
+  h+=`<div class="tu-chips">`+((TUTOR.chips&&TUTOR.chips.length)
+    ? TUTOR.chips.map(c=>`<button class="tu-chip" data-q="${esc(c)}">${esc(c)}</button>`).join("")
+    : `<button class="tu-chip" data-q="Explain that again more simply, in plainer words.">simpler</button>
       <button class="tu-chip" data-q="Go deeper — the underlying mechanism, and a subtlety I might be missing.">deeper</button>
       <button class="tu-chip" data-q="Give me a concrete, everyday example of this.">example</button>
       <button class="tu-chip" data-q="Give me an analogy from video games or daily life.">analogy</button>
-      <button class="tu-chip" data-q="Draw this as a simple arrow diagram in plain text (like: cue -> craving -> response -> reward).">diagram</button>
-    </div>
+      <button class="tu-chip" data-q="Draw this as a simple arrow diagram in plain text (like: cue -> craving -> response -> reward).">diagram</button>`)+
+    `</div>
     <div class="tu-ask"><input id="tutor-in" placeholder="ask a follow-up…" autocomplete="off">${(window.SpeechRecognition||window.webkitSpeechRecognition)?`<button id="tutor-mic" title="Speak your question">🎤</button>`:""}<button id="tutor-go">ask</button></div>`;
   body.innerHTML=h;
   body.querySelectorAll(".tu-chip").forEach(b=>b.onclick=()=>{if(!pending)tutorSend(b.dataset.q);});
@@ -3284,8 +3340,12 @@ $("btn-ach").onclick=()=>{const g=$("achgrid");g.innerHTML="";
   $("achs").classList.add("on")};
 
 /* ---------- patch notes ---------- */
-const APP_VER="3.52";
+const APP_VER="3.53";
 const PATCHES=[
+ {v:"3.53",n:"It Knows You",d:"29 Jul 2026",items:[
+  ["new","🎓 ASK THE VAULT — the tutor can now see everything: every book on your shelf, how far into each one you are, what you've mastered, what you chose to highlight, and the questions you got wrong. So “what should I read next” and “what am I weakest on” are finally real questions. It answered mine by quoting my own highlight back and picking the book I'd already started."],
+  ["new","The follow-up buttons are now written from the answer you just got, instead of the same five forever."],
+  ["fix","Serious one. Anything you created recently would have vanished the first time another device synced — forged lessons, Gauntlet scores, Council sittings, which hooks you'd followed. The sync merge only carries fields it has been explicitly told about, and five had piled up unnoticed. A forged lesson was the worst case: the lesson disappeared while your progress on it stayed behind, pointing at nothing."]]},
  {v:"3.52",n:"The Forge",d:"29 Jul 2026",items:[
   ["new","⚗️ THE FORGE — your Path is no longer a fixed set of 87 lessons. Name anything you want to understand and the tutor writes you a real lesson on it out of your own books: teaching prose that names its sources, three questions, and something to try. It lands on your Path as a proper lesson you complete for XP. Roughly eight seconds."],
   ["new","The quotes in a forged lesson are never written by the tutor. They are the exact passages found in your books, with the real chapter attached — a model asked to produce quotes will invent them, and an invented quote credited to a book you own is the one thing this cannot do."],
@@ -3807,6 +3867,26 @@ function mergeState(a,b){ // union merge — never loses progress from either de
   // whichever device still lists it as read. Each side's claim is judged against the tombstone:
   // a device that read the chapter AFTER the un-mark keeps it, one whose snapshot predates the
   // un-mark does not. That distinction is what stops an undo from erasing another device's work.
+  // #126: mergeState carries ONLY the fields it names, and every field added after it was written
+  // was therefore dropped on the first sync from another device. Five had accumulated. The worst was
+  // `forged`: the lesson itself vanished while S.node progress against its id survived, leaving a
+  // completed lesson that no longer existed. This is the trap CLAUDE.md warns about; it caught me.
+  m.hookSeen=[...new Set([...(a.hookSeen||[]),...(b.hookSeen||[])])].slice(-400);
+  if(a.dispatchSeen||b.dispatchSeen)
+    m.dispatchSeen=(a.dispatchSeen||"")>(b.dispatchSeen||"")?a.dispatchSeen:b.dispatchSeen;
+  if(a.gauntlet||b.gauntlet){const ga=a.gauntlet||{},gb=b.gauntlet||{};
+    m.gauntlet={best:Math.max(ga.best||0,gb.best||0),played:Math.max(ga.played||0,gb.played||0),
+                streak:Math.max(ga.streak||0,gb.streak||0)};}
+  // Forged lessons and council sittings are keyed content: union them, newest first, and keep the
+  // same caps the writers use so a merge can't grow S without bound.
+  if((a.forged||[]).length||(b.forged||[]).length){
+    const fs={},fo=[];
+    for(const n of [...(a.forged||[]),...(b.forged||[])])if(n&&n.id&&!fs[n.id]){fs[n.id]=1;fo.push(n);}
+    m.forged=fo.sort((x,y)=>(y.at||0)-(x.at||0)).slice(0,12);}
+  if((a.council||[]).length||(b.council||[]).length){
+    const cs={},co=[];
+    for(const c of [...(a.council||[]),...(b.council||[])])if(c&&c.q&&!cs[c.q]){cs[c.q]=1;co.push(c);}
+    m.council=co.sort((x,y)=>(y.at||0)-(x.at||0)).slice(0,8);}
   m.readDel=[...new Set([...(a.readDel||[]),...(b.readDel||[])])];
   const tomb={};
   for(const t of m.readDel){const k=tombKey(t),ts=tombAt(t);if(!(k in tomb)||ts>tomb[k])tomb[k]=ts;}

@@ -134,6 +134,10 @@ re-render on theme change — that's what `refreshRoot()` is for.
 
 **New state fields must be added to `mergeState`,** or they won't survive cross-device sync.
 Deletions need tombstones (`S.hlDel`) or sync resurrects them; an undo must lift the tombstone too.
+This rule was documented here and still got broken five times in one session — `forged`, `gauntlet`,
+`council`, `hookSeen`, `dispatchSeen` were all silently dropped on the first sync from another
+device. `selftest.js` now has a class guard ("no field from the other device is silently dropped");
+**add the new field to that fixture** when you add it to `S`, or the guard cannot see it either.
 
 **Removing a form field?** Grep the render function for leftover `$("id")` refs — a null throw
 before `classList.add("on")` silently breaks the whole overlay.
