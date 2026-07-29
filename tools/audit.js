@@ -207,6 +207,14 @@
     addbook:  function () { call("renderAddBook"); },
     sit:      function () { call("openSit"); },
     review:   function () { call("startReview"); },   // no-ops when nothing is due -> reported unmeasured
+    council:  function () {
+      // Opening it only renders the question form. The answer cards and the verdict — most of the
+      // new surface — exist only after a sitting, so replay a saved one: it paints the full result
+      // from stored text and costs no API quota.
+      call("openCouncil");
+      var h = (typeof S === "object" && S && S.council) || [];
+      if (h.length) call("replayCouncil", h[0]);
+    },
     booklanding: function () {
       // DATA is a top-level `const`, so it lives in the global LEXICAL scope and is NOT a
       // property of window -- window.DATA is undefined. Reference the binding directly.

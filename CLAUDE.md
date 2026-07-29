@@ -87,6 +87,17 @@ transitions must be killed before measuring (mid-transition reads produced ~300 
 gradient-backed text can't be composited and must be skipped, and closed overlays plus inactive
 state branches are invisible to a naive sweep — that's where real bugs hide.
 
+**Gemini quota is per key, so fan out.** `geminiParallel(jobs)` runs one lane per key at once;
+`geminiCall(...,{startAt:i})` pins the first key tried and `{only:true}` disables fallback (needed
+for a per-key health check, or a dead key passes on someone else's quota). Calls round-robin from
+`GEM_CURSOR` — before that the loop always began at `keys[0]`, so five extra keys did nothing but
+sit there as failover. Anything expensive and fan-out-shaped belongs on this path, not in a loop.
+
+**Never feed the model `ep.t` blindly.** Most episode titles are `"Episode 133"` — this app's own
+chunk numbering — and a model handed one cites it back at the reader as a source. Pass chapter
+titles only when they are real. Strip markdown on render too (`demd`); asking for plain prose in the
+prompt does not stop it, and the answer is rendered as `textContent`, so asterisks show up literally.
+
 **Colours baked at render time don't follow the theme.** A CSS variable can't fix a colour already
 written into an inline style. If you write `style="color:${...}"` during render, the root view must
 re-render on theme change — that's what `refreshRoot()` is for.

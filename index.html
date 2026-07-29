@@ -32,12 +32,14 @@
      use them sit on --card2 (a raised surface), which costs ~0.5 of contrast. Safe to darken:
      --gold/--jade only ever back textless fills, and filled buttons use --goldbtn. */
   --tx:#33291c; --tx2:#5f4f3a; --gold:#6d480a; --jade:#17564e; --line:rgba(70,48,20,.18); --read:#33291c;
-  --overlay:rgba(236,227,206,.95); --sticky:rgba(236,227,206,.9); --err:#9a3324; --ok:#256b4a; --ai:#6d28d9;
+  /* #119: --ok darkened for the same reason as gold/jade above — the Council's AGREE label and the
+     key chips put it on --card/--card2, which cost enough contrast to drop it under AA (4.27). */
+  --overlay:rgba(236,227,206,.95); --sticky:rgba(236,227,206,.9); --err:#9a3324; --ok:#1f5c3f; --ai:#6d28d9;
 }
 :root[data-theme="light"]{
   --bg:#f6f4ee; --bg2:#ffffff; --card:rgba(0,0,0,.04); --card2:rgba(0,0,0,.08);
   --tx:#1a1916; --tx2:#4c4840; --gold:#6f4e0c; --jade:#085a53; --line:rgba(0,0,0,.14); --read:#22201b;
-  --overlay:rgba(246,244,238,.96); --sticky:rgba(246,244,238,.9); --err:#b3261e; --ok:#1a7a4f; --ai:#6d28d9;
+  --overlay:rgba(246,244,238,.96); --sticky:rgba(246,244,238,.9); --err:#b3261e; --ok:#166b45; --ai:#6d28d9;   /* #119: see sepia note */
 }
 :root[data-theme="light"] body,:root[data-theme="sepia"] body{background-image:none}
 :root[data-font="sans"]{--read-font:var(--sans)}
@@ -288,6 +290,43 @@ header .brand span{color:var(--gold)}
   border-radius:8px;padding:11px 13px;margin-bottom:8px}
 .bl-hlrow .q{font-family:var(--serif);font-size:13.5px;line-height:1.55;display:block}
 .bl-hlrow .e{font-size:11px;color:var(--tx2);margin-top:6px;display:block}
+/* ---------- ⚖️ the council ---------- */
+.cn-intro{color:var(--tx2);font-size:13px;line-height:1.6;margin-bottom:12px}
+.cn-q{width:100%;min-height:74px;background:var(--bg2);border:1px solid var(--line);border-radius:12px;
+  color:var(--tx);padding:12px 14px;font-family:var(--serif);font-size:15px;line-height:1.5;resize:vertical;outline:none}
+.cn-chips{display:flex;gap:7px;flex-wrap:wrap;margin:10px 0 2px}
+.cn-stat{font-size:12px;color:var(--tx2);letter-spacing:.03em}
+.cn-seats{display:grid;grid-template-columns:repeat(auto-fit,minmax(255px,1fr));gap:12px;margin-top:16px}
+.cn-card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:13px 15px}
+.cn-card.pending{opacity:.72}
+.cn-card.failed{border-color:var(--err)}
+.cn-h{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.cn-h .g{font-size:17px}
+.cn-h .t{font-family:var(--serif);font-size:14.5px;line-height:1.2;flex:1}
+.cn-h .w{font-size:9.5px;letter-spacing:.16em;padding:3px 7px;border-radius:99px;border:1px solid var(--line);color:var(--tx2)}
+.cn-h .w.light{color:var(--jade)}
+.cn-h .w.shadow{color:var(--gold)}
+.cn-a{font-size:13.5px;line-height:1.62;color:var(--read)}
+.cn-a p{margin-bottom:8px}
+.cn-a p:last-child{margin-bottom:0}
+.cn-think{color:var(--tx2);font-size:12.5px}
+.cn-err{color:var(--err);font-size:12.5px}
+.cn-verdict{margin-top:20px;background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+.cn-vrow{display:flex;gap:11px;align-items:flex-start;margin-bottom:11px}
+.cn-vrow:last-child{margin-bottom:0}
+.cn-vrow .k{font-size:9.5px;letter-spacing:.16em;padding:4px 8px;border-radius:6px;border:1px solid var(--line);
+  white-space:nowrap;min-width:58px;text-align:center}
+.cn-vrow .k-agree{color:var(--ok)} .cn-vrow .k-clash{color:var(--err)} .cn-vrow .k-do{color:var(--gold)}
+.cn-vrow .s{font-size:13.5px;line-height:1.6;flex:1}
+.cn-old{display:block;width:100%;text-align:left;background:var(--card);border:1px solid var(--line);
+  border-radius:10px;padding:10px 13px;margin-bottom:7px}
+.cn-old .q{display:block;font-family:var(--serif);font-size:13.5px;line-height:1.4}
+.cn-old .m{display:block;font-size:11px;color:var(--tx2);margin-top:4px}
+/* ---------- gemini key panel ---------- */
+.kchips{display:flex;gap:7px;flex-wrap:wrap;margin:8px 0}
+.kchip{font-size:11.5px;padding:5px 10px;border-radius:99px;border:1px solid var(--line);
+  background:var(--card);color:var(--tx2);letter-spacing:.03em}
+.kchip.ok{color:var(--ok)} .kchip.bad{color:var(--err)} .kchip.quota{color:var(--gold)}
 .favdot{position:absolute;top:7px;right:9px;color:var(--gold);font-size:14px;text-shadow:0 1px 3px rgba(0,0,0,.6)}
 .book .cover{position:relative}
 .libsort{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:4px 0 18px}
@@ -682,6 +721,7 @@ header .brand span{color:var(--gold)}
   <div class="iconrow">
     <button class="iconbtn" id="btn-account" title="Account & sync">👤</button>
     <button class="iconbtn" id="btn-addbook" title="Add a book">➕</button>
+    <button class="iconbtn" id="btn-council" title="The Council — ask your whole library at once">⚖️</button>
     <button class="iconbtn" id="btn-search" title="Search">🔍</button>
     <button class="iconbtn" id="btn-hl" title="Journal — notes, highlights, backup">📓</button>
     <button class="iconbtn" id="btn-ach" title="Achievements">🏆</button>
@@ -781,6 +821,7 @@ header .brand span{color:var(--gold)}
 <div class="overlay" id="review"><div class="panel" style="max-width:660px"><h2>🔁 SHARPEN <span id="rvcount" style="font-size:13px;color:var(--tx2)"></span> <button class="x" data-close="review">✕</button></h2><div id="rvbody"></div></div></div>
 <div class="overlay" id="addbook"><div class="panel" style="max-width:640px"><h2>➕ ADD A BOOK <button class="x" data-close="addbook">✕</button></h2><div id="ab-body"></div><input type="file" id="ab-file" accept="application/pdf" style="display:none"></div></div>
 <div class="overlay" id="account"><div class="panel" style="max-width:640px"><h2>👤 ACCOUNT <button class="x" data-close="account">✕</button></h2><div id="acc-body"></div></div></div>
+<div class="overlay" id="council"><div class="panel" style="max-width:900px"><h2>⚖️ THE COUNCIL <button class="x" data-close="council">✕</button></h2><div id="council-body"></div></div></div>
 <div class="overlay" id="settings"><div class="panel" style="max-width:560px"><h2>⚙️ READING &amp; APPEARANCE <button class="x" data-close="settings">✕</button></h2><div id="set-body"></div></div></div>
 <div class="overlay" id="progress"><div class="panel" style="max-width:640px"><h2>📊 YOUR PROGRESS <button class="x" data-close="progress">✕</button></h2><div id="prog-body"></div></div></div>
 <div class="overlay" id="booklanding"><div class="panel" style="max-width:600px"><button class="x" data-close="booklanding" style="position:absolute;right:22px;top:22px;z-index:2">✕</button><div id="bl-body"></div></div></div>
@@ -1827,11 +1868,27 @@ function restoreVault(file){
 }
 /* ---------- Gemini tutor: reviews your apply-notes (browser-side, your key, when online) ---------- */
 const geminiKeys=()=>(localStorage.getItem("vault_gemini")||"").split(/[\s,]+/).filter(Boolean);
+// A key is only ever identified by its last four characters — never rendered, logged or stored whole.
+const keyTag=k=>"…"+k.slice(-4);
+// Per-key outcome counters, so "are my keys actually being used?" has an answer on screen.
+const GEM_STATS={};
+function gemStat(k,f){const t=keyTag(k);(GEM_STATS[t]=GEM_STATS[t]||{ok:0,quota:0,bad:0,net:0})[f]++;}
+// #119: ROUND ROBIN. The loop below always started at keys[0], so the first key served every
+// single request and the rest only ever woke up once it started returning 429. Six keys behaved
+// exactly like one. Each call now starts one key further along.
+let GEM_CURSOR=0;
 // free-tier quota is PER MODEL, so we try several models across every key until one answers
 const GEM_MODELS=["gemini-2.5-flash-lite","gemini-2.5-flash","gemini-flash-latest"];  // #14: dropped gemini-2.0-flash (zero free quota → always 429)
 // tutor-A #2: temp defaults LOW (0.3) — explanations should be factual, not creative; callers pass 0.7 only to generate questions
-async function geminiCall(prompt,maxTok=260,temp=0.3){
-  const keys=geminiKeys();if(!keys.length)throw new Error("no-key");
+// opts.startAt pins which key to try FIRST (the rest stay as fallbacks). geminiParallel gives each
+// lane a different starting key so concurrent calls spend different quotas instead of racing one.
+async function geminiCall(prompt,maxTok=260,temp=0.3,opts){
+  const all=geminiKeys();if(!all.length)throw new Error("no-key");
+  opts=opts||{};
+  const start=(opts.startAt!=null?opts.startAt:GEM_CURSOR++)%all.length;
+  // opts.only pins the call to exactly one key with no fallback — without it a per-key test would
+  // quietly succeed on a different key and report a dead one as healthy.
+  const keys=opts.only?[all[start]]:all.map((_,i)=>all[(start+i)%all.length]);
   const gen={maxOutputTokens:maxTok,temperature:temp,thinkingConfig:{thinkingBudget:0}};   // #16
   const url=m=>`https://generativelanguage.googleapis.com/v1beta/models/${m}:generateContent`;
   let quota=false,reached=false;
@@ -1842,11 +1899,11 @@ async function geminiCall(prompt,maxTok=260,temp=0.3){
       try{
         r=await fetch(url(model),{method:"POST",headers:hdr,signal:AbortSignal.timeout(20000),   // #15
           body:JSON.stringify({contents:[{role:"user",parts:[{text:prompt}]}],generationConfig:gen})});
-      }catch(e){continue;}                                  // network error / timeout -> next key
+      }catch(e){gemStat(k,"net");continue;}                 // network error / timeout -> next key
       reached=true;
-      if(r.status===429){quota=true;continue;}              // this model+key spent -> next
+      if(r.status===429){quota=true;gemStat(k,"quota");continue;}   // this model+key spent -> next
       if(r.status===404)break;                              // model not available -> next model
-      if(r.status===400||r.status===403)continue;           // bad key -> next key
+      if(r.status===400||r.status===403){gemStat(k,"bad");continue;}   // bad key -> next key
       if(!r.ok)continue;
       try{const j=await r.json();const c=j.candidates&&j.candidates[0];
         let t=c&&c.content&&c.content.parts&&c.content.parts[0]&&c.content.parts[0].text;
@@ -1859,12 +1916,268 @@ async function geminiCall(prompt,maxTok=260,temp=0.3){
                 if(ct)t+=(/[-–—]$/.test(t)?"":" ")+ct.trim();}
             }catch(e){}
           }
+          gemStat(k,"ok");
           return t;
         }
       }catch(e){}
     }
   }
   throw new Error(!reached?"unreachable":quota?"quota":"failed");
+}
+
+/* ---------- #119: parallel fan-out across every key ----------
+ * Gemini's free tier is rate-limited PER KEY, so N keys can legitimately carry N simultaneous
+ * requests. Everything before this called geminiCall one at a time, which meant six keys bought
+ * nothing but failover. This runs a queue of prompts across `keys.length` lanes at once, each
+ * lane starting on its own key, and reports each answer the moment it lands so the UI can fill in
+ * progressively rather than staring at one spinner until the slowest call returns.
+ */
+async function geminiParallel(jobs,onEach){
+  const keys=geminiKeys();if(!keys.length)throw new Error("no-key");
+  const width=Math.max(1,Math.min(jobs.length,keys.length));
+  const results=new Array(jobs.length);
+  let next=0;
+  async function lane(n){
+    for(;;){
+      const i=next++;if(i>=jobs.length)return;
+      const t0=performance.now();
+      try{results[i]={ok:true,text:await geminiCall(jobs[i].prompt,jobs[i].maxTok||340,jobs[i].temp||0.4,{startAt:n})};}
+      catch(e){results[i]={ok:false,error:(e&&e.message)||"failed"};}
+      results[i].ms=Math.round(performance.now()-t0);
+      results[i].lane=n;
+      if(onEach){try{onEach(i,results[i]);}catch(e){}}
+    }
+  }
+  await Promise.all(Array.from({length:width},(_,n)=>lane(n)));
+  results.width=width;
+  return results;
+}
+
+/* ============ #119 ⚖️ THE COUNCIL — put one question to the whole library ============
+ * Several books answer the same question at the same time, each from its OWN pages, then a verdict
+ * says where they agree and where they genuinely clash. This is the feature the extra keys exist
+ * for: one call per book, all in flight together, so five books answer in about the time one used
+ * to. Every answer is grounded in passages retrieved from that specific book — the model is never
+ * asked what it "knows" about a title, only to speak from the text actually in the vault.
+ */
+const COUNCIL_STOP=new Set(("about above after again against because been before being below between both cannot could "+
+  "does doing down during each from further have having here into itself just like more most much only other over same "+
+  "should some such than that them then there these they this those through under until very well were what when where "+
+  "which while with would your yourself really something anything someone").split(" "));
+// 12 terms max: the score packs one bit per term into an integer mask, and it keeps the scan cheap.
+const councilTerms=q=>[...new Set(fold(q||"").split(/[^a-z0-9]+/)
+  .filter(w=>w.length>3&&!COUNCIL_STOP.has(w)))].slice(0,12);
+
+// Retrieval, weighted by how RARE each word is in the library (idf). Counting distinct term hits
+// instead — the obvious approach — reads far better than it works: "Someone took credit for my
+// work" then scores any paragraph containing "work" and "took", and the council solemnly quoted
+// Man's Search for Meaning on the subject of wet socks. Weighting by rarity lets "credit" and
+// "boss" decide the passage while "work" and "took" contribute almost nothing.
+function councilSeats(question,limit){
+  const terms=councilTerms(question);
+  if(!terms.length)return {terms:terms,seats:[]};
+  const df=terms.map(()=>0),perBook=[];
+  let total=0;
+  for(const b of DATA.books){
+    if(!bookVisible(b.id))continue;
+    const hits=[];
+    for(let e=0;e<b.episodes.length;e++){
+      const ps=b.episodes[e].p,pf=epFold(b.episodes[e]);
+      for(let k=0;k<pf.length;k++){
+        total++;
+        if(ps[k].length<90)continue;                   // fragments and headings make poor evidence
+        let mask=0;
+        for(let ti=0;ti<terms.length;ti++)
+          if(pf[k].includes(terms[ti])){mask|=(1<<ti);df[ti]++;}
+        if(mask)hits.push({mask:mask,e:e,k:k});
+      }
+    }
+    if(hits.length)perBook.push({book:b,hits:hits});
+  }
+  const w=terms.map((_,i)=>Math.log((total+1)/(df[i]+1)));
+  const score=mask=>{let s=0,n=0;
+    for(let i=0;i<terms.length;i++)if(mask&(1<<i)){s+=w[i];n++;}
+    return s*(1+0.35*(n-1));};                         // covering several terms at once counts extra
+  const byWing={shadow:[],light:[]};
+  for(const pb of perBook){
+    pb.hits.forEach(h=>{h.sc=score(h.mask);});
+    pb.hits.sort((x,y)=>y.sc-x.sc||x.e-y.e);
+    const ps=pb.hits.slice(0,4).map(h=>({s:h.sc,e:h.e,
+      text:pb.book.episodes[h.e].p[h.k],ep:pb.book.episodes[h.e].t}));
+    (byWing[pb.book.wing]||byWing.shadow).push({book:pb.book,passages:ps,
+      score:ps.reduce((n,p)=>n+p.s,0)+ps[0].s*2});
+  }
+  byWing.shadow.sort((a,b)=>b.score-a.score);byWing.light.sort((a,b)=>b.score-a.score);
+  const seats=[];
+  while(seats.length<limit&&(byWing.shadow.length||byWing.light.length)){
+    const w=(seats.length%2===0?byWing.shadow:byWing.light);
+    const other=(w===byWing.shadow?byWing.light:byWing.shadow);
+    const pick=(w.length?w:other).shift();
+    if(!pick)break;
+    seats.push(pick);
+  }
+  return {terms:terms,seats:seats};
+}
+
+function councilPrompt(seat,q){
+  // Feed the chapter title only when it is a real one. Most books fall back to "Episode 133", which
+  // is this app's own chunk numbering — and a model handed that will cheerfully cite it back at the
+  // reader as though it were a source ("as described in Episode 133").
+  const ev=seat.passages.map(p=>{
+    const named=p.ep&&!/^episode\s+\d+$/i.test(p.ep.trim());
+    return `— ${named?"("+p.ep+") ":""}${p.text.slice(0,700)}`;
+  }).join("\n\n");
+  return `You are the book "${seat.book.title}"${seat.book.author?` by ${seat.book.author}`:""}. `+
+    `Speak only for what THIS book argues.\n\nPassages from your own pages:\n\n${ev}\n\n`+
+    `The reader asks: "${q}"\n\n`+
+    `Answer in 3-5 sentences, in this book's voice and doctrine. Take a clear position — this book `+
+    `has a point of view, so use it. Ground what you say in the passages above. If this book truly `+
+    `has nothing to say about the question, reply with exactly one sentence saying so rather than `+
+    `inventing a view. Never mention passages, prompts, being given text, or being an AI, and never `+
+    `cite chapter or episode numbers. Write plain prose with no markdown or asterisks.`;
+}
+
+function verdictPrompt(q,answered){
+  const body=answered.map(a=>`### ${a.title}\n${a.text}`).join("\n\n");
+  return `Books from one reader's personal library were each asked the same question, and each `+
+    `answered from its own pages.\n\nQUESTION: "${q}"\n\n${body}\n\n`+
+    `Write a verdict for the reader in exactly this shape, no preamble and no other headings:\n`+
+    `AGREE: the one thing these books genuinely share, in one sentence.\n`+
+    `CLASH: the sharpest real disagreement between them, naming the books, in one or two sentences.\n`+
+    `DO: one concrete thing the reader should actually do, saying which book you side with and why, in two sentences.`;
+}
+
+const COUNCIL_SEEDS=[
+  "Someone took credit for my work in front of my boss.",
+  "I keep procrastinating on the things I actually care about.",
+  "How do I get someone to like me without being fake?",
+  "I can't stop reaching for my phone.",
+  "Should I tell a friend a truth that will hurt them?",
+  "I lost my temper and I don't know why."];
+
+let COUNCIL_BUSY=false;
+function openCouncil(){$("council").classList.add("on");renderCouncil();}
+$("btn-council").onclick=openCouncil;
+// Asking the model for plain prose is not enough — it emits **bold** and *italics* regardless, and
+// this text is rendered as textContent (never HTML), so the asterisks would show up literally.
+const demd=t=>String(t||"").replace(/\*\*/g,"").replace(/\*([^*\n]+)\*/g,"$1").replace(/^\s*[-–]\s+/gm,"");
+function paras(el,text){el.innerHTML="";demd(text).split(/\n+/).filter(Boolean)
+  .forEach(t=>{const p=document.createElement("p");p.textContent=t.trim();el.appendChild(p);});}
+
+function renderCouncil(){
+  const b=$("council-body"),keys=geminiKeys();
+  if(!keys.length){
+    b.innerHTML=`<div class="abnote">⚖️ <b>The Council needs a tutor key.</b> Add one or more Google Gemini keys in 📓 Journal → tutor. With several keys the books answer <b>at the same time</b> instead of one after another.</div>`;
+    return;
+  }
+  const seatN=Math.min(6,Math.max(3,keys.length));
+  b.innerHTML=
+    `<div class="cn-intro">Ask once — <b>${seatN} books</b> answer simultaneously, each strictly from its own pages, then a verdict on where they agree and where they clash. Using <b>${keys.length} key${keys.length>1?"s":""}</b> in parallel.</div>`+
+    `<textarea id="cn-q" class="cn-q" placeholder="Ask your library something real…"></textarea>`+
+    `<div class="cn-chips">`+COUNCIL_SEEDS.map((s,i)=>`<button class="glosschip" data-seed="${i}">${esc(s)}</button>`).join("")+`</div>`+
+    `<div class="bl-actions"><button class="goldbtn" id="cn-go">⚖️ Convene</button><span class="cn-stat" id="cn-stat"></span></div>`+
+    `<div id="cn-seats" class="cn-seats"></div><div id="cn-verdict"></div><div id="cn-hist"></div>`;
+  b.querySelectorAll("[data-seed]").forEach(c=>c.onclick=()=>{$("cn-q").value=COUNCIL_SEEDS[+c.dataset.seed];$("cn-q").focus();});
+  $("cn-go").onclick=()=>convene(($("cn-q").value||"").trim());
+  $("cn-q").onkeydown=e=>{if(e.key==="Enter"&&(e.metaKey||e.ctrlKey))$("cn-go").click();};
+  renderCouncilHistory();
+}
+
+function renderCouncilHistory(){
+  const w=$("cn-hist"),h=(S.council||[]);
+  if(!w)return;
+  if(!h.length){w.innerHTML="";return;}
+  w.innerHTML=`<div class="prsec">Earlier questions</div>`+
+    h.map((s,i)=>`<button class="cn-old" data-h="${i}"><span class="q">${esc(s.q)}</span><span class="m">${s.seats.length} books · ${new Date(s.at).toLocaleDateString()}</span></button>`).join("");
+  w.querySelectorAll("[data-h]").forEach(btn=>btn.onclick=()=>replayCouncil(h[+btn.dataset.h]));
+}
+
+// A past sitting is re-rendered from what was saved — never re-asked. Re-running it would spend
+// quota to produce a slightly different answer to a question already answered.
+function replayCouncil(s){
+  $("cn-q").value=s.q;
+  const w=$("cn-seats");w.innerHTML="";
+  for(const seat of s.seats){
+    const b=bookById(seat.id);
+    const card=document.createElement("div");card.className="cn-card";
+    card.innerHTML=`<div class="cn-h"><span class="g">${b?b.glyph:"📖"}</span><span class="t">${esc(seat.title)}</span>`+
+      `<span class="w ${b&&b.wing==="light"?"light":"shadow"}">${b&&b.wing==="light"?"LIGHT":"SHADOW"}</span></div><div class="cn-a"></div>`;
+    paras(card.querySelector(".cn-a"),seat.text);
+    w.appendChild(card);
+  }
+  showVerdict(s.verdict);
+  $("cn-stat").textContent=`saved sitting · ${new Date(s.at).toLocaleString()}`;
+}
+
+function showVerdict(text){
+  const v=$("cn-verdict");v.innerHTML="";
+  if(!text)return;
+  const parts={};
+  demd(text).split(/\n+/).forEach(line=>{
+    const m=/^\s*(AGREE|CLASH|DO)\s*[:\-–]\s*(.+)$/i.exec(line.trim());
+    if(m)parts[m[1].toUpperCase()]=m[2].trim();
+  });
+  const rows=["AGREE","CLASH","DO"].filter(k=>parts[k]);
+  if(!rows.length){                                  // model ignored the shape — show it verbatim
+    const d=document.createElement("div");d.className="cn-verdict";
+    d.innerHTML=`<div class="prsec">The verdict</div>`;
+    const body=document.createElement("div");paras(body,text);d.appendChild(body);v.appendChild(d);return;
+  }
+  const d=document.createElement("div");d.className="cn-verdict";
+  d.innerHTML=`<div class="prsec">The verdict</div>`+rows.map(k=>
+    `<div class="cn-vrow"><span class="k k-${k.toLowerCase()}">${k}</span><span class="s">${esc(parts[k])}</span></div>`).join("");
+  v.appendChild(d);
+}
+
+async function convene(q){
+  if(COUNCIL_BUSY)return;
+  if(q.length<8){toast("Ask a fuller question — a sentence works best.");return;}
+  if(!navigator.onLine){toast("The Council needs a connection.");return;}
+  const keys=geminiKeys();
+  const {terms,seats}=councilSeats(q,Math.min(6,Math.max(3,keys.length)));
+  const w=$("cn-seats"),v=$("cn-verdict");v.innerHTML="";
+  if(!seats.length){
+    w.innerHTML=`<div class="abnote">Nothing in your library matches that${terms.length?"":" — try words with a bit more substance in them"}. Try naming the situation more concretely.</div>`;
+    return;
+  }
+  COUNCIL_BUSY=true;$("cn-go").disabled=true;$("cn-go").textContent="⚖️ Sitting…";
+  w.innerHTML="";
+  const cards=seats.map(seat=>{
+    const c=document.createElement("div");c.className="cn-card pending";
+    c.innerHTML=`<div class="cn-h"><span class="g">${seat.book.glyph}</span><span class="t">${esc(seat.book.title)}</span>`+
+      `<span class="w ${seat.book.wing==="light"?"light":"shadow"}">${seat.book.wing==="light"?"LIGHT":"SHADOW"}</span></div>`+
+      `<div class="cn-a"><span class="cn-think">consulting ${esc(seat.passages.length+" passage"+(seat.passages.length>1?"s":""))}…</span></div>`;
+    w.appendChild(c);return c;});
+  const t0=performance.now();
+  $("cn-stat").textContent=`${seats.length} books · ${Math.min(seats.length,keys.length)} keys in parallel…`;
+  let done=0;
+  try{
+    const res=await geminiParallel(seats.map(s=>({prompt:councilPrompt(s,q),maxTok:420,temp:0.55})),
+      (i,r)=>{                                       // fill each card the moment its answer lands
+        const c=cards[i];c.classList.remove("pending");
+        const a=c.querySelector(".cn-a");
+        if(r.ok)paras(a,r.text);
+        else{c.classList.add("failed");a.innerHTML=`<span class="cn-err">${r.error==="quota"?"every key is out of quota for now":r.error==="unreachable"?"couldn't reach Gemini":"no answer"}</span>`;}
+        $("cn-stat").textContent=`${++done}/${seats.length} answered · ${Math.min(seats.length,keys.length)} keys in parallel`;
+      });
+    const answered=res.map((r,i)=>r.ok?{id:seats[i].book.id,title:seats[i].book.title,text:r.text}:null).filter(Boolean);
+    let verdict="";
+    if(answered.length>=2){
+      $("cn-stat").textContent=`${answered.length} answered · weighing the verdict…`;
+      try{verdict=await geminiCall(verdictPrompt(q,answered),420,0.5);}catch(e){}
+      showVerdict(verdict);
+    }
+    const secs=((performance.now()-t0)/1000).toFixed(1);
+    $("cn-stat").textContent=answered.length
+      ? `${answered.length} book${answered.length>1?"s":""} answered in ${secs}s across ${res.width} key${res.width>1?"s":""}`
+      : `no answers — ${secs}s`;
+    if(answered.length){
+      S.council=[{q:q,at:Date.now(),seats:answered,verdict:verdict}].concat((S.council||[]).filter(x=>x.q!==q)).slice(0,8);
+      save();renderCouncilHistory();
+    }
+  }finally{
+    COUNCIL_BUSY=false;$("cn-go").disabled=false;$("cn-go").textContent="⚖️ Convene";
+  }
 }
 /* ---------- tutor grounding: feed Gemini YOUR books, not generic pop-psych ---------- */
 function nodeText(n){return [...(n.bridge||[]),...(n.sources||[]).flatMap(s=>s.quote||[])].join("\n\n");}
@@ -1991,6 +2304,40 @@ async function reviewAllNotes(){
   renderJournal();
   if(done)toast("🎓 "+done+" reflection"+(done>1?"s":"")+" reviewed by your tutor");
 }
+// #119: the keys were invisible. Six were configured, one did all the work, and nothing on screen
+// would ever have shown that. Each chip reports what its key has actually done this session.
+function renderKeyChips(live){
+  const w=$("kchips");if(!w)return;
+  const keys=geminiKeys();
+  w.innerHTML=keys.map((k,i)=>{
+    const s=(live&&live[i])||null,st=GEM_STATS[keyTag(k)];
+    const cls=s?s.cls:st?(st.ok?"ok":st.bad?"bad":st.quota?"quota":""):"";
+    const note=s?s.label:st?(st.ok?st.ok+" ok":st.quota?"quota":st.bad?"rejected":"idle"):"idle";
+    return `<span class="kchip ${cls}">key ${i+1} ${esc(keyTag(k))} · ${esc(note)}</span>`;
+  }).join("");
+}
+
+// Fires one tiny request per key, all at once, each pinned to its own key with no fallback — so
+// this both proves the keys work and is itself the clearest demonstration of the parallelism.
+async function testAllKeys(){
+  const keys=geminiKeys();if(!keys.length)return;
+  if(!navigator.onLine){toast("You're offline.");return;}
+  const btn=$("gem-test");if(btn){btn.disabled=true;btn.textContent="Testing…";}
+  const live=keys.map(()=>({cls:"",label:"testing…"}));
+  renderKeyChips(live);
+  const t0=performance.now();
+  await Promise.all(keys.map(async(k,i)=>{
+    try{await geminiCall("Reply with the single word OK.",8,0,{startAt:i,only:true});
+      live[i]={cls:"ok",label:"working"};}
+    catch(e){const m=(e&&e.message)||"failed";
+      live[i]={cls:m==="quota"?"quota":"bad",label:m==="quota"?"out of quota":m==="unreachable"?"unreachable":"rejected"};}
+    renderKeyChips(live);
+  }));
+  const ok=live.filter(x=>x.cls==="ok").length;
+  if(btn){btn.disabled=false;btn.textContent="Test every key";}
+  toast(`${ok}/${keys.length} keys working · ${((performance.now()-t0)/1000).toFixed(1)}s in parallel`);
+}
+
 function renderGemBox(){
   const box=$("gembox"),keys=geminiKeys(),unrev=journalNotes().filter(x=>!x.rec.review).length;
   if(keys.length){
@@ -1998,7 +2345,11 @@ function renderGemBox(){
     box.innerHTML=`🎓 <b>Tutor connected</b> (${keys.length} key${keys.length>1?"s":""}). `+
       (unrev?`${unrev} reflection${unrev>1?"s":""} awaiting feedback. <button class="ghostbtn" id="gem-review" style="margin:6px 8px 0 0;padding:7px 14px;font-size:12.5px">Review now</button>`
             :"Every reflection has tutor feedback. ")+
-      `<span class="miniA" id="gem-clear">disconnect</span>`;
+      `<span class="miniA" id="gem-clear">disconnect</span>`+
+      `<div class="kchips" id="kchips"></div>`+
+      `<button class="ghostbtn" id="gem-test" style="margin:2px 0 0;padding:7px 14px;font-size:12.5px">Test every key</button>`;
+    renderKeyChips();
+    $("gem-test").onclick=testAllKeys;
     if($("gem-review"))$("gem-review").onclick=reviewAllNotes;
     $("gem-clear").onclick=()=>{localStorage.removeItem("vault_gemini");renderJournal()};
   }else{
@@ -2205,8 +2556,15 @@ $("btn-ach").onclick=()=>{const g=$("achgrid");g.innerHTML="";
   $("achs").classList.add("on")};
 
 /* ---------- patch notes ---------- */
-const APP_VER="3.47";
+const APP_VER="3.48";
 const PATCHES=[
+ {v:"3.48",n:"The Council",d:"29 Jul 2026",items:[
+  ["new","⚖️ THE COUNCIL — ask your library one real question and five books answer it at the same time, each speaking only from its own pages. Then a verdict tells you where they agree, where they genuinely clash, and what to actually do. The Shadow and Light wings are always both seated, so you get the argument, not a consensus."],
+  ["new","Your Gemini keys now work in parallel. Five books answered a question in 3.5 seconds — the same work took over ten seconds' worth of requests, run one at a time."],
+  ["fix","Only your first key was ever being used. The code walked the key list from the start on every single request, so key 1 served everything and the rest were pure backup, waking up only once key 1 hit its quota. Requests now start at a different key each time, so six keys mean six keys' worth of quota."],
+  ["new","The Journal shows every key you've added, what each one has actually done, and a “Test every key” button that checks them all at once — each pinned to its own key so a dead one can't hide behind a working one."],
+  ["new","Every sitting is saved. Past questions reopen instantly from what was stored, without spending any quota re-asking."],
+  ["fix","The “correct” green failed contrast on the light and sepia themes wherever it sat on a raised card."]]},
  {v:"3.47",n:"Proof",d:"28 Jul 2026",items:[
   ["polish","Nothing visible changed. There is now a self-test suite covering the parts of the app that decide what counts as read and how two devices merge progress — 43 checks, including the ones that would have caught the sync bugs fixed in the last release. It exists so the next change can't quietly undo them."]]},
  {v:"3.46",n:"Take It Back",d:"28 Jul 2026",items:[
