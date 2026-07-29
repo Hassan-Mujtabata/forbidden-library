@@ -388,6 +388,42 @@
     });
   }
 
+  /* ----------------------------------------------------- retrieval matching */
+
+  function matchTests() {
+    // These are the exact false hits that shipped: a lesson about holding your TEMPER cited
+    // Thinking, Fast and Slow on "barometric TEMPERature", because the matcher was a substring test.
+    check("hasWord: 'temper' does not match 'temperature'", function () {
+      return hasWord("much as daily temperature or barometric pressure", "temper") === false
+        ? true : "still matching inside a longer word";
+    });
+    check("hasWord: 'hold' does not match 'household'", function () {
+      return hasWord("the household accounts", "hold") === false ? true : "matched inside household";
+    });
+    check("hasWord: 'power' does not match 'powerfully'", function () {
+      return hasWord("a powerfully built man", "power") === false ? true : "matched inside powerfully";
+    });
+    check("hasWord: still matches the word itself", function () {
+      return hasWord("if your opponent is of a hot temper", "temper") === true ? true : "lost a real hit";
+    });
+    check("hasWord: still matches a short inflection", function () {
+      // Demanding an exact word would lose most real hits, so up to two trailing letters are fine.
+      return hasWord("he tempers his speech", "temper") && hasWord("she held and folded", "fold")
+        ? true : "rejected a legitimate inflection";
+    });
+    check("hasWord: matches at the very start of the text", function () {
+      return hasWord("temper is a signal", "temper") === true ? true : "missed a match at index 0";
+    });
+    check("parseQuizBlock: reads several questions from one reply", function () {
+      // Options must be >1 char — parseQuestion drops single letters as malformed, which is why
+      // this fixture spells them out rather than using a/b/c/d.
+      var t = "Q: First question?\nA) alpha\nB) bravo\nC) charlie\nD) delta\nANSWER: A\n\n" +
+              "Q: Second question?\nA) echo\nB) foxtrot\nC) golf\nD) hotel\nANSWER: C";
+      var got = parseQuizBlock(t);
+      return got.length === 2 ? true : "parsed " + got.length + " of 2";
+    });
+  }
+
   /* ------------------------------------------------------ library integrity */
 
   function libraryTests() {
@@ -418,7 +454,7 @@
       var snap = st(S);                       // progress state is real data -- never leave it edited
       try {
         foldTests(); saneTests(); readTests(); mergeTests(); pushTests();
-        indexTests(); fmtTests(); hookTests(); gauntletTests(); libraryTests();
+        indexTests(); fmtTests(); hookTests(); gauntletTests(); matchTests(); libraryTests();
       } finally {
         S = snap;
         if (typeof save === "function") save();

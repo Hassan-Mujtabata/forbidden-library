@@ -208,6 +208,7 @@
     sit:      function () { call("openSit"); },
     review:   function () { call("startReview"); },   // no-ops when nothing is due -> reported unmeasured
     dispatch: function () { call("openDispatch"); },
+    forge:    function () { call("openForge"); },
     gauntlet: function () {
       call("openGauntlet");
       // The question card, the option buttons and the right/wrong colours only exist mid-run, so an

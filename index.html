@@ -771,6 +771,7 @@ header .brand span{color:var(--gold)}
     <button class="iconbtn" id="btn-council" title="The Council — ask your whole library at once">⚖️</button>
     <button class="iconbtn" id="btn-gauntlet" title="The Gauntlet — five books, five questions">🧩</button>
     <button class="iconbtn" id="btn-dispatch" title="The Dispatch — written for you each morning">📰</button>
+    <button class="iconbtn" id="btn-forge" title="The Forge — have a new lesson written for your Path">⚗️</button>
     <button class="iconbtn" id="btn-search" title="Search">🔍</button>
     <button class="iconbtn" id="btn-hl" title="Journal — notes, highlights, backup">📓</button>
     <button class="iconbtn" id="btn-ach" title="Achievements">🏆</button>
@@ -874,6 +875,7 @@ header .brand span{color:var(--gold)}
 <div class="overlay" id="council"><div class="panel" style="max-width:900px"><h2>⚖️ THE COUNCIL <button class="x" data-close="council">✕</button></h2><div id="council-body"></div></div></div>
 <div class="overlay" id="gauntlet"><div class="panel" style="max-width:660px"><h2>🧩 THE GAUNTLET <button class="x" data-close="gauntlet">✕</button></h2><div id="gauntlet-body"></div></div></div>
 <div class="overlay" id="dispatch"><div class="panel" style="max-width:660px"><h2>📰 THE DISPATCH <button class="x" data-close="dispatch">✕</button></h2><div id="dispatch-body"></div></div></div>
+<div class="overlay" id="forge"><div class="panel" style="max-width:660px"><h2>⚗️ THE FORGE <button class="x" data-close="forge">✕</button></h2><div id="forge-body"></div></div></div>
 <div class="overlay" id="settings"><div class="panel" style="max-width:560px"><h2>⚙️ READING &amp; APPEARANCE <button class="x" data-close="settings">✕</button></h2><div id="set-body"></div></div></div>
 <div class="overlay" id="progress"><div class="panel" style="max-width:640px"><h2>📊 YOUR PROGRESS <button class="x" data-close="progress">✕</button></h2><div id="prog-body"></div></div></div>
 <div class="overlay" id="booklanding"><div class="panel" style="max-width:600px"><button class="x" data-close="booklanding" style="position:absolute;right:22px;top:22px;z-index:2">✕</button><div id="bl-body"></div></div></div>
@@ -1136,7 +1138,8 @@ async function boot(){
     }).catch(()=>{});
   }
 }
-function landing(){ if(DATA.nodes&&DATA.nodes.length){renderPath();show("path")} else {renderHome();show("home")} patchCheck(); initA11y(); setTimeout(checkReminder,1500);
+function landing(){ loadForged();   // #125: put previously forged lessons back on the Path first
+  if(DATA.nodes&&DATA.nodes.length){renderPath();show("path")} else {renderHome();show("home")} patchCheck(); initA11y(); setTimeout(checkReminder,1500);
   setTimeout(autoRefreshHooks,4000);   // #121: quietly read a few more books, once a day, on its own
   setTimeout(()=>{markDispatchDot();refreshDispatch(false);},9000);   // #123: then write the dispatch,
   // staggered well after the hooks so the two daily jobs never contend for the same keys at once
@@ -2000,6 +2003,74 @@ async function geminiCall(prompt,maxTok=260,temp=0.3,opts){
   throw new Error(!reached?"unreachable":quota?"quota":"failed");
 }
 
+/* ---------- #124: streaming ----------
+ * The tutor used to sit behind a "…" for four or five seconds and then dump a finished paragraph.
+ * Gemini can stream, so it now types. Same key rotation and same failover as geminiCall, but the
+ * text arrives token by token via SSE and the caller paints each chunk as it lands.
+ *
+ * Falls back to the non-streaming call on any failure — a stream that dies halfway must degrade to
+ * a slower answer, never to no answer.
+ */
+async function geminiStream(prompt,onChunk,maxTok,temp,opts){
+  const all=geminiKeys();if(!all.length)throw new Error("no-key");
+  opts=opts||{};
+  const start=(opts.startAt!=null?opts.startAt:GEM_CURSOR++)%all.length;
+  const keys=all.map((_,i)=>all[(start+i)%all.length]);
+  const gen={maxOutputTokens:maxTok||420,temperature:temp==null?0.3:temp,thinkingConfig:{thinkingBudget:0}};
+  const body=JSON.stringify({contents:[{role:"user",parts:[{text:prompt}]}],generationConfig:gen});
+  for(const model of GEM_MODELS.slice(0,2)){
+    for(const k of keys){
+      let r;
+      try{
+        r=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:streamGenerateContent?alt=sse`,
+          {method:"POST",headers:{"Content-Type":"application/json","x-goog-api-key":k},
+           signal:AbortSignal.timeout(45000),body:body});
+      }catch(e){gemStat(k,"net");continue;}
+      if(r.status===429){gemStat(k,"quota");continue;}
+      if(r.status===404)break;
+      if(r.status===400||r.status===403){gemStat(k,"bad");continue;}
+      if(!r.ok||!r.body)continue;
+      const reader=r.body.getReader(),dec=new TextDecoder();
+      let buf="",out="";
+      try{
+        for(;;){
+          const {done,value}=await reader.read();
+          if(done)break;
+          buf+=dec.decode(value,{stream:true});
+          // SSE frames are separated by a blank line; a chunk can split one mid-way, so only
+          // complete frames are consumed and the remainder stays in the buffer.
+          let i;
+          while((i=buf.indexOf("\n"))>=0){
+            const line=buf.slice(0,i).trim();buf=buf.slice(i+1);
+            if(!line.startsWith("data:"))continue;
+            const payload=line.slice(5).trim();
+            if(!payload||payload==="[DONE]")continue;
+            try{
+              const j=JSON.parse(payload);
+              const t=j.candidates&&j.candidates[0]&&j.candidates[0].content&&
+                      j.candidates[0].content.parts&&j.candidates[0].content.parts[0]&&
+                      j.candidates[0].content.parts[0].text;
+              if(t){out+=t;if(onChunk)onChunk(out,t);}
+            }catch(e){}
+          }
+        }
+      }catch(e){if(!out)continue;}
+      if(out.trim()){gemStat(k,"ok");return out.trim();}
+    }
+  }
+  throw new Error("stream-failed");
+}
+
+// Stream when possible, fall back to the plain call. Callers get one promise either way and only
+// have to care that onChunk MAY fire.
+async function geminiAsk(prompt,onChunk,maxTok,temp,opts){
+  try{return await geminiStream(prompt,onChunk,maxTok,temp,opts);}
+  catch(e){
+    if(e&&e.message==="no-key")throw e;
+    return await geminiCall(prompt,maxTok||420,temp==null?0.3:temp,opts);
+  }
+}
+
 /* ---------- #119: parallel fan-out across every key ----------
  * Gemini's free tier is rate-limited PER KEY, so N keys can legitimately carry N simultaneous
  * requests. Everything before this called geminiCall one at a time, which meant six keys bought
@@ -2045,6 +2116,23 @@ const COUNCIL_STOP=new Set(("about above after again against because been before
 const councilTerms=q=>[...new Set(fold(q||"").split(/[^a-z0-9]+/)
   .filter(w=>w.length>3&&!COUNCIL_STOP.has(w)))].slice(0,12);
 
+// Whole-word matching. `includes` is a substring test, so asking about holding your TEMPER quoted
+// Thinking, Fast and Slow on "barometric TEMPERature", and "hold" matched inside longer words. A
+// short trailing inflection is still allowed — temper/tempers/tempered yes, temperature no — since
+// demanding an exact word would lose most real hits.
+function hasWord(hay,term){
+  let i=hay.indexOf(term);
+  while(i>=0){
+    if(i===0||!/[a-z0-9]/.test(hay[i-1])){
+      let j=i+term.length,k=0;
+      while(j<hay.length&&k<3&&/[a-z]/.test(hay[j])){j++;k++;}
+      if(k<3)return true;
+    }
+    i=hay.indexOf(term,i+1);
+  }
+  return false;
+}
+
 // Retrieval, weighted by how RARE each word is in the library (idf). Counting distinct term hits
 // instead — the obvious approach — reads far better than it works: "Someone took credit for my
 // work" then scores any paragraph containing "work" and "took", and the council solemnly quoted
@@ -2065,7 +2153,7 @@ function councilSeats(question,limit){
         if(ps[k].length<90)continue;                   // fragments and headings make poor evidence
         let mask=0;
         for(let ti=0;ti<terms.length;ti++)
-          if(pf[k].includes(terms[ti])){mask|=(1<<ti);df[ti]++;}
+          if(hasWord(pf[k],terms[ti])){mask|=(1<<ti);df[ti]++;}
         if(mask)hits.push({mask:mask,e:e,k:k});
       }
     }
@@ -2459,6 +2547,116 @@ function renderLure(){
   $("lure-more").onclick=()=>mineHooks(true);
 }
 
+/* ============ #125 ⚗️ THE FORGE — your Path stops being a fixed curriculum ============
+ * Name anything you want to understand and the tutor writes a real lesson about it, out of your
+ * own books: teaching prose, a quiz, an apply-it step — and it lands on your Path as a genuine
+ * node you complete for XP like any other.
+ *
+ * The SOURCES are not generated. They are the verbatim passages retrieval actually found, with the
+ * real book and chapter attached. A model asked to produce quotes will happily invent them, and a
+ * fabricated quote attributed to a book Hassan owns is the one failure this feature cannot have.
+ */
+const FORGE_TRACK={id:"FORGE",name:"Forged",glyph:"⚗️",accent:"#c084fc",
+  blurb:"Lessons you asked for, written out of your own books."};
+
+// Forged lessons live in S, not in a derived-content key: progress against them (S.node[id]) syncs
+// between devices, and a node id with no node behind it would leave a hole in the Path. Capped,
+// because everything in S rides along in every sync push.
+function loadForged(){
+  const list=(S.forged||[]).slice(0,12);
+  if(!list.length||typeof DATA==="undefined")return;
+  if(!DATA.tracks.some(t=>t.id===FORGE_TRACK.id))DATA.tracks.push(FORGE_TRACK);
+  for(const n of list)if(!DATA.nodes.some(x=>x.id===n.id))DATA.nodes.push(n);
+}
+
+function parseQuizBlock(text){
+  return demd(text||"").split(/\n(?=\s*Q\s*:)/i).map(parseQuestion).filter(Boolean);
+}
+
+let FORGING=false;
+function openForge(){$("forge").classList.add("on");renderForge();}
+$("btn-forge").onclick=openForge;
+
+const FORGE_SEEDS=["how to hold my temper","reading people's real intentions",
+  "why I procrastinate","making a habit actually stick","staying calm under pressure",
+  "spotting manipulation early"];
+
+function renderForge(state){
+  const w=$("forge-body"),keys=geminiKeys();
+  if(!keys.length){
+    w.innerHTML=`<div class="abnote">⚗️ <b>The Forge needs a tutor key.</b> Add one in 📓 Journal → tutor, and it will write new lessons for your Path out of your own books.</div>`;return;}
+  if(state&&state.busy){
+    w.innerHTML=`<div class="lure mining"><div class="lure-h">⚗️ FORGING “${esc(state.topic)}”</div>`+
+      `<div class="lure-t">${esc(state.step)}</div><div class="lure-bar"><span style="width:${state.pct}%"></span></div></div>`;return;}
+  const mine=(S.forged||[]);
+  w.innerHTML=`<div class="cn-intro">Name something you want to understand. The tutor reads across your library and writes you a real lesson on it — with quotes from your own books, a quiz, and something to try. It joins your Path.</div>`+
+    `<input id="fg-q" class="bl-q" placeholder="what do you want to understand?" autocomplete="off">`+
+    `<div class="cn-chips">`+FORGE_SEEDS.map((s,i)=>`<button class="glosschip" data-fs="${i}">${esc(s)}</button>`).join("")+`</div>`+
+    `<div class="bl-actions"><button class="goldbtn" id="fg-go">⚗️ Forge the lesson</button></div>`+
+    (mine.length?`<div class="prsec">Lessons you've forged</div>`+mine.map((n,i)=>
+      `<button class="lure-row" data-fo="${i}"><span class="q">${n.glyph} ${esc(n.title)}</span>`+
+      `<span class="e">${(n.sources||[]).length} source${(n.sources||[]).length===1?"":"s"} · ${nodeDone(n.id)?"mastered ✓":"on your Path"}</span></button>`).join(""):"");
+  w.querySelectorAll("[data-fs]").forEach(c=>c.onclick=()=>{$("fg-q").value=FORGE_SEEDS[+c.dataset.fs];$("fg-q").focus();});
+  w.querySelectorAll("[data-fo]").forEach(b=>b.onclick=()=>{
+    $("forge").classList.remove("on");openNode(mine[+b.dataset.fo].id);});
+  $("fg-go").onclick=()=>forgeLesson(($("fg-q").value||"").trim());
+  $("fg-q").onkeydown=e=>{if(e.key==="Enter")$("fg-go").click();};
+}
+
+async function forgeLesson(topic){
+  if(FORGING)return;
+  if(topic.length<4){toast("Give it a few more words to work with.");return;}
+  if(!navigator.onLine){toast("The Forge needs a connection.");return;}
+  const {seats}=councilSeats(topic,4);
+  if(!seats.length){toast("Nothing in your library covers that — try different words.");return;}
+  FORGING=true;
+  const st={busy:true,topic:topic,step:`reading ${seats.length} books…`,pct:15};
+  renderForge(st);
+  const ev=seats.map(s=>s.passages.map(p=>`From "${s.book.title}": ${p.text.slice(0,700)}`).join("\n\n")).join("\n\n");
+  const bridge=`You are writing ONE lesson for a private learning app. Topic: "${topic}".\n\n`+
+    `Real passages from the reader's own books:\n\n${ev}\n\n`+
+    `Write the lesson body: 4 to 6 short paragraphs of plain prose. Teach the idea directly and `+
+    `concretely, and where a book supports a point, name that book in the sentence. Claim nothing `+
+    `the passages do not support. No headings, no lists, no markdown, and never mention passages, `+
+    `prompts or being an AI. Output only the paragraphs, separated by blank lines.`;
+  const quiz=`Topic: "${topic}".\n\nPassages:\n\n${ev.slice(0,6000)}\n\n`+
+    `Write THREE multiple-choice questions testing whether someone understood this idea. Format each `+
+    `exactly:\nQ: <question>\nA) <option>\nB) <option>\nC) <option>\nD) <option>\nANSWER: <letter>\n\n`+
+    `Separate the three with a blank line. All options plausible, exactly one correct. No markdown. `+
+    `Ask about the idea itself, as if quizzing someone who read the books. Never write "according to `+
+    `the text", "the provided texts", "the passages", "the excerpt" or anything similar — the reader `+
+    `cannot see them.`;
+  const apply=`Topic: "${topic}". Write ONE instruction telling the reader to apply this to their own `+
+    `life, in at most 40 words, ending with a question they must answer in writing. Output only the `+
+    `instruction, no preamble, no markdown.`;
+  try{
+    st.step="writing the lesson, the quiz and the exercise at once…";st.pct=55;renderForge(st);
+    const res=await geminiParallel([
+      {prompt:bridge,maxTok:900,temp:0.6},{prompt:quiz,maxTok:700,temp:0.7},{prompt:apply,maxTok:140,temp:0.7}]);
+    const body=res[0].ok?demd(res[0].text).split(/\n\s*\n/).map(s=>s.trim()).filter(s=>s.length>40):[];
+    const qs=res[1].ok?parseQuizBlock(res[1].text):[];
+    const ap=res[2].ok?demd(res[2].text).trim():"";
+    if(!body.length){toast("The lesson didn't come back — try again in a moment.");return;}
+    const node={
+      id:"fg"+Date.now().toString(36),track:FORGE_TRACK.id,tier:0,prereq:[],glyph:"⚗️",
+      title:topic.replace(/^./,c=>c.toUpperCase()).slice(0,60),
+      bridge:body,
+      // Verbatim, with the real book and chapter. Never model-generated.
+      sources:seats.slice(0,4).map(s=>({book:s.book.title,ref:s.passages[0].ep||s.book.title,
+        quote:[s.passages[0].text.slice(0,420)]})),
+      quiz:qs.length?qs.map(q=>({q:q.q,c:q.opts,a:q.a})):
+        [{q:`What is the central claim of this lesson?`,c:body.slice(0,1).concat(["It cannot be known","It is purely a matter of opinion","None of these"]),a:0}],
+      apply:{prompt:ap||`Name one situation this week where this applies to you, and what you'll do differently.`},
+      forged:true,at:Date.now()};
+    S.forged=[node].concat(S.forged||[]).slice(0,12);
+    save();loadForged();
+    toast(`⚗️ "${node.title}" added to your Path`);
+    $("forge").classList.remove("on");
+    openNode(node.id);
+  }catch(e){toast("The Forge failed — try again.");}
+  finally{FORGING=false;renderForge();}
+}
+
 /* ============ #123 📰 THE DISPATCH — written for you, every morning ============
  * Three short pieces generated fresh each day, in parallel, all grounded in what you have actually
  * read: where you stand right now, a place two of your own books genuinely disagree, and one
@@ -2740,8 +2938,19 @@ async function tutorSend(userMsg){
   const sys=`You are a sharp, warm study tutor inside someone's private learning app. Ground every answer in THE LEARNER'S MATERIAL below — use its framing and wording, not generic textbook knowledge. If the answer isn't in the material, say so in a few words, then give your best general reading clearly flagged as outside their books. If you're unsure, say so plainly rather than guessing confidently. When you draw on the material, name which lesson or book it came from. Plain text, no markdown, 2-4 sentences unless the learner asks for more. Never mention being an AI.\n\n=== THE LEARNER'S MATERIAL ===\n${TUTOR.ctx||"(no specific lesson attached)"}\n=== END MATERIAL ===`
     +(known.length?`\n\nIdeas the learner has already mastered — connect to these BY NAME when it genuinely helps: ${known.join("; ")}`:"");
   const convo=TUTOR.thread.map(m=>`${m.role==="user"?"LEARNER":"TUTOR"}: ${m.text}`).join("\n\n");
-  try{const fb=await geminiCall(sys+"\n\n"+convo+"\n\nTUTOR:",420,0.3);TUTOR.thread.push({role:"tutor",text:fb});saveTutorThread();}
-  catch(e){TUTOR.thread.push({role:"tutor",text:e&&e.message==="quota"?"(Gemini quota is spent for now — it resets daily.)":e&&e.message==="no-key"?"(Connect a Gemini key first.)":"(Couldn't reach the tutor — check your connection.)"});}
+  // #124: stream the reply so the tutor types instead of hanging on a "…". One placeholder bubble
+  // is pushed and then written into DIRECTLY on each chunk — re-rendering the whole thread per
+  // token would rebuild the follow-up input and steal focus mid-sentence. An error overwrites the
+  // same placeholder rather than pushing a second bubble beside an empty one.
+  TUTOR.thread.push({role:"tutor",text:"…"});
+  const slot=TUTOR.thread.length-1;
+  renderTutor();
+  const bubble=()=>{const b=$("dp-body").querySelectorAll(".tu-t");return b[b.length-1];};
+  try{
+    const fb=await geminiAsk(sys+"\n\n"+convo+"\n\nTUTOR:",
+      partial=>{TUTOR.thread[slot].text=partial;const el=bubble();if(el)el.textContent=partial;},420,0.3);
+    TUTOR.thread[slot].text=fb;saveTutorThread();}
+  catch(e){TUTOR.thread[slot].text=e&&e.message==="quota"?"(Gemini quota is spent for now — it resets daily.)":e&&e.message==="no-key"?"(Connect a Gemini key first.)":"(Couldn't reach the tutor — check your connection.)";}
   renderTutor();
 }
 // tutor conversation history — save & revisit past chats
@@ -3075,8 +3284,14 @@ $("btn-ach").onclick=()=>{const g=$("achgrid");g.innerHTML="";
   $("achs").classList.add("on")};
 
 /* ---------- patch notes ---------- */
-const APP_VER="3.51";
+const APP_VER="3.52";
 const PATCHES=[
+ {v:"3.52",n:"The Forge",d:"29 Jul 2026",items:[
+  ["new","⚗️ THE FORGE — your Path is no longer a fixed set of 87 lessons. Name anything you want to understand and the tutor writes you a real lesson on it out of your own books: teaching prose that names its sources, three questions, and something to try. It lands on your Path as a proper lesson you complete for XP. Roughly eight seconds."],
+  ["new","The quotes in a forged lesson are never written by the tutor. They are the exact passages found in your books, with the real chapter attached — a model asked to produce quotes will invent them, and an invented quote credited to a book you own is the one thing this cannot do."],
+  ["new","🎓 The tutor now types. Answers stream in as they're written instead of sitting behind a “…” — first words on screen in about 2 seconds, where before you'd wait 9 for the whole thing to appear at once."],
+  ["fix","Search and every AI feature were matching words inside other words. A lesson about holding your TEMPER quoted Thinking, Fast and Slow on “barometric TEMPERature”, and “hold” matched inside “household”. Whole words now — though “temper” still finds “tempers”."],
+  ["fix","Forged quizzes no longer say “according to the provided texts”, which gave away the machinery and made no sense to a reader who cannot see them."]]},
  {v:"3.51",n:"Two More Ways In",d:"29 Jul 2026",items:[
   ["new","🧩 THE GAUNTLET — five of your books, one question each, written from their actual pages the moment you press start. Never the same twice: every run samples different chapters, so a replay is a new game rather than a reshuffle. Scored, with a best run and a perfect-run streak, and the XP counts."],
   ["new","📰 THE DISPATCH — a short briefing written for you each morning, in three pieces and all at once: where you actually stand right now, a place two of your own books genuinely disagree (and which side it takes), and one question to carry through the day. A dot on the 📰 button when today's is waiting."],

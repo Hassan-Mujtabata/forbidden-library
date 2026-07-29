@@ -99,6 +99,19 @@ keys' quota and the run finishes half the shelf. Bulk callers pass `{maxKeys:2,m
 `gap`, keep prompts small (~4KB, not 10KB), and treat a partial result as normal: mining is
 incremental, so re-running only fetches what's missing.
 
+**Never let a model produce a quote.** It will invent them, and a fabricated quote attributed to a
+book Hassan owns is the one unrecoverable failure here. Sources in a forged lesson are the verbatim
+passages retrieval found, with the real book and chapter attached — the model writes the *prose*
+around them, never the evidence itself.
+
+**Retrieval matches whole words** (`hasWord`), not substrings. `includes` had a lesson about holding
+your TEMPER quoting "barometric TEMPERature", and `hold` matching inside `household`. Up to two
+trailing letters are allowed so `temper` still finds `tempers`.
+
+**Streaming:** `geminiAsk(prompt, onChunk, …)` streams via SSE and falls back to `geminiCall` on any
+failure. Paint chunks by writing into the existing bubble — re-rendering the whole thread per token
+rebuilds the input and steals focus mid-sentence.
+
 **Generate on a schedule, not once.** A feature that calls Gemini once and caches the result forever
 is a static feature with an API bill — Hassan's actual complaint, twice. `autoRefreshHooks()` rotates
 six books a day from `landing()` and on `visibilitychange`, claiming the day in `_meta.day` *before*
