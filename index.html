@@ -338,6 +338,37 @@ header .brand span{color:var(--gold)}
 .lure-row.seen .q{color:var(--tx2)}
 .lure-n{float:right;letter-spacing:.1em;color:var(--gold)}
 .lure-f{color:var(--jade);letter-spacing:.1em}
+/* ---------- 📰 the dispatch ---------- */
+.dp-date{font-size:11px;letter-spacing:.18em;color:var(--tx2);text-transform:uppercase;margin-bottom:16px}
+.dp-sec{margin-bottom:18px;padding-left:13px;border-left:2px solid var(--line)}
+.dp-sec.clash{border-left-color:var(--err)} .dp-sec.ask{border-left-color:var(--gold)}
+.dp-l{font-size:10px;letter-spacing:.18em;color:var(--tx2);text-transform:uppercase;margin-bottom:7px}
+.dp-t{font-family:var(--serif);font-size:15.5px;line-height:1.65;color:var(--read)}
+.dp-sec.ask .dp-t{font-size:18px;color:var(--tx)}
+.iconbtn.hasnew{position:relative}
+.iconbtn.hasnew::after{content:"";position:absolute;top:5px;right:5px;width:7px;height:7px;
+  border-radius:50%;background:var(--goldbtn)}
+/* ---------- 🧩 the gauntlet ---------- */
+.ga-stats{display:flex;gap:18px;margin:14px 0 4px;font-size:12.5px;color:var(--tx2)}
+.ga-stats b{color:var(--tx);font-size:15px;font-family:var(--serif)}
+.ga-top{display:flex;justify-content:space-between;font-size:11.5px;color:var(--tx2);letter-spacing:.08em;margin-bottom:14px}
+.ga-q{font-family:var(--serif);font-size:19px;line-height:1.45;margin-bottom:18px}
+.ga-opts{display:flex;flex-direction:column;gap:9px}
+.ga-opt{display:flex;gap:11px;align-items:flex-start;width:100%;text-align:left;background:var(--card);
+  border:1px solid var(--line);border-radius:11px;padding:12px 14px}
+.ga-opt:hover:not(:disabled){background:var(--card2)}
+.ga-opt .l{font-size:11px;color:var(--tx2);min-width:15px;padding-top:2px;letter-spacing:.1em}
+.ga-opt .o{font-size:14px;line-height:1.5;flex:1}
+.ga-opt.right{border-color:var(--ok)} .ga-opt.right .o{color:var(--ok)}
+.ga-opt.wrong{border-color:var(--err)} .ga-opt.wrong .o{color:var(--err)}
+.ga-fbline{margin-top:14px;font-size:13px;letter-spacing:.04em}
+.ga-fbline.ok{color:var(--ok)} .ga-fbline.no{color:var(--err)}
+.ga-done{text-align:center;margin:6px 0 18px}
+.ga-score{font-family:var(--serif);font-size:44px;color:var(--gold);line-height:1.1}
+.ga-rev{background:var(--card);border-left:3px solid var(--line);border-radius:8px;padding:11px 13px;margin-bottom:8px}
+.ga-rev.ok{border-left-color:var(--ok)} .ga-rev.no{border-left-color:var(--err)}
+.ga-revq{font-size:13.5px;line-height:1.5}
+.ga-reva{font-size:12px;color:var(--tx2);margin-top:6px}
 /* ---------- gemini key panel ---------- */
 .kchips{display:flex;gap:7px;flex-wrap:wrap;margin:8px 0}
 .kchip{font-size:11.5px;padding:5px 10px;border-radius:99px;border:1px solid var(--line);
@@ -738,6 +769,8 @@ header .brand span{color:var(--gold)}
     <button class="iconbtn" id="btn-account" title="Account & sync">👤</button>
     <button class="iconbtn" id="btn-addbook" title="Add a book">➕</button>
     <button class="iconbtn" id="btn-council" title="The Council — ask your whole library at once">⚖️</button>
+    <button class="iconbtn" id="btn-gauntlet" title="The Gauntlet — five books, five questions">🧩</button>
+    <button class="iconbtn" id="btn-dispatch" title="The Dispatch — written for you each morning">📰</button>
     <button class="iconbtn" id="btn-search" title="Search">🔍</button>
     <button class="iconbtn" id="btn-hl" title="Journal — notes, highlights, backup">📓</button>
     <button class="iconbtn" id="btn-ach" title="Achievements">🏆</button>
@@ -839,6 +872,8 @@ header .brand span{color:var(--gold)}
 <div class="overlay" id="addbook"><div class="panel" style="max-width:640px"><h2>➕ ADD A BOOK <button class="x" data-close="addbook">✕</button></h2><div id="ab-body"></div><input type="file" id="ab-file" accept="application/pdf" style="display:none"></div></div>
 <div class="overlay" id="account"><div class="panel" style="max-width:640px"><h2>👤 ACCOUNT <button class="x" data-close="account">✕</button></h2><div id="acc-body"></div></div></div>
 <div class="overlay" id="council"><div class="panel" style="max-width:900px"><h2>⚖️ THE COUNCIL <button class="x" data-close="council">✕</button></h2><div id="council-body"></div></div></div>
+<div class="overlay" id="gauntlet"><div class="panel" style="max-width:660px"><h2>🧩 THE GAUNTLET <button class="x" data-close="gauntlet">✕</button></h2><div id="gauntlet-body"></div></div></div>
+<div class="overlay" id="dispatch"><div class="panel" style="max-width:660px"><h2>📰 THE DISPATCH <button class="x" data-close="dispatch">✕</button></h2><div id="dispatch-body"></div></div></div>
 <div class="overlay" id="settings"><div class="panel" style="max-width:560px"><h2>⚙️ READING &amp; APPEARANCE <button class="x" data-close="settings">✕</button></h2><div id="set-body"></div></div></div>
 <div class="overlay" id="progress"><div class="panel" style="max-width:640px"><h2>📊 YOUR PROGRESS <button class="x" data-close="progress">✕</button></h2><div id="prog-body"></div></div></div>
 <div class="overlay" id="booklanding"><div class="panel" style="max-width:600px"><button class="x" data-close="booklanding" style="position:absolute;right:22px;top:22px;z-index:2">✕</button><div id="bl-body"></div></div></div>
@@ -1103,6 +1138,8 @@ async function boot(){
 }
 function landing(){ if(DATA.nodes&&DATA.nodes.length){renderPath();show("path")} else {renderHome();show("home")} patchCheck(); initA11y(); setTimeout(checkReminder,1500);
   setTimeout(autoRefreshHooks,4000);   // #121: quietly read a few more books, once a day, on its own
+  setTimeout(()=>{markDispatchDot();refreshDispatch(false);},9000);   // #123: then write the dispatch,
+  // staggered well after the hooks so the two daily jobs never contend for the same keys at once
   if(!S.welcomed&&totalRead()===0&&nodesDone()===0&&(S.hl||[]).length===0)setTimeout(showWelcome,700); else if(!S.welcomed){S.welcomed=true;save();} }   // #26: only greet genuinely-new keyholders
 // #44: accessibility — give icon-only controls names and hide decorative art from screen readers
 function initA11y(){
@@ -1569,7 +1606,8 @@ function checkReminder(){
   try{navigator.serviceWorker.ready.then(reg=>reg.showNotification("The Vault",{body:"Your daily rite is waiting — learn, sharpen, sit.",icon:"./icon-192.png",tag:"vault-rite"})).catch(()=>{});}catch(e){}
 }
 addEventListener("visibilitychange",()=>{if(!document.hidden){checkReminder();
-  if(typeof autoRefreshHooks==="function")setTimeout(autoRefreshHooks,2500);}});   // #121: a PWA left
+  if(typeof autoRefreshHooks==="function")setTimeout(autoRefreshHooks,2500);
+  if(typeof refreshDispatch==="function")setTimeout(()=>refreshDispatch(false),7000);}});   // #121: a PWA left
   // open overnight never re-runs landing(), so the day would otherwise roll over without a refresh
 // NEXT-BATCH: reader swipe (mobile) + keyboard shortcuts (desktop) + Escape closes overlays
 let _touch={x:0,y:0,t:0};
@@ -2420,6 +2458,246 @@ function renderLure(){
   $("lure-roll").onclick=()=>{LURE_NONCE++;renderLure();};
   $("lure-more").onclick=()=>mineHooks(true);
 }
+
+/* ============ #123 📰 THE DISPATCH — written for you, every morning ============
+ * Three short pieces generated fresh each day, in parallel, all grounded in what you have actually
+ * read: where you stand right now, a place two of your own books genuinely disagree, and one
+ * question to carry around. Derived content, so it lives in its own key rather than in S.
+ */
+const DISPATCH_LS="vault_dispatch";
+let DISPATCH=(()=>{try{return JSON.parse(localStorage.getItem(DISPATCH_LS))||{}}catch(e){return{}}})();
+const saveDispatch=()=>{try{localStorage.setItem(DISPATCH_LS,JSON.stringify(DISPATCH))}catch(e){}};
+
+function dispatchJobs(){
+  const books=DATA.books.filter(b=>bookVisible(b.id));
+  const started=books.filter(b=>readSet(b.id).size>0);
+  const cur=(S.last&&bookById(S.last))||started[started.length-1]||books[0];
+  const doneN=started.filter(b=>readSet(b.id).size>=b.episodes.length).length;
+  const stand=`A reader's own library: ${books.length} books, ${doneN} finished, `+
+    `${totalRead()} chapters read, ${nodesDone()} ideas mastered, currently partway through `+
+    `"${cur?cur.title:"nothing"}" (${cur?readSet(cur.id).size:0} of ${cur?cur.episodes.length:0} chapters).\n\n`+
+    `Write TWO sentences telling them where they stand and what specifically to do next today. `+
+    `Speak directly to them. Name the book. No preamble, no lists, no markdown.`;
+
+  // The collision needs two books they have actually read, ideally from opposing wings — that is
+  // where the disagreement is real rather than manufactured.
+  const pool=(started.length>=2?started:books);
+  const sh=pool.slice();
+  let seed=daySeed();
+  const rnd=mulberry(seed);
+  for(let i=sh.length-1;i>0;i--){const j=Math.floor(rnd()*(i+1));[sh[i],sh[j]]=[sh[j],sh[i]];}
+  let x=sh[0],y=sh.find(b=>b.wing!==x.wing)||sh[1]||sh[0];
+  // Fall back to the books' own pages when a title hasn't been mined yet. Asked to compare two bare
+  // titles the model hedges — "might advocate", "could clash" — which is not an argument. Real text
+  // from both books forces it to name what each one actually says.
+  const brief=b=>{
+    const hk=((HOOKS[b.id]||{}).items||[]).slice(0,4).map(h=>"- "+h.t);
+    const ps=hk.length?[]:hookSample(b,2,seed).map(p=>"- "+p.text.slice(0,420));
+    return `"${b.title}"${b.author?" by "+b.author:""}\n${hk.concat(ps).join("\n")||"- (nothing on file)"}`;};
+  const clash=`Two books from one reader's shelf:\n\n${brief(x)}\n\n${brief(y)}\n\n`+
+    `In TWO sentences, name one place these two books would genuinely disagree about how to live, `+
+    `and say which side you would take and why. Use both titles. Be concrete about what each book `+
+    `actually advises — never hedge with "might" or "could". No preamble, no markdown.`;
+
+  // The provocation is anchored to something they chose to keep, so it lands personally.
+  const hl=(S.hl||[]).filter(h=>h.t&&h.t.length>40);
+  const seedTxt=hl.length?hl[Math.floor(rnd()*hl.length)].t
+    :(()=>{const h=((HOOKS[(cur||{}).id]||{}).items||[])[0];return h?h.t:(cur?cur.title:"reading");})();
+  const ask=`Something this reader kept from their books:\n\n"${seedTxt.slice(0,600)}"\n\n`+
+    `Write ONE short question, at most 25 words, that would make them look at this differently `+
+    `today. Output only the question, nothing else.`;
+  return {jobs:[{prompt:stand,maxTok:200,temp:0.7},{prompt:clash,maxTok:220,temp:0.8},
+                {prompt:ask,maxTok:90,temp:0.9}],pair:[x&&x.title,y&&y.title]};
+}
+
+let DISPATCHING=false;
+async function refreshDispatch(force){
+  if(DISPATCHING||!geminiKeys().length||!navigator.onLine)return;
+  if(!force&&DISPATCH.day===today())return;
+  DISPATCHING=true;
+  const spec=dispatchJobs();
+  DISPATCH.day=today();saveDispatch();          // claim the day before running, as with the hooks
+  try{
+    const res=await geminiParallel(spec.jobs.map(j=>Object.assign({opts:{maxKeys:2,maxModels:2}},j)));
+    const parts=res.map(r=>r.ok?demd(r.text).trim():"");
+    if(parts.some(Boolean)){
+      DISPATCH={day:today(),at:Date.now(),stand:parts[0],clash:parts[1],ask:parts[2],pair:spec.pair};
+      saveDispatch();
+    }
+  }catch(e){}
+  finally{DISPATCHING=false;markDispatchDot();if($("dispatch").classList.contains("on"))renderDispatch();}
+}
+
+// A quiet dot on the nav button — today's dispatch is worth opening, but not worth interrupting for.
+function markDispatchDot(){
+  const b=$("btn-dispatch");if(!b)return;
+  b.classList.toggle("hasnew",!!(DISPATCH.day===today()&&DISPATCH.stand&&S.dispatchSeen!==today()));
+}
+
+function openDispatch(){
+  $("dispatch").classList.add("on");
+  S.dispatchSeen=today();save();markDispatchDot();
+  renderDispatch();
+  if(DISPATCH.day!==today())refreshDispatch(false);
+}
+$("btn-dispatch").onclick=openDispatch;
+
+function renderDispatch(){
+  const w=$("dispatch-body");
+  if(!geminiKeys().length){
+    w.innerHTML=`<div class="abnote">📰 <b>The Dispatch needs a tutor key.</b> Add one in 📓 Journal → tutor and a fresh briefing is written for you each morning.</div>`;return;}
+  if(DISPATCHING||(!DISPATCH.stand&&DISPATCH.day===today())){
+    w.innerHTML=`<div class="lure mining"><div class="lure-h">📰 WRITING TODAY'S DISPATCH</div>`+
+      `<div class="lure-t">three pieces, in parallel…</div><div class="lure-bar"><span style="width:60%"></span></div></div>`;return;}
+  if(!DISPATCH.stand){
+    w.innerHTML=`<div class="cn-intro">Nothing written yet today.</div>`+
+      `<div class="bl-actions"><button class="goldbtn" id="dp-go">📰 Write today's dispatch</button></div>`;
+    $("dp-go").onclick=()=>{renderDispatch();refreshDispatch(true);};return;}
+  const sec=(label,text,cls)=>text?`<div class="dp-sec ${cls||""}"><div class="dp-l">${label}</div><div class="dp-t">${esc(text)}</div></div>`:"";
+  w.innerHTML=`<div class="dp-date">${new Date(DISPATCH.at||Date.now()).toLocaleDateString(undefined,{weekday:"long",day:"numeric",month:"long"})}</div>`+
+    sec("WHERE YOU STAND",DISPATCH.stand)+
+    sec(DISPATCH.pair&&DISPATCH.pair[0]?`${DISPATCH.pair[0]} vs ${DISPATCH.pair[1]}`:"A COLLISION",DISPATCH.clash,"clash")+
+    sec("CARRY THIS TODAY",DISPATCH.ask,"ask")+
+    `<div class="bl-actions"><button class="ghostbtn" id="dp-again">↻ Rewrite</button></div>`;
+  $("dp-again").onclick=()=>{DISPATCH.stand="";renderDispatch();refreshDispatch(true);};
+}
+
+/* ============ #122 🧩 THE GAUNTLET — five books, five questions, one shot each ============
+ * Written fresh every single play: five books are sampled with a new seed and five questions are
+ * generated at once, one per key. Nothing is cached, so the same book never asks the same thing
+ * twice and a replay is genuinely a new run rather than a re-shuffle of stored cards.
+ */
+const GAUNTLET_N=5;
+let GA=null;
+
+function gauntletPrompt(b,picks){
+  const ev=picks.map((p,i)=>`[${i+1}] ${p.text.slice(0,800)}`).join("\n\n");
+  return `Passages from "${b.title}"${b.author?` by ${b.author}`:""}:\n\n${ev}\n\n`+
+    `Write ONE multiple-choice question testing whether a reader understood the IDEA in these `+
+    `passages — not whether they can recall a name, a date or a number.\n\n`+
+    `Reply in exactly this form and nothing else:\n`+
+    `Q: <the question>\nA) <option>\nB) <option>\nC) <option>\nD) <option>\nANSWER: <single letter>\n\n`+
+    `All four options must sound plausible to someone who half-remembers this book, and exactly one `+
+    `must be correct according to the passages. Never write "all of the above". No markdown.\n`+
+    `Ask about the idea itself, as though quizzing someone who has read the book. Never mention `+
+    `"these passages", "the text", or "the excerpt" — the reader cannot see them.`;
+}
+
+// A malformed question is dropped rather than shown — a quiz that renders "undefined" as an option
+// is worse than a shorter quiz.
+function parseQuestion(text){
+  const t=demd(text||"");
+  const q=/Q:\s*(.+)/i.exec(t);
+  const ans=/ANSWER:\s*\(?([ABCD])/i.exec(t);
+  const opts=["A","B","C","D"].map(L=>{
+    const m=new RegExp("^\\s*"+L+"[\\)\\.:]\\s*(.+)$","im").exec(t);
+    return m?m[1].trim():null;});
+  if(!q||!ans||opts.some(o=>!o||o.length<2))return null;
+  const seen={};for(const o of opts){if(seen[o.toLowerCase()])return null;seen[o.toLowerCase()]=1;}
+  // Shuffle. The model puts the correct option in slot B with startling consistency — a five-book
+  // run came back B, B, B, B, which makes the whole game "always press B". Reordering here means
+  // the answer position is ours, not the model's, whatever bias it has.
+  const order=[0,1,2,3];
+  for(let i=3;i>0;i--){const j=Math.floor(Math.random()*(i+1));const t=order[i];order[i]=order[j];order[j]=t;}
+  const a="ABCD".indexOf(ans[1].toUpperCase());
+  return {q:q[1].trim(),opts:order.map(i=>opts[i]),a:order.indexOf(a)};
+}
+
+function openGauntlet(){$("gauntlet").classList.add("on");renderGauntlet();}
+$("btn-gauntlet").onclick=openGauntlet;
+
+function renderGauntlet(){
+  const b=$("gauntlet-body"),keys=geminiKeys(),g=S.gauntlet||{};
+  if(!keys.length){
+    b.innerHTML=`<div class="abnote">🧩 <b>The Gauntlet needs a tutor key.</b> Add one or more Gemini keys in 📓 Journal → tutor. With several, all five questions are written at the same time.</div>`;
+    return;}
+  if(!GA){
+    b.innerHTML=`<div class="cn-intro">Five of your books. One question each, written from their actual pages the moment you press start — never the same twice.</div>`+
+      `<div class="ga-stats"><span>Best <b>${g.best||0}/${GAUNTLET_N}</b></span><span>Runs <b>${g.played||0}</b></span>`+
+      (g.streak?`<span>Streak <b>${g.streak}</b></span>`:"")+`</div>`+
+      `<div class="bl-actions"><button class="goldbtn" id="ga-start">🧩 Enter the gauntlet</button></div>`;
+    $("ga-start").onclick=runGauntlet;
+    return;}
+  if(GA.phase==="forging"){
+    b.innerHTML=`<div class="lure mining"><div class="lure-h">🧩 FORGING YOUR GAUNTLET</div>`+
+      `<div class="lure-t">${GA.done} of ${GA.total} questions written · ${GA.width} key${GA.width>1?"s":""} in parallel</div>`+
+      `<div class="lure-bar"><span style="width:${Math.round(GA.done/GA.total*100)}%"></span></div></div>`;
+    return;}
+  if(GA.phase==="play"){
+    const q=GA.qs[GA.i],bk=q.book;
+    b.innerHTML=`<div class="ga-top"><span>${GA.i+1} / ${GA.qs.length}</span><span class="ga-src">${bk.glyph} ${esc(bk.title)}</span></div>`+
+      `<div class="ga-q">${esc(q.q)}</div><div class="ga-opts"></div><div id="ga-fb"></div>`;
+    const w=b.querySelector(".ga-opts");
+    q.opts.forEach((o,i)=>{const btn=document.createElement("button");btn.className="ga-opt";
+      btn.innerHTML=`<span class="l">${"ABCD"[i]}</span><span class="o">${esc(o)}</span>`;
+      btn.onclick=()=>answerGauntlet(i);w.appendChild(btn);});
+    return;}
+  // finished
+  const pct=Math.round(GA.score/GA.qs.length*100);
+  b.innerHTML=`<div class="ga-done"><div class="ga-score">${GA.score} / ${GA.qs.length}</div>`+
+    `<div class="cn-intro">${pct===100?"Cleared it. Every one.":pct>=60?"Solid run.":"The books won this round."}</div></div>`+
+    GA.qs.map((q,i)=>`<div class="ga-rev ${GA.picks[i]===q.a?"ok":"no"}">`+
+      `<div class="ga-revq">${q.book.glyph} ${esc(q.q)}</div>`+
+      `<div class="ga-reva">${GA.picks[i]===q.a?"✓ ":"✗ you said: "+esc(q.opts[GA.picks[i]]||"—")+" · "}`+
+      `answer: ${esc(q.opts[q.a])}</div></div>`).join("")+
+    `<div class="bl-actions"><button class="goldbtn" id="ga-again">🧩 Again — new questions</button>`+
+    `<button class="ghostbtn" id="ga-close2">Done</button></div>`;
+  $("ga-again").onclick=runGauntlet;
+  $("ga-close2").onclick=()=>{GA=null;$("gauntlet").classList.remove("on");};
+}
+
+function answerGauntlet(i){
+  const q=GA.qs[GA.i];
+  GA.picks[GA.i]=i;
+  if(i===q.a)GA.score++;
+  const fb=$("ga-fb");
+  [...document.querySelectorAll(".ga-opt")].forEach((el,k)=>{
+    el.disabled=true;
+    if(k===q.a)el.classList.add("right");
+    else if(k===i)el.classList.add("wrong");});
+  fb.innerHTML=`<div class="ga-fbline ${i===q.a?"ok":"no"}">${i===q.a?"✓ correct":"✗ the book says "+"ABCD"[q.a]}</div>`;
+  setTimeout(()=>{
+    GA.i++;
+    if(GA.i>=GA.qs.length){
+      GA.phase="done";
+      const g=S.gauntlet||(S.gauntlet={});
+      g.played=(g.played||0)+1;
+      g.best=Math.max(g.best||0,GA.score);
+      g.streak=GA.score===GA.qs.length?(g.streak||0)+1:0;
+      S.xp=(S.xp||0)+GA.score*15;               // real XP, so a run counts toward your level
+      save();checkAch();renderTopbar();
+    }
+    renderGauntlet();
+  },1400);
+}
+
+async function runGauntlet(){
+  if(!navigator.onLine){toast("The Gauntlet needs a connection.");return;}
+  const keys=geminiKeys();
+  const pool=DATA.books.filter(b=>bookVisible(b.id));
+  // Prefer books you've actually opened — being quizzed on a book you've never read is a guess.
+  const read=pool.filter(b=>readSet(b.id).size>0);
+  const src=(read.length>=GAUNTLET_N?read:pool).slice();
+  for(let i=src.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[src[i],src[j]]=[src[j],src[i]];}
+  const books=src.slice(0,Math.min(GAUNTLET_N,src.length));
+  GA={phase:"forging",done:0,total:books.length,width:Math.min(books.length,keys.length),
+      qs:[],picks:[],i:0,score:0,busy:true};
+  renderGauntlet();
+  // A fresh seed per run is what makes a replay a new game rather than the same five cards.
+  const seed=Date.now();
+  const picks=books.map((b,i)=>hookSample(b,4,seed+i*7919));
+  try{
+    const res=await geminiParallel(books.map((b,i)=>({prompt:gauntletPrompt(b,picks[i]),
+      maxTok:420,temp:0.85,opts:{maxKeys:2,maxModels:2}})),
+      ()=>{GA.done++;renderGauntlet();});
+    res.forEach((r,i)=>{if(!r.ok)return;const q=parseQuestion(r.text);
+      if(q){q.book=books[i];GA.qs.push(q);}});
+    if(!GA.qs.length){GA=null;toast("Couldn't write any questions — try again in a minute");renderGauntlet();return;}
+    GA.picks=new Array(GA.qs.length).fill(-1);
+    GA.phase="play";GA.busy=false;
+  }catch(e){GA=null;toast("The Gauntlet failed to start.");}
+  renderGauntlet();
+}
 /* ---------- tutor grounding: feed Gemini YOUR books, not generic pop-psych ---------- */
 function nodeText(n){return [...(n.bridge||[]),...(n.sources||[]).flatMap(s=>s.quote||[])].join("\n\n");}
 function bookOfNode(n){const s=(n.sources||[])[0];if(!s)return null;const nb=x=>x.toLowerCase().replace(/[^a-z0-9]/g,"");
@@ -2797,8 +3075,13 @@ $("btn-ach").onclick=()=>{const g=$("achgrid");g.innerHTML="";
   $("achs").classList.add("on")};
 
 /* ---------- patch notes ---------- */
-const APP_VER="3.50";
+const APP_VER="3.51";
 const PATCHES=[
+ {v:"3.51",n:"Two More Ways In",d:"29 Jul 2026",items:[
+  ["new","🧩 THE GAUNTLET — five of your books, one question each, written from their actual pages the moment you press start. Never the same twice: every run samples different chapters, so a replay is a new game rather than a reshuffle. Scored, with a best run and a perfect-run streak, and the XP counts."],
+  ["new","📰 THE DISPATCH — a short briefing written for you each morning, in three pieces and all at once: where you actually stand right now, a place two of your own books genuinely disagree (and which side it takes), and one question to carry through the day. A dot on the 📰 button when today's is waiting."],
+  ["fix","The Gauntlet's answer was always B. Models put the correct option second with startling regularity — a five-book run came back B, B, B, B, which would have made the whole game “always press B”. The options are shuffled after they arrive, so the answer's position is ours, not the model's."],
+  ["fix","The Dispatch's book-vs-book section hedged (“might advocate”, “could clash”) whenever it was handed two titles with nothing else. It now argues from real passages out of both books."]]},
  {v:"3.50",n:"Every Day",d:"29 Jul 2026",items:[
   ["new","The shelf now reads itself, every day, on its own. Six books each morning — quietly, in the background, no button — cycling the whole library every four days and then starting again."],
   ["fix","And it reads DIFFERENT PAGES each time. The first version always sent the same passages, so re-reading a book returned the same five facts forever — mining once and caching is just a slower way of storing something static. The pages it samples now move with the date, so the same book gives you genuinely new material every time it comes round."],

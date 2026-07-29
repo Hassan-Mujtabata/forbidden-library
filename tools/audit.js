@@ -207,6 +207,22 @@
     addbook:  function () { call("renderAddBook"); },
     sit:      function () { call("openSit"); },
     review:   function () { call("startReview"); },   // no-ops when nothing is due -> reported unmeasured
+    dispatch: function () { call("openDispatch"); },
+    gauntlet: function () {
+      call("openGauntlet");
+      // The question card, the option buttons and the right/wrong colours only exist mid-run, so an
+      // idle screen would leave most of this overlay unmeasured. Stage a fake run — no API call, no
+      // quota — and VA.restore() clears it again so the real game is never left mid-question.
+      try {
+        if (typeof DATA !== "undefined" && DATA.books && DATA.books.length) {
+          GA = { phase: "play", i: 0, score: 0, picks: [-1], done: 1, total: 1, width: 1,
+                 qs: [{ q: "A staged question, used only to measure contrast.",
+                        opts: ["first option", "second option", "third option", "fourth option"],
+                        a: 1, book: DATA.books[0] }] };
+          call("renderGauntlet");
+        }
+      } catch (e) {}
+    },
     council:  function () {
       // Opening it only renders the question form. The answer cards and the verdict — most of the
       // new surface — exist only after a sitting, so replay a saved one: it paints the full result
@@ -287,6 +303,8 @@
       };
     },
     restore: function () {
+      try { if (typeof GA !== "undefined" && GA && GA.qs && GA.qs[0] &&
+                /staged question/.test(GA.qs[0].q)) GA = null; } catch (e) {}
       if (original !== null) {
         if (hadTheme) setTheme(original);
         else document.documentElement.dataset.theme = original;

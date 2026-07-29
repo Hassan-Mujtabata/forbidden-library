@@ -353,6 +353,41 @@
     });
   }
 
+  /* ------------------------------------------------------------- gauntlet */
+
+  function gauntletTests() {
+    var Q = "Q: What is the core claim?\nA) alpha\nB) bravo\nC) charlie\nD) delta\nANSWER: B";
+    check("parseQuestion: reads a well-formed question", function () {
+      var q = parseQuestion(Q);
+      return q && q.opts.length === 4 && q.opts.indexOf("bravo") >= 0 ? true : "got " + JSON.stringify(q);
+    });
+    check("parseQuestion: the correct answer survives the shuffle", function () {
+      // The shuffle reorders options, so `a` must be recomputed — if it kept pointing at the old
+      // index the game would mark right answers wrong, which is worse than no game at all.
+      for (var i = 0; i < 50; i++) {
+        var q = parseQuestion(Q);
+        if (!q || q.opts[q.a] !== "bravo") return "run " + i + " marked '" + (q && q.opts[q.a]) + "' as correct";
+      }
+      return true;
+    });
+    check("parseQuestion: answer position is not always the same slot", function () {
+      // Models put the correct option in B with startling regularity — a real five-book run came
+      // back B,B,B,B, which makes the game "always press B". The shuffle is what stops that.
+      var seen = {};
+      for (var i = 0; i < 120; i++) { var q = parseQuestion(Q); if (q) seen[q.a] = 1; }
+      return Object.keys(seen).length >= 3 ? true : "answer only ever landed in " + Object.keys(seen).length + " slot(s)";
+    });
+    check("parseQuestion: rejects a missing ANSWER line", function () {
+      return parseQuestion("Q: x\nA) a\nB) b\nC) c\nD) d") === null ? true : "accepted a question with no answer";
+    });
+    check("parseQuestion: rejects duplicate options", function () {
+      return parseQuestion("Q: x\nA) same\nB) same\nC) c\nD) d\nANSWER: A") === null ? true : "accepted duplicate options";
+    });
+    check("parseQuestion: rejects a question missing options", function () {
+      return parseQuestion("Q: x\nA) a\nB) b\nANSWER: A") === null ? true : "accepted a two-option question";
+    });
+  }
+
   /* ------------------------------------------------------ library integrity */
 
   function libraryTests() {
@@ -383,7 +418,7 @@
       var snap = st(S);                       // progress state is real data -- never leave it edited
       try {
         foldTests(); saneTests(); readTests(); mergeTests(); pushTests();
-        indexTests(); fmtTests(); hookTests(); libraryTests();
+        indexTests(); fmtTests(); hookTests(); gauntletTests(); libraryTests();
       } finally {
         S = snap;
         if (typeof save === "function") save();
