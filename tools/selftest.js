@@ -492,6 +492,62 @@
     });
   }
 
+  /* ------------------------------------------------------- the top bar (#127)
+   * The phone layout broke because the icon row grew one button at a time, over three
+   * releases, and nothing anywhere knew how wide a phone is. These are width-independent
+   * on purpose -- they hold even when the suite runs in a 1200px pane, which is the only
+   * place it ever actually runs.
+   */
+  function chromeTests() {
+    var icons = function () {
+      return [].slice.call(document.querySelectorAll("#topbar .iconrow .iconbtn"))
+        .filter(function (b) { return b.id !== "btn-menu"; });
+    };
+
+    check("topbar: the phone bar still fits on a phone", function () {
+      // Deliberately NOT icons(): that drops btn-menu, and ☰ takes up exactly as much room as
+      // anything else. Written the other way first, this measured 3 buttons where the bar had 4
+      // and sailed straight through a mutation that added a fifth.
+      var keep = [].slice.call(document.querySelectorAll("#topbar .iconrow .iconbtn.keep"));
+      // 360px is the narrowest phone worth supporting; 11px of padding each side leaves 338.
+      // Buttons are pinned to a 44px tap target with a 4px gap, and the brand eats ~105px.
+      var need = keep.length * 44 + Math.max(0, keep.length - 1) * 4 + 105;
+      return need <= 338 ? true :
+        keep.length + " .keep buttons need " + need + "px beside the brand, a 360px phone has 338. " +
+        "Move one into the ☰ menu -- do not shrink the tap target.";
+    });
+
+    check("topbar: every icon is reachable on a phone (bar or menu)", function () {
+      if (typeof renderMenu !== "function") return "renderMenu is gone";
+      renderMenu();
+      var listed = {};
+      [].slice.call(document.querySelectorAll("#menu-body .mrow")).forEach(function (r) {
+        listed[r.dataset.go] = 1;
+      });
+      var lost = icons().filter(function (b) {
+        // an icon hidden for this device (non-admin, no face unlock) is not lost, it is absent
+        return b.style.display !== "none" && !b.classList.contains("keep") && !listed[b.id];
+      }).map(function (b) { return b.id; });
+      return lost.length ? "off-screen on a phone and not in the menu: " + lost.join(", ") : true;
+    });
+
+    check("topbar: every menu row points at a live button", function () {
+      renderMenu();
+      var dead = [].slice.call(document.querySelectorAll("#menu-body .mrow")).filter(function (r) {
+        var b = document.getElementById(r.dataset.go);
+        return !b || typeof b.onclick !== "function";
+      }).map(function (r) { return r.dataset.go; });
+      return dead.length ? "menu row wired to nothing: " + dead.join(", ") : true;
+    });
+
+    check("topbar: every icon's title carries a description for the menu", function () {
+      var bare = icons().filter(function (b) {
+        return (b.title || "").indexOf(" — ") < 0;      // em dash, the menu splits on it
+      }).map(function (b) { return b.id; });
+      return bare.length ? "title needs 'Name — what it does': " + bare.join(", ") : true;
+    });
+  }
+
   window.VT = {
     run: function () {
       out = []; t0 = performance.now();
@@ -499,6 +555,7 @@
       try {
         foldTests(); saneTests(); readTests(); mergeTests(); pushTests();
         indexTests(); fmtTests(); hookTests(); gauntletTests(); matchTests(); libraryTests();
+        chromeTests();
       } finally {
         S = snap;
         if (typeof save === "function") save();

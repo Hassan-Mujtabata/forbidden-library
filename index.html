@@ -91,9 +91,19 @@ header .brand span{color:var(--gold)}
 #xpfill{height:100%;background:linear-gradient(90deg,#8a6d1f,var(--gold));border-radius:99px;transition:width .6s}
 #xpwrap .lbl{display:flex;justify-content:space-between;font-size:11.5px;color:var(--tx2)}
 #xpwrap .lbl b{color:var(--gold);letter-spacing:.06em}
-.iconrow{display:flex;gap:8px;margin-left:auto}
+/* #127: wrap, never overflow. This row grew from 8 buttons to 13 across three releases and
+   silently ran off the right edge of every phone. Wrapping is the desktop safety net; the
+   phone rule further down hides all but the .keep few and hands the rest to the ☰ menu. */
+.iconrow{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:8px;margin-left:auto}
 .iconbtn{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:9px 13px;font-size:16px;transition:.2s}
 .iconbtn:hover{background:var(--card2);transform:translateY(-1px)}
+/* ☰ menu rows — the icon row again, but with names, because thirteen bare emoji are a quiz */
+.mrow{display:flex;align-items:center;gap:13px;width:100%;text-align:left;background:var(--card);
+  border:1px solid var(--line);border-radius:13px;padding:12px 14px;margin-bottom:8px;transition:.15s}
+.mrow:hover{background:var(--card2);border-color:rgba(212,175,55,.45);transform:translateX(2px)}
+.mrow .mg{font-size:21px;flex:0 0 auto;width:28px;text-align:center}
+.mrow .mt{display:block;font-weight:700;font-size:14.5px}
+.mrow .md{display:block;color:var(--tx2);font-size:12.5px;margin-top:2px;line-height:1.35}
 
 /* ---------- home cards ---------- */
 .bigcard{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:18px 20px;margin-bottom:16px;
@@ -475,12 +485,25 @@ header .brand span{color:var(--gold)}
   /* deliberate 3-row layout: [brand · icons] / [nav · streak] / [xp bar] */
   #topbar{gap:8px 7px;padding:10px 11px}
   #topbar .brand{font-size:13px;letter-spacing:.05em;order:1}
-  .iconrow{order:2;margin-left:auto;gap:4px}
-  .iconbtn{padding:6px 7px;font-size:14px;border-radius:9px}
+  .iconrow{order:2;margin-left:auto;gap:4px;flex-wrap:nowrap}
+  .iconbtn{font-size:14px;border-radius:9px}
   .nav{order:3}
   .navbtn{padding:6px 12px;font-size:12.5px}
   #topbar .hstat{order:4;padding:5px 10px;font-size:11.5px}
   #xpwrap{order:5;flex:1 1 100%;max-width:none;min-width:0}
+}
+/* #127: THE TOP BAR IS NOT A SHELF. Fourteen buttons at the 44px tap-target minimum need 668px;
+   a 375px phone offers 353. The row overflowed, five buttons sat off-screen where no amount of
+   scrolling reached them, and the whole document went 583px wide — which is why every view, not
+   just the bar, looked shifted and cut off. Below this width an icon is HIDDEN unless it earns a
+   slot with .keep; everything else lives in the ☰ menu, which builds itself from this same row.
+   Default-hidden is the point — the next button I add cannot re-break the layout.
+   The cutoff is 820, not the 560 the rest of the phone rules use: it is set by the width at which
+   the full row stops fitting on one line, and between 561 and 768 it was wrapping to two rows and
+   pushing the top bar to 204px tall. Same bug, just less obvious. */
+@media(max-width:820px){
+  .iconrow .iconbtn{display:none}
+  .iconrow .iconbtn.keep{display:inline-flex}
 }
 
 /* ---------- the path (skill tree) ---------- */
@@ -729,7 +752,12 @@ header .brand span{color:var(--gold)}
   .shelf{grid-template-columns:repeat(auto-fill,minmax(118px,1fr))}
   header .brand{font-size:16px}
   #rbody{font-size:15px}
-  /* #45: bigger, thumb-friendly tap targets on phones */
+  /* #45: bigger, thumb-friendly tap targets on phones.
+     NOTE: there is a second max-width:560px block up in the top-bar section that also styles
+     .iconbtn — these two disagreed for three releases (that one shrank the padding, this one
+     overrode it) which is half of why the row's real width was never what it looked like.
+     The `display:inline-flex` here is deliberately weaker than `.iconrow .iconbtn{display:none}`
+     up there, so it cannot resurrect an icon the phone layout means to hide. */
   .iconbtn{min-width:44px;min-height:44px;display:inline-flex;align-items:center;justify-content:center;padding:9px}
   #rtop .iconbtn{min-width:40px;min-height:40px}
   .navbtn{padding:9px 14px}
@@ -765,20 +793,24 @@ header .brand span{color:var(--gold)}
     <div class="lbl"><b id="lvlname">INITIATE</b><span id="xptext"></span></div>
     <div id="xpbar"><div id="xpfill"></div></div>
   </div>
+  <!-- #127: every title is "Name — one line of what it does", because the ☰ menu is built by
+       splitting these on the em dash. A button with no dash still lists, just without a subtitle.
+       .keep = survives on a phone; everything else is reachable through ☰. -->
   <div class="iconrow">
-    <button class="iconbtn" id="btn-account" title="Account & sync">👤</button>
-    <button class="iconbtn" id="btn-addbook" title="Add a book">➕</button>
+    <button class="iconbtn" id="btn-account" title="Account &amp; sync — back your progress up and pull it onto another device">👤</button>
+    <button class="iconbtn" id="btn-addbook" title="Add a book — turn a PDF into lessons on your Path">➕</button>
     <button class="iconbtn" id="btn-council" title="The Council — ask your whole library at once">⚖️</button>
     <button class="iconbtn" id="btn-gauntlet" title="The Gauntlet — five books, five questions">🧩</button>
     <button class="iconbtn" id="btn-dispatch" title="The Dispatch — written for you each morning">📰</button>
     <button class="iconbtn" id="btn-forge" title="The Forge — have a new lesson written for your Path">⚗️</button>
-    <button class="iconbtn" id="btn-ask" title="Ask the vault — a tutor that knows everything you've read">🎓</button>
-    <button class="iconbtn" id="btn-search" title="Search">🔍</button>
-    <button class="iconbtn" id="btn-hl" title="Journal — notes, highlights, backup">📓</button>
-    <button class="iconbtn" id="btn-ach" title="Achievements">🏆</button>
-    <button class="iconbtn" id="btn-settings" title="Reading & appearance">⚙️</button>
-    <button class="iconbtn" id="btn-patch" title="Patch notes">📜</button>
-    <button class="iconbtn" id="btn-bio" title="Enable face unlock on this device">👁️</button>
+    <button class="iconbtn keep" id="btn-ask" title="Ask the Vault — a tutor that knows everything you've read">🎓</button>
+    <button class="iconbtn keep" id="btn-search" title="Search — find any idea, word or passage across every book">🔍</button>
+    <button class="iconbtn keep" id="btn-hl" title="Journal — your notes, highlights and backup">📓</button>
+    <button class="iconbtn" id="btn-ach" title="Achievements — what you've unlocked so far">🏆</button>
+    <button class="iconbtn" id="btn-settings" title="Reading &amp; appearance — typeface, size, width, theme">⚙️</button>
+    <button class="iconbtn" id="btn-patch" title="Patch notes — what changed in the Vault">📜</button>
+    <button class="iconbtn" id="btn-bio" title="Face unlock — open the Vault with your face on this device">👁️</button>
+    <button class="iconbtn keep" id="btn-menu" title="Menu — everything in the Vault, with names">☰</button>
   </div>
 </div>
 
@@ -877,6 +909,7 @@ header .brand span{color:var(--gold)}
 <div class="overlay" id="gauntlet"><div class="panel" style="max-width:660px"><h2>🧩 THE GAUNTLET <button class="x" data-close="gauntlet">✕</button></h2><div id="gauntlet-body"></div></div></div>
 <div class="overlay" id="dispatch"><div class="panel" style="max-width:660px"><h2>📰 THE DISPATCH <button class="x" data-close="dispatch">✕</button></h2><div id="dispatch-body"></div></div></div>
 <div class="overlay" id="forge"><div class="panel" style="max-width:660px"><h2>⚗️ THE FORGE <button class="x" data-close="forge">✕</button></h2><div id="forge-body"></div></div></div>
+<div class="overlay" id="menu"><div class="panel" style="max-width:520px"><h2>☰ EVERYTHING IN THE VAULT <button class="x" data-close="menu">✕</button></h2><div id="menu-body"></div></div></div>
 <div class="overlay" id="settings"><div class="panel" style="max-width:560px"><h2>⚙️ READING &amp; APPEARANCE <button class="x" data-close="settings">✕</button></h2><div id="set-body"></div></div></div>
 <div class="overlay" id="progress"><div class="panel" style="max-width:640px"><h2>📊 YOUR PROGRESS <button class="x" data-close="progress">✕</button></h2><div id="prog-body"></div></div></div>
 <div class="overlay" id="booklanding"><div class="panel" style="max-width:600px"><button class="x" data-close="booklanding" style="position:absolute;right:22px;top:22px;z-index:2">✕</button><div id="bl-body"></div></div></div>
@@ -2956,6 +2989,30 @@ function askTheVault(){
 }
 $("btn-ask").onclick=askTheVault;
 
+/* ---------- ☰ menu: the icon row again, but with names (#127) ----------
+   Thirteen 44px buttons need 620px and a phone offers 353, so the bar keeps four and this
+   lists the lot. Built at OPEN time out of .iconrow itself, which means a button this device
+   doesn't get (➕ for non-admins, 👁️ with no platform authenticator) stays out of the list,
+   and a button added in some later release appears here with no extra wiring at all.
+   Availability is read off the INLINE style, never getComputedStyle: on a phone the CSS hides
+   the whole row, so a computed check would faithfully report that the menu is empty. */
+function renderMenu(){
+  const rows=[...document.querySelectorAll("#topbar .iconrow .iconbtn")]
+    .filter(b=>b.id!=="btn-menu"&&b.style.display!=="none")
+    .map(b=>{
+      const p=(b.title||b.id).split(" — ");
+      return `<button class="mrow" data-go="${b.id}"><span class="mg">${b.textContent.trim()}</span>`+
+        `<span><span class="mt">${esc(p[0])}</span>`+
+        (p.length>1?`<span class="md">${esc(p.slice(1).join(" — "))}</span>`:"")+`</span></button>`;
+    });
+  $("menu-body").innerHTML=rows.join("");
+  $("menu-body").querySelectorAll(".mrow").forEach(el=>el.onclick=()=>{
+    $("menu").classList.remove("on");
+    $(el.dataset.go).click();
+  });
+}
+$("btn-menu").onclick=()=>{renderMenu();$("menu").classList.add("on")};
+
 // Follow-ups written from the answer that just landed, rather than the same five buttons forever.
 // One extra call per turn, and it makes the thread feel like it is actually listening.
 async function suggestFollowups(){
@@ -3340,8 +3397,13 @@ $("btn-ach").onclick=()=>{const g=$("achgrid");g.innerHTML="";
   $("achs").classList.add("on")};
 
 /* ---------- patch notes ---------- */
-const APP_VER="3.53";
+const APP_VER="3.54";
 const PATCHES=[
+ {v:"3.54",n:"Fits In Your Hand",d:"29 Jul 2026",items:[
+  ["fix","THE PHONE LAYOUT WAS BROKEN AND IT WAS MY FAULT. The top bar grew from 8 icons to 13 over the last three releases and I never once checked it on a phone. Thirteen buttons need 620px of row; your screen gives 353. So five of them — 📓 Journal, 🏆 Achievements, ⚙️ Settings, 📜 Patch notes and 👁️ Face unlock — sat off the right edge where nothing could reach them, and the whole page went 583px wide, which is why every screen felt shifted and cut off. Measured at 371px: the document is now exactly as wide as the screen."],
+  ["new","☰ EVERYTHING IN THE VAULT — a menu that lists every feature with its name and a line saying what it does, instead of thirteen bare emoji you have to guess at. On a phone the bar keeps 🎓 🔍 📓 ☰ and the rest live in here. It builds itself from the bar, so it can never fall out of date."],
+  ["fix","Two separate mobile style blocks had been quietly disagreeing about how big an icon button is — one shrank it, the other overrode that and made it bigger — which is half of why the row's real width was never what it looked like."],
+  ["polish","The tooltips now say what each button actually does — “The Forge — have a new lesson written for your Path” rather than nothing at all."]]},
  {v:"3.53",n:"It Knows You",d:"29 Jul 2026",items:[
   ["new","🎓 ASK THE VAULT — the tutor can now see everything: every book on your shelf, how far into each one you are, what you've mastered, what you chose to highlight, and the questions you got wrong. So “what should I read next” and “what am I weakest on” are finally real questions. It answered mine by quoting my own highlight back and picking the book I'd already started."],
   ["new","The follow-up buttons are now written from the answer you just got, instead of the same five forever."],

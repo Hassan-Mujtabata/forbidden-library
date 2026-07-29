@@ -202,6 +202,7 @@
     patches:  function () { click("btn-patch"); },
     search:   function () { click("btn-search"); },
     account:  function () { click("btn-account"); },
+    menu:     function () { click("btn-menu"); },     // rows are built on open; empty otherwise
     progress: function () { call("renderProgress"); },
     queue:    function () { call("renderQueue"); },
     addbook:  function () { call("renderAddBook"); },
@@ -283,7 +284,49 @@
     }
   }
 
+  /* -------------------------------------------------------------- VA.fits() (#127)
+   * Contrast was the only thing measured here, so a top bar 212px wider than the screen
+   * shipped three times running. This reports anything sticking out past the viewport whose
+   * ancestors are ALL overflow:visible -- the qualifier is the whole trick, because the Path's
+   * track rail and the track jumper are meant to run off the edge inside their own scrollers.
+   *
+   * Run it inside a narrow iframe, not by resizing: the in-app browser pane will not go below
+   * ~583px, so a resize silently tests a tablet and reports a clean phone.
+   *     var f=document.createElement("iframe");
+   *     f.style.cssText="position:fixed;left:0;top:0;width:375px;height:812px;z-index:9e9";
+   *     f.src="/index.html#k="+key; document.body.appendChild(f);
+   * then paste this file into the frame and call VA.fits().
+   */
+  function fits() {
+    var W = window.innerWidth, bad = [], seen = {};
+    var all = document.querySelectorAll("body *");
+    for (var i = 0; i < all.length; i++) {
+      var el = all[i], r = el.getBoundingClientRect();
+      if (!r.width && !r.height) continue;
+      if (r.right <= W + 1 && r.left >= -1) continue;
+      if (!visible(el)) continue;
+      var p = el.parentElement, scroller = false;
+      while (p && p !== document.body) {
+        if (getComputedStyle(p).overflowX !== "visible") { scroller = true; break; }
+        p = p.parentElement;
+      }
+      if (scroller) continue;
+      var k = sel(el);
+      if (seen[k]) continue;
+      seen[k] = 1;
+      bad.push({ el: k, left: Math.round(r.left), right: Math.round(r.right), over: Math.round(r.right - W) });
+    }
+    return {
+      width: W, docWidth: document.documentElement.scrollWidth,
+      // the one number that matters: a document wider than its viewport pans sideways, and
+      // every view in the app looks shifted and cut off regardless of its own layout
+      pans: document.documentElement.scrollWidth > W + 1,
+      failed: bad.length, fails: bad.slice(0, MAX_REPORT)
+    };
+  }
+
   window.VA = {
+    fits: fits,
     run: function (theme) {
       if (original === null) {
         hadTheme = (typeof S === "object" && S && "theme" in S);
@@ -315,5 +358,5 @@
       return "restored";
     }
   };
-  return "VA ready — VA.run('dark'|'sepia'|'light'), then VA.restore()";
+  return "VA ready — VA.run('dark'|'sepia'|'light'), VA.fits(), then VA.restore()";
 })();

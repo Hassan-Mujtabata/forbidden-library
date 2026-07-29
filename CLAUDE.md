@@ -15,7 +15,7 @@ Single-file encrypted reading PWA. Hassan's books become gamified ~1,200-word le
 | `sw.js` | Service worker. `CACHE` const must bump with every `index.html` change. |
 | `content.enc` | AES-256-GCM(gzip(books + graph)). The only place lesson text exists publicly. |
 | `tools/ship.py` | **Release command.** Checks, bumps, commits, pushes. Use this, not manual steps. |
-| `tools/audit.js` | Browser-side contrast audit. Paste into `javascript_tool`. Returns terse JSON. |
+| `tools/audit.js` | Browser-side contrast audit (`VA.run`) + layout-overflow check (`VA.fits`). |
 | `tools/selftest.js` | Browser-side logic suite — `VT.run()`. Merge/tombstone/fold/sane invariants. |
 | `tools/bump.py` | Bumps `APP_VER` + `CACHE` together. `ship.py` calls it; rarely run directly. |
 | `tools/build.py` | Validates the graph (acyclic, prereqs resolve) → rebuilds `content.enc`. |
@@ -141,6 +141,34 @@ device. `selftest.js` now has a class guard ("no field from the other device is 
 
 **Removing a form field?** Grep the render function for leftover `$("id")` refs — a null throw
 before `classList.add("on")` silently breaks the whole overlay.
+
+**The top bar is not a shelf, and nothing was measuring it.** Adding one icon per release took the
+row from 8 buttons to 14; at the 44px tap-target minimum that needs 668px and a phone has 353. Five
+buttons sat off-screen, and because the row is `overflow:visible` the *document* went 583px wide, so
+every view panned sideways — the bug read as "the whole page is broken", not "the bar is too long".
+The fix is default-hidden: under 820px an `.iconbtn` is `display:none` unless it opts in with
+`.keep`, and the ☰ menu builds its rows from the same `.iconrow`, so a button added later is
+listed automatically and *cannot* re-break the layout. Two rules follow from this:
+- The menu tests availability with `b.style.display`, **not** `getComputedStyle` — on a phone the
+  CSS hides the whole row, so a computed check reports an empty menu, correctly and uselessly.
+- Every `.iconbtn` title reads `Name — what it does`; the menu splits on that em dash. `selftest.js`
+  fails the build if one is missing, along with the width sum and any icon reachable from neither.
+
+**Phone widths must be tested in an iframe.** The in-app browser pane refuses to go below ~583px —
+`resize_window({preset:"mobile"})` cheerfully returns "Viewport set to 375x812" and leaves
+`innerWidth` at 583, i.e. above the 560 breakpoint, so the phone CSS never even applies. An iframe
+gets its own viewport for media queries, so this actually tests a phone:
+`f.style.width="375px"; f.src="/index.html#k="+key`, then probe `f.contentDocument`. Reach app
+internals with `f.contentWindow.eval(src)` (indirect eval sees the lexical `const`s; the parent
+frame cannot). `VA.fits()` is the reusable form of the probe.
+
+**`cache:"reload"` on a fetch is not enough once the SW is gone.** Re-fetching `selftest.js` that
+way returned the pane's stale disk copy, so a mutation test re-installed the *old* assertion and
+reported that breaking the layout on purpose changed nothing. A `?x=`+timestamp query works here —
+the `{ignoreSearch:true}` warning above only applies while a service worker is registered.
+The first version of that same width guard also counted the wrong buttons (it excluded `btn-menu`,
+which occupies exactly as much room as any other) and passed a five-button bar. **Mutate every new
+assertion in both directions before believing it.**
 
 ## Conventions
 
