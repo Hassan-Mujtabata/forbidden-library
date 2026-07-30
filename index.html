@@ -2393,7 +2393,24 @@ async function convene(q){
  * pushing ~20KB of it through the sync gist alongside real progress would be wrong.
  */
 const HOOKS_LS="vault_hooks";
-let HOOKS=(()=>{try{return JSON.parse(localStorage.getItem(HOOKS_LS))||{}}catch(e){return{}}})();
+/* #129: derived content is only as good as the text it was derived from. 3.55 repaired 1,434
+   broken characters in the books, but the mined hooks are quotes taken from the OLD text and are
+   cached per book — so a device that mined "jh›na" or "ɹrst" keeps serving it in the daily lure
+   for days, because the refresh only rotates six books at a time. Stamp the cache with the
+   generation of the corpus it came from and throw it away wholesale when that changes. Cheap:
+   the hooks are ~20KB of regenerable text and re-mine themselves on the next landing. */
+const CONTENT_GEN=2;                       // bump whenever content.enc changes the book TEXT
+const HOOKS_LS_GEN="vault_hooks_gen";
+let HOOKS=(()=>{
+  try{
+    if((+localStorage.getItem(HOOKS_LS_GEN)||0)!==CONTENT_GEN){
+      localStorage.removeItem(HOOKS_LS);
+      localStorage.setItem(HOOKS_LS_GEN,CONTENT_GEN);
+      return {};
+    }
+    return JSON.parse(localStorage.getItem(HOOKS_LS))||{};
+  }catch(e){return{}}
+})();
 const saveHooks=()=>{try{localStorage.setItem(HOOKS_LS,JSON.stringify(HOOKS))}catch(e){}};
 const hookCount=()=>Object.keys(HOOKS).reduce((n,k)=>n+((HOOKS[k]&&HOOKS[k].items)||[]).length,0);
 
@@ -3416,8 +3433,13 @@ $("btn-ach").onclick=()=>{const g=$("achgrid");g.innerHTML="";
   $("achs").classList.add("on")};
 
 /* ---------- patch notes ---------- */
-const APP_VER="3.55";
+const APP_VER="3.56";
 const PATCHES=[
+ {v:"3.56",n:"The Repair Had A Bug",d:"30 Jul 2026",items:[
+  ["fix","YESTERDAY'S REPAIR INTRODUCED A WORD THAT WAS NEVER IN YOUR BOOK. Man's Search for Meaning now says a transport was “offcially announced” — one letter short of officially. The paragraph held two damaged fragments, “oʃcially” and a stray “oʃ”, and “oʃ” is a substring of the longer one: my repair expanded the short one first, rewrote every occurrence of it, and turned “oʃcially” into “offcially” before its own turn came. The word “offcially” appears zero times in the original scan, so I put it there. Fixed, and the books were rebuilt from the untouched original rather than patched on top of the damage."],
+  ["fix","The repair now substitutes each damaged word in place instead of by find-and-replace, so a short fragment can never overwrite a longer word that contains it. 262 words resolve correctly now, up from 237."],
+  ["fix","Daily facts mined before the text was repaired were still cached per book, so “jh›na” and “ɹrst” would have kept surfacing in your lure for days — the refresh only rotates six books at a time. The cache is now stamped with the version of the book text it came from and is thrown out whole when that changes."],
+  ["polish","The repair tool has its own self-test now (python tools/cleantext.py --selftest), pinned to this exact collision. Restoring the old code makes it fail with “offcially” — the bug reproduced on demand rather than trusted to stay fixed."]]},
  {v:"3.55",n:"Reads Like A Book Again",d:"30 Jul 2026",items:[
   ["content","YOUR BOOKS HAD 1,434 BROKEN CHARACTERS IN THEM AND I HAD NOT NOTICED. Man's Search for Meaning was missing a letter pair everywhere it mattered — “It is ɹrst of all a book about survival”, “prisoners have suʃered”. A second bad font had parked its ligatures on real Unicode letters, so every check I own said the text was fine. Now it reads “It is first of all a book about survival”."],
   ["content","Every jhāna in Bliss Beyond was stored as “jh›na”, so searching “jhana” found nothing in the one book that is entirely about them. It now returns 50 results. Same repair fixed nibbāna, Nikāya, Vicāra and Āsavas."],

@@ -183,23 +183,29 @@ def resolve(s, vocab, stats=None):
     Kept separate from clean() because the dictionary is built FROM clean() output -- a word
     can only vouch for a spelling once its own damage has been repaired.
     """
+    # #129: substituted match-by-match, NOT with s.replace(tok, ...). Replacing by token text
+    # rewrites every occurrence of that substring, and a short damaged token is frequently a
+    # prefix of a longer one in the same paragraph ("su<x>er" inside "su<x>ering") -- the short
+    # token's expansion lands inside the long one first, leaving a word its own pass can no longer
+    # find. On this corpus both expansions happened to agree so nothing was corrupted, but that is
+    # luck, not correctness, and the next book's ligature will not be as kind.
     for ch, cands in AMBIG.items():
         if ch not in s:
             continue
-        for tok in set(re.findall(r"\S*" + re.escape(ch) + r"\S*", s)):
+
+        def fix(m, ch=ch, cands=cands):
+            tok = m.group(0)
             core = tok.lower().strip(".,;:!?\u201c\u201d\u2018\u2019()[]'\u2014-")
-            pick = None
             for c in cands:
                 if core.replace(ch, c) in vocab:
-                    pick = c
-                    break
-            if pick is None:
-                pick = AMBIG_DEFAULT[ch]
-                if stats is not None:
-                    stats["fallback"].append(tok)
-            elif stats is not None:
-                stats["resolved"] += 1
-            s = s.replace(tok, tok.replace(ch, pick))
+                    if stats is not None:
+                        stats["resolved"] += 1
+                    return tok.replace(ch, c)
+            if stats is not None:
+                stats["fallback"].append(tok)
+            return tok.replace(ch, AMBIG_DEFAULT[ch])
+
+        s = re.sub(r"\S*" + re.escape(ch) + r"\S*", fix, s)
 
     def join(m):
         a, gap, b = m.group(1), m.group(2), m.group(3)
@@ -281,7 +287,32 @@ def build_vocab(data):
     return set(w for w, n in seen.items() if n >= 2)
 
 
+def selftest():
+    """The collision that corrupted 3.55, pinned so it cannot come back.
+
+    A paragraph holding both "o<esh>" and "o<esh>cially" resolves to "off" and "officially".
+    The old str.replace(token, ...) rewrote every occurrence of the substring, so whichever token
+    the set happened to yield first won: "o<esh>" -> "off" turned "o<esh>cially" into "offcially",
+    and that word's own pass then had nothing left to match. It shipped that way.
+    """
+    esh = "ʃ"
+    para = "was o%scially announced" % esh + " and o%s it went" % esh
+    vocab = {"officially", "off", "announced", "went"}
+    got = resolve(para, vocab)
+    bad = [w for w in ("offcially", "oﬃcially") if w in got]
+    if "officially" not in got or bad:
+        return "expected 'officially', got: " + got.encode("ascii", "backslashreplace").decode()
+    # and the short token must still expand on its own
+    if " off it went" not in got:
+        return "short token mis-expanded: " + got.encode("ascii", "backslashreplace").decode()
+    return True
+
+
 def main():
+    if "--selftest" in sys.argv:
+        r = selftest()
+        print("selftest: " + ("ok" if r is True else "FAIL -- " + str(r)))
+        sys.exit(0 if r is True else 1)
     fix = "--fix" in sys.argv
     data = json.load(open(BOOKS, encoding="utf-8"))
     unknown, total, empties = {}, 0, 0

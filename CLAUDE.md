@@ -171,6 +171,23 @@ separator there. Gate a repair on evidence of damage, then dump every before/aft
 before writing. Titles fall back to `"Episode N"`, never `""` — `esc(ep.t)` has no fallback of its
 own, so a blank title renders as a blank CONTINUE card.
 
+**Never repair text with `str.replace(token, ...)`.** It rewrites every occurrence of that
+substring, and damaged tokens overlap: a paragraph held both `oʃcially` and a stray `oʃ`, and
+because `oʃ` is a prefix of the longer word, expanding it first turned `oʃcially` into `offcially`
+— then that word's own pass had nothing left to match. It shipped in 3.55 and put a word in
+Hassan's book that appears **zero** times in the original scan. Substitute match-by-match with
+`re.sub(pattern, fn, s)` so every occurrence is resolved independently. `cleantext.py --selftest`
+pins this exact collision; restoring the old code makes it fail with `offcially`.
+Corollary: **re-repair from the pristine original, never patch on top of a bad repair** — the
+damaged character is already gone, so the second pass cannot see what went wrong. `--fix` moves the
+input to `books.json.bak`, which is what made the redo possible; copy it somewhere safe first.
+
+**Derived AI content must be invalidated when the source text changes.** Repairing the books left
+every mined hook still quoting the old damaged text, cached per book, and the daily refresh only
+rotates six books at a time — so `jh›na` would have kept surfacing for days. `vault_hooks` is now
+stamped with `CONTENT_GEN`; **bump that constant whenever `content.enc` changes the book text** and
+the cache is dropped wholesale. It is ~20KB of regenerable text, so throwing it away costs nothing.
+
 **A dot on a button the phone hides is a notification nobody gets.** 3.54 moved ten icons into ☰
 and silently took the 📜 patch and 📰 Dispatch unread markers with them. Anything that toggles
 `hasnew` must call `syncMenuBadge()`, which mirrors the marker onto ☰ — but only while
