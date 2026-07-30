@@ -202,9 +202,18 @@ a real place name in the same PDF. The books live in `Desktop\forbidden\*.pdf` �
 
 **Derived AI content must be invalidated when the source text changes.** Repairing the books left
 every mined hook still quoting the old damaged text, cached per book, and the daily refresh only
-rotates six books at a time — so `jh›na` would have kept surfacing for days. `vault_hooks` is now
-stamped with `CONTENT_GEN`; **bump that constant whenever `content.enc` changes the book text** and
-the cache is dropped wholesale. It is ~20KB of regenerable text, so throwing it away costs nothing.
+rotates six books at a time — so `jh›na` would have kept surfacing for days. `build.py` hashes the
+prose into `payload["gen"]`, and `pruneStaleHooks()` (called from `landing()`, since `HOOKS` is
+built at parse time before `DATA` exists) bins `vault_hooks` when the stamp differs. It is ~20KB of
+regenerable text, so throwing it away costs nothing.
+**This started as a hand-bumped `const CONTENT_GEN` and lasted exactly one release** — 3.57 rewrote
+159 words and left it at 2. If a rule says "remember to bump X", the rule is the bug: derive it.
+
+**NaN is the worst possible failure value here.** A review record merged from another device without
+its `k` interval index made `Math.min(undefined,1)` → NaN → `RV_DAYS[NaN]` → `undefined` → a `due`
+of NaN. Nothing throws, and `NaN <= now` is false forever, so the idea left Sharpen **permanently
+and silently**. Anything that computes a date or a score from stored state must clamp on the way in
+(`rvClamp`) — a thrown error gets reported, a NaN never does.
 
 **A dot on a button the phone hides is a notification nobody gets.** 3.54 moved ten icons into ☰
 and silently took the 📜 patch and 📰 Dispatch unread markers with them. Anything that toggles

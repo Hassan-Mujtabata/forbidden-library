@@ -1176,7 +1176,8 @@ async function boot(){
     }).catch(()=>{});
   }
 }
-function landing(){ loadForged();   // #125: put previously forged lessons back on the Path first
+function landing(){ pruneStaleHooks();   // #131: bin hooks mined from a previous edition of the text
+  loadForged();   // #125: put previously forged lessons back on the Path first
   if(DATA.nodes&&DATA.nodes.length){renderPath();show("path")} else {renderHome();show("home")} patchCheck(); initA11y(); setTimeout(checkReminder,1500);
   setTimeout(autoRefreshHooks,4000);   // #121: quietly read a few more books, once a day, on its own
   setTimeout(()=>{markDispatchDot();refreshDispatch(false);},9000);   // #123: then write the dispatch,
@@ -2398,19 +2399,22 @@ const HOOKS_LS="vault_hooks";
    cached per book — so a device that mined "jh›na" or "ɹrst" keeps serving it in the daily lure
    for days, because the refresh only rotates six books at a time. Stamp the cache with the
    generation of the corpus it came from and throw it away wholesale when that changes. Cheap:
-   the hooks are ~20KB of regenerable text and re-mine themselves on the next landing. */
-const CONTENT_GEN=2;                       // bump whenever content.enc changes the book TEXT
+   the hooks are ~20KB of regenerable text and re-mine themselves on the next landing.
+
+   #131: the first version of this was a hand-bumped `const CONTENT_GEN`, and it lasted exactly one
+   release — 3.57 rewrote 159 words and left the constant at 2, so the very rule this comment
+   states was already broken. build.py now stamps a sha256 of the prose into the payload as
+   DATA.gen, and the check below compares against that. Derived beats remembered. */
 const HOOKS_LS_GEN="vault_hooks_gen";
-let HOOKS=(()=>{
-  try{
-    if((+localStorage.getItem(HOOKS_LS_GEN)||0)!==CONTENT_GEN){
-      localStorage.removeItem(HOOKS_LS);
-      localStorage.setItem(HOOKS_LS_GEN,CONTENT_GEN);
-      return {};
-    }
-    return JSON.parse(localStorage.getItem(HOOKS_LS))||{};
-  }catch(e){return{}}
-})();
+let HOOKS=(()=>{try{return JSON.parse(localStorage.getItem(HOOKS_LS))||{}}catch(e){return{}}})();
+// Called once DATA exists — HOOKS is built at parse time, long before there is anything to compare.
+function pruneStaleHooks(){
+  const gen=(typeof DATA==="object"&&DATA&&DATA.gen)||"";
+  if(!gen)return;                                  // payload predates the stamp: leave it alone
+  if(localStorage.getItem(HOOKS_LS_GEN)===gen)return;
+  HOOKS={};
+  try{localStorage.removeItem(HOOKS_LS);localStorage.setItem(HOOKS_LS_GEN,gen);}catch(e){}
+}
 const saveHooks=()=>{try{localStorage.setItem(HOOKS_LS,JSON.stringify(HOOKS))}catch(e){}};
 const hookCount=()=>Object.keys(HOOKS).reduce((n,k)=>n+((HOOKS[k]&&HOOKS[k].items)||[]).length,0);
 
@@ -3433,8 +3437,12 @@ $("btn-ach").onclick=()=>{const g=$("achgrid");g.innerHTML="";
   $("achs").classList.add("on")};
 
 /* ---------- patch notes ---------- */
-const APP_VER="3.57";
+const APP_VER="3.58";
 const PATCHES=[
+ {v:"3.58",n:"Quiet Failures",d:"30 Jul 2026",items:[
+  ["fix","AN IDEA COULD DROP OUT OF SHARPEN FOREVER, SILENTLY. If a review record ever reached this device without its interval number — an older save, or merged in from your other device — the next-review date was computed as NaN. Nothing throws on NaN; it simply compares false against every date forever, so that idea stopped being reviewed and nothing anywhere said so. Review records are now repaired on the way in, and four tests hold the line: turning the repair off reports “this idea can never be reviewed again”."],
+  ["fix","The daily-facts cache now knows which edition of your books it was mined from. I built that check in 3.56 as a number I had to remember to change, then changed the text in 3.57 and forgot — so build.py now fingerprints the prose itself and the app compares against that. Derived instead of remembered, because I proved I would forget."],
+  ["polish","Verified while hunting: the streak survives a missed day correctly (freeze spends, count holds), highlighting saves from anywhere in a chapter, and no episode title still carries scanner damage."]]},
  {v:"3.57",n:"Scanned, Not Typed",d:"30 Jul 2026",items:[
   ["content","159 SCANNER MISREADS CORRECTED. “Alexander I, Rnssia's temperamental czar” is Russia's. “Really a Iyrrhir victory” is a Pyrrhic victory. Also vvith→with, frorn→from, tliey→they, pcople→people, rnore→more, toclay→today, ganlle→gaulle, and 150 more of the same kind."],
   ["content","Only two of your 22 books were repaired this way, and I measured which rather than guessing: counting rare words unique to each book, The 48 Laws scores 34.6 per thousand and Meditations 17.1, against 2.0–9.5 for every other book. Those two are page scans with the scanner's own bad reading baked in; the rest were typed. In a clean book a rare word is just a rare word."],
@@ -3782,14 +3790,25 @@ function levelPickerHTML(id){
 function wireLevelPicker(container,id){
   container.querySelectorAll(".lvlbtn").forEach(b=>b.onclick=()=>{
     const lv=+b.dataset.lvl,rec=(S.node[id]=S.node[id]||{});rec.level=lv;
-    const rv=rec.rv; if(rv){rv.k=lv===1?0:lv===2?Math.min(rv.k,1):rv.k;rv.due=Date.now()+RV_DAYS[rv.k]*864e5;}  // shakier = revisit sooner
+    const rv=rvClamp(rec.rv); if(rv){rv.k=lv===1?0:lv===2?Math.min(rv.k,1):rv.k;rv.due=Date.now()+RV_DAYS[rv.k]*864e5;}  // shakier = revisit sooner (#132: clamp first — a k-less rv made due NaN)
     save();
     container.querySelectorAll(".lvlbtn").forEach(x=>x.classList.toggle("on",+x.dataset.lvl===lv));
     toast(levelMeta(lv).e+" Progress updated — "+levelMeta(lv).l.toLowerCase());
   });
 }
+/* #132: one place that guarantees a review record is usable. An rv that arrives without `k` --
+   from an older save, or merged in from another device -- poisons the scheduler silently:
+   Math.min(undefined,1) is NaN, RV_DAYS[NaN] is undefined, and due becomes NaN. NaN <= now is
+   always false, so the idea drops out of Sharpen FOREVER with no error and no way to notice.
+   Spaced repetition quietly stopping for one idea is exactly the kind of failure nobody reports. */
+function rvClamp(rv){
+  if(!rv)return rv;
+  if(!Number.isInteger(rv.k)||rv.k<0||rv.k>=RV_DAYS.length)rv.k=0;
+  if(!Number.isFinite(rv.due))rv.due=Date.now();
+  return rv;
+}
 function rvState(id){const r=S.node[id];if(!r||!r.doneAt)return null;
-  r.rv??={due:r.doneAt+864e5,k:0};return r.rv}
+  r.rv??={due:r.doneAt+864e5,k:0};return rvClamp(r.rv)}
 function reviewDue(){if(!DATA.nodes)return[];const now=Date.now();
   return DATA.nodes.filter(x=>{const rv=rvState(x.id);return rv&&rv.due<=now})}
 // #39: a light weekly goal — master N ideas this week

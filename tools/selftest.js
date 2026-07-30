@@ -548,6 +548,50 @@
     });
   }
 
+  /* ------------------------------------------------- spaced review (#132)
+   * A review record that arrives without `k` -- an older save, or merged from another device --
+   * used to poison the scheduler: Math.min(undefined,1) is NaN, RV_DAYS[NaN] is undefined, due
+   * becomes NaN, and because NaN <= now is always false the idea left Sharpen permanently.
+   * Silent, unreported, and unrecoverable without editing localStorage by hand.
+   */
+  function reviewTests() {
+    var id = DATA.nodes[0] && DATA.nodes[0].id;
+
+    check("review: an idea finished long ago comes up for review", function () {
+      if (!id) return "no nodes in the graph";
+      S.node[id] = { doneAt: Date.now() - 30 * 864e5 };
+      var due = reviewDue().map(function (x) { return x.id; });
+      return due.indexOf(id) >= 0 ? true : "not due 30 days after completion";
+    });
+
+    check("review: a record with no k does not become NaN-scheduled", function () {
+      if (!id) return "no nodes in the graph";
+      S.node[id] = { doneAt: Date.now() - 30 * 864e5, level: 3, rv: { due: Date.now() - 864e5 } };
+      var rv = rvClamp(S.node[id].rv);
+      rv.k = Math.min(rv.k, 1);
+      rv.due = Date.now() + RV_DAYS[rv.k] * 864e5;
+      if (!isFinite(rv.due)) return "due is not finite -- this idea can never be reviewed again";
+      return Number.isInteger(rv.k) ? true : "k is " + rv.k;
+    });
+
+    check("review: a corrupt due date is repaired rather than trusted", function () {
+      if (!id) return "no nodes in the graph";
+      S.node[id] = { doneAt: Date.now() - 864e5, rv: { due: NaN, k: 99 } };
+      var rv = rvState(id);
+      if (!isFinite(rv.due)) return "due still not finite";
+      return (rv.k >= 0 && rv.k < RV_DAYS.length) ? true : "k out of range: " + rv.k;
+    });
+
+    check("review: answering it right pushes the next one further out", function () {
+      if (!id) return "no nodes in the graph";
+      S.node[id] = { doneAt: Date.now() - 30 * 864e5 };
+      var rv = rvState(id), k0 = rv.k;
+      rv.k = Math.max(0, Math.min(RV_DAYS.length - 1, k0 + 1));
+      rv.due = Date.now() + RV_DAYS[rv.k] * 864e5;
+      return rv.due > Date.now() + 864e5 ? true : "next review is not further away than one day";
+    });
+  }
+
   window.VT = {
     run: function () {
       out = []; t0 = performance.now();
@@ -555,7 +599,7 @@
       try {
         foldTests(); saneTests(); readTests(); mergeTests(); pushTests();
         indexTests(); fmtTests(); hookTests(); gauntletTests(); matchTests(); libraryTests();
-        chromeTests();
+        chromeTests(); reviewTests();
       } finally {
         S = snap;
         if (typeof save === "function") save();

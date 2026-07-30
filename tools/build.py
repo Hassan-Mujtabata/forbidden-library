@@ -104,6 +104,21 @@ def main():
         return
 
     payload = {"v": 2, "books": books["books"], "tracks": graph["tracks"], "nodes": graph["nodes"]}
+    # #131: stamp a fingerprint of the BOOK TEXT into the payload so anything derived from it
+    # (mined hooks, forged sources) can tell it is stale without a human remembering to bump a
+    # constant. The constant version of this lasted exactly one release before I forgot it: 3.57
+    # rewrote 159 words and left CONTENT_GEN at 2. Hash only the prose, so a graph or blurb edit
+    # does not needlessly bin 20KB of perfectly good hooks.
+    import hashlib
+    h = hashlib.sha256()
+    for b in payload["books"]:
+        h.update(b["id"].encode("utf-8"))
+        for e in b["episodes"]:
+            h.update((e.get("t") or "").encode("utf-8"))
+            for p in e["p"]:
+                h.update(p.encode("utf-8"))
+    payload["gen"] = h.hexdigest()[:12]
+    print("  text fingerprint: %s" % payload["gen"])
     raw = json.dumps(payload, ensure_ascii=False, separators=(",", ":")).encode("utf-8")
     data = gzip.compress(raw, 9)
 
