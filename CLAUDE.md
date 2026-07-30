@@ -182,6 +182,24 @@ Corollary: **re-repair from the pristine original, never patch on top of a bad r
 damaged character is already gone, so the second pass cannot see what went wrong. `--fix` moves the
 input to `books.json.bak`, which is what made the redo possible; copy it somewhere safe first.
 
+**Only two books are scans, and only they may get letter-level repair.** Measured, not assumed:
+rare tokens unique to a book, per 1000 words — `laws48` 34.6, `meditations` 17.1, every other book
+2.0–9.5. Those two are page images with the scanner's own bad reading baked into the text layer
+(the 48 Laws PDF is 476 image pages), so `vvith`/`frorn`/`pcople` are damage. **In a typed book a
+rare word is a rare word**: `clown`, `clone`, `eases`, `wafer` and `farce` all live in clean books,
+and a corpus-frequency dictionary will "fix" them into down/done/cases/water/force. Re-extraction
+cannot help these two — the garbage *is* the text layer — and there is no OCR tool installed.
+
+**A corpus dictionary cannot recognise real words the corpus never uses.** The automatic gate
+(rare + scan-only + unique candidate + common target) still proposed `trajan`→`trojan` (Trajan is
+an emperor Greene discusses), `aught`→`ought` (archaic English, in an archaic translation),
+`carnage`→`carriage`, `defecting`→`detecting` and `filing`→`filling`. `DENY` in `cleantext.py`
+holds the 21 reviewed exceptions; it is a judgement, written out in the open so it can be argued
+with, not derived. **Generate the list, read all of it, then apply** — `--list` prints it.
+Where a scan contradicts itself the PDF settles it rather than inference: the 48 Laws scan prints
+each law twice, and page 9's "Iyrrhir" is page 91's "Pyrrhic". `javiac` looked like damage and is
+a real place name in the same PDF. The books live in `Desktop\forbidden\*.pdf` — read them.
+
 **Derived AI content must be invalidated when the source text changes.** Repairing the books left
 every mined hook still quoting the old damaged text, cached per book, and the daily refresh only
 rotates six books at a time — so `jh›na` would have kept surfacing for days. `vault_hooks` is now

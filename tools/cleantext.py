@@ -222,7 +222,12 @@ def resolve(s, vocab, stats=None):
         # joining on a guess is how "Christa pher" would have become a word that does not exist.
         return a + ("-" if gap == "" else " ") + b
 
-    return HYPH_TIGHT.sub(r"\1-\2", HYPH.sub(join, s))
+    s = HYPH_TIGHT.sub(r"\1-\2", HYPH.sub(join, s))
+    # Whatever guillemet survives both passes had no letter on one side, so it is not a hyphen and
+    # not punctuation -- this corpus never uses « » as quotes. It is page furniture from the scan
+    # ("L AVV «'14 page 3 76"), so it goes. Tildes are NOT stripped here: ~ is a real attribution
+    # dash in two books and part of a real URL in a third (see the note in main()).
+    return s.replace("«", "").replace("»", "")
 
 
 # Characters that only ever turn up in an episode title as OCR sludge. This is a GATE, not a
@@ -268,6 +273,132 @@ def clean_title(t, index, unknown=None, vocab=None):
     if len(out) < 3 or not re.search(r"[A-Za-z\u00c0-\u00ff]{3}", out):
         return "Episode %d" % (index + 1), True
     return out, out != t
+
+
+# ---------------------------------------------------------------- letter-level OCR repair (#130)
+#
+# Only two books in the library came from a page SCAN rather than a digital text layer, and only
+# those two get letter-level correction. That is measured, not assumed: counting rare tokens unique
+# to each book, per 1000 words, gives laws48 34.6 and meditations 17.1 against 2.0-9.5 for all
+# twenty others. The distinction matters enormously, because in a clean digital book a rare word is
+# simply A RARE WORD. "clown", "clone", "eases" and "wafer" all live in clean books, and a
+# frequency-built dictionary will cheerfully "correct" them into down/done/cases/water.
+SCANNED = {"laws48", "meditations"}
+
+# Glyph pairs a scanner genuinely confuses, both directions. Multi-character ones (vv->w, rn->m,
+# ii->n, li->h) carry most of the weight and almost never produce a real word by accident.
+GLYPH_PAIRS = [("vv", "w"), ("rn", "m"), ("ii", "n"), ("li", "h"), ("cl", "d"), ("ri", "n"),
+               ("fi", "h"), ("n", "u"), ("i", "l"), ("c", "e"), ("f", "t"), ("a", "o"),
+               ("b", "h"), ("y", "v"), ("g", "q"), ("s", "5"), ("l", "1"), ("o", "0")]
+GLYPH_SUBS = list(dict.fromkeys([p for a, b in GLYPH_PAIRS for p in ((a, b), (b, a))]))
+
+# Words the PDF itself settles, so they are evidence rather than inference. The 48 Laws scan
+# prints each law twice -- once in the contents summary, once as the chapter -- and the second copy
+# is often clean where the first is not: page 9 reads "a Iyrrhir victory", page 91 the same
+# sentence as "a Pyrrhic victory". "Russia" appears 18 times correctly against one "Rnssia".
+# NOT included, deliberately: "javiac" is the real place name (the PDF reads "Madame Guillelma de
+# Javiac"), and "Viemetta"/"Viernetta" is a proper noun the scan spells two ways with nothing to
+# break the tie -- guessing at somebody's name is exactly what this file refuses to do.
+FROM_SOURCE = {"laws48": {"iyrrhir": "Pyrrhic", "rnssia": "Russia"}}
+
+# A separate, tiny class: the extractor expanded an "ffi" ligature but dropped the "i", leaving a
+# real-looking word one letter short. Applies library-wide because it is not a scanning artefact,
+# and it is an explicit list because the automatic version proposed two corrections that were
+# WRONG: "filing" (a real word -- filing a report) and "fulfilment" (the correct British spelling).
+# "diffictilz" is left alone: it is several edits from "difficult" with nothing to anchor the guess.
+LIG_DROP = {"diffcult": "difficult", "offcer": "officer"}
+
+TOKEN = re.compile(r"[A-Za-zÀ-ÿ][A-Za-zÀ-ÿ]*")
+
+# Where the corpus test runs out. Every entry below passed all four automatic gates and is still
+# WRONG, because the gates can only ask "does the library use this word elsewhere" and these are
+# real English (or real names) that simply never appear in the other twenty books. Reviewed by
+# hand from the generated list; this is a judgement, not a derivation, which is exactly why it is
+# written out here where it can be argued with.
+#   real words:   "aught" is archaic English and Meditations is an archaic translation; "carnage",
+#                 "defecting", "fended", "farces", "dotes", "rigidify", "baldness" and "auger" are
+#                 all plausible in a book about power, so "correcting" them invents a new sentence
+#   real names:   Trajan is a Roman emperor The 48 Laws discusses -- "trojan" would be a fabrication
+#                 Clare, Hales and Landon are people
+#   fragments:    "uation" is the tail of "situation" and "vated" of "motivated"; mapping them to
+#                 "nation" and "voted" would replace a broken word with a confident wrong one
+DENY = {"aught", "auger", "baldness", "carnage", "clare", "defecting", "dotes", "farces",
+        "fended", "hales", "hitter", "landon", "rigidify", "trajan",
+        "areri", "offhe", "ofthc", "tioii", "tious", "uation", "vated"}
+
+
+def _swaps(lw):
+    out = set()
+    for a, b in GLYPH_SUBS:
+        i = lw.find(a)
+        while i >= 0:
+            out.add(lw[:i] + b + lw[i + len(a):])
+            i = lw.find(a, i + 1)
+    out.discard(lw)
+    return out
+
+
+def build_fixmap(data):
+    """Decide, per scanned book, which damaged words have exactly one credible repair.
+
+    A word is corrected only when all of these hold:
+      * it lives in a scanned book and appears NOWHERE else in the library
+      * it is rare there (<= 2 sightings) and at least 5 letters long
+      * exactly ONE glyph-swap candidate is a word the library uses 20+ times, in 3+ books
+    Ambiguity is always declined. Nothing is ever invented; the corpus casts the deciding vote.
+    """
+    freq, in_book = {}, {}
+    for b in data["books"]:
+        for e in b["episodes"]:
+            for p in e["p"]:
+                for w in TOKEN.findall(p):
+                    lw = w.lower()
+                    freq[lw] = freq.get(lw, 0) + 1
+                    in_book.setdefault(lw, set()).add(b["id"])
+    common = {w for w, n in freq.items() if n >= 20 and len(in_book[w]) >= 3}
+
+    fixmap, declined = {}, {"ambiguous": [], "nothing_fits": 0}
+    for b in data["books"]:
+        if b["id"] not in SCANNED:
+            continue
+        mine = {}
+        for w, n in freq.items():
+            if n > 2 or len(w) < 5 or in_book[w] != {b["id"]} or w in DENY:
+                continue
+            hits = sorted(c for c in _swaps(w) if c in common)
+            if len(hits) == 1:
+                mine[w] = hits[0]
+            elif len(hits) > 1:
+                declined["ambiguous"].append(w)
+            else:
+                declined["nothing_fits"] += 1
+        for w, fixed in FROM_SOURCE.get(b["id"], {}).items():
+            mine[w] = fixed                      # the scan's own cleaner copy outranks inference
+        fixmap[b["id"]] = mine
+    for b in data["books"]:                      # ligature dropout is not scan-specific
+        fixmap.setdefault(b["id"], {}).update(LIG_DROP)
+    return fixmap, declined
+
+
+def letter_fix(s, fixes, stats=None):
+    """Apply the agreed corrections, matching whole words and preserving the original capitals."""
+    if not fixes:
+        return s
+
+    def one(m):
+        w = m.group(0)
+        f = fixes.get(w.lower())
+        if not f:
+            return w
+        if stats is not None:
+            stats["letters"] += 1
+        if w.isupper():
+            return f.upper()
+        if w[0].isupper():
+            return f[0].upper() + f[1:]
+        return f
+
+    return re.sub(r"\b[A-Za-zÀ-ÿ]{5,}\b", one, s)
 
 
 def build_vocab(data):
@@ -318,8 +449,17 @@ def main():
     unknown, total, empties = {}, 0, 0
 
     vocab = build_vocab(data)
-    stats = {"resolved": 0, "joined": 0, "fallback": [], "unjoined": []}
-    print("dictionary: %d words the library already spells correctly\n" % len(vocab))
+    stats = {"resolved": 0, "joined": 0, "fallback": [], "unjoined": [], "letters": 0}
+    fixmap, declined = build_fixmap(data)
+    print("dictionary: %d words the library already spells correctly" % len(vocab))
+    print("letter repair: %s; declined %d ambiguous, %d with nothing credible\n"
+          % (", ".join("%s %d words" % (k, len(v)) for k, v in sorted(fixmap.items())),
+             len(declined["ambiguous"]), declined["nothing_fits"]))
+    if "--list" in sys.argv:
+        for bid in sorted(fixmap):
+            for w, c in sorted(fixmap[bid].items()):
+                print("   %-10s %-22s -> %s" % (bid, w, c))
+        sys.exit(0)
 
     print("%-12s %8s %8s %8s %8s" % ("book", "paras", "damaged", "chars", "titles"))
     for b in data["books"]:
@@ -328,7 +468,8 @@ def main():
             new = []
             for p in e["p"]:
                 paras += 1
-                c = resolve(clean(p, unknown), vocab, stats)
+                c = letter_fix(resolve(clean(p, unknown), vocab, stats),
+                               fixmap.get(b["id"]), stats)
                 if c != p:
                     dmg += 1
                     chars += (len(CTRL.findall(p)) + len(ANY_PUA.findall(p)) +

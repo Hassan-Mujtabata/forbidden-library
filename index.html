@@ -3433,8 +3433,15 @@ $("btn-ach").onclick=()=>{const g=$("achgrid");g.innerHTML="";
   $("achs").classList.add("on")};
 
 /* ---------- patch notes ---------- */
-const APP_VER="3.56";
+const APP_VER="3.57";
 const PATCHES=[
+ {v:"3.57",n:"Scanned, Not Typed",d:"30 Jul 2026",items:[
+  ["content","159 SCANNER MISREADS CORRECTED. “Alexander I, Rnssia's temperamental czar” is Russia's. “Really a Iyrrhir victory” is a Pyrrhic victory. Also vvith→with, frorn→from, tliey→they, pcople→people, rnore→more, toclay→today, ganlle→gaulle, and 150 more of the same kind."],
+  ["content","Only two of your 22 books were repaired this way, and I measured which rather than guessing: counting rare words unique to each book, The 48 Laws scores 34.6 per thousand and Meditations 17.1, against 2.0–9.5 for every other book. Those two are page scans with the scanner's own bad reading baked in; the rest were typed. In a clean book a rare word is just a rare word."],
+  ["content","That distinction is the whole safety mechanism. “clown”, “clone”, “eases”, “wafer” and “farce” all live in your other books, and a corpus-built dictionary would happily “fix” them into down, done, cases, water and force. 21 more were rejected by hand for the same reason — Trajan is a Roman emperor Greene actually discusses, not a typo for trojan, and “aught” is real archaic English in Meditations."],
+  ["content","Two words came from your PDFs rather than from inference. The 48 Laws scan prints each law twice, and where page 9 reads “Iyrrhir” page 91 reads “Pyrrhic” — the book correcting itself. “javiac” looked wrong and is not: the PDF reads “Madame Guillelma de Javiac”. It stays."],
+  ["content","The last 264 stray « » marks are gone from the front matter. Tildes were left alone on purpose — “~ Caesar” is a real attribution, “Confucius ~ Rumi” a real separator, and one sits inside a real web address."],
+  ["fix","“diffcult” is difficult and “offcer” is officer — a dropped letter from an ffi ligature. The automatic version of this also proposed “filing”→filling and “fulfilment”→fulfillment; both were wrong, so that repair is now an explicit two-word list instead."]]},
  {v:"3.56",n:"The Repair Had A Bug",d:"30 Jul 2026",items:[
   ["fix","YESTERDAY'S REPAIR INTRODUCED A WORD THAT WAS NEVER IN YOUR BOOK. Man's Search for Meaning now says a transport was “offcially announced” — one letter short of officially. The paragraph held two damaged fragments, “oʃcially” and a stray “oʃ”, and “oʃ” is a substring of the longer one: my repair expanded the short one first, rewrote every occurrence of it, and turned “oʃcially” into “offcially” before its own turn came. The word “offcially” appears zero times in the original scan, so I put it there. Fixed, and the books were rebuilt from the untouched original rather than patched on top of the damage."],
   ["fix","The repair now substitutes each damaged word in place instead of by find-and-replace, so a short fragment can never overwrite a longer word that contains it. 262 words resolve correctly now, up from 237."],
