@@ -142,6 +142,40 @@ device. `selftest.js` now has a class guard ("no field from the other device is 
 **Removing a form field?** Grep the render function for leftover `$("id")` refs — a null throw
 before `classList.add("on")` silently breaks the whole overlay.
 
+**Text damage hides in valid Unicode.** The 3.43 pass fixed control bytes and private-use
+ligatures, so every later check reported the corpus clean — while a second subset font had parked
+its ligatures on *real letters*: "first" stored as "ɹrst" (IPA turned-r), every jhāna in Bliss
+Beyond as "jh›na". Nothing is invalid, nothing renders as a box, and search silently misses the one
+book that is entirely about jhānas. When looking for damage, sweep for *implausible* characters —
+IPA in an English book, Cyrillic homoglyphs, a lone `›` — not just invalid ones. Each damaged code
+point turned out to be confined to exactly one book, which is the signature of a per-PDF font quirk
+and is itself the evidence the mapping is real.
+
+**Repair with the corpus as the dictionary, never with a guess.** `cleantext.py` builds a set of
+every word the library already spells correctly (seen 2+ times in 13.3M chars) and only applies an
+ambiguous fix when the result is in it — U+0283 is "ff" in "suʃered" but "ffi" in "suʃcient", and
+the dictionary decides which. Same rule rejoins line-break hyphens: 306 joined, **248 declined**
+because "Christa/pher" and "Gilga/mesh" would have become words that do not exist. Declining is the
+feature.
+
+**Before stripping a character wholesale, print its real context.** `~` looked like pure OCR noise
+(636 of them) — it is also the attribution dash in Covert 30 ("~ Caesar"), the separator in Quiet
+Influence ("Confucius ~ Rumi"), and part of a **real URL** in Thinking Fast and Slow
+(`princeton.edu/~kahneman/docs/`). A blanket strip corrupts all three. Only a guillemet or tilde
+with a letter on *both* sides is treated as a hyphen; the rest is reported, not touched.
+
+**A repair that deletes real information is worse than the damage.** The first title cleaner
+rewrote 405 titles when 47 were damaged — it "fixed" the genuine "Chapter 2 (Pages 17-56)" down to
+"Chapter 2" and ate the page ranges from all 40 Right Concentration chapters because `|` is a real
+separator there. Gate a repair on evidence of damage, then dump every before/after and read them
+before writing. Titles fall back to `"Episode N"`, never `""` — `esc(ep.t)` has no fallback of its
+own, so a blank title renders as a blank CONTINUE card.
+
+**A dot on a button the phone hides is a notification nobody gets.** 3.54 moved ten icons into ☰
+and silently took the 📜 patch and 📰 Dispatch unread markers with them. Anything that toggles
+`hasnew` must call `syncMenuBadge()`, which mirrors the marker onto ☰ — but only while
+`matchMedia("(max-width:820px)")` matches, or desktop shows the dot twice.
+
 **The top bar is not a shelf, and nothing was measuring it.** Adding one icon per release took the
 row from 8 buttons to 14; at the 44px tap-target minimum that needs 668px and a phone has 353. Five
 buttons sat off-screen, and because the row is `overflow:visible` the *document* went 583px wide, so

@@ -31,6 +31,33 @@ Stripping the bad bytes is not enough -- for two of the three it silently delete
     font's .notdef box -- which again differs per font. Strip them last, after the repairs
     above have had their chance to interpret them as data.
 
+ 4. IPA / PUNCTUATION STAND-INS FOR LIGATURES  (Man's Search for Meaning, Bliss Beyond)
+    A second family of subset fonts mapped their ligatures onto real Unicode letters instead of
+    the private-use area, so the damage is INVISIBLE to every check above -- the characters are
+    perfectly valid, they are just the wrong ones. "first" is stored as "ɹrst" with an IPA
+    turned-r, and every jhana in Bliss Beyond is "jh›na" with a single angle quote where the
+    a-macron belongs. Each damaged code point is confined to exactly ONE book (see MAP below),
+    which is what a per-PDF font quirk looks like and is itself evidence the mapping is real.
+    Two of them are ambiguous -- U+0283 is "ff" in "suʃered" but "ffi" in "suʃcient" --
+    so those are resolved per word against a dictionary built from THIS corpus: whatever the
+    library already spells correctly somewhere in its 13.3M characters is a real word. 594 of the
+    620 damaged tokens resolve that way; the rest are hyphenated compounds and rare Pali proper
+    nouns whose expansion is unambiguous anyway.
+
+ 5. LINE-BREAK HYPHENS THAT BECAME GUILLEMETS  (48 Laws, ~1100 occurrences)
+    The extractor turned the soft hyphen at a line break into "»", "«" or "~", leaving
+    "resent» ment" and "manipu~ late" mid-sentence. Rejoining is only done when the joined
+    form is a word the corpus already knows, so a real hyphen ("East~West") is never eaten and
+    no new word is ever invented; anything unresolved just loses the stray character.
+
+ 6. JUNK EPISODE TITLES  (47 of them)
+    Front-matter pages came through as "1(}A.‘3\\ Law 15" and "VVC)Rl(()D$TT{EZ}IEAURTS".
+    These are read out in the reader header, the CONTINUE card and every search result, so they
+    are the most VISIBLE damage in the library. Junk tokens are dropped and the recognisable part
+    kept ("Law 15"); a title with nothing recognisable left falls back to "Episode N", which is
+    what most of this corpus already uses, rather than to an empty string -- `esc(ep.t)` is
+    rendered with no fallback of its own, so a blank title shows as a blank CONTINUE card.
+
 Anything in the Private Use Area that is NOT in the proven map is reported by name and
 dropped, never guessed at -- a wrong guess would put invented words into the books.
 """
@@ -52,6 +79,35 @@ PUA = {"\ue002": "Th", "\ue04e": "Th", "\ue053": "Th"}
 # them is the standard NFKC decomposition: lossless, and it makes 1415 words searchable again.
 LIGATURES = {"\ufb00": "ff", "\ufb01": "fi", "\ufb02": "fl",
              "\ufb03": "ffi", "\ufb04": "ffl", "\ufb05": "st", "\ufb06": "st"}
+
+# Ligatures a subset font parked on real Unicode letters (damage #4). Every one of these is
+# confined to a single book, listed here so a future scan can tell "still there" from "came back".
+#   U+0279 fi   U+027B fl   U+0283 ff|ffi   U+0280 ffl|ffi|ffil   U+027D ffi   [meaning]
+#   U+203A a-macron   U+02DB t-underdot                                        [bliss]
+# The single-valued ones are applied unconditionally; the list-valued ones go to the resolver.
+MAP = {
+    "ɹ": "fi",
+    "ɻ": "fl",
+    "›": "ā",                    # a with macron: jh›na -> jhāna
+    "˛": "ṭ",                    # t with dot below: a˛˛hakathā -> aṭṭhakathā
+}
+AMBIG = {
+    "ʃ": ["ff", "ffi"],               # suʃered -> suffered, suʃcient -> sufficient
+    "ʀ": ["ffl", "ffi", "ffil"],      # aʀictions -> afflictions, aʀiated -> affiliated
+    "ɽ": ["ffi"],                     # diɽcilia -> difficilia (Latin, 1 occurrence)
+}
+# Used when no candidate is a known word: the overwhelmingly commoner expansion. Every token
+# that lands here was checked by hand and is a hyphenated or em-dashed compound (side-eʃect,
+# aʃording, k›ma-cchanda) whose expansion is not in doubt, only absent from the dictionary.
+AMBIG_DEFAULT = {"ʃ": "ff", "ʀ": "ffl", "ɽ": "ffi"}
+
+# A line-break hyphen that arrived as a guillemet or tilde (damage #5). Captures the letters
+# either side so the join can be dictionary-checked before it is made.
+HYPH = re.compile(r"([A-Za-zÀ-ɏ]{2,})[«»~]([ \t]*)([A-Za-zà-ɏ]{2,})")
+# A stray guillemet/tilde still sitting between two letters after the rejoin pass was a plain
+# hyphen all along ("Chiang Kai~shek"), so it becomes one rather than being dropped.
+HYPH_TIGHT = re.compile(r"([A-Za-zÀ-ɏ])[«»~]([A-Za-zÀ-ɏ])")
+WORD = re.compile(r"[A-Za-zÀ-ɏḀ-ỿ']+")
 
 # Control characters that never carry meaning in book prose. Tab and newline are kept.
 CTRL = re.compile(r"[\x00-\x08\x0b\x0c\x0e-\x1f\x7f-\x9f]")
@@ -109,6 +165,8 @@ def clean(s, unknown=None):
         s = s.replace(k, v)
     for k, v in LIGATURES.items():
         s = s.replace(k, v)
+    for k, v in MAP.items():
+        s = s.replace(k, v)
     if unknown is not None:
         for ch in ANY_PUA.findall(s):
             unknown[ch] = unknown.get(ch, 0) + 1
@@ -119,31 +177,167 @@ def clean(s, unknown=None):
     return re.sub(r"[ \t]{2,}", " ", s).strip()
 
 
+def resolve(s, vocab, stats=None):
+    """Second pass: the repairs that need to know what a real word looks like.
+
+    Kept separate from clean() because the dictionary is built FROM clean() output -- a word
+    can only vouch for a spelling once its own damage has been repaired.
+    """
+    for ch, cands in AMBIG.items():
+        if ch not in s:
+            continue
+        for tok in set(re.findall(r"\S*" + re.escape(ch) + r"\S*", s)):
+            core = tok.lower().strip(".,;:!?\u201c\u201d\u2018\u2019()[]'\u2014-")
+            pick = None
+            for c in cands:
+                if core.replace(ch, c) in vocab:
+                    pick = c
+                    break
+            if pick is None:
+                pick = AMBIG_DEFAULT[ch]
+                if stats is not None:
+                    stats["fallback"].append(tok)
+            elif stats is not None:
+                stats["resolved"] += 1
+            s = s.replace(tok, tok.replace(ch, pick))
+
+    def join(m):
+        a, gap, b = m.group(1), m.group(2), m.group(3)
+        if (a + b).lower() in vocab:                     # resent\u00bb ment -> resentment
+            if stats is not None:
+                stats["joined"] += 1
+            return a + b
+        if (a + "-" + b).lower() in vocab:               # East~West stays hyphenated
+            return a + "-" + b
+        if stats is not None:
+            stats["unjoined"].append(a + "/" + b)
+        # No space meant no line break, so this was a real hyphen and not a wrap artefact --
+        # "tea~bowl" is "tea-bowl", never "tea bowl". With a space, the words stay separate:
+        # joining on a guess is how "Christa pher" would have become a word that does not exist.
+        return a + ("-" if gap == "" else " ") + b
+
+    return HYPH_TIGHT.sub(r"\1-\2", HYPH.sub(join, s))
+
+
+# Characters that only ever turn up in an episode title as OCR sludge. This is a GATE, not a
+# filter: a title containing none of these is left byte-for-byte alone. The first version of this
+# rewrote 405 titles when only 47 were damaged -- it "cleaned" the real "Chapter 2 (Pages 17-56)"
+# down to "Chapter 2" and ate the bullet page numbers in Seduction's contents. Losing real
+# information to a repair is worse than the damage being repaired.
+# "|" is deliberately absent: Right Concentration titles chapters "Chapter 1 | Quotes From Pages
+# 19-20", and treating the pipe as sludge tripped the filter on all 40 and threw the range away.
+TITLE_JUNK = re.compile(r"[{}\\^~\u00ab\u00bb\ue000-\uf8ff\x00-\x1f]")
+# Inside a damaged title a token is kept only if it still reads as a word, a number, a page range
+# or a roman numeral -- tested against the token with its edge punctuation already stripped, and
+# the STRIPPED form is what gets kept, so "Law 3}" comes out as "Law 3" and not "Law 3}".
+TITLE_OK = re.compile(r"^[A-Za-z\u00c0-\u00ff][A-Za-z\u00c0-\u00ff'\u2019.-]*$"
+                      r"|^[0-9]{1,4}(?:[-\u2013][0-9]{1,4})?$|^[IVXLC]+$")
+TITLE_EDGE = "{}()[]|\\^~\u00ab\u00bb$.,;:\u2019'\"\u201c\u201d"
+
+
+def clean_title(t, index, unknown=None, vocab=None):
+    """Strip OCR sludge out of an episode title, keeping whatever is genuinely readable.
+
+    Titles are the most visible text in the library -- the reader header, the CONTINUE card and
+    every search result print them -- so "1(}A.\u20183\\ Law 15" is worse than no title at all.
+    Falls back to "Episode N" (which most of this corpus already uses) rather than to "", because
+    the app renders ep.t with no fallback of its own.
+    """
+    c = clean(t, unknown)
+    if not TITLE_JUNK.search(c):
+        return c, c != t                      # undamaged: only the shared clean() applies
+    # A word-shaped token is only kept if the library actually uses that word somewhere. Without
+    # this, "Ptiuiy" and "CLIFION" survive as titles purely because they are spelled with letters.
+    toks = []
+    for tok in c.split():
+        t2 = tok.strip(TITLE_EDGE)
+        if not t2 or not TITLE_OK.match(t2):
+            continue
+        word = re.match(r"^[A-Za-zÀ-ÿ]", t2)
+        if word and vocab is not None and t2.lower().strip("'’.-") not in vocab:
+            continue
+        toks.append(t2)
+    out = re.sub(r"\s{2,}", " ", " ".join(toks)).strip(" .,-|\\")
+    # A lone stray letter or number is not a title -- "K" and "8" are page furniture.
+    if len(out) < 3 or not re.search(r"[A-Za-z\u00c0-\u00ff]{3}", out):
+        return "Episode %d" % (index + 1), True
+    return out, out != t
+
+
+def build_vocab(data):
+    """Dictionary of words this library already spells correctly, from clean() output.
+
+    Two sightings, because a single sighting could itself be the damaged spelling -- and a word
+    that appears only once cannot vouch for anything anyway.
+    """
+    seen = {}
+    for b in data["books"]:
+        for e in b["episodes"]:
+            for p in e["p"]:
+                for w in WORD.findall(clean(p)):
+                    w = w.lower().strip("'")
+                    if len(w) > 2:
+                        seen[w] = seen.get(w, 0) + 1
+    return set(w for w, n in seen.items() if n >= 2)
+
+
 def main():
     fix = "--fix" in sys.argv
     data = json.load(open(BOOKS, encoding="utf-8"))
     unknown, total, empties = {}, 0, 0
 
-    print("%-12s %8s %8s %8s" % ("book", "paras", "damaged", "chars"))
+    vocab = build_vocab(data)
+    stats = {"resolved": 0, "joined": 0, "fallback": [], "unjoined": []}
+    print("dictionary: %d words the library already spells correctly\n" % len(vocab))
+
+    print("%-12s %8s %8s %8s %8s" % ("book", "paras", "damaged", "chars", "titles"))
     for b in data["books"]:
-        dmg = chars = paras = 0
-        for e in b["episodes"]:
+        dmg = chars = paras = titles = 0
+        for i, e in enumerate(b["episodes"]):
             new = []
             for p in e["p"]:
                 paras += 1
-                c = clean(p, unknown)
+                c = resolve(clean(p, unknown), vocab, stats)
                 if c != p:
                     dmg += 1
                     chars += (len(CTRL.findall(p)) + len(ANY_PUA.findall(p)) +
-                              sum(p.count(k) for k in LIGATURES))
+                              sum(p.count(k) for k in LIGATURES) +
+                              sum(p.count(k) for k in MAP) + sum(p.count(k) for k in AMBIG) +
+                              len(HYPH.findall(p)))
                 if c:
                     new.append(c)
                 else:
                     empties += 1          # paragraph was nothing but ad copy / control bytes
             e["p"] = new
+            t, changed = clean_title(e.get("t", ""), i, unknown, vocab)
+            if changed:
+                titles += 1
+            e["t"] = t
         total += chars
-        if dmg:
-            print("%-12s %8d %8d %8d" % (b["id"], paras, dmg, chars))
+        if dmg or titles:
+            print("%-12s %8d %8d %8d %8d" % (b["id"], paras, dmg, chars, titles))
+
+    print("\nligature resolver: %d tokens matched a known word, %d fell back to the default"
+          % (stats["resolved"], len(stats["fallback"])))
+    if stats["fallback"]:
+        # the console here is cp1252 and cannot print the damaged characters themselves
+        print("   fallbacks: " + ", ".join(
+            sorted(set(stats["fallback"]))[:10]).encode("ascii", "backslashreplace").decode())
+    print("hyphen rejoin:     %d words put back together, %d left as two words"
+          % (stats["joined"], len(stats["unjoined"])))
+
+    # Report, don't repair. What is left is «/» sitting inside front-matter that OCR destroyed
+    # outright ("«:ircmrIslumte,.r."); deleting the guillemet does not make that readable, so it
+    # would be churn. Counted here so a later pass can tell leftovers from a regression.
+    # It is also why «/»/~ are NEVER stripped wholesale: ~ is real punctuation in three books
+    # ("~ Caesar" as an attribution, "Confucius ~ Rumi" as a separator) and sits inside a real
+    # URL in Thinking Fast and Slow (princeton.edu/~kahneman/docs/). A blanket strip corrupts all
+    # three. Only a guillemet or tilde with a letter on BOTH sides is treated as a hyphen.
+    left = sum(p.count(c) for b in data["books"] for e in b["episodes"]
+               for p in e["p"] for c in "«»")
+    if left:
+        print("unrepairable:      %d guillemet(s) left inside OCR sludge (reported, not touched)"
+              % left)
 
     if unknown:
         print("\nUNMAPPED private-use code points (dropped, not guessed):")
