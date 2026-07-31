@@ -186,6 +186,24 @@ Corollary: **re-repair from the pristine original, never patch on top of a bad r
 damaged character is already gone, so the second pass cannot see what went wrong. `--fix` moves the
 input to `books.json.bak`, which is what made the redo possible; copy it somewhere safe first.
 
+**Added books must pass the Weave, or they sit beside the graph rather than in it.**
+`gemini_pipeline.merge_nodes` sets `"prereq":[prev]` — every generated track is a chain with zero
+edges out of it (measured: hand-built tracks share 19 cross-track prereqs, pipeline tracks 0), and
+its cross-references live only in bridge prose. `tools/integrate.py` fixes that:
+`--orphans` surveys, `--track X` judges, `--track X --apply` writes. Five rules it enforces:
+- Edges point **new → old only**, so a cycle is structurally impossible (build.py still checks).
+- A prereq edge is auto-applied **only when the target is already read** (`--done`), because a
+  wrong prereq locks a reader out of a lesson. Everything else demotes to `rel` and is listed.
+- **`tier` is AUTHORED, not derived.** Recomputing depth graph-wide from prereqs rewrote 62 nodes
+  across every other track and pushed each track's opening lesson off tier 0. Only a node that
+  gained a prereq in this run may move, only deeper. Nothing outside the track is ever touched.
+- The judge is a **forced choice over ids**, not a yes/no per pair: asked "are these related?" one
+  pair at a time it answered KINSHIP to *every* pair including deliberately unrelated ones. Given
+  a numbered list it miscounted and named a candidate that did not exist. Ids, and "choose at most
+  one, or none", is what finally discriminated. Verify that on unrelated nodes before trusting it.
+- `rel` is optional, undirected kinship. It gates nothing; `relOf()` in the client only surfaces
+  partners the reader has already finished.
+
 **`extract.py` rewrites the WHOLE of `books.json` from the PDFs.** It applies only the
 per-paragraph repairs (`cleantext.clean`); everything corpus-wide — resolving ambiguous ligatures,
 rejoining line-break hyphens, letter-level OCR correction, the junk-title gate — needs a vocabulary

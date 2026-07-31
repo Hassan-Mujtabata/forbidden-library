@@ -31,6 +31,14 @@ def validate(books, graph):
         for p in n.get("prereq", []):
             if p not in idset:
                 problems.append(f"{n['id']}: prereq '{p}' does not exist")
+        # #149: `rel` is undirected kinship added by integrate.py. It gates nothing, so it is not
+        # part of cycle detection — but a dangling one would render as a dead cross-link, and a
+        # self-link would have a lesson pointing at itself in "Connect my ideas".
+        for r in n.get("rel", []):
+            if r not in idset:
+                problems.append(f"{n['id']}: rel '{r}' does not exist")
+            elif r == n["id"]:
+                problems.append(f"{n['id']}: rel points at itself")
         if not n.get("stub"):
             for key in ("bridge", "sources", "quiz", "apply"):
                 if not n.get(key):

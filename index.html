@@ -1973,9 +1973,20 @@ function coachMe(){   // tutor-F #17: knowledge is organised by book, but life a
   $("hls").classList.remove("on");
   openTutor("Coach me",ctxBlock,`I want to apply what I've learned to a real situation. First ask me — in one line — what situation I'm facing. Once I answer, tell me which of my mastered ideas apply and exactly how to use each, naming the ideas.`);
 }
+/* #149: `rel` — kinship links written by tools/integrate.py when a book is added, so an added
+   track joins the graph instead of sitting beside it. It gates nothing; it only says "these two
+   genuinely illuminate each other", which is exactly what the cross-track exercises below were
+   previously guessing at by picking whatever was recent. */
+const relOf=n=>((n&&n.rel)||[]).map(id=>nodeById(id)).filter(x=>x&&nodeDone(x.id));
+
 function synthesize(){   // tutor-J #18: force connections across recently mastered ideas from different tracks
   const recent=journalNotes().slice(0,8).map(x=>x.node);
-  const ideas=recent.length>=3?recent:DATA.nodes.filter(x=>nodeDone(x.id)).slice(0,8);
+  let ideas=recent.length>=3?recent:DATA.nodes.filter(x=>nodeDone(x.id)).slice(0,8);
+  // Pull in the kinship partners of whatever is already in the set: a judged link beats proximity
+  // in the journal, and it is the whole reason those links exist.
+  const kin=[];
+  for(const n of ideas)for(const r of relOf(n))if(!ideas.includes(r)&&!kin.includes(r))kin.push(r);
+  if(kin.length)ideas=ideas.slice(0,6).concat(kin.slice(0,3));
   if(ideas.length<3){toast("Master a few more ideas first");return;}
   const ctx=ideas.map(n=>`• ${n.title} (${trackById(n.track).name}): ${((n.bridge&&n.bridge[0])||"").slice(0,110)}`).join("\n");
   $("hls").classList.remove("on");
@@ -3823,8 +3834,13 @@ $("btn-ach").onclick=()=>{const g=$("achgrid");g.innerHTML="";
   $("achs").classList.add("on")};
 
 /* ---------- patch notes ---------- */
-const APP_VER="3.63";
+const APP_VER="3.64";
 const PATCHES=[
+ {v:"3.64",n:"The Weave",d:"1 Aug 2026",items:[
+  ["fix","BOOKS YOU ADD WERE BEING PARKED NEXT TO YOUR PATH, NOT PUT INTO IT. Every AI-written track was a straight chain with nothing pointing out of it — your hand-built tracks share 19 connections between them, the generated ones had zero. The cross-references existed only as words inside the lessons. There's now a step that finds the real links and writes them into the graph, and it runs automatically for every book you add from here."],
+  ["new","Influence & Persuasion was one of two islands on your Path. It now connects: “Perception Is Everything” to Greene's “Never Outshine the Master”, “Scarcity & Framing” to “Conceal Intention”, and “Ethical & Quiet Influence” to the cross-training lesson. Those are judged links with a stated reason, not keyword matches."],
+  ["polish","“Connect my ideas” now reaches for genuinely kindred lessons instead of whatever you happened to read recently — and only ever offers ones you've actually finished."],
+  ["fix","A link is only allowed to LOCK a lesson behind another if you've already read the other one. Anything else becomes a soft connection, so nothing you could reach yesterday can become unreachable today."]]},
  {v:"3.63",n:"The Warden",d:"1 Aug 2026",items:[
   ["new","🕯️ THE WARDEN — one question each morning about what you actually read YESTERDAY. It takes the real pages you finished, asks one thing that checks whether the idea went in rather than whether you remember a phrase, and grades your answer in two sentences. +15 XP. I read Law 4 and it asked “How can you make yourself seem more powerful through your words?” — then told me what I'd nailed and the one thing I'd blurred."],
   ["new","It's a card on your Path, not a gate. Skip it and it's gone for the day. Nothing read yesterday, no key, or offline and it simply isn't there — never an error, never something blocking your way to the shelf."],
