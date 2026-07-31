@@ -11,3 +11,7 @@ tools/*.bak
 
 tools/queue/*
 !tools/queue/*.job.enc
+
+# integrate.py reports quote lesson titles and reasoning in plaintext (#150)
+tools/integrate_report.txt
+tools/graph_preview.json

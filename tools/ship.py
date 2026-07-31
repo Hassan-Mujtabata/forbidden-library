@@ -41,6 +41,11 @@ FORBIDDEN = [
     re.compile(r"(^|/)books\.json"),
     re.compile(r"(^|/)graph\.json"),
     re.compile(r"(^|/)\.gemini_keys$"),
+    # #150: integrate.py's report quotes lesson TITLES and the judge's reasoning in plaintext.
+    # It shipped once before this rule existed. The whole point of content.enc is that the graph
+    # is not readable in a public repo; a report about the graph is the graph.
+    re.compile(r"(^|/)integrate_report\.txt"),
+    re.compile(r"(^|/)graph_preview\.json"),
     re.compile(r"\.pdf$", re.I),
     re.compile(r"github_token"),
 ]
