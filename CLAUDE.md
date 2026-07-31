@@ -224,6 +224,18 @@ regenerable text, so throwing it away costs nothing.
 **This started as a hand-bumped `const CONTENT_GEN` and lasted exactly one release** — 3.57 rewrote
 159 words and left it at 2. If a rule says "remember to bump X", the rule is the bug: derive it.
 
+**`S.read` says THAT, never WHEN.** It is `{bookId:[episodeIndex,…]}` — flat, unioned across
+devices, tombstoned against. Anything needing "what did I read yesterday" uses `S.readLog`
+(`{"YYYY-MM-DD":[[bookId,ep],…]}`, seven days, written by `logRead` inside `markRead` — the single
+choke point every read passes through) and `readOn(day)`. Do **not** add timestamps to `S.read`
+itself: `mergeState` unions it and `S.readDel` tombstones against it, and neither survives a shape
+change. The merge unions per day so two devices reading on the same date both count.
+
+**`restoreVault` is a deliberate REPLACE, and that is correct** — checked, not assumed. It confirms
+with the backup's date, overwrites `vault_state` wholesale, offers to make the backup authoritative
+in the cloud too (otherwise the next sync merges the old state straight back — #29), then reloads,
+which is also why no achievement-toast storm is possible. Do not "fix" it into a merge.
+
 **NaN is the worst possible failure value here.** A review record merged from another device without
 its `k` interval index made `Math.min(undefined,1)` → NaN → `RV_DAYS[NaN]` → `undefined` → a `due`
 of NaN. Nothing throws, and `NaN <= now` is false forever, so the idea left Sharpen **permanently

@@ -339,6 +339,16 @@ header .brand span{color:var(--gold)}
 /* ---------- 💡 the lure ---------- */
 .lure{background:var(--card2);border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin-bottom:18px;position:relative}
 .lure-h{font-size:10px;letter-spacing:.2em;color:var(--tx2);margin-bottom:9px}
+/* #148: the Warden. Jade throughout — it is a recall exercise, so it reads as Sharpen, not as news. */
+.bigcard.warden{border-color:rgba(78,205,196,.28)}
+.wd-q{font-family:var(--serif);font-size:19px;line-height:1.45;color:var(--tx);margin:2px 0 12px}
+.wd-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.wd-row input{flex:1 1 220px;min-width:0;background:var(--bg2);border:1px solid var(--line);
+  border-radius:10px;padding:10px 13px;font-size:14px;color:var(--tx);font-family:var(--sans)}
+.wd-row .goldbtn,.wd-row .ghostbtn{padding:9px 16px;font-size:13px;margin:0}
+.wd-back{font-size:14.5px;line-height:1.6;color:var(--tx);white-space:pre-wrap;margin-top:11px}
+.wd-back:empty{margin:0}
+.wd-src{font-size:11.5px;color:var(--tx2);margin-top:10px}
 .lure-q{font-family:var(--serif);font-size:19px;line-height:1.4;color:var(--tx)}
 .lure-m{font-size:12px;color:var(--tx2);margin-top:9px}
 .lure-t{font-size:13px;color:var(--tx2);line-height:1.6;margin-bottom:12px}
@@ -872,6 +882,7 @@ header .brand span{color:var(--gold)}
 </div>
 
 <div id="path" class="view">
+  <div class="bigcard warden" id="warden" style="display:none"></div>
   <div class="bigcard daily" id="daily"></div>
   <div class="bigcard slim" id="pipestatus" style="display:none"></div>
   <button class="bigcard" id="pathcont" style="display:none"></button>
@@ -984,7 +995,7 @@ header .brand span{color:var(--gold)}
 </div></div>
 
 <div id="hlbtn"><button id="hl-save">⭐ Save</button><button id="hl-def">📖 Define</button></div>
-<div id="defpop"><button class="dp-x" id="dp-x">✕</button><div class="dp-word" id="dp-word"></div><div class="dp-src" id="dp-src"></div><div class="dp-body" id="dp-body"></div><div class="dp-actions"><button class="dp-open" id="dp-open" style="display:none">Open the lesson →</button><button id="dp-explain">🎓 Explain</button><button id="dp-save">⭐ Save word</button></div></div>
+<div id="defpop"><button class="dp-x" id="dp-x">✕</button><div class="dp-word" id="dp-word"></div><div class="dp-src" id="dp-src"></div><div class="dp-body" id="dp-body" aria-live="polite" aria-atomic="false"></div><div class="dp-actions"><button class="dp-open" id="dp-open" style="display:none">Open the lesson →</button><button id="dp-explain">🎓 Explain</button><button id="dp-save">⭐ Save word</button></div></div>
 <div id="toasts"></div>
 
 <script>
@@ -1021,6 +1032,20 @@ const save=()=>{S._mtime=Date.now();
 // One definition of "this device can actually reach the server", so callers that need to know
 // whether a change has escaped locally can't drift from the condition that schedules the push.
 function canPush(){return _syncOn&&!!localStorage.getItem("vault_gh");}
+
+/* #146: two tabs open on the same device silently overwrite each other. Both hold S in memory,
+   both write the whole object on save, and last-write-wins — so reading in one tab and answering
+   a quiz in the other loses whichever saved first, with nothing on screen to suggest it happened.
+   A real fix is a cross-tab lock or a merge on every write; this is deliberately just the warning,
+   because the failure is rare and silent, and telling the reader costs one line.
+   The `storage` event only fires in OTHER documents, never the one that wrote — so a single tab
+   never sees this, and the guard keeps a busy second tab from toasting repeatedly. */
+let _tabWarned=false;
+addEventListener("storage",e=>{
+  if(e.key!==LS_ST||_tabWarned)return;
+  _tabWarned=true;
+  toast("⚠️ The Vault is open in another tab — progress there may overwrite this one");
+});
 // Has a just-made change plausibly already left this device? Only then does undoing it need
 // tombstones rather than a plain local restore. Named, because the obvious test is wrong: a null
 // _pushT is not "already pushed", it is also the resting state of a device with no sync at all —
@@ -1124,10 +1149,28 @@ function markUnread(bk,eps){
   S.readDel=[...(S.readDel||[]).filter(t=>!ds.has(tombKey(t))),...[...ds].map(k=>k+"@"+now)];
   if(S.readDel.length>3000)S.readDel=S.readDel.slice(-3000);
 }
+/* #147: S.read records THAT a chapter was read, never WHEN — it is a flat list of indices. So
+   "what did I read yesterday" was unanswerable, which is the one question the Warden is built on.
+   A tiny dated log, written at the single choke point every read passes through, capped to seven
+   days because nothing needs more than that and it syncs inside S.
+   Deliberately NOT a timestamp per episode: that would rewrite the shape of S.read, which
+   mergeState unions across devices and tombstones against, and this needs none of that risk. */
+const READLOG_DAYS=7;
+function logRead(bk,eps){
+  const d=today(),lg=(S.readLog=S.readLog||{});
+  const seen=new Set((lg[d]||[]).map(x=>x[0]+"|"+x[1]));
+  for(const e of eps){const k=bk+"|"+e;if(!seen.has(k)){seen.add(k);(lg[d]=lg[d]||[]).push([bk,e]);}}
+  if(lg[d]&&lg[d].length>200)lg[d]=lg[d].slice(-200);      // a "mark all read" must not bloat S
+  for(const k of Object.keys(lg).sort().slice(0,-READLOG_DAYS))delete lg[k];
+}
+// Chapters read on a given day, newest first, as {b,e} — the Warden's only input.
+function readOn(day){return ((S.readLog||{})[day]||[]).map(x=>({b:x[0],e:x[1]})).reverse();}
+
 function markRead(bk,eps){
   const live=new Set(eps.map(e=>readKey(bk,e)));
   S.read[bk]=[...new Set([...(S.read[bk]||[]),...eps])];
   S.readDel=(S.readDel||[]).filter(t=>!live.has(tombKey(t)));
+  logRead(bk,eps);
 }
 const totalRead=()=>Object.values(S.read).reduce((n,a)=>n+a.length,0);
 
@@ -1248,6 +1291,8 @@ function landing(){ pruneStaleHooks();   // #131: bin hooks mined from a previou
   loadForged();   // #125: put previously forged lessons back on the Path first
   if(DATA.nodes&&DATA.nodes.length){renderPath();show("path")} else {renderHome();show("home")} patchCheck(); initA11y(); setTimeout(checkReminder,1500);
   setTimeout(autoRefreshHooks,4000);   // #121: quietly read a few more books, once a day, on its own
+  renderWarden();                                                     // #148: show yesterday's if it exists
+  setTimeout(()=>refreshWarden(false),14000);                         // last of the daily jobs, so lanes never contend
   setTimeout(()=>{markDispatchDot();refreshDispatch(false);},9000);   // #123: then write the dispatch,
   // staggered well after the hooks so the two daily jobs never contend for the same keys at once
   if(!S.welcomed&&totalRead()===0&&nodesDone()===0&&(S.hl||[]).length===0)setTimeout(showWelcome,700); else if(!S.welcomed){S.welcomed=true;save();} }   // #26: only greet genuinely-new keyholders
@@ -2533,6 +2578,7 @@ function genGuard(lsKey){
 function pruneStaleHooks(){
   if(genGuard(HOOKS_LS))HOOKS={};
   if(genGuard(DISPATCH_LS))DISPATCH={day:"",stand:"",clash:"",ask:"",fade:""};
+  if(genGuard(WARDEN_LS))WARDEN={};        // #148: its question quotes the book text verbatim
 }
 const saveHooks=()=>{try{localStorage.setItem(HOOKS_LS,JSON.stringify(HOOKS))}catch(e){}};
 const hookCount=()=>Object.keys(HOOKS).reduce((n,k)=>n+((HOOKS[k]&&HOOKS[k].items)||[]).length,0);
@@ -3168,6 +3214,109 @@ function askTheVault(){
 }
 $("btn-ask").onclick=askTheVault;
 
+/* ---------- #148: The Warden — one question about what you read yesterday -------------------
+   Everything else in the app asks you to take something IN. This is the only thing that asks you
+   to give something BACK, and it does it before the shelf tempts you into starting something new.
+   Deliberately a card on the Path and not a popup: a gate you must clear to reach your own books
+   would be a punishment, and the whole point is that it is easy to walk past.
+   It reads yesterday's chapters out of S.readLog (#147) — the reason that log exists — takes the
+   book's own words for those chapters, and asks ONE question. Answer streams back a short grading.
+   Degrades to nothing at all: no keys, offline, or an empty yesterday and the card never appears.
+   State lives in vault_warden (its question quotes book text, so genGuard bins it when the text
+   changes); the only thing that touches S is the XP, through the existing path. */
+const WARDEN_LS="vault_warden", WARDEN_XP=15;
+let WARDEN=(()=>{try{return JSON.parse(localStorage.getItem(WARDEN_LS))||{}}catch(e){return{}}})();
+const saveWarden=()=>{try{localStorage.setItem(WARDEN_LS,JSON.stringify(WARDEN))}catch(e){}};
+let WARDENING=false;
+
+// Yesterday's chapters, with their text — capped, because one "mark all read" is 323 of them.
+function wardenSource(){
+  const eps=readOn(yesterday()).slice(0,4);
+  const out=[];
+  for(const r of eps){
+    const b=bookById(r.b);if(!b||!bookVisible(b.id))continue;
+    const ep=b.episodes[r.e];if(!ep||!ep.p||!ep.p.length)continue;
+    // Chapter titles are only passed on when they are real ones — most of this corpus falls back
+    // to "Episode 133", which is this app's own chunk numbering and not something to quote at anyone.
+    const t=(ep.t&&!/^episode\s+\d+$/i.test(ep.t))?ep.t:"";
+    out.push({book:b.title,title:t,text:sane(ep.p.join("\n\n")).slice(0,2200)});
+  }
+  return out;
+}
+
+async function refreshWarden(force){
+  if(WARDENING||!geminiKeys().length||!navigator.onLine)return;
+  if(!force&&WARDEN.day===today())return;
+  const src=wardenSource();
+  if(!src.length)return;                       // nothing was read yesterday: no card, no call
+  WARDENING=true;
+  WARDEN.day=today();saveWarden();             // claim the day before running, as the other jobs do
+  try{
+    const body=src.map(s=>`From "${s.book}"${s.title?` — ${s.title}`:""}:\n${s.text}`).join("\n\n---\n\n");
+    const q=await geminiCall(
+      `A reader finished these pages yesterday:\n\n${body}\n\n`+
+      `Ask them ONE question, at most 25 words, that checks whether they actually took the idea in — `+
+      `not whether they remember a phrase. It must be answerable from what is above, in their own `+
+      `words, in a sentence or two.\n`+
+      `Ask about the idea itself. Never write "the text", "the passage", "the provided text" or `+
+      `"the lesson" — they are recalling, not looking at anything. Output only the question.`,
+      90,0.8);
+    const clean=demd(q||"").trim().split("\n")[0].trim();
+    if(clean.length>8){
+      WARDEN={day:today(),q:clean,book:src[0].book,answered:false,skipped:false};
+      saveWarden();renderWarden();
+    }
+  }catch(e){}
+  finally{WARDENING=false;}
+}
+
+function renderWarden(){
+  const c=$("warden");if(!c)return;
+  const live=WARDEN.day===today()&&WARDEN.q&&!WARDEN.skipped;
+  if(!live){c.style.display="none";return;}
+  c.style.display="block";
+  if(WARDEN.answered){
+    c.innerHTML=`<div class="tag" style="color:var(--jade)">🕯️ THE WARDEN</div>`+
+      `<div class="wd-q">${esc(WARDEN.q)}</div>`+
+      `<div class="wd-back">${esc(WARDEN.feedback||"")}</div>`+
+      `<div class="wd-src">on ${esc(WARDEN.book||"yesterday's reading")}</div>`;
+    return;
+  }
+  c.innerHTML=`<div class="tag" style="color:var(--jade)">🕯️ THE WARDEN · YESTERDAY'S READING</div>`+
+    `<div class="wd-q">${esc(WARDEN.q)}</div>`+
+    `<div class="wd-row"><input id="wd-in" placeholder="in a sentence or two…" autocomplete="off">`+
+    `<button class="goldbtn" id="wd-go">answer</button>`+
+    `<button class="ghostbtn" id="wd-skip">skip</button></div>`+
+    `<div class="wd-back" id="wd-back"></div>`+
+    `<div class="wd-src">on ${esc(WARDEN.book||"yesterday's reading")}</div>`;
+  $("wd-go").onclick=()=>wardenAnswer($("wd-in").value.trim());
+  $("wd-in").onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();$("wd-go").click();}};
+  $("wd-skip").onclick=()=>{WARDEN.skipped=true;saveWarden();renderWarden();};
+}
+
+async function wardenAnswer(text){
+  if(!text||text.length<2){toast("Say what you remember — even roughly.");return;}
+  const back=$("wd-back"),go=$("wd-go");
+  if(go){go.disabled=true;go.textContent="…";}
+  const src=wardenSource();
+  const body=src.map(s=>`From "${s.book}":\n${s.text}`).join("\n\n---\n\n").slice(0,4000);
+  let acc="";
+  try{
+    await geminiAsk(
+      `A reader was asked: "${WARDEN.q}"\n\nThey answered: "${sane(text).slice(0,700)}"\n\n`+
+      `Here is what they actually read:\n\n${body}\n\n`+
+      `In two sentences, tell them warmly what they got right and the one thing they missed or `+
+      `blurred. Speak to them directly. Never mention "the text" or "the passage". No markdown.`,
+      partial=>{acc=partial;if(back)back.textContent=demd(acc);},220,0.5);
+  }catch(e){}
+  WARDEN.answered=true;WARDEN.feedback=demd(acc).trim()||"Marked — nothing came back from the tutor.";
+  saveWarden();
+  S.xp=(S.xp||0)+WARDEN_XP;save();
+  toast(`+${WARDEN_XP} XP — the Warden is satisfied`);
+  checkAch();renderTopbar();
+  renderWarden();
+}
+
 /* ---------- ☰ menu: the icon row again, but with names (#127) ----------
    Thirteen 44px buttons need 620px and a phone offers 353, so the bar keeps four and this
    lists the lot. Built at OPEN time out of .iconrow itself, which means a button this device
@@ -3211,6 +3360,10 @@ $("btn-menu").onclick=()=>{renderMenu();$("menu").classList.add("on")};
 async function suggestFollowups(){
   const last=TUTOR.thread[TUTOR.thread.length-1];
   if(!last||last.role!=="tutor"||!last.text||last.text.length<60)return;
+  // #145: this fires after every tutor turn and its catch is empty, so offline it spent a 45s
+  // timeout per answer and reported nothing. The chips the user already has are better than a
+  // stalled request; they are a nicety, not the answer.
+  if(!navigator.onLine)return;
   const mine=TUTOR.id;
   try{
     const t=await geminiCall(`A tutor just told a learner:\n\n"${last.text.slice(0,700)}"\n\n`+
@@ -3670,8 +3823,15 @@ $("btn-ach").onclick=()=>{const g=$("achgrid");g.innerHTML="";
   $("achs").classList.add("on")};
 
 /* ---------- patch notes ---------- */
-const APP_VER="3.62";
+const APP_VER="3.63";
 const PATCHES=[
+ {v:"3.63",n:"The Warden",d:"1 Aug 2026",items:[
+  ["new","🕯️ THE WARDEN — one question each morning about what you actually read YESTERDAY. It takes the real pages you finished, asks one thing that checks whether the idea went in rather than whether you remember a phrase, and grades your answer in two sentences. +15 XP. I read Law 4 and it asked “How can you make yourself seem more powerful through your words?” — then told me what I'd nailed and the one thing I'd blurred."],
+  ["new","It's a card on your Path, not a gate. Skip it and it's gone for the day. Nothing read yesterday, no key, or offline and it simply isn't there — never an error, never something blocking your way to the shelf."],
+  ["fix","The app never recorded WHEN you read anything, only that you had — so “what did I read yesterday” was unanswerable. There's now a small dated log of the last seven days, and it merges properly across your devices: read on your phone and your laptop on the same day and both are kept."],
+  ["fix","Two tabs open on the same device silently overwrote each other's progress — both hold everything in memory and the last one to save won, with nothing on screen to say so. You now get told once."],
+  ["fix","The tutor's follow-up chips fired a request after every answer even with no connection, burning a 45-second timeout each time and reporting nothing. They stay quiet offline now."],
+  ["polish","Tutor answers are announced to screen readers as they stream in."]]},
  {v:"3.62",n:"Sharpen Writes Its Own",d:"31 Jul 2026",items:[
   ["new","🔁 SHARPEN NOW WRITES FRESH QUESTIONS EVERY SESSION. Review used to replay the lesson's built-in quiz, cycling through them by number — so an idea that came back often eventually tested whether you remembered the QUESTION rather than whether you still held the idea. Each session's questions are now written from the lesson's own text, one lane per key, all at once. Every review spends the keys instead of leaving them idle."],
   ["new","The wrong answers are written to be plausible rather than silly, and the options are shuffled before you see them — models overwhelmingly favour the same slot, which is how “always press B” became a real bug in the Gauntlet once."],
@@ -4329,6 +4489,19 @@ function mergeState(a,b){ // union merge — never loses progress from either de
   // `forged`: the lesson itself vanished while S.node progress against its id survived, leaving a
   // completed lesson that no longer existed. This is the trap CLAUDE.md warns about; it caught me.
   m.hookSeen=[...new Set([...(a.hookSeen||[]),...(b.hookSeen||[])])].slice(-400);
+  // #147: the dated read log. Union per day (you can read on two devices in one day), dedupe the
+  // book|episode pairs, then keep the newest seven days — the same cap logRead enforces, so a
+  // merge cannot grow S past what a single device would.
+  if(a.readLog||b.readLog){
+    const lg={};
+    for(const src of [a.readLog||{},b.readLog||{}])
+      for(const d in src){
+        const seen=new Set((lg[d]||[]).map(x=>x[0]+"|"+x[1]));
+        for(const p of src[d]){const k=p[0]+"|"+p[1];if(!seen.has(k)){seen.add(k);(lg[d]=lg[d]||[]).push(p);}}
+      }
+    for(const d of Object.keys(lg).sort().slice(0,-READLOG_DAYS))delete lg[d];
+    m.readLog=lg;
+  }
   if(a.dispatchSeen||b.dispatchSeen)
     m.dispatchSeen=(a.dispatchSeen||"")>(b.dispatchSeen||"")?a.dispatchSeen:b.dispatchSeen;
   if(a.gauntlet||b.gauntlet){const ga=a.gauntlet||{},gb=b.gauntlet||{};

@@ -188,7 +188,8 @@
                 forged: [{ id: "fg1", at: 9, title: "Forged lesson" }],
                 council: [{ q: "why do I procrastinate", at: 9, seats: [] }],
                 gauntlet: { best: 4, played: 2, streak: 1 },
-                hookSeen: ["laws48|1|something"], dispatchSeen: "2026-07-29" };
+                hookSeen: ["laws48|1|something"], dispatchSeen: "2026-07-29",
+                readLog: { "2026-07-29": [["laws48", 3]] } };
       var m = mergeState({ _mtime: 1 }, b);
       var dropped = Object.keys(b).filter(function (k) {
         if (k === "_mtime") return false;
@@ -548,6 +549,55 @@
     });
   }
 
+  /* -------------------------------------------------- the dated read log (#147) */
+  function readLogTests() {
+    check("readLog: marking a chapter read records it under today", function () {
+      S.readLog = {}; S.read = {}; S.readDel = [];
+      markRead("laws48", [3, 4]);
+      var t = (S.readLog[today()] || []).map(function (x) { return x.join("|"); });
+      return (t.indexOf("laws48|3") >= 0 && t.indexOf("laws48|4") >= 0)
+        ? true : "today holds " + JSON.stringify(t);
+    });
+
+    check("readLog: re-reading the same chapter does not duplicate the entry", function () {
+      S.readLog = {}; S.read = {}; S.readDel = [];
+      markRead("laws48", [3]); markRead("laws48", [3]); markRead("laws48", [3]);
+      var n = (S.readLog[today()] || []).length;
+      return n === 1 ? true : n + " entries for one chapter";
+    });
+
+    check("readLog: keeps seven days and drops the eighth", function () {
+      S.readLog = {};
+      for (var i = 0; i < 12; i++) {
+        var d = new Date(Date.now() - i * 864e5);
+        S.readLog[d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" +
+                   String(d.getDate()).padStart(2, "0")] = [["laws48", i]];
+      }
+      S.read = {}; S.readDel = [];
+      markRead("laws48", [99]);                       // triggers the prune
+      var days = Object.keys(S.readLog).length;
+      return days <= 7 ? true : days + " days retained";
+    });
+
+    check("readLog: a merge keeps both devices' days and both books in a shared day", function () {
+      var d1 = "2026-07-29", d2 = "2026-07-30";
+      var m = mergeState({ _mtime: 1, readLog: { [d1]: [["laws48", 1]], [d2]: [["tmi", 2]] } },
+                         { _mtime: 2, readLog: { [d2]: [["laws48", 5]] } });
+      var lg = m.readLog || {};
+      if (!lg[d1]) return "lost the day only one device had";
+      var day2 = (lg[d2] || []).map(function (x) { return x.join("|"); }).sort().join(",");
+      return day2 === "laws48|5,tmi|2" ? true : "shared day merged to " + day2;
+    });
+
+    check("readOn: reads back what was logged, newest first", function () {
+      S.readLog = {}; S.read = {}; S.readDel = [];
+      markRead("laws48", [1]); markRead("tmi", [9]);
+      var r = readOn(today());
+      return (r.length === 2 && r[0].b === "tmi" && r[0].e === 9)
+        ? true : "got " + JSON.stringify(r);
+    });
+  }
+
   /* ------------------------------------------------- spaced review (#132)
    * A review record that arrives without `k` -- an older save, or merged from another device --
    * used to poison the scheduler: Math.min(undefined,1) is NaN, RV_DAYS[NaN] is undefined, due
@@ -674,7 +724,7 @@
       try {
         foldTests(); saneTests(); readTests(); mergeTests(); pushTests();
         indexTests(); fmtTests(); hookTests(); gauntletTests(); matchTests(); libraryTests();
-        chromeTests(); reviewTests(); derivedTests();
+        chromeTests(); reviewTests(); derivedTests(); readLogTests();
       } finally {
         S = snap;
         if (typeof save === "function") save();
