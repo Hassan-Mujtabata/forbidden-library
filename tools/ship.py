@@ -183,6 +183,44 @@ def check_syntax():
         checked += 1
     ok("node --check passed (%d inline script block%s)" % (checked, "" if checked == 1 else "s"))
 
+    # sw.js was never checked here, only listed as a file whose presence makes this a release. A
+    # typo in it ships silently and takes offline mode and the whole cache layer down with it.
+    swp = os.path.join(ROOT, "sw.js")
+    if os.path.exists(swp):
+        p = subprocess.run(["node", "--check", swp], capture_output=True, text=True,
+                           encoding="utf-8", errors="replace")
+        if p.returncode != 0:
+            die("JavaScript syntax error in sw.js:\n" + (p.stderr or "").strip()[:800])
+        ok("node --check passed (sw.js)")
+
+
+def check_tools():
+    """The repair tool has its own pinned regression; run it before anything ships."""
+    ct = os.path.join(HERE, "cleantext.py")
+    if not os.path.exists(ct):
+        return
+    p = subprocess.run([sys.executable, ct, "--selftest"], capture_output=True, text=True,
+                       encoding="utf-8", errors="replace")
+    if p.returncode != 0:
+        die("cleantext selftest failed:\n" + ((p.stdout or "") + (p.stderr or "")).strip()[:600])
+    ok("cleantext --selftest passed")
+
+
+def check_patch_date(version):
+    """A patch note dated yesterday is a small lie that ships forever. I typed one already."""
+    import datetime
+    html = read(IDX)
+    m = re.search(r'\{\s*v\s*:\s*"%s"\s*,\s*n\s*:\s*"[^"]+"\s*,\s*d\s*:\s*"([^"]+)"' % re.escape(version), html)
+    if not m:
+        return
+    today = datetime.date.today()
+    want = {today.strftime("%d %b %Y"), today.strftime("%-d %b %Y") if os.name != "nt" else
+            today.strftime("%d %b %Y").lstrip("0")}
+    if m.group(1) not in want:
+        die('PATCHES date for %s reads "%s" but today is "%s". Fix the d: field.'
+            % (version, m.group(1), today.strftime("%d %b %Y").lstrip("0")))
+    ok("patch note dated today")
+
 
 def patch_entry(version):
     """Find the PATCHES entry for this version and return its release name."""
@@ -230,15 +268,17 @@ def main():
     args = [a for a in sys.argv[1:]]
     dry = "--dry" in args or "--check" in args
     nopush = "--no-push" in args
-    rest = [a for a in args if not a.startswith("--")]
-
+    # NB: "-m" starts with a single dash, so the --flag filter below does not remove it. Dropping
+    # only the message left "-m" itself sitting in `rest`, and on a release commit that became the
+    # version -> "version must look like 3.41, got '-m'". Strip the flag and its argument by index.
     msg = None
     if "-m" in args:
         i = args.index("-m")
         if i + 1 >= len(args):
             die("-m needs a message")
         msg = args[i + 1]
-        rest = [a for a in rest if a != msg]
+        args = args[:i] + args[i + 2:]
+    rest = [a for a in args if not a.startswith("-")]
 
     files = pending_files()
     if not files and not dry:
@@ -261,7 +301,10 @@ def main():
     check_secrets(files)
     check_glyphs(files)
     check_syntax()
+    check_tools()
     name = patch_entry(version) if release else None
+    if release:
+        check_patch_date(version)
 
     if dry:
         print("\nAll checks passed. %d file(s) ready. Nothing was changed." % len(files))

@@ -248,6 +248,79 @@
     // reported in `unmeasured` so a false clean is visible instead of silent.
   };
 
+  /* Panels that are NOT .overlay, and so were invisible to every audit ever run here (#136).
+   * #defpop is the whole tutor -- the most-used AI surface in the app and the one with the most
+   * generated text in it -- and it predates the overlay pattern. #hlbtn only exists while text is
+   * selected. #updchip is built by JS at the moment an update lands. All three were unaudited.
+   * Each is staged with real text, measured, then put back exactly as found.
+   */
+  function sweepExtras(out, seen) {
+    var checked = 0, unmeasured = [], undo = [];
+
+    // --- the tutor: stage a thread so bubbles, chips and the ask row all exist
+    var pop = document.getElementById("defpop");
+    if (pop) {
+      var was = pop.classList.contains("on");
+      var prev = (typeof TUTOR !== "undefined") ? TUTOR : null;
+      try {
+        if (typeof TUTOR !== "undefined" && typeof renderTutor === "function") {
+          TUTOR = { ctx: "", title: "Audit", id: -1,
+            chips: ["A follow-up chip", "Another one", "A third"],
+            thread: [{ role: "tutor", text: "A staged tutor answer, used only to measure contrast." },
+                     { role: "user", text: "A staged question from the reader." },
+                     { role: "tutor", text: "A second staged answer, long enough to wrap onto more than a single line of the bubble." }] };
+          renderTutor();
+        }
+        pop.classList.add("on");
+        var n = scan(out, seen, pop) + scanPlaceholders(out, seen, pop);
+        checked += n;
+        if (!n) unmeasured.push("defpop");
+      } catch (e) { unmeasured.push("defpop(threw)"); }
+      undo.push(function () {
+        if (!was) pop.classList.remove("on");
+        if (prev && typeof TUTOR !== "undefined") { TUTOR = prev; try { renderTutor(); } catch (e) {} }
+      });
+    }
+
+    // --- the highlight popover: only ever visible mid-selection
+    var hb = document.getElementById("hlbtn");
+    if (hb) {
+      var d0 = hb.style.display, l0 = hb.style.left, t0 = hb.style.top;
+      hb.style.display = "flex"; hb.style.left = "20px"; hb.style.top = "120px";
+      var hd = document.getElementById("hl-def");
+      var hd0 = hd && hd.style.display;
+      if (hd) hd.style.display = "block";
+      checked += scan(out, seen, hb);
+      undo.push(function () {
+        hb.style.display = d0; hb.style.left = l0; hb.style.top = t0;
+        if (hd) hd.style.display = hd0;
+      });
+    }
+
+    // --- the update chip: created on demand, removed here afterwards
+    var hadChip = document.getElementById("updchip");
+    if (!hadChip && typeof showUpdateChip === "function") {
+      try {
+        if (typeof _updChip !== "undefined") _updChip = false;
+        showUpdateChip();
+        var chip = document.getElementById("updchip");
+        if (chip) {
+          // scan() walks root.querySelectorAll("*"), so a root's OWN text node is never measured.
+          // The chip used to hold its label as a bare text node, which is why staging it here
+          // measured nothing and still looked like a clean pass; index.html now wraps that label
+          // in a span so there is an element to measure. Report 0 rather than imply coverage.
+          var nc = scan(out, seen, chip);
+          checked += nc;
+          if (!nc) unmeasured.push("updchip");
+          undo.push(function () { chip.remove(); if (typeof _updChip !== "undefined") _updChip = false; });
+        } else { unmeasured.push("updchip(not created)"); }
+      } catch (e) { unmeasured.push("updchip(threw)"); }
+    }
+
+    for (var i = 0; i < undo.length; i++) { try { undo[i](); } catch (e) {} }
+    return { checked: checked, unmeasured: unmeasured };
+  }
+
   function sweepOverlays(out, seen) {
     var ovs = document.querySelectorAll(".overlay"), checked = 0, unmeasured = [];
     for (var i = 0; i < ovs.length; i++) {
@@ -327,6 +400,8 @@
 
   window.VA = {
     fits: fits,
+    _extras: sweepExtras,          // exposed so a failure to STAGE can be told from a clean pass
+    _scan: scan,
     run: function (theme) {
       if (original === null) {
         hadTheme = (typeof S === "object" && S && "theme" in S);
@@ -338,11 +413,12 @@
       var out = [], seen = {};
       var base = scan(out, seen) + scanPlaceholders(out, seen);
       var ov = sweepOverlays(out, seen);
+      var ex = sweepExtras(out, seen);
       return {
-        theme: theme, checked: base + ov.checked, failed: out.length,
+        theme: theme, checked: base + ov.checked + ex.checked, failed: out.length,
         // overlays that rendered no measurable text -- these were NOT audited. A clean run
         // with a long unmeasured list is not a clean run; open those by hand and re-check.
-        unmeasured: ov.unmeasured,
+        unmeasured: ov.unmeasured.concat(ex.unmeasured),
         fails: out.sort(function (a, b) { return a.r - b.r; }).slice(0, MAX_REPORT)
       };
     },
