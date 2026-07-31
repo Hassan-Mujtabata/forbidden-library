@@ -511,6 +511,32 @@ def main():
         print("unrepairable:      %d guillemet(s) left inside OCR sludge (reported, not touched)"
               % left)
 
+    # #144: SCANNED is a hardcoded pair, which is correct today and silently wrong the moment a
+    # scanned book is added -- it would get no letter repair and nobody would be told. Score every
+    # book the same way the pair was chosen (rare tokens unique to it, per 1000 words) and say so.
+    freq, in_book, toks = {}, {}, {}
+    for b in data["books"]:
+        toks[b["id"]] = 0
+        for e in b["episodes"]:
+            for p in e["p"]:
+                for w in TOKEN.findall(p):
+                    lw = w.lower()
+                    freq[lw] = freq.get(lw, 0) + 1
+                    in_book.setdefault(lw, set()).add(b["id"])
+                    toks[b["id"]] += 1
+    flagged = []
+    for b in data["books"]:
+        uniq = sum(1 for w, n in freq.items()
+                   if n <= 2 and len(w) >= 5 and in_book[w] == {b["id"]})
+        rate = 1000.0 * uniq / max(1, toks[b["id"]])
+        if rate >= 12 and b["id"] not in SCANNED:
+            flagged.append((b["id"], rate))
+    if flagged:
+        print("\n[!] these score like a page SCAN but are not in SCANNED, so they got no letter repair:")
+        for bid, rate in sorted(flagged, key=lambda x: -x[1]):
+            print("      %-13s %.1f junk tokens per 1000 words (laws48 is 34.6, a typed book 2-9)" % (bid, rate))
+        print("    Add them to SCANNED in this file, re-run --fix, and READ THE --list OUTPUT.")
+
     if unknown:
         print("\nUNMAPPED private-use code points (dropped, not guessed):")
         for ch, n in sorted(unknown.items(), key=lambda kv: -kv[1]):

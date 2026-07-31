@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 """Extract text from the vault PDFs into episode-structured books.json."""
-import fitz, json, re, os, sys
+import fitz, json, re, os, sys, subprocess
 from collections import Counter
 from cleantext import clean as repair_text
+
+HERE = os.path.dirname(os.path.abspath(__file__))
 
 ROOT = r"C:\Users\sands\OneDrive\Desktop\forbidden"
 OUT = os.path.join(ROOT, "vault", "tools", "books.json")
@@ -221,6 +223,24 @@ def main():
         json.dump(data, f, ensure_ascii=False, separators=(",", ":"))
     print("\n".join(report))
     print(f"\nwrote {OUT} ({os.path.getsize(OUT)/1e6:.2f} MB, {len(out)} books)")
+
+    # #144: THIS SCRIPT REWRITES books.json FROM THE PDFs. extract() applies only the
+    # per-paragraph repairs (cleantext.clean); everything added in 3.55 and 3.57 --
+    # resolving the ambiguous ligatures, rejoining line-break hyphens, letter-level OCR
+    # correction, the junk-title gate -- needs a vocabulary built from the WHOLE library and so
+    # cannot run per paragraph. Without this call a re-extract silently throws all of it away and
+    # the books quietly regress to "the ɹrst law" and "a Iyrrhir victory".
+    # Shelling out to the real entry point rather than reimplementing it, so there is exactly one
+    # copy of the repair logic and it is the one with the pinned regression test.
+    print("\nrunning the corpus-wide repairs (cleantext --fix)…")
+    r = subprocess.run([sys.executable, os.path.join(HERE, "cleantext.py"), "--fix"],
+                       capture_output=True, text=True, encoding="utf-8", errors="replace")
+    sys.stdout.write(r.stdout or "")
+    if r.returncode != 0:
+        sys.stderr.write(r.stderr or "")
+        raise SystemExit("cleantext failed — books.json is EXTRACTED BUT UNREPAIRED. Fix and "
+                         "re-run `python tools/cleantext.py --fix` before build.py.")
+    print("next: python tools/build.py")
 
 
 if __name__ == "__main__":

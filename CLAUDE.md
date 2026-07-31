@@ -185,6 +185,17 @@ Corollary: **re-repair from the pristine original, never patch on top of a bad r
 damaged character is already gone, so the second pass cannot see what went wrong. `--fix` moves the
 input to `books.json.bak`, which is what made the redo possible; copy it somewhere safe first.
 
+**`extract.py` rewrites the WHOLE of `books.json` from the PDFs.** It applies only the
+per-paragraph repairs (`cleantext.clean`); everything corpus-wide — resolving ambiguous ligatures,
+rejoining line-break hyphens, letter-level OCR correction, the junk-title gate — needs a vocabulary
+built from the whole library and cannot run per paragraph. So a re-extract used to silently discard
+every repair 3.55 and 3.57 made and regress the books to "the ɹrst law". It now shells out to
+`cleantext.py --fix` itself and fails loudly if that step does not succeed. **Never hand-roll a
+second copy of the repair logic** — the one in `cleantext.py` is the one with the pinned regression.
+`cleantext.py` also scores every book for scan-damage (rare tokens unique to it, per 1000 words) and
+names any that look scanned but are missing from `SCANNED`, which is otherwise a hardcoded pair that
+goes quietly wrong the moment a scanned book is added.
+
 **Only two books are scans, and only they may get letter-level repair.** Measured, not assumed:
 rare tokens unique to a book, per 1000 words — `laws48` 34.6, `meditations` 17.1, every other book
 2.0–9.5. Those two are page images with the scanner's own bad reading baked into the text layer
