@@ -15,6 +15,7 @@ Single-file encrypted reading PWA. Hassan's books become gamified ~1,200-word le
 | `sw.js` | Service worker. `CACHE` const must bump with every `index.html` change. |
 | `content.enc` | AES-256-GCM(gzip(books + graph)). The only place lesson text exists publicly. |
 | `tools/ship.py` | **Release command.** Checks, bumps, commits, pushes. Use this, not manual steps. |
+| `tools/verify.js` | **Start here.** `VV.all({stage:1})` — harness, selftest, overflow, contrast x3, one verdict. |
 | `tools/audit.js` | Browser-side contrast audit (`VA.run`) + layout-overflow check (`VA.fits`). |
 | `tools/selftest.js` | Browser-side logic suite — `VT.run()`. Merge/tombstone/fold/sane invariants. |
 | `tools/bump.py` | Bumps `APP_VER` + `CACHE` together. `ship.py` calls it; rarely run directly. |
@@ -273,6 +274,13 @@ buttons with black text. They pull in opposite directions — don't collapse the
 
 **Overlays** are `.overlay > .panel > h2 > button.x[data-close]`. Toggle with `.classList.add("on")`.
 Check the existing markup before inventing class names.
+
+**Verify with one call, not forty-five lines.** Paste `tools/verify.js` and run `VV.all({stage:1})`:
+it unregisters the service worker, clears caches, builds a 375px iframe (the pane cannot resize
+below ~583px and will report a phone while testing a tablet), stages the states where bugs actually
+live — a half-finished track, an overdue idea, a pre-repair highlight — then runs the selftest, the
+overflow check and all three themes, and prints one `VERDICT` line. Retyping that setup inline on
+every pass was the largest avoidable cost in a working session; `{w:1200}` for the desktop chrome.
 
 **Verify in the browser with DOM probes,** not screenshots — screenshots, IntersectionObserver and
 rAF don't fire reliably in the in-app pane. Clear `vault_state` on the github.io origin after testing
