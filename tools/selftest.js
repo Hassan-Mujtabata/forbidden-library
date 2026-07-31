@@ -616,6 +616,37 @@
       return dirty ? dirty + " dispatch prompt(s) carried damaged text" : true;
     });
 
+    /* #142: the review parser is the only thing standing between a malformed model reply and a
+     * broken quiz card. It must refuse anything it cannot fully understand -- a question with
+     * three options or two identical ones is worse than falling back to the canned quiz. */
+    check("sharpen: a well-formed reply parses, with the right answer index", function () {
+      if (typeof parseFreshQ !== "function") return "parseFreshQ is gone";
+      var p = parseFreshQ("Q: What does it claim?\nA) One\nB) Two\nC) Three\nD) Four\nCORRECT: C\nWHY: Because.");
+      if (!p) return "refused a valid reply";
+      return (p.a === 2 && p.c.length === 4) ? true : "a=" + p.a + " opts=" + p.c.length;
+    });
+
+    check("sharpen: malformed replies are refused, not half-used", function () {
+      var bad = {
+        "no why":        "Q: x\nA) aa\nB) bb\nC) cc\nD) dd\nCORRECT: A",
+        "three options": "Q: x\nA) aa\nB) bb\nC) cc\nCORRECT: A\nWHY: y",
+        "identical":     "Q: x\nA) same\nB) same\nC) same\nD) same\nCORRECT: A\nWHY: y",
+        "no letter":     "Q: x\nA) aa\nB) bb\nC) cc\nD) dd\nCORRECT: yes\nWHY: y",
+        "just prose":    "Sure! Here is a question for you."
+      };
+      var accepted = Object.keys(bad).filter(function (k) { return parseFreshQ(bad[k]); });
+      return accepted.length ? "accepted malformed: " + accepted.join(", ") : true;
+    });
+
+    check("sharpen: the question never mentions a text the reader cannot see", function () {
+      var p = parseFreshQ("Q: According to the provided text, why does the mind wander?\n" +
+                          "A) aa\nB) bb\nC) cc\nD) dd\nCORRECT: B\nWHY: Based on the passage, by default.");
+      if (!p) return "refused a valid reply";
+      var leak = /provided text|the passage|the lesson\b|the text\b/i;
+      if (leak.test(p.q) || leak.test(p.why)) return "leaked: " + p.q + " / " + p.why;
+      return /^[A-Z]/.test(p.q) ? true : "lost its capital letter: " + p.q;
+    });
+
     check("genGuard: a changed fingerprint bins the cache, an unchanged one does not", function () {
       if (typeof genGuard !== "function") return "genGuard is gone";
       var K = "vault_selftest_cache";

@@ -563,10 +563,14 @@ header .brand span{color:var(--gold)}
 .tnode:not(:last-child)::after{content:"";position:absolute;left:27px;bottom:-20px;height:20px;width:2px;background:var(--line)}
 .tnode .ng{font-size:22px;width:28px;text-align:center;flex:0 0 auto;line-height:1.1}
 .tnode .ntx{flex:1;min-width:0}
-.tnode .stg{display:block;font-size:9.5px;letter-spacing:.24em;color:var(--tacc,var(--gold));opacity:.8;margin-bottom:3px}
-.tnode.locked .stg{color:var(--tx2)}
-/* track accents are tuned for the dark canvas; on light/sepia use readable muted text */
-:root[data-theme="light"] .tnode .stg,:root[data-theme="sepia"] .tnode .stg{color:var(--tx2);opacity:1}
+/* #143: this measured 3.87 against a 4.5 requirement, and it was NOT opacity — it was the track
+   accent itself. "Track accents read fine on dark" (see tagColor) is true of most of them and
+   false of the green one, #27ae60, which is a perfectly good border colour and a poor 9.5px text
+   colour. An accent chosen to decorate is not automatically fit to read.
+   So the label takes readable muted text in every theme, and --tacc keeps the jobs it is actually
+   good at: the left border, the availability ring, the unlock glow. Only surfaced now because
+   STAGE labels appear once a track has finished ideas on it — a state no audit had ever staged. */
+.tnode .stg{display:block;font-size:9.5px;letter-spacing:.24em;color:var(--tx2);margin-bottom:3px}
 .miniA{color:var(--jade);cursor:pointer;font-size:12px;text-decoration:underline}
 .tnode .nt{font-size:13.5px;font-weight:600;line-height:1.3}
 .tnode .nsub{font-size:11px;color:var(--tx2);margin-top:4px;line-height:1.35}
@@ -3666,8 +3670,14 @@ $("btn-ach").onclick=()=>{const g=$("achgrid");g.innerHTML="";
   $("achs").classList.add("on")};
 
 /* ---------- patch notes ---------- */
-const APP_VER="3.61";
+const APP_VER="3.62";
 const PATCHES=[
+ {v:"3.62",n:"Sharpen Writes Its Own",d:"31 Jul 2026",items:[
+  ["new","🔁 SHARPEN NOW WRITES FRESH QUESTIONS EVERY SESSION. Review used to replay the lesson's built-in quiz, cycling through them by number — so an idea that came back often eventually tested whether you remembered the QUESTION rather than whether you still held the idea. Each session's questions are now written from the lesson's own text, one lane per key, all at once. Every review spends the keys instead of leaving them idle."],
+  ["new","The wrong answers are written to be plausible rather than silly, and the options are shuffled before you see them — models overwhelmingly favour the same slot, which is how “always press B” became a real bug in the Gauntlet once."],
+  ["polish","If you're offline, out of quota, or the reply comes back malformed, it falls back to the lesson's own quiz — exactly the old behaviour, never an error. The parser refuses anything it can't fully understand: a question with three options, or two identical ones, is worse than the canned question it replaced."],
+  ["fix","Generated questions kept opening with “according to the provided text…”, which tells you about plumbing you can't see and shouldn't have to. Stripped, and the sentence put back together properly."],
+  ["fix","The STAGE labels on your Path were unreadable on the green track — 3.87 against a 4.5 minimum. The track colour is a fine border and a poor 9.5px text colour. Found because staging a half-finished track for the first time made those labels appear at all."]]},
  {v:"3.61",n:"Ask Your Library",d:"31 Jul 2026",items:[
   ["new","🎓 SEARCH NOW ANSWERS QUESTIONS, NOT JUST FINDS WORDS. Type something question-shaped into 🔍 and a new row appears above the matches: ask your library. It pulls the passages that actually bear on what you asked — the same rarity-weighted retrieval the Council uses — hands them to the tutor, and streams back an answer that names the books it drew on. I asked it about losing my temper and got The 48 Laws, Meditations, Dark Psychology and Quiet Influence in one paragraph, with Dark Psychology explicitly disagreeing with the others."],
   ["new","It tells you when your books DON'T answer. Asked about handling a difficult boss it opened with “the books offer some insights into difficult individuals, but do not directly answer how to handle a difficult boss” — which is worth more than four confident sentences of padding."],
@@ -4094,13 +4104,75 @@ function renderSharpen(){
   c.onclick=startReview;
 }
 let RQ=[];
-function startReview(){
+/* ---------- #142: Sharpen writes its own questions ----------------------------------------
+   Review used to replay the lesson's canned quiz, cycling by index — so a returning idea
+   eventually tests whether you remember the QUESTION rather than whether you hold the idea.
+   Each session now has fresh questions written from the lesson's own text, one lane per key,
+   which also means every review actually spends the keys instead of leaving them idle.
+   The canned quiz stays as the fallback: no network, no keys, spent quota or a reply that will
+   not parse all degrade to exactly the previous behaviour rather than to an error.
+   Bulk-caller rules apply (capped keys and models, small prompt) because this fires once per due
+   idea, all at once. Option order is shuffled by the existing render — models favour the same
+   slot, and "always press B" was a real bug in the Gauntlet before the shuffle went in. */
+let RVFRESH={};
+function parseFreshQ(t){
+  if(!t)return null;
+  const q=(t.match(/^\s*(?:Q|QUESTION)\s*[::]\s*(.+)$/im)||[])[1];
+  const opts=[];const rx=/^\s*([A-D])[).:]\s+(.+)$/gim;let m;
+  while((m=rx.exec(t))&&opts.length<4)opts.push(m[2].trim());
+  const cm=t.match(/^\s*CORRECT\s*[::]\s*([A-D])/im);
+  const why=(t.match(/^\s*WHY\s*[::]\s*([\s\S]+)$/im)||[])[1];
+  if(!q||opts.length!==4||!cm||!why)return null;
+  const a="ABCD".indexOf(cm[1].toUpperCase());
+  if(a<0)return null;
+  // Asking the prompt not to say "the provided text" is not enough — it still does, and a review
+  // question that mentions a text the reader cannot see leaks this app's own plumbing at them.
+  // Strip the lead-in and restore the sentence rather than throwing away a paid-for question.
+  const deleak=s=>s.replace(/^\s*(?:according to|based on|as (?:stated|described|explained) in|from)\s+(?:the\s+)?(?:provided\s+|given\s+|above\s+)?(?:text|passage|lesson|excerpt|material|content|reading)s?\s*,?\s*/i,
+      m=>"").replace(/\s+(?:in|according to)\s+(?:the\s+)?(?:provided\s+)?(?:text|passage|lesson)s?\b/ig,"");
+  const cap=s=>s?s.charAt(0).toUpperCase()+s.slice(1):s;
+  const out={q:cap(deleak(demd(q.trim()))),c:opts.map(o=>demd(o)),a:a,
+             why:cap(deleak(demd(why.trim().split(/\n\s*\n/)[0])))};
+  // A question whose options are not four distinct strings is not a question.
+  if(new Set(out.c.map(x=>x.toLowerCase())).size!==4)return null;
+  return out.c.every(x=>x.length>1)?out:null;
+}
+async function mineFreshReview(ids){
+  if(!geminiKeys().length||!navigator.onLine)return;
+  const pick=ids.slice(0,5);
+  const jobs=pick.map(id=>{const n=nodeById(id),bk=bookOfNode(n);
+    return {prompt:`A lesson this reader studied a while ago${bk?` (from "${bk.title}")`:""}:\n\n`+
+      `"${n.title}"\n\n${nodeText(n).slice(0,2500)}\n\n`+
+      `Write ONE multiple-choice question checking whether they still UNDERSTAND this idea — not `+
+      `whether they remember its wording. Four options, exactly one correct, the wrong ones `+
+      `plausible rather than silly. Use this exact format and nothing else:\n`+
+      `Q: <question>\nA) <option>\nB) <option>\nC) <option>\nD) <option>\nCORRECT: <letter>\n`+
+      `WHY: <one sentence saying what the idea actually is>\n\n`+
+      `Ask about the idea itself. Never write "the text", "the passage", "the provided text", `+
+      `"the lesson" or "the author" — the reader is not looking at anything, they are recalling.`,
+      maxTok:340,temp:0.85,opts:{maxKeys:2,maxModels:2}};});
+  try{
+    const res=await geminiParallel(jobs);
+    res.forEach((r,i)=>{if(r&&r.ok){const p=parseFreshQ(r.text);if(p)RVFRESH[pick[i]]=p;}});
+  }catch(e){}
+}
+
+async function startReview(){
   const due=reviewDue();if(!due.length)return;
   // tutor-F #23: interleave across tracks — consecutive questions from different tracks force real discrimination
   const byTrack={};for(const n of due)(byTrack[n.track]=byTrack[n.track]||[]).push(n.id);
   const tracks=Object.keys(byTrack);RQ=[];let any=true;
   while(any){any=false;for(const t of tracks)if(byTrack[t].length){RQ.push(byTrack[t].shift());any=true;}}
   $("review").classList.add("on");
+  RVFRESH={};
+  // Show the wait rather than hiding it, but never let it hold the session hostage: whatever has
+  // arrived when the race ends is used, and the rest fall back to the lesson's own quiz.
+  if(geminiKeys().length&&navigator.onLine){
+    $("rvbody").innerHTML=`<div class="lure mining"><div class="lure-h">🔁 WRITING THIS SESSION'S QUESTIONS</div>`+
+      `<div class="lure-t">fresh ones, from the lessons themselves…</div><div class="lure-bar"><span style="width:55%"></span></div></div>`;
+    await Promise.race([mineFreshReview(RQ),new Promise(r=>setTimeout(r,14000))]);
+    if(!$("review").classList.contains("on"))return;      // they closed it while we were waiting
+  }
   reviewStep(0,0);
 }
 function reviewStep(idx,gained){
@@ -4115,8 +4187,13 @@ function reviewStep(idx,gained){
   }
   const n=nodeById(RQ[idx]),rv=rvState(n.id),tr=trackById(n.track);
   // #7: cycle through the node's questions across review sessions instead of re-rolling the same one
-  const rec2=(S.node[n.id]=S.node[n.id]||{});const qi=(rec2.rvQ||0)%n.quiz.length;rec2.rvQ=qi+1;
-  const q=n.quiz[qi];
+  const rec2=(S.node[n.id]=S.node[n.id]||{});const qi=(rec2.rvQ||0)%n.quiz.length;
+  // #142: a question written for this session if one arrived, otherwise the lesson's own. Only
+  // advance the canned cursor when the canned one is actually used, or a run of fresh questions
+  // would silently burn through the stock and leave repeats waiting for the next offline session.
+  const fresh=RVFRESH[n.id];
+  const q=fresh||n.quiz[qi];
+  if(!fresh)rec2.rvQ=qi+1;
   const card=document.createElement("div");card.className="gatecard";
   card.innerHTML=`<div style="font-size:11px;letter-spacing:.2em;color:${tagColor(tr.accent)};margin-bottom:6px">${tr.glyph} ${esc(tr.name.toUpperCase())}</div>
     <h3>${n.glyph} ${esc(n.title)}</h3><div class="gsub">${esc(q.q)}</div>`;

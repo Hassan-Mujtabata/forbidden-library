@@ -207,7 +207,22 @@
     queue:    function () { call("renderQueue"); },
     addbook:  function () { call("renderAddBook"); },
     sit:      function () { call("openSit"); },
-    review:   function () { call("startReview"); },   // no-ops when nothing is due -> reported unmeasured
+    review: function () {
+      // NOT startReview(): since #142 that mines fresh questions over the network, which would
+      // spend real quota on every audit run (three themes x one call per due idea). Stage the
+      // card the same way the Gauntlet is staged -- a question that costs nothing -- so the
+      // surface is still measured. VA.restore() clears it again.
+      try {
+        var due = (typeof reviewDue === "function") ? reviewDue() : [];
+        if (!due.length) return;                       // nothing due -> reported unmeasured, honestly
+        RQ = due.map(function (n) { return n.id; });
+        RVFRESH = {};
+        RVFRESH[RQ[0]] = { q: "A staged review question, used only to measure contrast.",
+                           c: ["first option", "second option", "third option", "fourth option"],
+                           a: 1, why: "A staged explanation." };
+        call("reviewStep", 0, 0);
+      } catch (e) {}
+    },
     dispatch: function () { call("openDispatch"); },
     forge:    function () { call("openForge"); },
     gauntlet: function () {
@@ -425,6 +440,9 @@
     restore: function () {
       try { if (typeof GA !== "undefined" && GA && GA.qs && GA.qs[0] &&
                 /staged question/.test(GA.qs[0].q)) GA = null; } catch (e) {}
+      try { if (typeof RVFRESH !== "undefined" && RVFRESH) {
+              Object.keys(RVFRESH).forEach(function (k) {
+                if (/staged review question/.test(RVFRESH[k].q)) delete RVFRESH[k]; }); } } catch (e) {}
       if (original !== null) {
         if (hadTheme) setTheme(original);
         else document.documentElement.dataset.theme = original;
