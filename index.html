@@ -386,6 +386,22 @@ header .brand span{color:var(--gold)}
 .ga-revq{font-size:13.5px;line-height:1.5}
 .ga-reva{font-size:12px;color:var(--tx2);margin-top:6px}
 /* ---------- gemini key panel ---------- */
+/* #141: ask-the-library. Sits above the word matches, because the answer is the better result
+   when the query was a question — but the matches stay, because sometimes you did want the word. */
+.sask{display:none}
+.sask.offer,.sask.on{display:block;margin:10px 0 4px}
+.sask-go{display:block;width:100%;text-align:left;background:var(--card);border:1px solid var(--line);
+  border-radius:12px;padding:11px 14px;font-size:13.5px;color:var(--gold);font-weight:600;transition:.15s}
+.sask-go:hover{background:var(--card2);border-color:rgba(212,175,55,.45)}
+.sask.on{background:var(--card);border:1px solid var(--line);border-left:2px solid var(--ai);
+  border-radius:12px;padding:13px 15px}
+.sask-q{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--tx2);margin-bottom:8px}
+.sask-a{font-size:14.5px;line-height:1.62;color:var(--tx);white-space:pre-wrap}
+.sask-dots{color:var(--tx2)}
+.sask-src{display:flex;gap:7px;flex-wrap:wrap;margin-top:11px}
+.sask-b{font-size:11.5px;padding:5px 11px;border-radius:99px;border:1px solid var(--line);
+  background:var(--card2);color:var(--tx2);transition:.15s}
+.sask-b:hover{color:var(--tx);border-color:rgba(212,175,55,.45)}
 .kchips{display:flex;gap:7px;flex-wrap:wrap;margin:8px 0}
 /* #138: a week of key usage. A key that never fires must LOOK like a flat row, not like missing data. */
 .kusage{margin:10px 0 4px}
@@ -907,7 +923,7 @@ header .brand span{color:var(--gold)}
 </div>
 
 <div class="overlay" id="eplist"><div class="panel"><h2>☰ EPISODES <button class="x" data-close="eplist">✕</button></h2><div id="eprows"></div></div></div>
-<div class="overlay" id="search"><div class="panel"><h2>🔍 SEARCH <button class="x" data-close="search">✕</button></h2><input id="sinput" placeholder="search all books…" autocomplete="off"><div id="sres"></div></div></div>
+<div class="overlay" id="search"><div class="panel"><h2>🔍 SEARCH <button class="x" data-close="search">✕</button></h2><input id="sinput" placeholder="search all books…" autocomplete="off"><div id="sask" class="sask"></div><div id="sres"></div></div></div>
 <div class="overlay" id="hls"><div class="panel" style="max-width:760px">
   <h2>📓 JOURNAL <button class="x" data-close="hls">✕</button></h2>
   <div id="jstats"></div>
@@ -3528,8 +3544,68 @@ $("jfile").onchange=e=>{if(e.target.files[0])restoreVault(e.target.files[0]);e.t
 /* ---------- search ---------- */
 $("btn-search").onclick=()=>{$("search").classList.add("on");$("sinput").value="";$("sres").innerHTML="";setTimeout(()=>$("sinput").focus(),50)};
 let sT;$("sinput").addEventListener("input",()=>{clearTimeout(sT);sT=setTimeout(doSearch,250)});
+/* ---------- #141: ask the library ----------------------------------------------------------
+   Search finds the WORD. This answers the QUESTION, out of the same shelf, and it is the one
+   feature that makes 22 books behave like one thing rather than twenty-two.
+   It reuses councilSeats() — the idf-weighted, whole-word retrieval already proven by the Council
+   — so the model never searches and never remembers: it is handed real paragraphs and asked to
+   write the prose between them. The passages carry their book and chapter, and the answer is
+   required to name them, which is also what makes a fabricated claim obvious on sight.
+   Offered only for something question-shaped (3+ words): "temper" wants the word, not an essay. */
+const askable=s=>s.trim().split(/\s+/).length>=3;
+let ASKING=false;
+async function askLibrary(question){
+  if(ASKING)return;
+  if(!geminiKeys().length){toast("Add a Gemini key in 📓 Journal first");return;}
+  if(!navigator.onLine){toast("You're offline — search still works.");return;}
+  const box=$("sask");if(!box)return;
+  ASKING=true;
+  box.className="sask on";
+  box.innerHTML=`<div class="sask-q">🔎 ${esc(question)}</div><div class="sask-a"><span class="sask-dots">reading your shelf…</span></div>`;
+  const body=box.querySelector(".sask-a");
+  try{
+    const {seats}=councilSeats(question,4);
+    if(!seats.length){body.textContent="Nothing in your books speaks to that one.";ASKING=false;return;}
+    // Verbatim evidence only. Chapter titles are passed only when they are real ones — most of this
+    // corpus falls back to "Episode 133", which is this app's chunk numbering and not a source.
+    const ev=seats.map(s=>{
+      const ps=s.passages.slice(0,2).map(p=>{
+        const t=(p.ep&&!/^episode\s+\d+$/i.test(p.ep))?` — ${p.ep}`:"";
+        return `[${s.book.title}${t}] "${sane(p.text).slice(0,700)}"`;}).join("\n\n");
+      return ps;}).join("\n\n");
+    const names=seats.map(s=>s.book.title).join(", ");
+    const prompt=`A reader asked their own library: "${question}"\n\n`+
+      `These are real passages from their books:\n\n${ev}\n\n`+
+      `Answer them in 4-6 sentences using ONLY what these passages say. Name the books you are `+
+      `drawing on (${names}) as you use them. Where the books disagree, say so plainly rather than `+
+      `blending them. If the passages do not really answer the question, say that instead of `+
+      `padding. Do not invent quotations. Plain prose, no markdown, no lists, no preamble.`;
+    // geminiStream calls onChunk(cumulative, delta) — the FIRST argument is everything so far,
+    // not the new piece. Appending it repeats the answer with every frame, growing quadratically:
+    // the first live run printed the same paragraph four times, each longer than the last.
+    let acc="";
+    await geminiAsk(prompt,partial=>{acc=partial;body.textContent=demd(acc);},420,0.6);
+    if(!acc.trim())body.textContent="No answer came back — try again in a moment.";
+    // The sources are the retrieval's, not the model's, so they cannot be fabricated.
+    const src=document.createElement("div");src.className="sask-src";
+    src.innerHTML=seats.map(s=>`<button class="sask-b" data-b="${esc(s.book.id)}" data-e="${s.passages[0].e}">${s.book.glyph} ${esc(s.book.title)}</button>`).join("");
+    box.appendChild(src);
+    src.querySelectorAll(".sask-b").forEach(b=>b.onclick=()=>{
+      $("search").classList.remove("on");openEp(b.dataset.b,+b.dataset.e);});
+  }catch(e){body.textContent="That didn't go through. Try again in a moment.";}
+  ASKING=false;
+}
+
 function doSearch(){
   const q=fold($("sinput").value.trim());const w=$("sres");w.innerHTML="";
+  const raw=$("sinput").value.trim();
+  const ask=$("sask");
+  if(ask&&!ASKING){ask.className="sask";ask.innerHTML="";}
+  if(ask&&raw&&askable(raw)&&geminiKeys().length&&!ASKING){
+    ask.className="sask offer";
+    ask.innerHTML=`<button class="sask-go" id="sask-go">🎓 Ask your library: “${esc(raw.slice(0,70))}”</button>`;
+    $("sask-go").onclick=()=>askLibrary(raw);
+  }
   if(q.length<3){w.innerHTML=q.length?'<p style="color:var(--tx2)">Type at least 3 characters…</p>':"";return}  // #76
   let n=0;
   // path lessons first
@@ -3590,8 +3666,13 @@ $("btn-ach").onclick=()=>{const g=$("achgrid");g.innerHTML="";
   $("achs").classList.add("on")};
 
 /* ---------- patch notes ---------- */
-const APP_VER="3.60";
+const APP_VER="3.61";
 const PATCHES=[
+ {v:"3.61",n:"Ask Your Library",d:"31 Jul 2026",items:[
+  ["new","🎓 SEARCH NOW ANSWERS QUESTIONS, NOT JUST FINDS WORDS. Type something question-shaped into 🔍 and a new row appears above the matches: ask your library. It pulls the passages that actually bear on what you asked — the same rarity-weighted retrieval the Council uses — hands them to the tutor, and streams back an answer that names the books it drew on. I asked it about losing my temper and got The 48 Laws, Meditations, Dark Psychology and Quiet Influence in one paragraph, with Dark Psychology explicitly disagreeing with the others."],
+  ["new","It tells you when your books DON'T answer. Asked about handling a difficult boss it opened with “the books offer some insights into difficult individuals, but do not directly answer how to handle a difficult boss” — which is worth more than four confident sentences of padding."],
+  ["new","The source buttons under the answer come from the retrieval, not from the tutor, so they can't be invented — tap one and you land on the actual page it came from. One word still just searches: “temper” wants the word, not an essay."],
+  ["fix","First live run printed the same paragraph four times, each copy longer than the last — I appended each streamed update instead of replacing it, and every update carries the whole answer so far. Caught by running it rather than by reading it."]]},
  {v:"3.60",n:"What The Keys Are Doing",d:"31 Jul 2026",items:[
   ["new","📊 EVERY KEY, EVERY DAY. The Journal now draws a bar per key per day for the last week, so “are my keys actually being used?” has an answer on screen instead of a shrug. It survives reloads — the old counter reset to zero every time you opened the app, which is exactly why the question kept coming up. A key that never fires now looks like a flat row rather than like missing data."],
   ["new","📰 THE DISPATCH HAS A FOURTH SECTION, AND IT USES A FOURTH KEY. “Fading” picks the idea you're closest to forgetting — straight out of the Sharpen schedule — and reminds you what it actually says and one way to use it today, written from the lesson's own words. There's a button to go sharpen it on the spot. It's skipped on days when nothing is fading, because a section with nothing behind it is worse than no section."],

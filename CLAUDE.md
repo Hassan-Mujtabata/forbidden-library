@@ -111,6 +111,9 @@ trailing letters are allowed so `temper` still finds `tempers`.
 **Streaming:** `geminiAsk(prompt, onChunk, …)` streams via SSE and falls back to `geminiCall` on any
 failure. Paint chunks by writing into the existing bubble — re-rendering the whole thread per token
 rebuilds the input and steals focus mid-sentence.
+**`onChunk(cumulative, delta)` — the first argument is EVERYTHING SO FAR, not the new piece.**
+Assign it (`acc = partial`), never append. Appending grows the answer quadratically: the first live
+run of ask-the-library printed the same paragraph four times, each copy longer than the last.
 
 **Generate on a schedule, not once.** A feature that calls Gemini once and caches the result forever
 is a static feature with an API bill — Hassan's actual complaint, twice. `autoRefreshHooks()` rotates
