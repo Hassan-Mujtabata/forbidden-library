@@ -356,6 +356,8 @@ header .brand span{color:var(--gold)}
 .dp-date{font-size:11px;letter-spacing:.18em;color:var(--tx2);text-transform:uppercase;margin-bottom:16px}
 .dp-sec{margin-bottom:18px;padding-left:13px;border-left:2px solid var(--line)}
 .dp-sec.clash{border-left-color:var(--err)} .dp-sec.ask{border-left-color:var(--gold)}
+/* #137: jade is the Sharpen colour everywhere else, so a fading idea reads as review, not news */
+.dp-sec.fade{border-left-color:var(--jade)}
 .dp-l{font-size:10px;letter-spacing:.18em;color:var(--tx2);text-transform:uppercase;margin-bottom:7px}
 .dp-t{font-family:var(--serif);font-size:15.5px;line-height:1.65;color:var(--read)}
 .dp-sec.ask .dp-t{font-size:18px;color:var(--tx)}
@@ -385,6 +387,15 @@ header .brand span{color:var(--gold)}
 .ga-reva{font-size:12px;color:var(--tx2);margin-top:6px}
 /* ---------- gemini key panel ---------- */
 .kchips{display:flex;gap:7px;flex-wrap:wrap;margin:8px 0}
+/* #138: a week of key usage. A key that never fires must LOOK like a flat row, not like missing data. */
+.kusage{margin:10px 0 4px}
+.kusage-h{font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--tx2);margin-bottom:7px}
+.kusage-row{display:flex;align-items:center;gap:10px;margin-bottom:5px;font-size:11.5px;color:var(--tx2)}
+.kusage-row .kn{flex:0 0 44px}
+.kusage-row .kbars{display:flex;align-items:flex-end;gap:3px;height:24px;flex:0 0 auto}
+.kusage-row .kbars i{display:block;width:7px;border-radius:2px;background:var(--gold);opacity:.85}
+.kusage-row .kv{color:var(--tx2)}
+.kusage-none{font-size:11.5px;color:var(--tx2);margin-top:4px}
 .kchip{font-size:11.5px;padding:5px 10px;border-radius:99px;border:1px solid var(--line);
   background:var(--card);color:var(--tx2);letter-spacing:.03em}
 .kchip.ok{color:var(--ok)} .kchip.bad{color:var(--err)} .kchip.quota{color:var(--gold)}
@@ -1961,7 +1972,7 @@ async function vocabQuiz(){
   const pop=$("defpop");$("dp-word").textContent="Vocab check";$("dp-open").style.display="none";
   $("dp-explain").style.display="none";$("dp-save").style.display="none";
   $("dp-src").textContent="🎓 BUILDING QUESTIONS…";$("dp-body").textContent="…";pop.classList.add("on");
-  const list=words.map(w=>`- "${w.t}"${w.ctx?` (context: ${w.ctx.slice(0,140)})`:""}`).join("\n");
+  const list=words.map(w=>`- "${sane(w.t)}"${w.ctx?` (context: ${sane(w.ctx).slice(0,140)})`:""}`).join("\n");   // #140
   const prompt=`A learner saved these words/phrases while studying and wants to check they truly understood each idea (not just its dictionary meaning). For EACH item, write one short question that probes understanding, and a one-sentence model answer. Format EXACTLY, plain text, no markdown:\nQ: <question>\nA: <answer>\n\n(one blank line between items)\n\nItems:\n${list}`;
   try{
     const txt=await geminiCall(prompt,900,0.7);   // #19: headroom; temp 0.7 for question variety
@@ -2036,7 +2047,33 @@ const geminiKeys=()=>(localStorage.getItem("vault_gemini")||"").split(/[\s,]+/).
 const keyTag=k=>"…"+k.slice(-4);
 // Per-key outcome counters, so "are my keys actually being used?" has an answer on screen.
 const GEM_STATS={};
-function gemStat(k,f){const t=keyTag(k);(GEM_STATS[t]=GEM_STATS[t]||{ok:0,quota:0,bad:0,net:0})[f]++;}
+/* #138: GEM_STATS lives only in memory, so "are my keys actually being used?" reset to zero on
+   every reload — which is precisely the question Hassan kept asking and nothing on screen could
+   answer beyond the current session. A per-day, per-key tally now persists in its OWN localStorage
+   key: this is diagnostics, not progress, so it must never go into S and never sync.
+   Writing on every call would hit localStorage hundreds of times during a mining run, so the flush
+   is debounced and forced when the tab hides. Seven days kept, older ones dropped on load. */
+const KSTATS_LS="vault_keystats";
+let KSTATS=(()=>{try{return JSON.parse(localStorage.getItem(KSTATS_LS))||{}}catch(e){return{}}})();
+(()=>{const keep=Object.keys(KSTATS).sort().slice(-7),t={};keep.forEach(d=>t[d]=KSTATS[d]);KSTATS=t;})();
+const flushKStats=()=>{try{localStorage.setItem(KSTATS_LS,JSON.stringify(KSTATS))}catch(e){}};
+let _kstatT=null;
+const saveKStats=()=>{if(_kstatT)return;_kstatT=setTimeout(()=>{_kstatT=null;flushKStats()},4000)};
+addEventListener("visibilitychange",()=>{if(document.hidden&&_kstatT){clearTimeout(_kstatT);_kstatT=null;flushKStats();}});
+function gemStat(k,f){const t=keyTag(k);
+  (GEM_STATS[t]=GEM_STATS[t]||{ok:0,quota:0,bad:0,net:0})[f]++;
+  const day=(KSTATS[today()]=KSTATS[today()]||{});
+  (day[t]=day[t]||{ok:0,quota:0,bad:0,net:0})[f]++;
+  saveKStats();
+}
+// Totals for one key tag across the retained window, plus a per-day series for the bars.
+function keyHistory(tag){
+  const days=Object.keys(KSTATS).sort().slice(-7);
+  const series=days.map(d=>{const r=(KSTATS[d]||{})[tag];return r?(r.ok|0)+(r.quota|0)+(r.bad|0)+(r.net|0):0;});
+  const ok=days.reduce((n,d)=>n+(((KSTATS[d]||{})[tag]||{}).ok|0),0);
+  const bad=days.reduce((n,d)=>n+(((KSTATS[d]||{})[tag]||{}).quota|0)+((((KSTATS[d]||{})[tag]||{}).bad|0)),0);
+  return {days,series,ok,bad,todayN:(series.length&&days[days.length-1]===today())?series[series.length-1]:0};
+}
 // #119: ROUND ROBIN. The loop below always started at keys[0], so the first key served every
 // single request and the rest only ever woke up once it started returning 429. Six keys behaved
 // exactly like one. Each call now starts one key further along.
@@ -2457,15 +2494,25 @@ const HOOKS_LS="vault_hooks";
    release — 3.57 rewrote 159 words and left the constant at 2, so the very rule this comment
    states was already broken. build.py now stamps a sha256 of the prose into the payload as
    DATA.gen, and the check below compares against that. Derived beats remembered. */
-const HOOKS_LS_GEN="vault_hooks_gen";
+// (the stamp key is derived as lsKey+"_gen" inside genGuard, so "vault_hooks_gen" still matches
+//  what earlier versions wrote and no device re-mines needlessly on upgrade)
 let HOOKS=(()=>{try{return JSON.parse(localStorage.getItem(HOOKS_LS))||{}}catch(e){return{}}})();
-// Called once DATA exists — HOOKS is built at parse time, long before there is anything to compare.
-function pruneStaleHooks(){
+/* #139: one guard for every cache derived from the book text. Written out as a helper the moment
+   a SECOND such cache appeared — the Dispatch now quotes a lesson's own words, so it goes stale
+   for exactly the same reason the hooks did. Returns true when it binned something, so the caller
+   can reset its in-memory copy too. Called once DATA exists: these caches are built at parse time,
+   long before there is a fingerprint to compare against. */
+function genGuard(lsKey){
   const gen=(typeof DATA==="object"&&DATA&&DATA.gen)||"";
-  if(!gen)return;                                  // payload predates the stamp: leave it alone
-  if(localStorage.getItem(HOOKS_LS_GEN)===gen)return;
-  HOOKS={};
-  try{localStorage.removeItem(HOOKS_LS);localStorage.setItem(HOOKS_LS_GEN,gen);}catch(e){}
+  if(!gen)return false;                            // payload predates the stamp: leave it alone
+  const mark=lsKey+"_gen";
+  if(localStorage.getItem(mark)===gen)return false;
+  try{localStorage.removeItem(lsKey);localStorage.setItem(mark,gen);}catch(e){}
+  return true;
+}
+function pruneStaleHooks(){
+  if(genGuard(HOOKS_LS))HOOKS={};
+  if(genGuard(DISPATCH_LS))DISPATCH={day:"",stand:"",clash:"",ask:"",fade:""};
 }
 const saveHooks=()=>{try{localStorage.setItem(HOOKS_LS,JSON.stringify(HOOKS))}catch(e){}};
 const hookCount=()=>Object.keys(HOOKS).reduce((n,k)=>n+((HOOKS[k]&&HOOKS[k].items)||[]).length,0);
@@ -2810,13 +2857,43 @@ function dispatchJobs(){
 
   // The provocation is anchored to something they chose to keep, so it lands personally.
   const hl=(S.hl||[]).filter(h=>h.t&&h.t.length>40);
-  const seedTxt=hl.length?hl[Math.floor(rnd()*hl.length)].t
+  // #140: stored user text goes into prompts through sane(), not raw. A highlight kept before the
+  // 3.55 repair still holds the damaged spelling, and handed to the model verbatim it gets quoted
+  // straight back — a live run produced a question asking what "Pawer" revealed about the reader.
+  // sane() fixes the ligature family; letter-level scan damage in an old highlight cannot be
+  // repaired here (it needs the corpus vocabulary) and is a known, bounded limit.
+  const seedTxt=hl.length?sane(hl[Math.floor(rnd()*hl.length)].t)
     :(()=>{const h=((HOOKS[(cur||{}).id]||{}).items||[])[0];return h?h.t:(cur?cur.title:"reading");})();
   const ask=`Something this reader kept from their books:\n\n"${seedTxt.slice(0,600)}"\n\n`+
     `Write ONE short question, at most 25 words, that would make them look at this differently `+
     `today. Output only the question, nothing else.`;
-  return {jobs:[{prompt:stand,maxTok:200,temp:0.7},{prompt:clash,maxTok:220,temp:0.8},
-                {prompt:ask,maxTok:90,temp:0.9}],pair:[x&&x.title,y&&y.title]};
+  // #137: a fourth lane, and the only one tied to the spaced-review schedule. Sharpen already knows
+  // which ideas are going cold; nothing ever said so out loud. Prefer one that is overdue, else the
+  // one fading soonest, and hand the model the lesson's OWN text so the reminder is the idea itself
+  // rather than a paraphrase of its title. Skipped entirely when nothing is fading — a section with
+  // nothing behind it is worse than no section, and the extra key is better spent tomorrow.
+  let fade=null,fadeNode=null;
+  if(DATA.nodes&&DATA.nodes.length){
+    const now=Date.now();
+    const dueList=DATA.nodes.map(n=>({n,rv:(typeof rvState==="function")?rvState(n.id):null}))
+      .filter(o=>o.rv&&isFinite(o.rv.due))
+      .sort((a,b)=>a.rv.due-b.rv.due);
+    const pick=dueList.find(o=>o.rv.due<=now)||dueList.find(o=>o.rv.due<=now+7*864e5);
+    if(pick){
+      fadeNode=pick.n;
+      const bk=(typeof bookOfNode==="function")?bookOfNode(pick.n):null;
+      const body=((typeof nodeText==="function")?nodeText(pick.n):"").slice(0,1200);
+      fade=`An idea this reader learned a while ago and is now due to revisit:\n\n`+
+        `"${pick.n.title}"${bk?` (from "${bk.title}")`:""}\n\n${body}\n\n`+
+        `In TWO sentences, remind them what this idea actually says and give them one concrete way `+
+        `to use it today. Speak directly to them. No preamble, no lists, no markdown.`;
+    }
+  }
+  const jobs=[{prompt:stand,maxTok:200,temp:0.7},{prompt:clash,maxTok:220,temp:0.8},
+              {prompt:ask,maxTok:90,temp:0.9}];
+  if(fade)jobs.push({prompt:fade,maxTok:200,temp:0.7});
+  return {jobs,pair:[x&&x.title,y&&y.title],fadeTitle:fadeNode?fadeNode.title:"",
+          fadeId:fadeNode?fadeNode.id:""};
 }
 
 let DISPATCHING=false;
@@ -2830,7 +2907,8 @@ async function refreshDispatch(force){
     const res=await geminiParallel(spec.jobs.map(j=>Object.assign({opts:{maxKeys:2,maxModels:2}},j)));
     const parts=res.map(r=>r.ok?demd(r.text).trim():"");
     if(parts.some(Boolean)){
-      DISPATCH={day:today(),at:Date.now(),stand:parts[0],clash:parts[1],ask:parts[2],pair:spec.pair};
+      DISPATCH={day:today(),at:Date.now(),stand:parts[0],clash:parts[1],ask:parts[2],
+                fade:parts[3]||"",fadeTitle:spec.fadeTitle||"",fadeId:spec.fadeId||"",pair:spec.pair};
       saveDispatch();
     }
   }catch(e){}
@@ -2867,8 +2945,11 @@ function renderDispatch(){
   w.innerHTML=`<div class="dp-date">${new Date(DISPATCH.at||Date.now()).toLocaleDateString(undefined,{weekday:"long",day:"numeric",month:"long"})}</div>`+
     sec("WHERE YOU STAND",DISPATCH.stand)+
     sec(DISPATCH.pair&&DISPATCH.pair[0]?`${DISPATCH.pair[0]} vs ${DISPATCH.pair[1]}`:"A COLLISION",DISPATCH.clash,"clash")+
+    sec(DISPATCH.fadeTitle?`FADING — ${DISPATCH.fadeTitle}`:"FADING",DISPATCH.fade,"fade")+
     sec("CARRY THIS TODAY",DISPATCH.ask,"ask")+
+    (DISPATCH.fadeId?`<div class="bl-actions"><button class="ghostbtn" id="dp-fade">🔁 Sharpen it now</button></div>`:"")+
     `<div class="bl-actions"><button class="ghostbtn" id="dp-again">↻ Rewrite</button></div>`;
+  if($("dp-fade"))$("dp-fade").onclick=()=>{$("dispatch").classList.remove("on");openNode(DISPATCH.fadeId);};
   $("dp-again").onclick=()=>{DISPATCH.stand="";renderDispatch();refreshDispatch(true);};
 }
 
@@ -3047,7 +3128,7 @@ function vaultContext(){
     `${b.title} ${readSet(b.id).size}/${b.episodes.length}`).join("; "));
   const mast=(typeof masteredTitles==="function")?masteredTitles(30):[];
   if(mast.length)L.push("IDEAS THEY HAVE MASTERED: "+mast.join("; "));
-  const hl=(S.hl||[]).slice(0,8).filter(h=>h.t).map(h=>`"${h.t.slice(0,170)}"`);
+  const hl=(S.hl||[]).slice(0,8).filter(h=>h.t).map(h=>`"${sane(h.t).slice(0,170)}"`);   // #140
   if(hl.length)L.push("WHAT THEY CHOSE TO KEEP: "+hl.join(" | "));
   const errs=(S.errors||[]).slice(0,5).map(e=>e.q).filter(Boolean);
   if(errs.length)L.push("QUESTIONS THEY GOT WRONG: "+errs.join(" | "));
@@ -3248,6 +3329,26 @@ function renderKeyChips(live){
     const note=s?s.label:st?(st.ok?st.ok+" ok":st.quota?"quota":st.bad?"rejected":"idle"):"idle";
     return `<span class="kchip ${cls}">key ${i+1} ${esc(keyTag(k))} · ${esc(note)}</span>`;
   }).join("");
+  renderKeyUsage();
+}
+
+/* #138: the week, not the session. Each key gets seven bars — one per retained day — so a key that
+   never fires is visible as a flat row rather than as an absence of evidence. */
+function renderKeyUsage(){
+  const w=$("kusage");if(!w)return;
+  const keys=geminiKeys();
+  if(!keys.length){w.innerHTML="";return;}
+  const hist=keys.map(k=>keyHistory(keyTag(k)));
+  const peak=Math.max(1,...hist.map(h=>Math.max(0,...h.series)));
+  const total=hist.reduce((n,h)=>n+h.ok+h.bad,0);
+  w.innerHTML=`<div class="kusage-h">Calls per key, last ${Math.max(1,hist[0].days.length)} day${hist[0].days.length===1?"":"s"} · ${total} total</div>`+
+    keys.map((k,i)=>{const h=hist[i];
+      const bars=(h.series.length?h.series:[0]).map(v=>
+        `<i style="height:${Math.max(2,Math.round(v/peak*22))}px" title="${v} call${v===1?"":"s"}"></i>`).join("");
+      return `<div class="kusage-row"><span class="kn">key ${i+1}</span><span class="kbars">${bars}</span>`+
+        `<span class="kv">${h.ok} ok${h.bad?` · ${h.bad} failed`:""}</span></div>`;
+    }).join("")+
+    (total?"":`<div class="kusage-none">Nothing recorded yet — the daily jobs run a few seconds after the shelf opens.</div>`);
 }
 
 // Fires one tiny request per key, all at once, each pinned to its own key with no fallback — so
@@ -3279,7 +3380,7 @@ function renderGemBox(){
       (unrev?`${unrev} reflection${unrev>1?"s":""} awaiting feedback. <button class="ghostbtn" id="gem-review" style="margin:6px 8px 0 0;padding:7px 14px;font-size:12.5px">Review now</button>`
             :"Every reflection has tutor feedback. ")+
       `<span class="miniA" id="gem-clear">disconnect</span>`+
-      `<div class="kchips" id="kchips"></div>`+
+      `<div class="kchips" id="kchips"></div><div class="kusage" id="kusage"></div>`+
       `<button class="ghostbtn" id="gem-test" style="margin:2px 0 0;padding:7px 14px;font-size:12.5px">Test every key</button>`;
     renderKeyChips();
     $("gem-test").onclick=testAllKeys;
@@ -3489,8 +3590,13 @@ $("btn-ach").onclick=()=>{const g=$("achgrid");g.innerHTML="";
   $("achs").classList.add("on")};
 
 /* ---------- patch notes ---------- */
-const APP_VER="3.59";
+const APP_VER="3.60";
 const PATCHES=[
+ {v:"3.60",n:"What The Keys Are Doing",d:"31 Jul 2026",items:[
+  ["new","📊 EVERY KEY, EVERY DAY. The Journal now draws a bar per key per day for the last week, so “are my keys actually being used?” has an answer on screen instead of a shrug. It survives reloads — the old counter reset to zero every time you opened the app, which is exactly why the question kept coming up. A key that never fires now looks like a flat row rather than like missing data."],
+  ["new","📰 THE DISPATCH HAS A FOURTH SECTION, AND IT USES A FOURTH KEY. “Fading” picks the idea you're closest to forgetting — straight out of the Sharpen schedule — and reminds you what it actually says and one way to use it today, written from the lesson's own words. There's a button to go sharpen it on the spot. It's skipped on days when nothing is fading, because a section with nothing behind it is worse than no section."],
+  ["fix","The tutor was being fed your own highlights with the old broken spelling still in them, and quoted it back — a live run produced a question asking what “Pawer” revealed about my reading. Stored text is cleaned on the way to the model now, in every place that sends it."],
+  ["fix","The stale-cache check from 3.58 covered the daily facts but not the Dispatch, which now quotes a lesson directly and can go stale the same way. One guard covers both, and any cache added later."]]},
  {v:"3.59",n:"Under The Notch",d:"31 Jul 2026",items:[
   ["fix","THE APP WAS DRAWING ITSELF UNDER YOUR PHONE'S CAMERA. The page has been set to use the full screen since the day it was written, and nothing ever compensated for the bits of screen that aren't rectangular — so installed on the home screen, the top bar sat beneath the island and the tutor bar and toasts beneath the home indicator. There was not one line of safe-area code in the file. Measured both ways: with no notch the layout is unchanged to the pixel, with one it clears it."],
   ["fix","Pressing a keyboard shortcut while the tutor was open stacked a panel on top of your conversation — the shortcut guard only knew about one of the three kinds of panel this app has. There is now a single answer to “is something open?”, so the next one is covered too."],

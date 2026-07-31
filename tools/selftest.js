@@ -592,6 +592,50 @@
     });
   }
 
+  /* ------------------------------------------------ derived caches + prompts (#139/#140) */
+  function derivedTests() {
+    check("sane: repairs the ligature stand-ins in text saved before 3.55", function () {
+      var got = sane("the ɹrst ɻame of a jh›na");
+      return got === "the first flame of a jhāna" ? true : "got " + got;
+    });
+
+    check("sane: leaves undamaged text byte-identical", function () {
+      var s = "An ordinary sentence, with punctuation — and an em dash.";
+      return sane(s) === s ? true : "mutated clean text";
+    });
+
+    check("prompts: stored highlights are cleaned on the way to the model", function () {
+      var snap = S.hl;
+      S.hl = [{ b: "laws48", e: 0, t: "the ɹrst law" }];
+      var bad = /[ɹɻʃ›]/;
+      var ctx = (typeof vaultContext === "function") ? vaultContext() : "";
+      var jobs = (typeof dispatchJobs === "function") ? dispatchJobs().jobs : [];
+      var dirty = jobs.filter(function (j) { return bad.test(j.prompt); }).length;
+      S.hl = snap;
+      if (bad.test(ctx)) return "vaultContext passed damaged text to the model";
+      return dirty ? dirty + " dispatch prompt(s) carried damaged text" : true;
+    });
+
+    check("genGuard: a changed fingerprint bins the cache, an unchanged one does not", function () {
+      if (typeof genGuard !== "function") return "genGuard is gone";
+      var K = "vault_selftest_cache";
+      try {
+        localStorage.setItem(K, "payload");
+        localStorage.setItem(K + "_gen", "DEFINITELY-NOT-THE-CURRENT-ONE");
+        var binned = genGuard(K);
+        var after = localStorage.getItem(K);
+        localStorage.setItem(K, "payload2");
+        var again = genGuard(K);                 // same gen now -> must be a no-op
+        var kept = localStorage.getItem(K);
+        localStorage.removeItem(K); localStorage.removeItem(K + "_gen");
+        if (!DATA.gen) return true;              // payload predates the stamp: guard is inert by design
+        if (!binned || after !== null) return "stale cache was not binned";
+        if (again || kept !== "payload2") return "binned a cache whose fingerprint still matches";
+        return true;
+      } catch (e) { return "threw: " + (e && e.message || e); }
+    });
+  }
+
   window.VT = {
     run: function () {
       out = []; t0 = performance.now();
@@ -599,7 +643,7 @@
       try {
         foldTests(); saneTests(); readTests(); mergeTests(); pushTests();
         indexTests(); fmtTests(); hookTests(); gauntletTests(); matchTests(); libraryTests();
-        chromeTests(); reviewTests();
+        chromeTests(); reviewTests(); derivedTests();
       } finally {
         S = snap;
         if (typeof save === "function") save();
