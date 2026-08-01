@@ -215,7 +215,26 @@ second copy of the repair logic** — the one in `cleantext.py` is the one with 
 names any that look scanned but are missing from `SCANNED`, which is otherwise a hardcoded pair that
 goes quietly wrong the moment a scanned book is added.
 
-**Only two books are scans, and only they may get letter-level repair.** Measured, not assumed:
+**Nothing in the library is a page scan any more** (1 Aug 2026 — Hassan replaced 48 Laws and
+Meditations with text editions, and swapped the Bliss Beyond ch.1–4 excerpt and the Right
+Concentration *summary* for the real books). `SCANNED` is now empty and no book gets letter-level
+correction. The detector still scores every book on every run: laws48 20 and meditations 13 per
+1000 look scan-like but are **false positives** — sampled and they are Greene's historical proper
+nouns and an archaic translation's classical names (`aesculapius`, `agrigentum`, `abideth`).
+Sample before believing that number. The section below is kept because the reasoning is what
+matters if a scan is ever added again.
+
+**A text edition can drop the line-break hyphen entirely**, leaving "accumu lation" and "knowl
+edge" split across a plain space — no stray character for the guillemet rejoin to anchor on.
+`rejoin_splits()` walks TOKENS, not `re.sub`: a substitution consumes both words, so in "for knowl
+edge" it matches "for knowl", declines it and has already eaten the fragment. Repeating does not
+help — a declined match leaves the string identical, so every pass aligns the same way.
+Two safety rules, both needed: the first half must not be a word (that is what stops
+*the rapist* → *therapist*), **or** must be rarer than the joined word — because a fragment split
+seven times appears seven times and otherwise vouches for itself as real. `build_vocab` returns
+counts, not a set, for exactly that comparison.
+
+**Only two books were scans, and only they got letter-level repair.** Measured, not assumed:
 rare tokens unique to a book, per 1000 words — `laws48` 34.6, `meditations` 17.1, every other book
 2.0–9.5. Those two are page images with the scanner's own bad reading baked into the text layer
 (the 48 Laws PDF is 476 image pages), so `vvith`/`frorn`/`pcople` are damage. **In a typed book a

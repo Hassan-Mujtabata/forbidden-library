@@ -3834,8 +3834,13 @@ $("btn-ach").onclick=()=>{const g=$("achgrid");g.innerHTML="";
   $("achs").classList.add("on")};
 
 /* ---------- patch notes ---------- */
-const APP_VER="3.64";
+const APP_VER="3.65";
 const PATCHES=[
+ {v:"3.65",n:"Real Editions",d:"1 Aug 2026",items:[
+  ["content","FOUR BOOKS REPLACED WITH PROPER EDITIONS — and two of them you'd only ever had a fragment of. Mindfulness, Bliss and Beyond went from 17,870 words to 95,783: you had chapters 1–4, now you have the book. Right Concentration went from a 26,926-word summary to the real 65,177-word text. Your library is now 2,378,720 words."],
+  ["content","THE 48 LAWS AND MEDITATIONS ARE NO LONGER PHOTOGRAPHS. Both were page scans with the scanner's own misreadings baked in — that's where “Rnssia's temperamental czar” and “a Iyrrhir victory” came from. They're real text editions now, so that entire class of damage is gone at the source rather than patched: no more letter-by-letter corrections, and the 21 words I'd had to deliberately leave wrong are simply correct."],
+  ["fix","The new 48 Laws drops the hyphen at a line break entirely, leaving words split across a space — “accumu lation”, “accompa nying”, “knowl edge”. Those are put back together, but only when the first half isn't a word in its own right, which is what stops “the rapist” from ever becoming “therapist”. Checked: it didn't."],
+  ["polish","Chapter numbering shifted a little where the new editions are paginated differently — 48 Laws now has 348 chapters instead of 323, Meditations 123 instead of 105. If a bookmark lands a page or two off, that's why."]]},
  {v:"3.64",n:"The Weave",d:"1 Aug 2026",items:[
   ["fix","BOOKS YOU ADD WERE BEING PARKED NEXT TO YOUR PATH, NOT PUT INTO IT. Every AI-written track was a straight chain with nothing pointing out of it — your hand-built tracks share 19 connections between them, the generated ones had zero. The cross-references existed only as words inside the lessons. There's now a step that finds the real links and writes them into the graph, and it runs automatically for every book you add from here."],
   ["new","Influence & Persuasion was one of two islands on your Path. It now connects: “Perception Is Everything” to Greene's “Never Outshine the Master”, “Scarcity & Framing” to “Conceal Intention”, and “Ethical & Quiet Influence” to the cross-training lesson. Those are judged links with a stated reason, not keyword matches."],

@@ -10,7 +10,7 @@ ROOT = r"C:\Users\sands\OneDrive\Desktop\forbidden"
 OUT = os.path.join(ROOT, "vault", "tools", "books.json")
 
 BOOKS = [
-    dict(id="laws48",    file="The+48+Laws+Of+Power.pdf",
+    dict(id="laws48",    file="the+48+laws+of+power_2.pdf",
          title="The 48 Laws of Power", author="Robert Greene",
          wing="shadow", glyph="♛", accent="#d4af37"),
     dict(id="seduction", file="the-art-of-seduction-robert-greene.pdf",
@@ -34,7 +34,7 @@ BOOKS = [
     dict(id="quietinf",  file="16-05-2021-050120The-Art-of-Quiet-Influence.pdf",
          title="The Art of Quiet Influence", author="Jocelyn Davis",
          wing="light", glyph="\U0001f343", accent="#27ae60"),
-    dict(id="bliss",     file="Ajahn_Brahm-Mindfulness_Bliss_and_Beyond-Chapters1-4_copy.pdf",
+    dict(id="bliss",     file="Mindfulness, Bliss and Beyond.pdf",
          title="Mindfulness, Bliss and Beyond", author="Ajahn Brahm",
          wing="light", glyph="\U0001fab7", accent="#16a085"),
     dict(id="insight",   file="bp520s_Goldstein_Experience-of-Insight.pdf",
@@ -46,7 +46,7 @@ BOOKS = [
     dict(id="tmi",       file="The Mind Illuminated - A Complete Meditation Guide Integrating Buddhist Wisdom and Brain Science ( PDFDrive.com ) (1).pdf",
          title="The Mind Illuminated", author="Culadasa (John Yates)",
          wing="light", glyph="\U0001f319", accent="#34495e"),
-    dict(id="rightconc", file="Right Concentration PDF.pdf",
+    dict(id="rightconc", file="right concentration a practical guide to the jhanas by leigh brasington.pdf",
          title="Right Concentration", author="Leigh Brasington",
          wing="light", glyph="\U0001f506", accent="#f39c12"),
     dict(id="kahneman", file="Daniel Kahneman-Thinking, Fast and Slow  .pdf",
@@ -58,7 +58,7 @@ BOOKS = [
     dict(id="bodyscore", file="The-Body-Keeps-the-Score-PDF.pdf",
          title="The Body Keeps the Score", author="Bessel van der Kolk",
          wing="light", glyph="\U0001fac0", accent="#b0413e"),
-    dict(id="meditations", file="meditationsofmar00marc.pdf",
+    dict(id="meditations", file="Marcus-Aurelius-Meditations.pdf",
          title="Meditations", author="Marcus Aurelius",
          wing="light", glyph="\U0001f3db️", accent="#8a94a6"),
     dict(id="humannature", file="The Laws of Human Nature.pdf",

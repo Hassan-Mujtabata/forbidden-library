@@ -107,6 +107,8 @@ HYPH = re.compile(r"([A-Za-zÀ-ɏ]{2,})[«»~]([ \t]*)([A-Za-zà-ɏ]{2,})")
 # A stray guillemet/tilde still sitting between two letters after the rejoin pass was a plain
 # hyphen all along ("Chiang Kai~shek"), so it becomes one rather than being dropped.
 HYPH_TIGHT = re.compile(r"([A-Za-zÀ-ɏ])[«»~]([A-Za-zÀ-ɏ])")
+# #151: a word split across a plain space by a dropped line-break hyphen.
+SPLITWORD = re.compile(r"\b([A-Za-zÀ-ɏ]{3,}) ([a-zà-ɏ]{2,})\b")
 WORD = re.compile(r"[A-Za-zÀ-ɏḀ-ỿ']+")
 
 # Control characters that never carry meaning in book prose. Tab and newline are kept.
@@ -177,6 +179,51 @@ def clean(s, unknown=None):
     return re.sub(r"[ \t]{2,}", " ", s).strip()
 
 
+SPLIT_EDGE = ".,;:!?\"'()[]“”‘’—-"
+
+
+def rejoin_splits(s, vocab, stats=None):
+    """Put back words a dropped line-break hyphen split across a space (#151).
+
+    Walks tokens instead of using re.sub, because a substitution consumes BOTH words: in
+    "for knowl edge" the pattern matches "for knowl" first, declines it (since "for" is a word)
+    and has already eaten "knowl", so the real split never gets a turn. Repeating the pass does
+    not help either — a declined match returns the string unchanged, so every pass aligns
+    identically. Advancing by two on a join is what actually fixes the alignment.
+
+    The safety rule is the FIRST half: a line-break split always leaves a fragment that is not
+    itself a word. That is what keeps "the rapist" from becoming "therapist" — "the" is a word.
+    """
+    if " " not in s:
+        return s
+    parts = s.split(" ")
+    out, i, n = [], 0, len(parts)
+    while i < n:
+        a = parts[i]
+        if i + 1 < n:
+            b = parts[i + 1]
+            ca = a.strip(SPLIT_EDGE)
+            cb = b.strip(SPLIT_EDGE)
+            la, lw = ca.lower(), (ca + cb).lower()
+            # Either the first half is not a word at all, or it is RARER than the joined word —
+            # which is what a repeatedly-split fragment looks like ("knowl" 7, "knowledge" 43).
+            # "the rapist" fails both: "the" is a word and vastly commoner than "therapist".
+            frag = (la not in vocab) or (isinstance(vocab, dict) and
+                                         vocab.get(la, 0) < vocab.get(lw, 0))
+            if (len(ca) >= 3 and len(cb) >= 2 and ca.isalpha() and cb.isalpha()
+                    and cb[0].islower() and frag and lw in vocab):
+                # keep whatever punctuation rode along on the second half
+                out.append(a[:len(a) - len(a.lstrip(SPLIT_EDGE)) + 0] + ca + cb +
+                           b[len(b) - (len(b) - len(b.rstrip(SPLIT_EDGE))):])
+                if stats is not None:
+                    stats["split"] = stats.get("split", 0) + 1
+                i += 2
+                continue
+        out.append(a)
+        i += 1
+    return " ".join(out)
+
+
 def resolve(s, vocab, stats=None):
     """Second pass: the repairs that need to know what a real word looks like.
 
@@ -223,6 +270,26 @@ def resolve(s, vocab, stats=None):
         return a + ("-" if gap == "" else " ") + b
 
     s = HYPH_TIGHT.sub(r"\1-\2", HYPH.sub(join, s))
+
+    # #151: the 2026 text edition of 48 Laws drops the line-break hyphen ENTIRELY rather than
+    # turning it into a guillemet, so words arrive split across a plain space: "accumu lation",
+    # "accompa nying", "knowl edge", "accor dance". The rejoin above needs a stray character to
+    # anchor on and never sees these.
+    # The safety rule is the FIRST half: a line-break split always leaves a fragment that is not
+    # itself a word. Requiring that is what stops the classic "the rapist" -> "therapist" — "the"
+    # is a word, so that pair is never touched. Both the fragment test and the joined-word test
+    # are made against this corpus, so nothing is invented.
+    def rejoin(m):
+        a, b = m.group(1), m.group(2)
+        if a.lower() in vocab:
+            return m.group(0)                      # a real word: leave the pair alone
+        if (a + b).lower() in vocab:
+            if stats is not None:
+                stats["split"] = stats.get("split", 0) + 1
+            return a + b
+        return m.group(0)
+
+    s = rejoin_splits(s, vocab, stats)
     # Whatever guillemet survives both passes had no letter on one side, so it is not a hyphen and
     # not punctuation -- this corpus never uses « » as quotes. It is page furniture from the scan
     # ("L AVV «'14 page 3 76"), so it goes. Tildes are NOT stripped here: ~ is a real attribution
@@ -283,7 +350,11 @@ def clean_title(t, index, unknown=None, vocab=None):
 # twenty others. The distinction matters enormously, because in a clean digital book a rare word is
 # simply A RARE WORD. "clown", "clone", "eases" and "wafer" all live in clean books, and a
 # frequency-built dictionary will cheerfully "correct" them into down/done/cases/water.
-SCANNED = {"laws48", "meditations"}
+# Hassan replaced both scans with real text editions on 1 Aug 2026 (48 Laws 31MB->11MB,
+# Meditations 11.5MB->2MB), so nothing in the library is a page scan any more and no book
+# gets letter-level correction. The detector below re-scores every book on every run and
+# names anything that looks scanned but is missing from this set — trust it over this line.
+SCANNED = set()
 
 # Glyph pairs a scanner genuinely confuses, both directions. Multi-character ones (vv->w, rn->m,
 # ii->n, li->h) carry most of the weight and almost never produce a real word by accident.
@@ -415,7 +486,11 @@ def build_vocab(data):
                     w = w.lower().strip("'")
                     if len(w) > 2:
                         seen[w] = seen.get(w, 0) + 1
-    return set(w for w, n in seen.items() if n >= 2)
+    # A dict, not a set: `in` behaves identically for every existing caller, but the split-word
+    # rejoin needs the COUNTS. A fragment that recurs — "knowl" appears 7 times in 48 Laws because
+    # the same word was split 7 times — otherwise vouches for itself as a real word and blocks its
+    # own repair. Being rarer than the whole word is what identifies it as the fragment.
+    return {w: n for w, n in seen.items() if n >= 2}
 
 
 def selftest():
@@ -426,6 +501,22 @@ def selftest():
     the set happened to yield first won: "o<esh>" -> "off" turned "o<esh>cially" into "offcially",
     and that word's own pass then had nothing left to match. It shipped that way.
     """
+    # #151: words split across a space by a dropped line-break hyphen. The first half being a
+    # NON-word is the whole safety rule — it is what keeps "the rapist" from becoming "therapist".
+    v2 = {"accumulation", "knowledge", "therapist", "the", "rapist", "dance", "accordance",
+          "red", "hot", "redhot"}
+    cases = [
+        ("accumu lation", "accumulation", "joins a fragment to make a real word"),
+        ("knowl edge", "knowledge", "joins even when nothing looks wrong on screen"),
+        ("accor dance", "accordance", "joins although the SECOND half is itself a word"),
+        ("the rapist", "the rapist", "NEVER joins when the first half is a real word"),
+        ("red hot", "red hot", "leaves two real words alone"),
+    ]
+    for src, want, label in cases:
+        got = resolve(src, v2)
+        if got != want:
+            return "%s: %r -> %r, wanted %r" % (label, src, got, want)
+
     esh = "ʃ"
     para = "was o%scially announced" % esh + " and o%s it went" % esh
     vocab = {"officially", "off", "announced", "went"}
