@@ -312,6 +312,31 @@
       });
     }
 
+    // --- a felt figure (#155): its caption is the teaching, and it only exists inside an open
+    // lesson, so no sweep would ever reach one. Stage a real spec into the node body.
+    var nb = document.getElementById("nbody");
+    if (nb && typeof renderFig === "function") {
+      try {
+        // #nbody sits inside the .view that is display:none unless the Path lesson is open, and
+        // scan() skips anything with no offsetParent — so staging a figure there measured exactly
+        // nothing and said so. Show the view for the duration, then put it back as it was.
+        var nv = document.getElementById("node");
+        var nvDisp = nv && nv.style.display;
+        if (nv) nv.style.display = "block";
+        undo.push(function () { if (nv) nv.style.display = nvDisp || ""; });
+        var f = renderFig({ v: 1, alt: "staged figure",
+          stages: [{ cap: "A staged figure caption, used only to measure contrast.",
+                     scene: [{ c: "hand" }, { c: "pressure", at: "fingertips", rate: 1 }] }] },
+          "var(--gold)");
+        f.setAttribute("data-audit", "1");
+        nb.appendChild(f);
+        var nf = scan(out, seen, f);
+        checked += nf;
+        if (!nf) unmeasured.push("feltfig");
+        undo.push(function () { f.remove(); if (typeof figReset === "function") figReset(); });
+      } catch (e) { unmeasured.push("feltfig(threw)"); }
+    }
+
     // --- the update chip: created on demand, removed here afterwards
     var hadChip = document.getElementById("updchip");
     if (!hadChip && typeof showUpdateChip === "function") {

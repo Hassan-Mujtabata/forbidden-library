@@ -599,6 +599,64 @@
     });
   }
 
+  /* ------------------------------------------------------- felt figures (#155) */
+  function figTests() {
+    check("figures: every shipped spec names components the runtime actually has", function () {
+      var bad = [];
+      (DATA.nodes || []).forEach(function (n) {
+        (n.fig || []).forEach(function (f, fi) {
+          var stages = f.stages || [{ scene: f.scene || [] }];
+          stages.forEach(function (st, si) {
+            (st.scene || []).forEach(function (it) {
+              if (!FIGC[it.c]) bad.push(n.id + " fig" + fi + " stage" + si + ": " + it.c);
+            });
+          });
+        });
+      });
+      return bad.length ? bad.slice(0, 4).join("; ") : true;
+    });
+
+    check("figures: a scene renders SVG, and an unknown component renders nothing rather than throwing", function () {
+      var good = figScene([{ c: "hand" }, { c: "pressure", at: "fingertips", rate: 1 }], "#d4af37");
+      if (!/circle|path/.test(good)) return "a hand with pressure drew nothing";
+      var bad = figScene([{ c: "definitely-not-real" }], "#d4af37");
+      return bad === "" ? true : "unknown component emitted: " + bad.slice(0, 40);
+    });
+
+    check("figures: pressure attaches to the anchors the body published", function () {
+      // The whole point of the heartbeat figure: rings must land ON the fingertip pads, which
+      // only `hand` knows about. Ordering matters — pressure alone has nothing to attach to.
+      var withHand = figScene([{ c: "hand" }, { c: "pressure", at: "fingertips" }], "#d4af37");
+      var alone = figScene([{ c: "pressure", at: "fingertips" }], "#d4af37");
+      var rings = (withHand.match(/fg-ring/g) || []).length;
+      var fallback = (alone.match(/fg-ring/g) || []).length;
+      if (rings < 8) return "expected two rings per fingertip pad, got " + rings;
+      return fallback > 0 ? true : "pressure with no body drew nothing at all";
+    });
+
+    check("figures: renderFig builds real stage buttons and advances", function () {
+      var spec = { v: 1, alt: "test", stages: [
+        { cap: "one", scene: [{ c: "hand" }] },
+        { cap: "two", scene: [{ c: "feet" }] }] };
+      var el = renderFig(spec, "#d4af37");
+      var dots = el.querySelectorAll(".ff-dot");
+      if (dots.length !== 2) return dots.length + " stage buttons for 2 stages";
+      if (el.querySelector("figcaption").textContent !== "one") return "did not start on stage one";
+      dots[1].click();
+      var moved = el.querySelector("figcaption").textContent === "two";
+      if (el.querySelector("svg").getAttribute("aria-label") !== "test") return "alt text lost";
+      figReset();
+      return moved ? true : "clicking the second dot did not change the caption";
+    });
+
+    check("figures: a caption is text, so the contrast audit can see it", function () {
+      var el = renderFig({ v: 1, alt: "a", stages: [{ cap: "a readable caption", scene: [{ c: "body" }] }] }, "#d4af37");
+      var cap = el.querySelector("figcaption");
+      figReset();
+      return (cap && cap.textContent === "a readable caption") ? true : "caption is not plain text";
+    });
+  }
+
   /* ------------------------------------------------ the weekly reckoning (#153/#154) */
   function reckonTests() {
     check("reckon: the week key is Monday-anchored and stable across a week", function () {
@@ -776,7 +834,7 @@
       try {
         foldTests(); saneTests(); readTests(); mergeTests(); pushTests();
         indexTests(); fmtTests(); hookTests(); gauntletTests(); matchTests(); libraryTests();
-        chromeTests(); reviewTests(); derivedTests(); readLogTests(); reckonTests();
+        chromeTests(); reviewTests(); derivedTests(); readLogTests(); reckonTests(); figTests();
       } finally {
         S = snap;
         if (typeof save === "function") save();

@@ -15,6 +15,12 @@ def die(msg):
     sys.exit(1)
 
 
+# Mirrors FIGC in index.html. If you add a component there, add it here — otherwise a spec using
+# it validates fine and then draws nothing, which is the failure mode this list exists to prevent.
+FIG_COMPONENTS = {"hand", "feet", "body", "sit", "pressure", "wash", "dot", "halo",
+                  "pacer", "loop", "stages", "label"}
+
+
 def validate(books, graph):
     tracks = {t["id"] for t in graph["tracks"]}
     nodes = graph["nodes"]
@@ -31,6 +37,37 @@ def validate(books, graph):
         for p in n.get("prereq", []):
             if p not in idset:
                 problems.append(f"{n['id']}: prereq '{p}' does not exist")
+        # #155: felt figures. The spec is DATA and the components are CODE, so a spec naming a
+        # component the runtime does not have would render an empty box with a caption promising
+        # something that is not there. Caught here, where it is loud, not at view time where it
+        # is silent. FIG_COMPONENTS mirrors FIGC in index.html — extend both together.
+        for fi, f in enumerate(n.get("fig", []) or []):
+            where = f"{n['id']}: fig[{fi}]"
+            if not isinstance(f, dict):
+                problems.append(f"{where}: not an object"); continue
+            if not f.get("alt"):
+                problems.append(f"{where}: no alt text (it is the screen-reader description)")
+            stages = f.get("stages") or ([{"cap": f.get("cap", ""), "scene": f.get("scene", [])}]
+                                         if f.get("scene") else [])
+            if not stages:
+                problems.append(f"{where}: no stages and no scene")
+            if len(stages) > 5:
+                problems.append(f"{where}: {len(stages)} stages — more than five is a slideshow")
+            place = f.get("place")
+            if place is not None and not (0 <= place < max(1, len(n.get("bridge") or []))):
+                problems.append(f"{where}: place {place} is outside the lesson's paragraphs")
+            for si, st in enumerate(stages):
+                cap = (st.get("cap") or f.get("cap") or "")
+                if len(cap) > 220:
+                    problems.append(f"{where} stage {si}: caption is {len(cap)} chars, cap is 220")
+                if "<" in cap or "&#" in cap:
+                    problems.append(f"{where} stage {si}: caption contains markup")
+                if not (st.get("scene") or []):
+                    problems.append(f"{where} stage {si}: empty scene")
+                for it in (st.get("scene") or []):
+                    c = (it or {}).get("c")
+                    if c not in FIG_COMPONENTS:
+                        problems.append(f"{where} stage {si}: unknown component '{c}'")
         # #149: `rel` is undirected kinship added by integrate.py. It gates nothing, so it is not
         # part of cycle detection — but a dangling one would render as a dead cross-link, and a
         # self-link would have a lesson pointing at itself in "Connect my ideas".

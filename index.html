@@ -514,9 +514,49 @@ header .brand span{color:var(--gold)}
 .an-pulse{animation:fpulse 2.6s ease-in-out infinite}
 .an-roll{animation:froll 7s linear infinite}
 @media(max-width:560px){.rdbody figure.sidefig{float:none!important;width:auto;max-width:230px;margin:18px auto!important}}
+
+/* ---------- #155: felt figures ----------
+   Full width and in the flow, not floated: these are read, not glanced at. The caption is real
+   text so the contrast audit can measure it, and the stage buttons are real buttons so a keyboard
+   and a screen reader can drive them. */
+.feltfig{margin:22px 0;padding:16px 16px 12px;background:var(--card);border:1px solid var(--line);
+  border-radius:14px;cursor:pointer}
+.feltfig .ff-svg svg{width:100%;height:150px;display:block;overflow:visible}
+.feltfig figcaption{font-size:13.5px;line-height:1.55;color:var(--tx);margin-top:12px}
+.feltfig .ff-nav{display:flex;align-items:center;gap:7px;margin-top:11px}
+.feltfig .ff-dot{width:9px;height:9px;padding:0;border-radius:50%;border:1px solid var(--line);
+  background:transparent;cursor:pointer;transition:.2s}
+.feltfig .ff-dot.on{background:var(--gold);border-color:var(--gold)}
+.feltfig .ff-replay{margin-left:auto;background:transparent;border:none;color:var(--tx2);
+  font-size:15px;cursor:pointer;padding:2px 6px;border-radius:8px}
+.feltfig .ff-replay:hover{color:var(--tx);background:var(--card2)}
+.feltfig text.fg-lbl{font-family:var(--sans);font-size:9px;letter-spacing:.12em;
+  text-transform:uppercase;fill:var(--tx2);stroke:none}
+.feltfig text.fg-lbl.big{font-size:13px;letter-spacing:.04em;text-transform:none;fill:var(--tx)}
+/* A ring that grows outward and fades — a pulse you have to look for, not a throb. */
+@keyframes fgring{from{r:3;opacity:.85}to{r:var(--fg-max,15);opacity:0}}
+.feltfig .fg-ring{animation:fgring 1s ease-out infinite;fill:none;stroke-width:1.8}
+@keyframes fgpace{0%,100%{r:14;opacity:.55}50%{r:30;opacity:1}}
+.feltfig .fg-pace{animation:fgpace 6s ease-in-out infinite;stroke-width:2.4}
+@keyframes fgbreathe{0%,100%{transform:scale(.94)}50%{transform:scale(1.06)}}
+.feltfig .fg-breathe{animation:fgbreathe 5s ease-in-out infinite;transform-box:fill-box;transform-origin:center}
+@keyframes fgjit{0%,100%{transform:translate(0,0)}25%{transform:translate(var(--fg-j),-3px)}
+  50%{transform:translate(calc(var(--fg-j) * -1),2px)}75%{transform:translate(2px,var(--fg-j))}}
+.feltfig .fg-jit{animation:fgjit 2.2s ease-in-out infinite;transform-box:fill-box;transform-origin:center}
+@keyframes fgspin{to{transform:rotate(360deg)}}
+.feltfig .fg-orbit{animation:fgspin 26s linear infinite;transform-box:fill-box;transform-origin:center}
+@keyframes fgwash{0%,100%{opacity:.35}50%{opacity:.85}}
+.feltfig .fg-wash{animation:fgwash 5s ease-in-out infinite}
+/* Off-screen figures stop dead: an animation under the fold is heat for nothing. */
+.feltfig.ff-paused svg *{animation-play-state:paused!important}
 @media (prefers-reduced-motion:reduce){
   #rbody p,#rbody blockquote,#nbody>p,#nbody .src,.rdbody figure.sidefig{opacity:1;transform:none;transition:none}
   .rdbody figure.sidefig svg *{animation:none!important}
+  /* #155: a felt figure still TEACHES without motion — it becomes a still diagram of the current
+     stage, and the stage buttons stay, so the sequence is walked by hand instead of by timer. */
+  .feltfig svg *{animation:none!important}
+  .feltfig .fg-pace{r:22}
+  .feltfig .fg-ring{opacity:.5;r:11}
 }
 
 /* ---------- top bar + nav ---------- */
@@ -3942,8 +3982,13 @@ $("btn-ach").onclick=()=>{const g=$("achgrid");g.innerHTML="";
   $("achs").classList.add("on")};
 
 /* ---------- patch notes ---------- */
-const APP_VER="3.66";
+const APP_VER="3.67";
 const PATCHES=[
+ {v:"3.67",n:"Felt Figures",d:"1 Aug 2026",items:[
+  ["new","🫀 FIGURES THAT TEACH THE FEELING, NOT JUST THE IDEA. Some things prose is bad at. “Feel your heartbeat internally” is one — nobody tells you it starts as a faint pressure at your fingertips, then the soles of your feet, then everywhere. Access Concentration now has a figure that walks you through exactly that, one stage at a time: a hand with a pulse you have to go looking for, then feet, then the whole body. Tap it to move on."],
+  ["new","Two more to start: a breath pacer on Why Train the Mind — a ring that breathes so you can match it instead of counting, then a stage that asks you to stop watching it — and the cue/craving/response/reward circuit on The Habit Loop, with a second stage showing what changes when you make the cue invisible."],
+  ["polish","They stop when you scroll past them, hold still if your device asks for less motion (the steps still work by hand), take your theme's colours, and are described for screen readers. They're drawn live rather than being pictures, so they cost about half a kilobyte each instead of megabytes."],
+  ["polish","Figures are checked before they ship: one naming a shape the app doesn't know how to draw, missing its description, or carrying an empty step now stops the build instead of rendering an empty box."]]},
  {v:"3.66",n:"The Reckoning",d:"1 Aug 2026",items:[
   ["new","📜 THE RECKONING — once a week, what the week actually amounted to. Not a scoreboard: it names the ideas you mastered, notices which lesson fought you hardest, mentions what you got wrong, and gives you one thing to do next week. Mine said “you made significant progress on The Five Aggregates, a complex topic that clearly took you the longest to process” — which was true, and nothing on screen had ever told me that before."],
   ["new","🎓 RE-EXPLAIN THE HARD ONE. The Reckoning offers to take the lesson that took you longest and explain it again more simply, then check that it landed. It only names a lesson when it genuinely knows which one — the app has only just started recording that, so it stays quiet rather than guessing."],
@@ -5229,6 +5274,207 @@ function toggleFocus(){
 $("r-focus").onclick=toggleFocus;
 $("n-focus").onclick=toggleFocus;
 
+/* ============ #155: FELT FIGURES — staged instructional diagrams ==============================
+   The 43 FIGURES below this block are DECORATION: keyword-matched, one static idea, chosen at
+   random from whatever matches. These are the opposite. A felt figure is authored per lesson, it
+   moves through STAGES in a deliberate order, and its job is to answer the question a beginner
+   cannot answer from prose alone — where does attention go, what should it feel like, in what
+   order. Hassan's own account of learning to feel a heartbeat internally is the reference: it
+   begins as faint pressure at the fingertips, then the soles, then everywhere, and nobody tells
+   you that. A paragraph struggles to teach it. Three staged frames do it in seconds.
+
+   Specs are DATA (they ship inside content.enc with the lesson), components are CODE (they live
+   here). Same split as everything else in this app: content encrypted, drawing in the open.
+   A spec is ~0.5KB, so 87 lessons cost ~60KB of text that gzips fourfold — a raster equivalent
+   would be megabytes, would not follow the theme, and could not move at all.
+
+   Components draw into a 200x120 box, in the same visual language as the glyphs below: accent
+   stroke, no fill except washes, round caps. A component returns {svg, anchors} — anchors are
+   named point sets ("fingertips", "soles") that later components in the same scene can attach to,
+   which is what lets `pressure` sit exactly on a hand's fingertip pads without hard-coding them. */
+const FIG_W=200, FIG_H=120;
+
+// Small helpers so component bodies stay readable.
+const fPt=(x,y)=>[x,y];
+const fRings=(A,x,y,n,rate,strength,delay)=>{
+  let s="";
+  for(let i=0;i<n;i++)s+=`<circle class="fg-ring" cx="${x}" cy="${y}" r="3" stroke="${A}" `+
+    `style="animation-duration:${(1/(rate||1)).toFixed(2)}s;animation-delay:${(delay+i*(1/(rate||1))/n).toFixed(2)}s;`+
+    `--fg-max:${(7+10*(strength==null?0.7:strength)).toFixed(1)}"/>`;
+  return s;
+};
+
+const FIGC={
+  /* --- bodies. Each publishes the anchors that make `pressure` teachable. --- */
+  hand(p,A){
+    // palm-up left hand, fingers spread; the five pads are the whole point of the component
+    const pads=[[62,26],[80,18],[99,17],[117,22],[131,42]];
+    const fingers=pads.slice(0,4).map(([x,y],i)=>
+      `<path d="M${88+(i-1.5)*11} 66 C${x-3} ${y+26} ${x-2} ${y+10} ${x} ${y}" />`).join("");
+    return {svg:
+      `<path d="M70 66 C64 78 68 96 86 100 L110 100 C128 96 132 80 126 66 Z" fill="${A}" fill-opacity=".07"/>`+
+      `<path d="M70 66 C64 78 68 96 86 100 L110 100 C128 96 132 80 126 66"/>`+
+      fingers+
+      `<path d="M126 66 C136 60 141 46 133 41 C127 37 121 43 118 50"/>`,
+      anchors:{fingertips:pads.map(([x,y])=>fPt(x,y)),palm:[fPt(98,82)]}};
+  },
+  feet(p,A){
+    const soles=[[74,74],[126,74]];
+    return {svg:soles.map(([x,y])=>
+      `<path d="M${x-13} ${y-26} C${x-17} ${y-6} ${x-15} ${y+16} ${x} ${y+20} C${x+15} ${y+16} ${x+17} ${y-6} ${x+13} ${y-26} C${x+6} ${y-34} ${x-6} ${y-34} ${x-13} ${y-26} Z" fill="${A}" fill-opacity=".07"/>`+
+      `<path d="M${x-13} ${y-26} C${x-17} ${y-6} ${x-15} ${y+16} ${x} ${y+20} C${x+15} ${y+16} ${x+17} ${y-6} ${x+13} ${y-26} C${x+6} ${y-34} ${x-6} ${y-34} ${x-13} ${y-26} Z"/>`).join(""),
+      anchors:{soles:soles.map(([x,y])=>fPt(x,y+2))}};
+  },
+  body(p,A){
+    return {svg:
+      `<circle cx="100" cy="24" r="11" fill="${A}" fill-opacity=".07"/><circle cx="100" cy="24" r="11"/>`+
+      `<path d="M100 35v44M100 44l-22 14M100 44l22 14M100 79l-13 30M100 79l13 30" />`,
+      anchors:{whole:[fPt(100,24),fPt(78,58),fPt(122,58),fPt(87,109),fPt(113,109),fPt(100,60)],
+               head:[fPt(100,24)],hands:[fPt(78,58),fPt(122,58)],chest:[fPt(100,52)]}};
+  },
+  sit(p,A){
+    return {svg:
+      `<circle cx="100" cy="30" r="10" fill="${A}" fill-opacity=".07"/><circle cx="100" cy="30" r="10"/>`+
+      `<path d="M100 40c-14 6-20 22-20 34M100 40c14 6 20 22 20 34"/>`+
+      `<path d="M74 92h52c4 0 4-8 0-8H74c-4 0-4 8 0 8z" fill="${A}" fill-opacity=".07"/>`,
+      anchors:{chest:[fPt(100,58)],head:[fPt(100,30)],whole:[fPt(100,30),fPt(100,58),fPt(100,86)]}};
+  },
+
+  /* --- the teaching layers --- */
+  pressure(p,A,scene){
+    // Sits on whichever anchor set the body component published. This is the component that does
+    // the actual work in the heartbeat figure: a faint pulse you have to go looking for.
+    const pts=(scene.anchors&&scene.anchors[p.at])||scene.anchors&&scene.anchors.whole||[fPt(100,60)];
+    return {svg:pts.map(([x,y],i)=>fRings(A,x,y,2,p.rate||1,p.strength,i*0.09)).join("")};
+  },
+  wash(p,A){
+    const up=(p.dir||"up")==="up";
+    return {svg:`<defs><linearGradient id="fgw" x1="0" y1="${up?1:0}" x2="0" y2="${up?0:1}">`+
+      `<stop offset="0" stop-color="${A}" stop-opacity=".30"/><stop offset="1" stop-color="${A}" stop-opacity="0"/>`+
+      `</linearGradient></defs>`+
+      `<rect class="fg-wash" x="8" y="8" width="184" height="104" rx="10" fill="url(#fgw)" stroke="none"/>`};
+  },
+  dot(p,A){
+    const j=p.jitter==null?0:p.jitter;
+    return {svg:`<circle class="${j>0.35?"fg-jit":"fg-still"}" cx="${p.x||100}" cy="${p.y||60}" r="6" `+
+      `fill="${A}" stroke="none" style="--fg-j:${(j*9).toFixed(1)}px"/>`};
+  },
+  halo(p,A){
+    return {svg:`<circle class="fg-breathe" cx="${p.x||100}" cy="${p.y||60}" r="${p.r||40}" `+
+      `stroke="${A}" stroke-opacity=".45" stroke-dasharray="3 6"/>`};
+  },
+  pacer(p,A){
+    // A ring that breathes at a stated pace so the reader can match it rather than count.
+    const s=(p.pace||6);
+    return {svg:`<circle class="fg-pace" cx="100" cy="58" r="20" stroke="${A}" `+
+      `style="animation-duration:${s}s"/>`+
+      `<circle cx="100" cy="58" r="4" fill="${A}" stroke="none"/>`+
+      `<text class="fg-lbl" x="100" y="108" text-anchor="middle">${esc(p.label||(s+"s in · "+s+"s out"))}</text>`};
+  },
+  loop(p,A){
+    const labels=(p.labels||["cue","craving","response","reward"]).slice(0,4);
+    const at=[[100,22],[158,60],[100,98],[42,60]];
+    return {svg:
+      `<circle class="fg-orbit" cx="100" cy="60" r="38" stroke="${A}" stroke-opacity=".35" stroke-dasharray="5 7"/>`+
+      at.map(([x,y],i)=>`<circle cx="${x}" cy="${y}" r="5" fill="${A}" stroke="none"/>`+
+        `<text class="fg-lbl" x="${x}" y="${y+(i===2?18:i===0?-11:4)}" text-anchor="middle">${esc(labels[i]||"")}</text>`).join("")+
+      `<circle class="fg-run" r="4.5" fill="${A}" stroke="none" style="animation-duration:${(p.pace||8)}s">`+
+        `<animateMotion dur="${(p.pace||8)}s" repeatCount="indefinite" `+
+        `path="M100 22 A38 38 0 0 1 158 60 A38 38 0 0 1 100 98 A38 38 0 0 1 42 60 A38 38 0 0 1 100 22"/></circle>`};
+  },
+  stages(p,A){
+    const n=Math.max(2,Math.min(6,p.n||4)),on=Math.max(0,Math.min(n-1,p.on==null?0:p.on));
+    let s="";
+    for(let i=0;i<n;i++){const x=100+(i-(n-1)/2)*26;
+      s+=`<circle cx="${x}" cy="60" r="${i===on?9:6}" fill="${A}" fill-opacity="${i<=on?".9":".18"}" stroke="none"/>`;
+      if(i<n-1)s+=`<path d="M${x+11} 60h${26-22}" stroke="${A}" stroke-opacity=".35"/>`;}
+    return {svg:s};
+  },
+  label(p,A){
+    return {svg:`<text class="fg-lbl big" x="${p.x||100}" y="${p.y||62}" text-anchor="middle">${esc(p.text||"")}</text>`};
+  }
+};
+
+/* Compile a scene: components in order, each seeing the anchors published before it. */
+function figScene(scene,A){
+  const acc={anchors:{}};
+  let svg="";
+  for(const item of (scene||[])){
+    const fn=FIGC[item.c];
+    if(!fn)continue;                       // validated at build time; skipped defensively here
+    const out=fn(item,A,acc)||{};
+    if(out.anchors)Object.assign(acc.anchors,out.anchors);
+    svg+=out.svg||"";
+  }
+  return svg;
+}
+
+/* Build the figure element. Stages advance on tap, and on a timer only while actually on screen —
+   an animation running under the fold is heat and battery for nothing. */
+function renderFig(spec,accent){
+  const A=accent||"var(--gold)";
+  const fig=document.createElement("figure");
+  fig.className="feltfig";
+  const stages=(spec.stages&&spec.stages.length)?spec.stages:[{cap:spec.cap||"",scene:spec.scene||[]}];
+  let i=0,timer=null;
+  const svgWrap=document.createElement("div");svgWrap.className="ff-svg";
+  const cap=document.createElement("figcaption");
+  const nav=document.createElement("div");nav.className="ff-nav";
+  const draw=()=>{
+    const st=stages[i];
+    svgWrap.innerHTML=`<svg viewBox="0 0 ${FIG_W} ${FIG_H}" fill="none" stroke="${A}" stroke-width="2.4" `+
+      `stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="${esc(spec.alt||st.cap||"figure")}">`+
+      figScene(st.scene,A)+`</svg>`;
+    cap.textContent=st.cap||spec.cap||"";
+    nav.querySelectorAll(".ff-dot").forEach((d,k)=>{
+      d.classList.toggle("on",k===i);d.setAttribute("aria-current",k===i?"true":"false");});
+  };
+  const go=k=>{i=(k+stages.length)%stages.length;draw();};
+  if(stages.length>1){
+    stages.forEach((st,k)=>{
+      const b=document.createElement("button");
+      b.className="ff-dot"+(k===0?" on":"");
+      b.setAttribute("aria-label",`Step ${k+1} of ${stages.length}${st.cap?": "+st.cap:""}`);
+      b.onclick=e=>{e.stopPropagation();stop();go(k);};
+      nav.appendChild(b);});
+    const rp=document.createElement("button");
+    rp.className="ff-replay";rp.textContent="↺";rp.setAttribute("aria-label","Play the steps again");
+    rp.onclick=e=>{e.stopPropagation();go(0);start();};
+    nav.appendChild(rp);
+    fig.onclick=()=>{stop();go(i+1);};
+  }
+  const stop=()=>{if(timer){clearInterval(timer);timer=null;}};
+  const start=()=>{
+    if(timer||stages.length<2||FIG_REDUCED)return;
+    timer=setInterval(()=>{
+      if(document.hidden||!onScreen(fig)){return;}          // paused, not skipped
+      if(i>=stages.length-1){stop();return;}                 // stop at the end; ↺ to see it again
+      go(i+1);
+    },(spec.dur||6)*1000);
+  };
+  fig.append(svgWrap,cap,nav);
+  draw();
+  FIG_LIVE.push({fig,start,stop});
+  return fig;
+}
+
+const FIG_REDUCED=(()=>{try{return matchMedia("(prefers-reduced-motion: reduce)").matches}catch(e){return false}})();
+let FIG_LIVE=[];
+const onScreen=el=>{const r=el.getBoundingClientRect();return r.bottom>0&&r.top<innerHeight;};
+// Only the figure the reader is actually looking at animates. Screenshots and rAF are unreliable
+// in the in-app pane, so this is a plain scroll/visibility check rather than IntersectionObserver.
+function figPulse(){
+  for(const f of FIG_LIVE){
+    if(!f.fig.isConnected)continue;
+    const vis=onScreen(f.fig)&&!document.hidden;
+    f.fig.classList.toggle("ff-paused",!vis);
+    if(vis)f.start(); else f.stop();
+  }
+}
+addEventListener("scroll",()=>{clearTimeout(figPulse._t);figPulse._t=setTimeout(figPulse,120)},{passive:true});
+addEventListener("visibilitychange",figPulse);
+function figReset(){FIG_LIVE.forEach(f=>f.stop());FIG_LIVE=FIG_LIVE.filter(f=>f.fig.isConnected);}
+
 /* ---------- side illustrations: concept -> animated SVG ---------- */
 const wrap=(A,inner)=>`<svg viewBox="0 0 100 100" fill="none" stroke="${A}" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">${inner}</svg>`;
 const FIGURES=[
@@ -5470,12 +5716,19 @@ function openNode(id){
   if(glossary.length){const gl=document.createElement("div");gl.className="glossrow";
     gl.innerHTML=`<span class="glosslbl">key terms</span>`+glossary.map(t=>`<button class="glosschip">${esc(t)}</button>`).join("");
     gl.querySelectorAll(".glosschip").forEach(b=>b.onclick=()=>{SELCTX="";defineTerm(b.textContent);});body.appendChild(gl);}
-  for(const p of n.bridge){const el=document.createElement("p");el.textContent=p;
+  // #155: felt figures sit at the paragraph they explain, so the diagram arrives at the moment
+  // the prose needs it rather than as an illustration bolted to the top.
+  figReset();
+  const figs=(n.fig||[]).filter(f=>f&&(f.stages||f.scene));
+  const figAt=k=>{for(const f of figs){const at=(f.place==null?n.bridge.length-1:f.place);
+    if(at===k)body.appendChild(renderFig(f,tagColor(trackById(n.track).accent)));}};
+  n.bridge.forEach((p,pi)=>{const el=document.createElement("p");el.textContent=p;
     // tutor-H #33: per-paragraph explain — no fiddly text-selection needed
     if(geminiKeys().length){const x=document.createElement("button");x.className="paraex";x.title="explain this paragraph";x.textContent="🎓";
       x.onclick=()=>{const bk=bookOfNode(n);openTutor("Tutor",`Lesson: "${n.title}"${bk?` (from "${bk.title}")`:""}\n\n${nodeText(n)}`,`Explain this specific passage in plainer words, and why it matters here: "${p}"`);};
       el.appendChild(document.createTextNode(" "));el.appendChild(x);}
-    body.appendChild(el);}
+    body.appendChild(el);figAt(pi);});
+  setTimeout(figPulse,60);   // start whichever figure is actually on screen
   (S.node[id]=S.node[id]||{}).read=true;S.lastTrack=n.track;
   pushRecent({k:"n:"+id,type:"node",id,title:n.title,sub:trackById(n.track).name,glyph:n.glyph,at:Date.now()});   // #35
   if(st==="avail"&&!nodeDone(id))S.node[id].openAt=Date.now();   // tutor-I #50: time this session for a real per-lesson estimate

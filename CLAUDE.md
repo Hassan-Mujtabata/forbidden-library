@@ -186,6 +186,29 @@ Corollary: **re-repair from the pristine original, never patch on top of a bad r
 damaged character is already gone, so the second pass cannot see what went wrong. `--fix` moves the
 input to `books.json.bak`, which is what made the redo possible; copy it somewhere safe first.
 
+**Felt figures (#155) are staged diagrams, not decoration.** The 43 keyword-matched `FIGURES` in
+the reader are decoration; a `fig` on a Path node is authored for that lesson and answers what
+prose is bad at — where attention goes, what it should feel like, in what order (the reference is
+Hassan's account of finding a heartbeat internally: fingertips, then soles, then everywhere).
+- **Specs are DATA, components are CODE.** The spec ships in `content.enc`; `FIGC` + `renderFig`
+  live in `index.html`. Same split as the rest of the app. ~0.5KB a figure.
+- **Components publish anchors; layers attach to them.** `hand` exposes `fingertips`, `feet`
+  exposes `soles`; `pressure` reads whatever the body before it published. Order matters —
+  `pressure` alone falls back to centre. That indirection is what makes the figure teachable
+  rather than hard-coded, and `figTests` pins it (10 rings on 5 pads, 4 on 2 soles).
+- **`FIG_COMPONENTS` in `build.py` mirrors `FIGC`.** Extend both together or a spec validates and
+  then draws nothing. The gate refuses unknown components, missing `alt`, empty scenes, markup in
+  captions and an out-of-range `place` — all five mutation-tested.
+- Captions are real text so `VA` can measure them; stage controls are real `<button>`s. Staging one
+  in the audit needs `#node` shown first — `scan()` skips anything with no `offsetParent`, so the
+  first attempt measured nothing and honestly said `unmeasured: feltfig`.
+- Only the figure on screen animates (`figPulse`, scroll + `visibilitychange` — **not**
+  IntersectionObserver, which is unreliable in the pane). Reduced motion keeps the stages, drops
+  the movement.
+- The content fingerprint hashes **book prose only**, so adding figures does not bin derived
+  caches — checked deliberately: nothing derived quotes figures, and a figure edit should not throw
+  away 20KB of good hooks. Revisit if a future feature starts quoting them.
+
 **Added books must pass the Weave, or they sit beside the graph rather than in it.**
 `gemini_pipeline.merge_nodes` sets `"prereq":[prev]` — every generated track is a chain with zero
 edges out of it (measured: hand-built tracks share 19 cross-track prereqs, pipeline tracks 0), and
