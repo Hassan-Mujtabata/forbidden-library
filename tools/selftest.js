@@ -189,7 +189,8 @@
                 council: [{ q: "why do I procrastinate", at: 9, seats: [] }],
                 gauntlet: { best: 4, played: 2, streak: 1 },
                 hookSeen: ["laws48|1|something"], dispatchSeen: "2026-07-29",
-                readLog: { "2026-07-29": [["laws48", 3]] } };
+                readLog: { "2026-07-29": [["laws48", 3]] },
+                lessonTimes: [{ m: 4, w: 900, id: "a1", at: 9 }] };
       var m = mergeState({ _mtime: 1 }, b);
       var dropped = Object.keys(b).filter(function (k) {
         if (k === "_mtime") return false;
@@ -598,6 +599,57 @@
     });
   }
 
+  /* ------------------------------------------------ the weekly reckoning (#153/#154) */
+  function reckonTests() {
+    check("reckon: the week key is Monday-anchored and stable across a week", function () {
+      var mon = weekKey(new Date(2026, 7, 3));      // Mon 3 Aug 2026
+      var sun = weekKey(new Date(2026, 7, 9));      // Sun 9 Aug 2026
+      var nextMon = weekKey(new Date(2026, 7, 10));
+      if (mon !== sun) return "Monday and Sunday of one week differ: " + mon + " vs " + sun;
+      return mon !== nextMon ? true : "the next Monday did not start a new week";
+    });
+
+    check("reckon: the XP baseline is claimed once, then left alone", function () {
+      var snapR = JSON.stringify(RECKON);
+      RECKON = {}; S.xp = 500;
+      touchReckonBaseline();
+      var first = RECKON.xp0;
+      S.xp = 900;
+      touchReckonBaseline();                        // same week -> must NOT re-baseline
+      var second = RECKON.xp0;
+      RECKON = JSON.parse(snapR);
+      if (first !== 500) return "baseline was " + first + ", expected 500";
+      return second === 500 ? true : "re-baselined mid-week to " + second;
+    });
+
+    check("reckon: the week's numbers count only this week", function () {
+      var snapR = JSON.stringify(RECKON), id = DATA.nodes[0] && DATA.nodes[0].id;
+      if (!id) return "no nodes";
+      RECKON = { week: weekKey(), xp0: 100 }; S.xp = 175;
+      S.node = {}; S.node[id] = { doneAt: Date.now() };            // this week
+      var old = DATA.nodes[1];
+      if (old) S.node[old.id] = { doneAt: Date.now() - 30 * 864e5 }; // long ago
+      S.errors = [{ q: "recent", at: Date.now() }, { q: "old", at: Date.now() - 30 * 864e5 }];
+      var st = reckonStats();
+      RECKON = JSON.parse(snapR);
+      if (st.xp !== 75) return "xp delta " + st.xp + ", expected 75";
+      if (st.missed.length !== 1) return st.missed.length + " misses counted, expected 1";
+      return st.mastered.length === 1 ? true : st.mastered.length + " mastered, expected 1";
+    });
+
+    check("reckon: a lessonTime with no id cannot name a lesson", function () {
+      var snap = S.lessonTimes, snapR = JSON.stringify(RECKON);
+      RECKON = { week: weekKey(), xp0: 0 };
+      S.lessonTimes = [{ m: 20, w: 100, at: Date.now() }];          // legacy sample, no id
+      var quiet = reckonStats().slow;
+      S.lessonTimes = [{ m: 20, w: 100, at: Date.now(), id: DATA.nodes[0].id }];
+      var named = reckonStats().slow;
+      S.lessonTimes = snap; RECKON = JSON.parse(snapR);
+      if (quiet) return "named a lesson from a sample that has no id";
+      return named ? true : "could not name a lesson from a sample that has one";
+    });
+  }
+
   /* ------------------------------------------------- spaced review (#132)
    * A review record that arrives without `k` -- an older save, or merged from another device --
    * used to poison the scheduler: Math.min(undefined,1) is NaN, RV_DAYS[NaN] is undefined, due
@@ -724,7 +776,7 @@
       try {
         foldTests(); saneTests(); readTests(); mergeTests(); pushTests();
         indexTests(); fmtTests(); hookTests(); gauntletTests(); matchTests(); libraryTests();
-        chromeTests(); reviewTests(); derivedTests(); readLogTests();
+        chromeTests(); reviewTests(); derivedTests(); readLogTests(); reckonTests();
       } finally {
         S = snap;
         if (typeof save === "function") save();

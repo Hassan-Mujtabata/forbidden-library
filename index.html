@@ -339,6 +339,10 @@ header .brand span{color:var(--gold)}
 /* ---------- 💡 the lure ---------- */
 .lure{background:var(--card2);border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin-bottom:18px;position:relative}
 .lure-h{font-size:10px;letter-spacing:.2em;color:var(--tx2);margin-bottom:9px}
+/* #153: the Reckoning. Gold, because it is the one card that looks back rather than forward. */
+.bigcard.reckon{border-color:rgba(212,175,55,.3)}
+.rk-t{font-size:15px;line-height:1.68;color:var(--tx);white-space:pre-wrap;margin:4px 0 12px}
+.rk-n{font-size:11.5px;letter-spacing:.06em;color:var(--tx2);margin-bottom:10px}
 /* #148: the Warden. Jade throughout — it is a recall exercise, so it reads as Sharpen, not as news. */
 .bigcard.warden{border-color:rgba(78,205,196,.28)}
 .wd-q{font-family:var(--serif);font-size:19px;line-height:1.45;color:var(--tx);margin:2px 0 12px}
@@ -882,6 +886,7 @@ header .brand span{color:var(--gold)}
 </div>
 
 <div id="path" class="view">
+  <div class="bigcard reckon" id="reckon" style="display:none"></div>
   <div class="bigcard warden" id="warden" style="display:none"></div>
   <div class="bigcard daily" id="daily"></div>
   <div class="bigcard slim" id="pipestatus" style="display:none"></div>
@@ -1291,6 +1296,9 @@ function landing(){ pruneStaleHooks();   // #131: bin hooks mined from a previou
   loadForged();   // #125: put previously forged lessons back on the Path first
   if(DATA.nodes&&DATA.nodes.length){renderPath();show("path")} else {renderHome();show("home")} patchCheck(); initA11y(); setTimeout(checkReminder,1500);
   setTimeout(autoRefreshHooks,4000);   // #121: quietly read a few more books, once a day, on its own
+  touchReckonBaseline();                                              // #153: claim this week's XP mark
+  renderReckon();                                                     // show last week's if unread
+  setTimeout(()=>refreshReckon(false),20000);                         // weekly, after every daily job
   renderWarden();                                                     // #148: show yesterday's if it exists
   setTimeout(()=>refreshWarden(false),14000);                         // last of the daily jobs, so lanes never contend
   setTimeout(()=>{markDispatchDot();refreshDispatch(false);},9000);   // #123: then write the dispatch,
@@ -2590,6 +2598,7 @@ function pruneStaleHooks(){
   if(genGuard(HOOKS_LS))HOOKS={};
   if(genGuard(DISPATCH_LS))DISPATCH={day:"",stand:"",clash:"",ask:"",fade:""};
   if(genGuard(WARDEN_LS))WARDEN={};        // #148: its question quotes the book text verbatim
+  if(genGuard(RECKON_LS))RECKON={};        // #153: it names lessons and quotes missed questions
 }
 const saveHooks=()=>{try{localStorage.setItem(HOOKS_LS,JSON.stringify(HOOKS))}catch(e){}};
 const hookCount=()=>Object.keys(HOOKS).reduce((n,k)=>n+((HOOKS[k]&&HOOKS[k].items)||[]).length,0);
@@ -3235,6 +3244,105 @@ $("btn-ask").onclick=askTheVault;
    Degrades to nothing at all: no keys, offline, or an empty yesterday and the card never appears.
    State lives in vault_warden (its question quotes book text, so genGuard bins it when the text
    changes); the only thing that touches S is the XP, through the existing path. */
+/* ---------- #153: The Reckoning — what the week actually amounted to ---------------------------
+   Everything else here is about the next thing to do. This is the only thing that looks back, and
+   it is written from numbers the app already had and never showed you: XP earned since Monday,
+   ideas mastered this week, questions missed, how the streak held.
+   The weekly XP baseline has to be CLAIMED at the start of a week, not computed backwards — there
+   is no history of XP over time, only a running total, so without a stamp the delta is unknowable.
+   Lives in its own key (it quotes lesson titles, so genGuard bins it when the books change). */
+const RECKON_LS="vault_reckon";
+let RECKON=(()=>{try{return JSON.parse(localStorage.getItem(RECKON_LS))||{}}catch(e){return{}}})();
+const saveReckon=()=>{try{localStorage.setItem(RECKON_LS,JSON.stringify(RECKON))}catch(e){}};
+// Monday-anchored week key. Local time throughout, like today()/yesterday().
+function weekKey(d){
+  d=d?new Date(d):new Date();
+  const day=(d.getDay()+6)%7;                     // Monday = 0
+  d.setHours(0,0,0,0); d.setDate(d.getDate()-day);
+  return d.getFullYear()+"-W"+String(Math.ceil(((d-new Date(d.getFullYear(),0,1))/864e5+1)/7)).padStart(2,"0");
+}
+const weekStart=()=>{const d=new Date();const day=(d.getDay()+6)%7;d.setHours(0,0,0,0);d.setDate(d.getDate()-day);return d.getTime();};
+
+// Claim the week's XP baseline the first time we see a new week. Without this the delta below is
+// just "all XP ever", which is not a week in review.
+function touchReckonBaseline(){
+  const wk=weekKey();
+  if(RECKON.week!==wk){RECKON.week=wk;RECKON.xp0=S.xp||0;RECKON.at=Date.now();saveReckon();}
+}
+
+function reckonStats(){
+  const since=weekStart();
+  const mastered=DATA.nodes.filter(n=>{const r=S.node[n.id];return r&&r.doneAt&&r.doneAt>=since;});
+  const missed=(S.errors||[]).filter(e=>e.at&&e.at>=since);
+  const read=Object.keys(S.readLog||{}).filter(d=>new Date(d+"T00:00:00").getTime()>=since)
+    .reduce((n,d)=>n+(S.readLog[d]||[]).length,0);
+  // #154: the lesson that fought hardest — slowest words-per-minute this week. Only samples that
+  // carry an id can be named, and older ones do not, so this simply stays quiet until there are.
+  const slow=(S.lessonTimes||[]).filter(s=>s&&s.id&&s.at&&s.at>=since&&s.w>0&&s.m>0)
+    .map(s=>({id:s.id,wpm:s.w/s.m})).sort((a,b)=>a.wpm-b.wpm)[0];
+  return {xp:Math.max(0,(S.xp||0)-(RECKON.xp0||0)),mastered,missed,read,
+          slow:slow?nodeById(slow.id):null,streak:(S.streak&&S.streak.count)||0};
+}
+
+let RECKONING=false;
+async function refreshReckon(force){
+  if(RECKONING||!geminiKeys().length||!navigator.onLine)return;
+  const wk=weekKey();
+  if(!force&&RECKON.doneWeek===wk)return;
+  // Sunday onwards, or a full week since the baseline — whichever comes first.
+  if(!force&&new Date().getDay()!==0&&Date.now()-(RECKON.at||0)<7*864e5)return;
+  const st=reckonStats();
+  if(!st.mastered.length&&!st.read&&!st.xp)return;      // a week with nothing in it needs no review
+  RECKONING=true;
+  RECKON.doneWeek=wk;saveReckon();                      // claim before running, as the other jobs do
+  try{
+    const lines=[
+      `XP earned this week: ${st.xp}`,
+      `Ideas mastered: ${st.mastered.length}${st.mastered.length?" — "+st.mastered.slice(0,6).map(n=>n.title).join("; "):""}`,
+      `Chapters read: ${st.read}`,
+      `Questions missed: ${st.missed.length}${st.missed.length?" — "+st.missed.slice(0,4).map(e=>sane(e.q)).join(" | "):""}`,
+      `Current streak: ${st.streak} day${st.streak===1?"":"s"}`,
+      st.slow?`Slowest lesson to get through: "${st.slow.title}"`:""].filter(Boolean).join("\n");
+    const t=await geminiCall(
+      `A reader's week in their own library:\n\n${lines}\n\n`+
+      `Write them 5-7 sentences reviewing the week. Be specific — name the ideas and the books. `+
+      `Say what the shape of the week actually was, praise what deserves it without inflating it, `+
+      `and name ONE thing worth doing next week. Speak directly to them. Warm, not gushing. `+
+      `Plain prose, no lists, no markdown, no preamble.`,420,0.7);
+    const text=demd(t||"").trim();
+    if(text.length>40){
+      RECKON.entries=[{week:wk,at:Date.now(),text,xp:st.xp,mastered:st.mastered.length,
+                       read:st.read,missed:st.missed.length,
+                       slowId:st.slow?st.slow.id:"",slowTitle:st.slow?st.slow.title:""}]
+        .concat(RECKON.entries||[]).slice(0,8);
+      saveReckon();renderReckon();
+    }
+  }catch(e){}
+  finally{RECKONING=false;}
+}
+
+function renderReckon(){
+  const c=$("reckon");if(!c)return;
+  const e=(RECKON.entries||[])[0];
+  if(!e||RECKON.seen===e.week){c.style.display="none";return;}
+  c.style.display="block";
+  c.innerHTML=`<div class="tag" style="color:var(--gold)">📜 THE RECKONING · YOUR WEEK</div>`+
+    `<div class="rk-t">${esc(e.text)}</div>`+
+    `<div class="rk-n">${e.xp} XP · ${e.mastered} idea${e.mastered===1?"":"s"} mastered · `+
+    `${e.read} chapter${e.read===1?"":"s"} · ${e.missed} missed</div>`+
+    (e.slowId?`<div class="bl-actions"><button class="ghostbtn" id="rk-slow">🎓 Re-explain “${esc(e.slowTitle)}”</button>`+
+      `<button class="ghostbtn" id="rk-ok">got it</button></div>`
+     :`<div class="bl-actions"><button class="ghostbtn" id="rk-ok">got it</button></div>`);
+  $("rk-ok").onclick=()=>{RECKON.seen=e.week;saveReckon();renderReckon();};
+  if($("rk-slow"))$("rk-slow").onclick=()=>{
+    const n=nodeById(e.slowId);if(!n)return;
+    const bk=bookOfNode(n);
+    openTutor("Slow going",`Lesson: "${n.title}"${bk?` (from "${bk.title}")`:""}\n\n${nodeText(n)}`,
+      `This one took me longer than anything else this week. Explain it again more simply, in plain `+
+      `terms, then ask me ONE question to check it landed.`);
+  };
+}
+
 const WARDEN_LS="vault_warden", WARDEN_XP=15;
 let WARDEN=(()=>{try{return JSON.parse(localStorage.getItem(WARDEN_LS))||{}}catch(e){return{}}})();
 const saveWarden=()=>{try{localStorage.setItem(WARDEN_LS,JSON.stringify(WARDEN))}catch(e){}};
@@ -3834,8 +3942,13 @@ $("btn-ach").onclick=()=>{const g=$("achgrid");g.innerHTML="";
   $("achs").classList.add("on")};
 
 /* ---------- patch notes ---------- */
-const APP_VER="3.65";
+const APP_VER="3.66";
 const PATCHES=[
+ {v:"3.66",n:"The Reckoning",d:"1 Aug 2026",items:[
+  ["new","📜 THE RECKONING — once a week, what the week actually amounted to. Not a scoreboard: it names the ideas you mastered, notices which lesson fought you hardest, mentions what you got wrong, and gives you one thing to do next week. Mine said “you made significant progress on The Five Aggregates, a complex topic that clearly took you the longest to process” — which was true, and nothing on screen had ever told me that before."],
+  ["new","🎓 RE-EXPLAIN THE HARD ONE. The Reckoning offers to take the lesson that took you longest and explain it again more simply, then check that it landed. It only names a lesson when it genuinely knows which one — the app has only just started recording that, so it stays quiet rather than guessing."],
+  ["polish","The weekly XP figure is a real weekly figure. The app only ever kept a running total, so a mark is now set at the start of each week — without it, “this week” could only ever have meant “ever”."],
+  ["polish","Nothing happened this week, you're offline, or it already ran — the Reckoning simply doesn't appear and costs nothing."]]},
  {v:"3.65",n:"Real Editions",d:"1 Aug 2026",items:[
   ["content","FOUR BOOKS REPLACED WITH PROPER EDITIONS — and two of them you'd only ever had a fragment of. Mindfulness, Bliss and Beyond went from 17,870 words to 95,783: you had chapters 1–4, now you have the book. Right Concentration went from a 26,926-word summary to the real 65,177-word text. Your library is now 2,378,720 words."],
   ["content","THE 48 LAWS AND MEDITATIONS ARE NO LONGER PHOTOGRAPHS. Both were page scans with the scanner's own misreadings baked in — that's where “Rnssia's temperamental czar” and “a Iyrrhir victory” came from. They're real text editions now, so that entire class of damage is gone at the source rather than patched: no more letter-by-letter corrections, and the 21 words I'd had to deliberately leave wrong are simply correct."],
@@ -5548,7 +5661,10 @@ function completeNode(n){
   delete rec.draft;
   if(!rec.doneAt){
     // tutor-I #50: log real minutes spent (capped so a lesson left open overnight doesn't skew it)
-    if(rec.openAt){const mins=Math.min(30,Math.max(1,Math.round((Date.now()-rec.openAt)/60000)));(S.lessonTimes=S.lessonTimes||[]).push({m:mins,w:nodeWords(n)});if(S.lessonTimes.length>60)S.lessonTimes=S.lessonTimes.slice(-60);delete rec.openAt;}
+    // #152: `id` and `at` are new. Reading pace only ever needed minutes-per-word, but "which
+    // lesson fought you hardest this week" needs to know WHICH — and older samples simply lack it,
+    // so anything that reads them must tolerate their absence rather than backfill a guess.
+    if(rec.openAt){const mins=Math.min(30,Math.max(1,Math.round((Date.now()-rec.openAt)/60000)));(S.lessonTimes=S.lessonTimes||[]).push({m:mins,w:nodeWords(n),id:n.id,at:Date.now()});if(S.lessonTimes.length>60)S.lessonTimes=S.lessonTimes.slice(-60);delete rec.openAt;}
     rec.doneAt=Date.now();const before=lvl();S.xp+=nodeXP(n);
     const d=today();
     bumpStreak();
