@@ -575,7 +575,8 @@ def main():
             and (not a.track or n["track"] == a.track)]
     if a.n:
         todo = todo[:a.n]
-    print("drafting %d lesson(s) with %d key(s); library vocabulary %d words\n" % (len(todo), len(gp.KEYS), len(vocab)))
+    where = ("this machine's GPU (%s)" % a.model) if a.local else ("%d Gemini key(s)" % len(call.keys))
+    print("drafting %d lesson(s) on %s; library vocabulary %d words\n" % (len(todo), where, len(vocab)))
     good = bad = 0
     stopped = None
     for i, n in enumerate(todo):
@@ -600,8 +601,11 @@ def main():
             bad += 1
             print("  [%2d/%d] %-6s SKIP %-34s %s" % (i + 1, len(todo), n["id"], n.get("title", "")[:34], err))
         save_drafts(drafts)              # incremental: stop any time, resume any time
-    print("\n%d drafted, %d refused (%d calls, %d rate-limit waits)."
-          % (good, bad, call.calls, call.waits))
+    print("\n%d drafted, %d refused (%d model calls)." % (good, bad, call.calls))
+    if stopped:
+        print("STOPPED: %s\n  Everything drafted is saved. Run the same command tomorrow and it\n"
+              "  resumes where it left off — or add --local to use this machine's GPU instead."
+              % stopped)
     print("Next: python tools/figs_pipeline.py --gallery")
 
 
