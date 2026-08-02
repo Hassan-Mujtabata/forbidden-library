@@ -238,67 +238,134 @@ def menu_text():
     return "\n".join("  %-9s %s\n            e.g. %s" % (a, b, c) for a, b, c in MENU)
 
 
-class Patient:
-    """A caller that waits out rate limits instead of giving up on the whole run.
+class Local:
+    """Draft on Hassan's own GPU through Ollama, so a daily quota stops being the ceiling.
 
-    gemini_pipeline.call retires a key permanently the first time it sees a 429 — correct for a
-    short cron job, ruinous here: one burst of rate limiting killed 79 of 84 lessons in seconds,
-    every one reported as "all keys exhausted". A 429 means "not this second", not "not today".
-
-    So: rotate keys, and when every key is rate-limited at once, sleep and try again rather than
-    unwinding the run. Only a 400/403/404 retires a key, because those really are broken (one of
-    Hassan's five 404s on every request). Paced by default, because the point of this tool is to
-    grind quietly for hours on a machine that is switched on anyway.
+    This work suits a local model unusually well. The output is a small, rigidly-shaped JSON
+    object, and every gate in this file REFUSES rather than repairs — so a weaker model does not
+    produce worse figures, it produces more rejections, and the rejections cost nothing but time
+    on a machine that is already switched on. Quality is defended by the gates and by review, not
+    by the size of the model.
     """
-    def __init__(self, keys, model, gap=4.0, max_wait=900):
+    def __init__(self, model="qwen2.5:7b", host="http://127.0.0.1:11434", gap=0.0):
+        import urllib.request
+        self.ur = urllib.request
+        self.model = model; self.host = host.rstrip("/"); self.gap = gap
+        self.calls = 0; self.spent = set(); self.broken = set()
+
+    def available(self):
+        import json as _json
+        try:
+            with self.ur.urlopen(self.host + "/api/tags", timeout=6) as r:
+                tags = [m["name"] for m in _json.load(r).get("models", [])]
+        except Exception:
+            return False, "Ollama is not responding on " + self.host
+        if not tags:
+            return False, "Ollama has no models pulled (try: ollama pull " + self.model + ")"
+        if not any(t.split(":")[0] == self.model.split(":")[0] for t in tags):
+            return False, "%s is not pulled; available: %s" % (self.model, ", ".join(tags[:4]))
+        return True, tags[0]
+
+    def __call__(self, prompt, temp=0.7, schema=None):
+        import json as _json, time as _time
+        body = _json.dumps({"model": self.model, "prompt": prompt, "stream": False,
+                            "format": "json",              # Ollama constrains the output to JSON
+                            "options": {"temperature": temp, "num_ctx": 8192}}).encode()
+        req = self.ur.Request(self.host + "/api/generate", data=body,
+                              headers={"Content-Type": "application/json"})
+        with self.ur.urlopen(req, timeout=600) as r:
+            d = _json.load(r)
+        self.calls += 1
+        if self.gap:
+            _time.sleep(self.gap)
+        return d.get("response", "")
+
+
+class OutOfQuota(Exception):
+    """Every key has spent its DAY. Not a condition to wait out — stop and run again tomorrow."""
+
+
+class Caller:
+    """Rotates keys, picks a model each key can actually use, and stops when the day is spent.
+
+    Two things were wrong before, both found by looking at the actual error bodies rather than the
+    status codes:
+
+    * 404 was treated as "this key is broken". The body says
+      "This model gemini-2.5-flash is no longer available to new users" — the KEY is fine, the
+      hard-coded model just is not offered to newer projects. So a 404 now demotes that key to
+      another model instead of retiring it, which reclaims a whole key.
+    * 429 was treated as a momentary rate limit worth sleeping through. The body says
+      "You exceeded your current quota" — that is the DAILY allowance, and no amount of backoff
+      brings it back before tomorrow. Sitting in a retry loop until midnight burns a machine for
+      nothing, so the run now stops cleanly and says so.
+    """
+    # Ordered by preference. The first two are what most keys have; the older ones are the
+    # fallbacks for projects that cannot see the newest.
+    MODELS = ["gemini-2.5-flash", "gemini-flash-latest", "gemini-2.0-flash", "gemini-2.0-flash-lite"]
+
+    def __init__(self, keys, model=None, gap=4.0):
         import urllib.request, urllib.error
         self.ur, self.ue = urllib.request, urllib.error
-        self.keys = list(keys); self.model = model
-        self.dead = set(); self.i = 0; self.gap = gap; self.max_wait = max_wait
-        self.calls = 0; self.waits = 0
+        self.keys = list(keys)
+        self.models = ([model] if model else []) + [m for m in self.MODELS if m != model]
+        self.pick = {}                     # key -> the model that works for it
+        self.spent = set()                 # keys out of quota for the day
+        self.broken = set()                # keys no model works for at all
+        self.i = 0; self.gap = gap; self.calls = 0
 
-    def alive(self):
-        return [k for k in self.keys if k not in self.dead]
+    def _post(self, key, model, body):
+        url = ("https://generativelanguage.googleapis.com/v1beta/models/%s:generateContent" % model)
+        req = self.ur.Request(url, data=body, headers={"Content-Type": "application/json",
+                                                       "x-goog-api-key": key})
+        with self.ur.urlopen(req, timeout=120) as r:
+            import json as _json
+            return _json.load(r)
+
+    def usable(self):
+        return [k for k in self.keys if k not in self.spent and k not in self.broken]
 
     def __call__(self, prompt, temp=0.7, schema=None):
         import json as _json, time as _time
         body = _json.dumps({"contents": [{"parts": [{"text": prompt}]}],
                             "generationConfig": {"temperature": temp,
                                                  "responseMimeType": "application/json"}}).encode()
-        backoff = 20
+        tried = 0
         while True:
-            live = self.alive()
+            live = self.usable()
             if not live:
-                raise RuntimeError("every key is rejected outright (not rate limits) — check the keys")
-            limited = 0
-            for _ in range(len(live)):
-                k = live[self.i % len(live)]; self.i += 1
-                url = ("https://generativelanguage.googleapis.com/v1beta/models/%s:generateContent"
-                       % self.model)
-                req = self.ur.Request(url, data=body, headers={"Content-Type": "application/json",
-                                                               "x-goog-api-key": k})
+                if self.spent:
+                    raise OutOfQuota("all %d usable key(s) are out of quota for today" % len(self.spent))
+                raise RuntimeError("no key can reach any model")
+            k = live[self.i % len(live)]; self.i += 1
+            tried += 1
+            for model in ([self.pick[k]] if k in self.pick else self.models):
                 try:
-                    with self.ur.urlopen(req, timeout=120) as r:
-                        d = _json.load(r)
+                    d = self._post(k, model, body)
+                    self.pick[k] = model                       # remember what works for this key
                     self.calls += 1
                     _time.sleep(self.gap)
                     return d["candidates"][0]["content"]["parts"][0]["text"]
                 except self.ue.HTTPError as e:
+                    msg = ""
+                    try:
+                        msg = (_json.load(e).get("error", {}).get("message") or "")
+                    except Exception:
+                        pass
                     if e.code == 429:
-                        limited += 1; continue          # not this second — try the next key
-                    if e.code in (400, 403, 404):
-                        self.dead.add(k); continue      # genuinely broken, stop using it
-                    _time.sleep(3)
+                        self.spent.add(k)                       # daily allowance, not a rate limit
+                        break
+                    if e.code == 404:
+                        continue                                # try this key on an older model
+                    if e.code in (400, 403):
+                        self.broken.add(k); break
+                    _time.sleep(2)
                 except Exception:
-                    _time.sleep(3)
-            if not limited:
+                    _time.sleep(2)
+            else:
+                self.broken.add(k)                              # no model worked for this key
+            if tried > len(self.keys) * 2:
                 raise RuntimeError("no key could complete the request")
-            if backoff > self.max_wait:
-                raise RuntimeError("still rate limited after %ds — quota is spent for now" % self.max_wait)
-            self.waits += 1
-            print("      …all %d keys rate-limited, waiting %ds (resumes on its own)" % (len(live), backoff))
-            _time.sleep(backoff)
-            backoff = min(int(backoff * 1.8), self.max_wait)
 
 
 def draft_one(n, call, vocab, tries=2):
@@ -443,6 +510,9 @@ def main():
     ap.add_argument("--track"); ap.add_argument("--n", type=int, default=0)
     ap.add_argument("--status", action="store_true"); ap.add_argument("--gallery", action="store_true")
     ap.add_argument("--apply", action="store_true"); ap.add_argument("--selftest", action="store_true")
+    ap.add_argument("--local", action="store_true",
+                    help="draft on this machine's GPU via Ollama instead of Gemini (no quota)")
+    ap.add_argument("--model", default="qwen2.5:7b", help="Ollama model to use with --local")
     ap.add_argument("--gap", type=float, default=4.0,
                     help="seconds between calls — this is meant to run slowly and unattended")
     ap.add_argument("--verdicts", default=os.path.join(REVIEW, "figs_verdicts.json"))
@@ -488,10 +558,17 @@ def main():
         return
 
     sys.path.insert(0, HERE)
-    import gemini_pipeline as gp
-    if not gp.KEYS:
-        print("no Gemini keys."); return
-    call = Patient(gp.KEYS, gp.MODEL, gap=a.gap)
+    if a.local:
+        call = Local(a.model, gap=0.0)
+        ok_local, why = call.available()
+        if not ok_local:
+            print("local model unavailable — " + why); return
+        print("drafting on this machine's GPU via Ollama (%s) — no Gemini quota involved" % a.model)
+    else:
+        import gemini_pipeline as gp
+        if not gp.KEYS:
+            print("no Gemini keys."); return
+        call = Caller(gp.KEYS, gp.MODEL, gap=a.gap)
     vocab = library_vocab()
     todo = [n for n in graph["nodes"]
             if not n.get("stub") and not n.get("fig") and n["id"] not in drafts
@@ -500,9 +577,17 @@ def main():
         todo = todo[:a.n]
     print("drafting %d lesson(s) with %d key(s); library vocabulary %d words\n" % (len(todo), len(gp.KEYS), len(vocab)))
     good = bad = 0
+    stopped = None
     for i, n in enumerate(todo):
         t0 = time.time()
-        d, err = draft_one(n, call, vocab)
+        try:
+            d, err = draft_one(n, call, vocab)
+        except OutOfQuota as e:
+            # Nothing to wait for: this is the daily allowance, and it comes back tomorrow, not
+            # in fifteen minutes. Everything drafted so far is already on disk, and the next run
+            # picks up exactly where this one stopped.
+            stopped = str(e)
+            break
         if d:
             drafts[n["id"]] = {"fig": {"v": 1, "alt": d["alt"], "place": d.get("place", 1),
                                        "stages": d["stages"]},
