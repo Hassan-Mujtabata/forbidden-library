@@ -539,14 +539,21 @@ header .brand span{color:var(--gold)}
 /* A ring that grows outward and fades — a pulse you have to look for, not a throb. */
 @keyframes fgring{from{r:3;opacity:.85}to{r:var(--fg-max,15);opacity:0}}
 .feltfig .fg-ring{animation:fgring 1s ease-out infinite;fill:none;stroke-width:1.8}
+/* #160: the travelling segment leaves the far end rather than snapping back to the heart.
+   Fading the tail out over the last stretch means the loop point is never seen. */
+@keyframes fgflowfade{0%,78%{opacity:.95}100%{opacity:0}}
 /* #157: pressure LEAVING the heart and ARRIVING at the ends. The dash is normalised by
    pathLength=100, so every route runs in step regardless of how far it actually is. */
 @keyframes fgflow{from{stroke-dashoffset:14}to{stroke-dashoffset:-100}}
-.feltfig .fg-flow{stroke-dasharray:14 100;animation:fgflow 1s linear infinite;
-  stroke-linecap:round;opacity:.95}
-/* The destination swells as the pressure lands, then settles — the balloon filling, not a blink. */
-@keyframes fgarrive{0%,55%{transform:scale(.55);opacity:.30}72%{transform:scale(1.25);opacity:.95}
-  100%{transform:scale(.55);opacity:.30}}
+.feltfig .fg-flow{stroke-dasharray:14 100;stroke-linecap:round;opacity:.95;
+  animation:fgflow var(--fg-beat,1s) linear infinite, fgflowfade var(--fg-beat,1s) linear infinite}
+/* #160: the destination grows and FADES OUT. It used to shrink back to its starting size, and a
+   contraction is just as visible as an expansion — so every beat read as "swell, deflate" instead
+   of "arrive, dissipate". Now the reset happens at zero opacity, where the eye cannot follow it. */
+@keyframes fgarrive{0%,52%{transform:scale(.5);opacity:0}
+  70%{transform:scale(1.15);opacity:.95}
+  88%{transform:scale(1.4);opacity:0}
+  100%{transform:scale(.5);opacity:0}}
 .feltfig .fg-arrive{animation:fgarrive 1s ease-out infinite;transform-box:fill-box;transform-origin:center}
 /* #159: the body expands FROM THE HEART, OUTWARD, in time with the wave.
    Three things were wrong before and each made it read as random: it ran on its own 1s clock
@@ -554,8 +561,14 @@ header .brand span{color:var(--gold)}
    it scaled about the middle of the silhouette so the growth had no direction. Now the duration
    comes from the flow itself (--fg-beat), the peak sits where the pressure arrives, and the
    origin is the heart — so the expansion moves outward with the wave rather than pulsing in place. */
-@keyframes fgswell{0%{transform:scale(1)}62%{transform:scale(1.05)}100%{transform:scale(1)}}
-.feltfig .fg-swell{animation:fgswell var(--fg-beat,1s) ease-out infinite;
+/* #160: grow the WHOLE way out with the wave, then CUT. The old curve peaked at 62% and animated
+   back down over the remaining 38%, which is a visible deflation — and a body that inflates and
+   deflates in equal measure reads as breathing, not as a pulse pushing outward. The growth now
+   runs until the last point is reached (86%, the final arrival delay) and the reset takes one
+   frame, so the only motion the eye ever tracks is outward. */
+@keyframes fgswell{0%{transform:scale(1)}86%{transform:scale(1.045)}
+  87%{transform:scale(1)}100%{transform:scale(1)}}
+.feltfig .fg-swell{animation:fgswell var(--fg-beat,1s) cubic-bezier(.33,.7,.5,1) infinite;
   transform-box:fill-box;transform-origin:48% 36%}
 
 /* #158: the psychology set. Each says something a static picture cannot: one thing outweighing
@@ -4035,8 +4048,10 @@ $("btn-ach").onclick=()=>{const g=$("achgrid");g.innerHTML="";
   $("achs").classList.add("on")};
 
 /* ---------- patch notes ---------- */
-const APP_VER="3.70";
+const APP_VER="3.71";
 const PATCHES=[
+ {v:"3.71",n:"Nothing Shrinks",d:"2 Aug 2026",items:[
+  ["fix","IT WAS STILL DEFLATING, AND THAT WAS THE WHOLE PROBLEM. The body grew to a peak and then animated back down, and a contraction is exactly as visible as an expansion — so every beat read as “swell, deflate” instead of a wave pushing outward. Now the growth runs all the way out to the last point and the reset takes a single frame, about ten milliseconds. The bright points arriving grow and FADE OUT rather than shrinking back, so their reset happens where the eye can't follow it. On screen, nothing ever gets smaller."]]},
  {v:"3.70",n:"One Pump, Not Two Clocks",d:"2 Aug 2026",items:[
   ["fix","THE WHOLE-BODY STAGE WAS TWITCHING, NOT BREATHING. The body swelled on one timer while the pressure travelled on another, so the two drifted apart and it looked random. They share a clock now — the swell peaks exactly as the pressure lands, and it grows outward FROM THE HEART instead of scaling about the middle, so the expansion follows the wave rather than happening around it."],
   ["new","Thirteen new kinds of diagram, for the ideas that aren't about the body: a balance that tips when one thing outweighs another, two runners at different speeds, a dial that settles, a tether you venture out from and return to, a crowd where most are already doing it, a narrow spotlight over a wide field, the gap between what happens and how you answer, a fist that opens, layers that come apart, and an estimate dragged toward a number you were shown."],

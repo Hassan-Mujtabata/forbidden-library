@@ -199,6 +199,11 @@ Hassan's account of finding a heartbeat internally: fingertips, then soles, then
   near and far stay in step) and swells the destination as it lands, staggered so distant points
   arrive later. Reach for "what is actually happening" over "where you notice it".
 - **Stick figures cannot be under pressure.** Bodies are filled silhouettes so they can swell.
+- **Nothing may shrink on screen.** A contraction is as visible as an expansion, so an
+  expand-then-return curve reads as deflation and undoes the meaning. Grow for the whole beat and
+  reset in one frame (`fgswell` cuts between 86% and 87%), or grow and fade to zero opacity and
+  reset while invisible (`fgarrive`). Test the KEYFRAMES, not a sample of the running animation —
+  figures pause off-screen, so sampling a paused element returns a flat line and proves nothing.
 - **Everything in one scene shares a clock.** The body swelled on its own 1s timer while the
   pressure travelled on another; they drifted and it read as random twitching. `flow` publishes
   `--fg-beat` through `figScene`'s vars, and anything moving with it reads that instead of
