@@ -17,8 +17,14 @@ def die(msg):
 
 # Mirrors FIGC in index.html. If you add a component there, add it here — otherwise a spec using
 # it validates fine and then draws nothing, which is the failure mode this list exists to prevent.
-FIG_COMPONENTS = {"hand", "feet", "body", "sit", "pressure", "flow", "wash", "dot", "halo",
-                  "pacer", "loop", "stages", "label"}
+FIG_COMPONENTS = {
+    # bodies + sensation
+    "hand", "feet", "body", "sit", "pressure", "flow", "wash", "dot", "halo", "pacer",
+    # structure over time
+    "loop", "stages", "label", "curve", "ripple", "fork",
+    # relationships and forces (#158) — what psychology actually needs
+    "scale", "lanes", "gauge", "tether", "crowd", "spot", "gap", "grip", "stack", "magnet",
+}
 
 
 def validate(books, graph):

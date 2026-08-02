@@ -548,9 +548,43 @@ header .brand span{color:var(--gold)}
 @keyframes fgarrive{0%,55%{transform:scale(.55);opacity:.30}72%{transform:scale(1.25);opacity:.95}
   100%{transform:scale(.55);opacity:.30}}
 .feltfig .fg-arrive{animation:fgarrive 1s ease-out infinite;transform-box:fill-box;transform-origin:center}
-/* The whole body under pressure: a small, slow swell, so the silhouette reads as filling. */
-@keyframes fgswell{0%,100%{transform:scale(1)}50%{transform:scale(1.035)}}
-.feltfig .fg-swell{animation:fgswell 1s ease-in-out infinite;transform-box:fill-box;transform-origin:50% 60%}
+/* #159: the body expands FROM THE HEART, OUTWARD, in time with the wave.
+   Three things were wrong before and each made it read as random: it ran on its own 1s clock
+   independent of the flow, it peaked halfway through while the pressure only lands at ~62%, and
+   it scaled about the middle of the silhouette so the growth had no direction. Now the duration
+   comes from the flow itself (--fg-beat), the peak sits where the pressure arrives, and the
+   origin is the heart — so the expansion moves outward with the wave rather than pulsing in place. */
+@keyframes fgswell{0%{transform:scale(1)}62%{transform:scale(1.05)}100%{transform:scale(1)}}
+.feltfig .fg-swell{animation:fgswell var(--fg-beat,1s) ease-out infinite;
+  transform-box:fill-box;transform-origin:48% 36%}
+
+/* #158: the psychology set. Each says something a static picture cannot: one thing outweighing
+   another, one thing outrunning another, a pull you did not consent to. */
+@keyframes fgtilt{0%,100%{transform:rotate(0)}55%{transform:rotate(var(--fg-t,8deg))}}
+.feltfig .fg-tilt{animation:fgtilt 4s ease-in-out infinite;transform-box:fill-box;transform-origin:100px 44px}
+@keyframes fgrun{0%{transform:translateX(0)}92%,100%{transform:translateX(144px)}}
+.feltfig .fg-run1,.feltfig .fg-run2{animation:fgrun 3s ease-in-out infinite;transform-box:view-box}
+@keyframes fgsettle{0%{transform:rotate(-38deg)}70%{transform:rotate(6deg)}100%{transform:rotate(0)}}
+.feltfig .fg-settle{animation:fgsettle 4s ease-out infinite;transform-box:fill-box;transform-origin:100px 88px}
+@keyframes fgelastic{0%,100%{transform:scaleX(.72)}50%{transform:scaleX(1)}}
+.feltfig .fg-elastic{animation:fgelastic 5s ease-in-out infinite;transform-box:fill-box;transform-origin:left center}
+@keyframes fgventure{0%,100%{transform:translateX(-26px)}50%{transform:translateX(0)}}
+.feltfig .fg-venture{animation:fgventure 5s ease-in-out infinite;transform-box:view-box}
+@keyframes fglite{from{opacity:.14}to{opacity:.95}}
+.feltfig .fg-lite{animation:fglite 2.6s ease-out infinite alternate}
+@keyframes fgsweep{0%,100%{transform:translateX(-30px)}50%{transform:translateX(30px)}}
+.feltfig .fg-sweep{animation:fgsweep 6s ease-in-out infinite;transform-box:view-box}
+@keyframes fgglow{0%,100%{stroke-opacity:.45;fill-opacity:.09}50%{stroke-opacity:1;fill-opacity:.2}}
+.feltfig .fg-glow{animation:fgglow 3.4s ease-in-out infinite}
+@keyframes fgpart{0%,100%{transform:translateY(0)}55%{transform:translateY(-7px)}}
+.feltfig .fg-part{animation:fgpart 4.5s ease-in-out infinite}
+@keyframes fgwave{0%{opacity:0;transform:translateX(-40px)}25%{opacity:.85}
+  100%{opacity:0;transform:translateX(40px)}}
+.feltfig .fg-wave{animation:fgwave 4.2s ease-in-out infinite;transform-box:view-box}
+@keyframes fgdrag{0%{transform:translateX(var(--fg-from,20px))}70%,100%{transform:translateX(0)}}
+.feltfig .fg-drag{animation:fgdrag 4s ease-in-out infinite;transform-box:view-box}
+@keyframes fgopen{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+.feltfig .fg-open{animation:fgopen 5s ease-in-out infinite;transform-box:fill-box;transform-origin:center}
 @keyframes fgpace{0%,100%{r:14;opacity:.55}50%{r:30;opacity:1}}
 .feltfig .fg-pace{animation:fgpace 6s ease-in-out infinite;stroke-width:2.4}
 @keyframes fgbreathe{0%,100%{transform:scale(.94)}50%{transform:scale(1.06)}}
@@ -4001,8 +4035,13 @@ $("btn-ach").onclick=()=>{const g=$("achgrid");g.innerHTML="";
   $("achs").classList.add("on")};
 
 /* ---------- patch notes ---------- */
-const APP_VER="3.69";
+const APP_VER="3.70";
 const PATCHES=[
+ {v:"3.70",n:"One Pump, Not Two Clocks",d:"2 Aug 2026",items:[
+  ["fix","THE WHOLE-BODY STAGE WAS TWITCHING, NOT BREATHING. The body swelled on one timer while the pressure travelled on another, so the two drifted apart and it looked random. They share a clock now — the swell peaks exactly as the pressure lands, and it grows outward FROM THE HEART instead of scaling about the middle, so the expansion follows the wave rather than happening around it."],
+  ["new","Thirteen new kinds of diagram, for the ideas that aren't about the body: a balance that tips when one thing outweighs another, two runners at different speeds, a dial that settles, a tether you venture out from and return to, a crowd where most are already doing it, a narrow spotlight over a wide field, the gap between what happens and how you answer, a fist that opens, layers that come apart, and an estimate dragged toward a number you were shown."],
+  ["new","The figures for the other 84 lessons are now drafted by a step that has to answer one question first: what does a beginner actually get WRONG here? A diagram of the mechanism teaches; a picture of the topic doesn't. It refuses its own work when a caption uses a word your books never use, mentions “the text”, or can't name the misunderstanding it fixes."],
+  ["polish","Key check: one of your five API keys returns a 404 and had been silently skipping work. The others all work, including the two in the newer format that my own test harness had been quietly ignoring."]]},
  {v:"3.69",n:"Pressure, Not Circles",d:"2 Aug 2026",items:[
   ["new","THE HEARTBEAT FIGURE REDRAWN, AND IT'S A BETTER IDEA THAN THE ONE I HAD. It was expanding circles sitting on a stick figure — which is wrong twice over. A heartbeat doesn't happen where you feel it; it LEAVES the heart and ARRIVES there a moment later, and that travel is the thing you're being asked to notice. Now the pressure runs outward along real routes and swells as it lands, and the far ones land later than the near ones, because they do."],
   ["new","The stick figure is gone. The body is a soft filled silhouette that swells with each beat — your image of a balloon filling under building pressure, which a stick figure can't express because a stick figure can't be under pressure at all."],
@@ -5411,7 +5450,8 @@ const FIGC={
       s+=`<circle class="fg-arrive" cx="${x}" cy="${y}" r="${(3.5+4*(p.strength==null?0.7:p.strength)).toFixed(1)}"`+
          ` fill="${A}" stroke="none" style="animation-duration:${secs}s;animation-delay:${(+delay+ +secs*0.62).toFixed(2)}s"/>`;
     });
-    return {svg:s};
+    // Publish the beat so the body swells WITH the wave instead of on a clock of its own.
+    return {svg:s,vars:{"--fg-beat":secs+"s"}};
   },
   pressure(p,A,scene){
     // Sits on whichever anchor set the body component published. This is the component that does
@@ -5464,20 +5504,180 @@ const FIGC={
   },
   label(p,A){
     return {svg:`<text class="fg-lbl big" x="${p.x||100}" y="${p.y||62}" text-anchor="middle">${esc(p.text||"")}</text>`};
+  },
+
+  /* ---- #158: the components psychology needs. Bodies and pressure covered meditation; an idea
+     like anchoring or the plateau of latent potential is a RELATIONSHIP over time, and needs
+     shapes that can hold two things in tension and show one changing. ---- */
+
+  scale(p,A){
+    // Two pans, tilted by `tilt` (-1..1). For "this outweighs that" — availability, loss aversion.
+    const t=Math.max(-1,Math.min(1,p.tilt==null?0:p.tilt)),dy=t*16;
+    const L=(p.left||"").slice(0,14),R=(p.right||"").slice(0,14);
+    return {svg:
+      `<path d="M100 96V44" stroke="${A}"/><path d="M86 96h28" stroke="${A}"/>`+
+      `<g class="fg-tilt" style="--fg-t:${(-t*11).toFixed(1)}deg">`+
+      `<path d="M46 ${44+dy}H154" stroke="${A}"/>`+
+      `<path d="M46 ${44+dy}v10a14 9 0 0028 0v-10" stroke="${A}" fill="${A}" fill-opacity=".10"/>`+
+      `<path d="M126 ${44-dy}v10a14 9 0 0028 0v-10" stroke="${A}" fill="${A}" fill-opacity=".10"/>`+
+      `</g>`+
+      `<text class="fg-lbl" x="60" y="${86}" text-anchor="middle">${esc(L)}</text>`+
+      `<text class="fg-lbl" x="140" y="${86}" text-anchor="middle">${esc(R)}</text>`};
+  },
+
+  lanes(p,A){
+    // Two runners at different speeds — fast/slow thinking, effort vs results.
+    const a=(p.a||"fast"),b=(p.b||"slow");
+    return {svg:
+      `<path d="M28 44h144" stroke="${A}" stroke-opacity=".25" stroke-dasharray="4 6"/>`+
+      `<path d="M28 82h144" stroke="${A}" stroke-opacity=".25" stroke-dasharray="4 6"/>`+
+      `<circle class="fg-run1" cx="28" cy="44" r="6.5" fill="${A}" stroke="none" style="animation-duration:${p.fast||2.4}s"/>`+
+      `<circle class="fg-run2" cx="28" cy="82" r="6.5" fill="${A}" fill-opacity=".45" stroke="none" style="animation-duration:${p.slow||6}s"/>`+
+      `<text class="fg-lbl" x="28" y="32" text-anchor="start">${esc(a)}</text>`+
+      `<text class="fg-lbl" x="28" y="102" text-anchor="start">${esc(b)}</text>`};
+  },
+
+  curve(p,A){
+    // Two lines with the gap between them shaded — the plateau of latent potential, compounding.
+    const flat=p.flat!==false;
+    const eff="M24 96 L176 28";
+    const res=flat?"M24 96 C70 94 104 92 124 74 C140 60 156 40 176 28":"M24 96 L176 28";
+    return {svg:
+      `<path d="${eff} L176 96 L24 96Z" fill="${A}" fill-opacity=".07" stroke="none"/>`+
+      `<path d="${res}" stroke="${A}" stroke-width="3"/>`+
+      `<path d="${eff}" stroke="${A}" stroke-opacity=".45" stroke-dasharray="4 5"/>`+
+      (p.band!==false?`<path d="M24 96 C70 94 104 92 124 74 L124 40 C104 60 70 82 24 96Z" fill="${A}" fill-opacity=".13" stroke="none"/>`:"")+
+      `<text class="fg-lbl" x="74" y="70" text-anchor="middle">${esc(p.band_label||"the gap")}</text>`+
+      `<text class="fg-lbl" x="176" y="22" text-anchor="end">${esc(p.right||"")}</text>`};
+  },
+
+  gauge(p,A){
+    const v=Math.max(0,Math.min(1,p.v==null?0.5:p.v)),ang=-90+v*180;
+    return {svg:
+      `<path d="M50 88a50 50 0 01100 0" stroke="${A}" stroke-opacity=".3" stroke-width="7"/>`+
+      `<g class="${p.settle?"fg-settle":""}" style="--fg-a:${ang.toFixed(1)}deg">`+
+      `<path d="M100 88V44" stroke="${A}" stroke-width="3" transform="rotate(${ang.toFixed(1)} 100 88)"/></g>`+
+      `<circle cx="100" cy="88" r="4.5" fill="${A}" stroke="none"/>`+
+      `<text class="fg-lbl" x="100" y="108" text-anchor="middle">${esc(p.label||"")}</text>`};
+  },
+
+  tether(p,A){
+    // A secure base: one figure holds, the other ventures and returns — `far` sets the distance.
+    const far=Math.max(0,Math.min(1,p.far==null?0.5:p.far)),x=70+far*74;
+    return {svg:
+      `<circle cx="46" cy="62" r="11" fill="${A}" fill-opacity=".16" stroke="${A}"/>`+
+      `<path class="fg-elastic" d="M57 62 Q${((57+x)/2).toFixed(0)} ${(62-14*far).toFixed(0)} ${x} 62" stroke="${A}" stroke-opacity=".55" stroke-dasharray="3 4"/>`+
+      `<circle class="fg-venture" cx="${x}" cy="62" r="8" fill="${A}" stroke="none"/>`+
+      `<text class="fg-lbl" x="46" y="88" text-anchor="middle">${esc(p.base||"secure base")}</text>`};
+  },
+
+  crowd(p,A){
+    // A grid where a fraction is lit — social proof, "everyone is doing it".
+    const lit=Math.max(0,Math.min(1,p.lit==null?0.3:p.lit));
+    let s="";const cols=9,rows=4,n=cols*rows,on=Math.round(n*lit);
+    for(let i=0;i<n;i++){const c=i%cols,r=(i/cols)|0;
+      const x=44+c*14,y=34+r*17;
+      s+=`<circle cx="${x}" cy="${y}" r="4.6" fill="${A}" fill-opacity="${i<on?".95":".14"}" stroke="none"`+
+         (i<on?` class="fg-lite" style="animation-delay:${(i*0.05).toFixed(2)}s"`:"")+`/>`;}
+    return {svg:s+`<text class="fg-lbl" x="100" y="112" text-anchor="middle">${esc(p.label||"")}</text>`};
+  },
+
+  spot(p,A){
+    // A narrow cone of attention over a wider field — WYSIATI, spotlight of attention.
+    const w=Math.max(0.1,Math.min(1,p.width==null?0.35:p.width));
+    return {svg:
+      `<rect x="24" y="60" width="152" height="44" rx="8" fill="${A}" fill-opacity=".06" stroke="${A}" stroke-opacity=".3"/>`+
+      `<path class="fg-sweep" d="M100 16 L${(100-46*w).toFixed(0)} 104 L${(100+46*w).toFixed(0)} 104Z" fill="${A}" fill-opacity=".20" stroke="none"/>`+
+      `<circle cx="100" cy="16" r="5" fill="${A}" stroke="none"/>`+
+      `<text class="fg-lbl" x="100" y="116" text-anchor="middle">${esc(p.label||"")}</text>`};
+  },
+
+  gap(p,A){
+    // Stimulus -> [gap] -> response. Frankl's one figure, and the whole of self-regulation.
+    const g=Math.max(0,Math.min(1,p.gap==null?0.4:p.gap)),half=18+g*34;
+    return {svg:
+      `<path d="M20 60H${(100-half).toFixed(0)}" stroke="${A}" stroke-width="3"/>`+
+      `<path d="M${(100-half-9).toFixed(0)} 54l9 6-9 6" stroke="${A}" fill="none"/>`+
+      `<path d="M${(100+half).toFixed(0)} 60H180" stroke="${A}" stroke-width="3"/>`+
+      `<path d="M171 54l9 6-9 6" stroke="${A}" fill="none"/>`+
+      `<circle class="fg-glow" cx="100" cy="60" r="${(half-4).toFixed(0)}" fill="${A}" fill-opacity=".13" stroke="${A}" stroke-dasharray="3 5"/>`+
+      `<text class="fg-lbl" x="20" y="46" text-anchor="start">${esc(p.left||"stimulus")}</text>`+
+      `<text class="fg-lbl" x="180" y="46" text-anchor="end">${esc(p.right||"response")}</text>`+
+      `<text class="fg-lbl" x="100" y="96" text-anchor="middle">${esc(p.label||"your freedom is here")}</text>`};
+  },
+
+  grip(p,A){
+    // Closed fist vs open palm — clinging and release, in one shape that opens.
+    return {svg:(p.open?
+      `<path class="fg-open" d="M64 84c-6-16 0-34 12-40c6-3 10 2 9 8M76 44c1-8 4-13 10-13s9 6 9 13M95 44c0-8 4-13 10-13s9 6 9 14M114 45c1-6 5-10 10-9c6 1 8 7 7 13c-2 14-4 26-10 34c-6 8-16 12-28 12c-14 0-24-6-29-15" stroke="${A}" fill="${A}" fill-opacity=".08"/>`
+      :`<path d="M66 78c-4-14 2-28 14-32c14-5 30-3 38 6c8 9 8 24 0 32c-8 8-24 10-36 5c-8-3-14-7-16-11z" stroke="${A}" fill="${A}" fill-opacity=".14"/>`+
+       `<path d="M76 62h44M76 74h40" stroke="${A}" stroke-opacity=".5"/>`)+
+      `<text class="fg-lbl" x="100" y="110" text-anchor="middle">${esc(p.label||(p.open?"open":"holding on"))}</text>`};
+  },
+
+  stack(p,A){
+    // Translucent layers that separate — the aggregates, "this feeling is made of parts".
+    const labels=(p.labels||[]).slice(0,5),n=Math.max(2,Math.min(5,p.n||labels.length||4));
+    let s="";
+    for(let i=0;i<n;i++){const sep=p.apart?i*16:i*5,y=88-sep-i*3;
+      s+=`<g class="${p.apart?"fg-part":""}" style="animation-delay:${(i*0.08).toFixed(2)}s">`+
+        `<ellipse cx="100" cy="${y}" rx="${52-i*3}" ry="9" fill="${A}" fill-opacity="${(0.2-i*0.03).toFixed(2)}" stroke="${A}" stroke-opacity=".55"/>`+
+        (labels[i]?`<text class="fg-lbl" x="${152-i*3}" y="${y+3}" text-anchor="start">${esc(labels[i])}</text>`:"")+
+        `</g>`;}
+    return {svg:s};
+  },
+
+  ripple(p,A){
+    // Something arising and passing — impermanence, a thought crossing the mind.
+    return {svg:
+      `<path d="M20 70h160" stroke="${A}" stroke-opacity=".28"/>`+
+      [0,1,2].map(i=>`<path class="fg-wave" d="M20 70 Q60 ${34+i*2} 100 70 T180 70" stroke="${A}" `+
+        `style="animation-delay:${(i*1.4).toFixed(1)}s" fill="none"/>`).join("")+
+      `<text class="fg-lbl" x="100" y="102" text-anchor="middle">${esc(p.label||"arises · passes")}</text>`};
+  },
+
+  fork(p,A){
+    // One path becomes two, and BOTH get walked — considering alternatives.
+    return {svg:
+      `<path d="M22 60h48" stroke="${A}" stroke-width="3"/>`+
+      `<path d="M70 60 C100 60 108 30 150 30" stroke="${A}" stroke-opacity="${p.take===1?"1":".4"}" stroke-width="${p.take===1?3:2}"/>`+
+      `<path d="M70 60 C100 60 108 92 150 92" stroke="${A}" stroke-opacity="${p.take===2?"1":".4"}" stroke-width="${p.take===2?3:2}"/>`+
+      `<circle cx="70" cy="60" r="5" fill="${A}" stroke="none"/>`+
+      `<text class="fg-lbl" x="156" y="33" text-anchor="start">${esc(p.a||"")}</text>`+
+      `<text class="fg-lbl" x="156" y="95" text-anchor="start">${esc(p.b||"")}</text>`};
+  },
+
+  magnet(p,A){
+    // An estimate dragged toward a planted number — anchoring, in one picture.
+    const anchor=Math.max(0,Math.min(1,p.anchor==null?0.2:p.anchor));
+    const ax=30+anchor*140,gx=110,px=gx-(gx-ax)*(p.pull==null?0.55:p.pull);
+    return {svg:
+      `<path d="M24 74h152" stroke="${A}" stroke-opacity=".4"/>`+
+      `<path d="M${ax.toFixed(0)} 66v16" stroke="${A}" stroke-width="3"/>`+
+      `<text class="fg-lbl" x="${ax.toFixed(0)}" y="58" text-anchor="middle">${esc(p.anchor_label||"anchor")}</text>`+
+      `<circle class="fg-drag" cx="${px.toFixed(0)}" cy="74" r="7" fill="${A}" stroke="none"`+
+      ` style="--fg-from:${(gx-px).toFixed(0)}px"/>`+
+      `<text class="fg-lbl" x="${px.toFixed(0)}" y="98" text-anchor="middle">${esc(p.label||"your estimate")}</text>`};
   }
 };
 
 /* Compile a scene: components in order, each seeing the anchors published before it. */
-function figScene(scene,A){
-  const acc={anchors:{}};
+function figScene(scene,A,outVars){
+  const acc={anchors:{},vars:{}};
   let svg="";
   for(const item of (scene||[])){
     const fn=FIGC[item.c];
     if(!fn)continue;                       // validated at build time; skipped defensively here
     const out=fn(item,A,acc)||{};
     if(out.anchors)Object.assign(acc.anchors,out.anchors);
+    if(out.vars)Object.assign(acc.vars,out.vars);
     svg+=out.svg||"";
   }
+  // #159: components in one scene must share a clock. The body was swelling on its own 1s timer
+  // while the pressure travelled on another, so the two drifted and the whole thing read as
+  // random twitching rather than as one pump. `flow` publishes the beat; everything that should
+  // move WITH it reads --fg-beat instead of hard-coding a duration.
+  if(outVars)Object.assign(outVars,acc.vars);
   return svg;
 }
 
@@ -5494,9 +5694,12 @@ function renderFig(spec,accent){
   const nav=document.createElement("div");nav.className="ff-nav";
   const draw=()=>{
     const st=stages[i];
+    const vars={};
+    const inner=figScene(st.scene,A,vars);
+    const cssVars=Object.keys(vars).map(k=>k+":"+vars[k]).join(";");
     svgWrap.innerHTML=`<svg viewBox="0 0 ${FIG_W} ${FIG_H}" fill="none" stroke="${A}" stroke-width="2.4" `+
-      `stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="${esc(spec.alt||st.cap||"figure")}">`+
-      figScene(st.scene,A)+`</svg>`;
+      `stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="${esc(spec.alt||st.cap||"figure")}"`+
+      (cssVars?` style="${cssVars}"`:"")+`>`+inner+`</svg>`;
     cap.textContent=st.cap||spec.cap||"";
     nav.querySelectorAll(".ff-dot").forEach((d,k)=>{
       d.classList.toggle("on",k===i);d.setAttribute("aria-current",k===i?"true":"false");});

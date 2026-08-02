@@ -199,6 +199,18 @@ Hassan's account of finding a heartbeat internally: fingertips, then soles, then
   near and far stay in step) and swells the destination as it lands, staggered so distant points
   arrive later. Reach for "what is actually happening" over "where you notice it".
 - **Stick figures cannot be under pressure.** Bodies are filled silhouettes so they can swell.
+- **Everything in one scene shares a clock.** The body swelled on its own 1s timer while the
+  pressure travelled on another; they drifted and it read as random twitching. `flow` publishes
+  `--fg-beat` through `figScene`'s vars, and anything moving with it reads that instead of
+  hard-coding a duration. Phase matters too: the swell peaks at 62%, where the pressure lands, and
+  its `transform-origin` is the HEART — scaling about the centre gives growth no direction.
+- **The drafting prompt makes the model find the CONFUSION first** (`figs_pipeline.py`): what does
+  a beginner get wrong, what is actually happening, what changes across steps — then components.
+  Asking it to "illustrate the lesson" produces decoration. Gates refuse rather than repair, and
+  the grounding gate is the important one: a caption is an instruction, so one using a word the
+  library never uses is a fabricated technique carrying the app's authority.
+- Drafts and the review gallery quote lessons in plaintext: gitignored **and** in ship.py's
+  FORBIDDEN, same as `integrate_report.txt` (#150).
 - **Components publish anchors; layers attach to them.** `hand` exposes `fingertips`, `feet`
   exposes `soles`; `pressure` reads whatever the body before it published. Order matters —
   `pressure` alone falls back to centre. That indirection is what makes the figure teachable

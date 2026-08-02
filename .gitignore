@@ -15,3 +15,7 @@ tools/queue/*
 # integrate.py reports quote lesson titles and reasoning in plaintext (#150)
 tools/integrate_report.txt
 tools/graph_preview.json
+
+# figure drafts + review gallery quote lesson text in plaintext (#158)
+tools/figs_drafts.json
+tools/figs_review/

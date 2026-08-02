@@ -38,8 +38,12 @@
     } catch (e) {}
 
     var key = (await get(KEYS + "?x=" + Date.now())).trim();
+    // Not filtered by prefix. Google issues at least two key shapes — "AIza…" and "AQ.…" — and
+    // both work against x-goog-api-key. Filtering on "AIza" silently dropped two of Hassan's five
+    // keys from every test run, so the harness reported a smaller fleet than the app actually had.
+    // The app itself never filtered; only this harness was wrong.
     var gk = (await get(GEM + "?x=" + Date.now())).split(/[\s,]+/).filter(function (k) {
-      return k.indexOf("AIza") === 0; });
+      return k.length > 20; });
 
     document.querySelectorAll("#vvframe").forEach(function (n) { n.remove(); });
     var f = document.createElement("iframe");

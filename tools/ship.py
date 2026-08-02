@@ -46,6 +46,9 @@ FORBIDDEN = [
     # is not readable in a public repo; a report about the graph is the graph.
     re.compile(r"(^|/)integrate_report\.txt"),
     re.compile(r"(^|/)graph_preview\.json"),
+    re.compile(r"(^|/)figs_drafts\.json"),
+    re.compile(r"(^|/)figs_review/"),
+    re.compile(r"(^|/)figs_verdicts\.json"),
     re.compile(r"\.pdf$", re.I),
     re.compile(r"github_token"),
 ]
