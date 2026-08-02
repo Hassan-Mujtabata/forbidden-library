@@ -4048,8 +4048,11 @@ $("btn-ach").onclick=()=>{const g=$("achgrid");g.innerHTML="";
   $("achs").classList.add("on")};
 
 /* ---------- patch notes ---------- */
-const APP_VER="3.71";
+const APP_VER="3.72";
 const PATCHES=[
+ {v:"3.72",n:"Each Idea Its Own Shape",d:"2 Aug 2026",items:[
+  ["new","THREE NEW DIAGRAMS BUILT BECAUSE PARTICULAR LESSONS NEEDED THEM. Attention drifting off the breath and being brought back — which is the actual practice, not the failure, and no combination of the existing shapes could say it. Two people of unequal standing, for every lesson about power, deference and being outshone. And a ladder of named rungs, for progressions where you genuinely cannot skip a step."],
+  ["fix","The figures being drafted for the rest of your Path were falling back on the same three shapes — a seated figure, a floating dot, a text label — which fit any lesson at all and therefore teach nothing in particular. Each figure now has to take its shape from its own idea: statistical ideas look statistical, social ones show people, sequences look like sequences. A scene that would work unchanged on a different lesson is rejected as the wrong scene."]]},
  {v:"3.71",n:"Nothing Shrinks",d:"2 Aug 2026",items:[
   ["fix","IT WAS STILL DEFLATING, AND THAT WAS THE WHOLE PROBLEM. The body grew to a peak and then animated back down, and a contraction is exactly as visible as an expansion — so every beat read as “swell, deflate” instead of a wave pushing outward. Now the growth runs all the way out to the last point and the reset takes a single frame, about ten milliseconds. The bright points arriving grow and FADE OUT rather than shrinking back, so their reset happens where the eye can't follow it. On screen, nothing ever gets smaller."]]},
  {v:"3.70",n:"One Pump, Not Two Clocks",d:"2 Aug 2026",items:[
@@ -5660,6 +5663,63 @@ const FIGC={
       `<circle cx="70" cy="60" r="5" fill="${A}" stroke="none"/>`+
       `<text class="fg-lbl" x="156" y="33" text-anchor="start">${esc(p.a||"")}</text>`+
       `<text class="fg-lbl" x="156" y="95" text-anchor="start">${esc(p.b||"")}</text>`};
+  },
+
+  drift(p,A){
+    /* #161: the single most important figure in the whole meditation half, and the generic parts
+       could not draw it. Every beginner makes the same mistake — they try to CLAMP attention on
+       the breath, and treat each wander as a failure. The instruction in every one of these books
+       is the opposite: attention leaving is not the error, it is the rep. Noticing and returning
+       without blame IS the exercise. So the figure has to show the whole loop, including the
+       return, because the return is the part people do not know is the point. */
+    const st=p.stage||"wander";      // "hold" | "wander" | "return"
+    const anchor=`<circle cx="60" cy="66" r="13" stroke="${A}" stroke-opacity=".5" stroke-dasharray="3 4"/>`+
+      `<circle cx="60" cy="66" r="5" fill="${A}" stroke="none"/>`+
+      `<text class="fg-lbl" x="60" y="94" text-anchor="middle">${esc(p.anchor||"the breath")}</text>`;
+    if(st==="hold")
+      return {svg:anchor+`<text class="fg-lbl" x="150" y="66" text-anchor="middle">${esc(p.note||"")}</text>`};
+    if(st==="wander")
+      return {svg:anchor+
+        `<path class="fg-driftpath" d="M60 66 C92 54 118 40 152 34" stroke="${A}" stroke-opacity=".35" stroke-dasharray="2 5"/>`+
+        `<circle class="fg-drift" cx="60" cy="66" r="5" fill="${A}" fill-opacity=".8" stroke="none"/>`+
+        `<text class="fg-lbl" x="156" y="30" text-anchor="end">${esc(p.away||"a thought")}</text>`};
+    // the return: a clear arc back, drawn as the strongest thing in the frame
+    return {svg:anchor+
+      `<path class="fg-return" d="M152 34 C118 40 92 54 66 64" stroke="${A}" stroke-width="3" fill="none"/>`+
+      `<path d="M74 60l-9 5 8 6" stroke="${A}" stroke-width="3" fill="none"/>`+
+      `<circle cx="152" cy="34" r="4.5" fill="${A}" fill-opacity=".35" stroke="none"/>`+
+      `<text class="fg-lbl" x="150" y="22" text-anchor="middle">${esc(p.note||"notice — no blame")}</text>`};
+  },
+
+  two(p,A){
+    /* Two people of unequal standing. Power, status, deference, attachment — a whole track of
+       ideas needs it and the only way to say it before was two silhouettes and some labels. */
+    const hi=Math.max(0,Math.min(1,p.high==null?0.9:p.high));
+    const lo=Math.max(0,Math.min(1,p.low==null?0.4:p.low));
+    const fig=(x,glow,name)=>
+      `<circle cx="${x}" cy="${(58-glow*10).toFixed(0)}" r="${(26+glow*12).toFixed(0)}" fill="${A}" `+
+      `fill-opacity="${(0.05+glow*0.13).toFixed(2)}" stroke="none"/>`+
+      `<circle cx="${x}" cy="42" r="9" fill="${A}" fill-opacity="${(0.12+glow*0.3).toFixed(2)}" stroke="${A}"/>`+
+      `<path d="M${x} 52c-8 0-13 5-14 12l-2 14h32l-2-14c-1-7-6-12-14-12z" fill="${A}" `+
+      `fill-opacity="${(0.10+glow*0.25).toFixed(2)}" stroke="${A}"/>`+
+      `<text class="fg-lbl" x="${x}" y="96" text-anchor="middle">${esc(name||"")}</text>`;
+    return {svg:fig(62,hi,p.a||"the master")+fig(138,lo,p.b||"you")+
+      (p.threat?`<path class="fg-threat" d="M96 58h8M104 58l-4-4M104 58l-4 4" stroke="${A}" stroke-width="2.4"/>`:"")};
+  },
+
+  ladder(p,A){
+    /* A staged progression with named rungs — the jhānas, the stages of insight, any "you cannot
+       skip step three" sequence. `on` lights how far you are; each rung says what it costs. */
+    const rungs=(p.rungs||[]).slice(0,5),n=Math.max(2,rungs.length||4);
+    const on=Math.max(0,Math.min(n-1,p.on==null?0:p.on));
+    let s="";
+    for(let i=0;i<n;i++){
+      const y=104-i*(78/(n-1)),lit=i<=on;
+      s+=`<path d="M52 ${y.toFixed(0)}h96" stroke="${A}" stroke-opacity="${lit?".9":".22"}" stroke-width="${lit?3:2}"/>`;
+      s+=`<circle cx="52" cy="${y.toFixed(0)}" r="${i===on?6:4}" fill="${A}" fill-opacity="${lit?".95":".25"}" stroke="none"/>`;
+      if(rungs[i])s+=`<text class="fg-lbl" x="154" y="${(y+3).toFixed(0)}" text-anchor="start">${esc(rungs[i])}</text>`;
+    }
+    return {svg:s};
   },
 
   magnet(p,A){

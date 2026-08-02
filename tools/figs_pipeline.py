@@ -66,6 +66,12 @@ MENU = [
     ("gap",   "stimulus -> [space] -> response, the space glowing", '{"gap":0.6,"left":"stimulus","right":"response"}'),
     ("grip",  "a closed fist or an open palm", '{"open":true,"label":"letting go"}'),
     ("stack", "translucent layers, together or separated", '{"n":5,"apart":true,"labels":["form","feeling"]}'),
+    ("drift", "attention leaving an anchor and being brought back; stage hold|wander|return",
+              '{"stage":"return","anchor":"the breath","away":"a thought"}'),
+    ("two",   "two people of unequal standing, glow shows status; threat marks a clash",
+              '{"high":0.9,"low":0.4,"a":"the master","b":"you","threat":true}'),
+    ("ladder","a staged progression with named rungs, lit up to `on`",
+              '{"rungs":["first","second","third"],"on":1}'),
     ("magnet","an estimate dragged toward a planted anchor", '{"anchor":0.2,"pull":0.6,"anchor_label":"the number you heard"}'),
     ("label", "a short line of text in the frame", '{"text":"","x":100,"y":62}'),
 ]
@@ -84,10 +90,21 @@ HOW TO THINK ABOUT THIS (do this before choosing anything)
    picture of the topic does not.
 3. What CHANGES across two or three steps? A figure earns its steps by showing change.
 
-A worked example of the difference. For "feel your own heartbeat internally", the beginner's error
-is looking for a tap where they feel it. The mechanism is that the beat LEAVES the heart and
-ARRIVES at the fingertips a moment later, filling the body like a balloon. So the figure shows
-pressure travelling outward and swelling as it lands — not circles pulsing where it is noticed.
+A worked example of the METHOD — not a template. For "feel your own heartbeat internally", the
+beginner's error is looking for a tap where they feel it. The mechanism is that the beat LEAVES the
+heart and ARRIVES at the fingertips a moment later, filling the body like a balloon. So that figure
+shows pressure travelling outward and swelling as it lands, rather than circles pulsing where it is
+noticed.
+
+Take the METHOD from that — find the error, draw the mechanism — and nothing else. Do NOT reach for
+bodies, pulses or anything else from it unless THIS concept genuinely needs them. A statistical idea
+should look statistical; a social one should show people; a sequence should look like a sequence.
+The right form comes from the concept in front of you, and a figure that borrows another concept's
+shape teaches that concept instead of this one.
+
+Also avoid the lazy fallbacks: a seated figure, a floating dot and a text label can be dropped onto
+any lesson at all, which is exactly why they usually teach nothing. If your scene would work
+unchanged for a different lesson, it is the wrong scene.
 
 COMPONENTS YOU MAY USE (only these)
 {menu}

@@ -24,6 +24,8 @@ FIG_COMPONENTS = {
     "loop", "stages", "label", "curve", "ripple", "fork",
     # relationships and forces (#158) — what psychology actually needs
     "scale", "lanes", "gauge", "tether", "crowd", "spot", "gap", "grip", "stack", "magnet",
+    # concept-shaped, added because specific lessons needed them (#161)
+    "drift", "two", "ladder",
 }
 
 

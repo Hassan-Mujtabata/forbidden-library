@@ -192,6 +192,17 @@ prose is bad at — where attention goes, what it should feel like, in what orde
 Hassan's account of finding a heartbeat internally: fingertips, then soles, then everywhere).
 - **Specs are DATA, components are CODE.** The spec ships in `content.enc`; `FIGC` + `renderFig`
   live in `index.html`. Same split as the rest of the app. ~0.5KB a figure.
+- **The heartbeat figure is the STANDARD, not the template.** Take the method from it — find the
+  error, draw the mechanism — and nothing else. Every figure's form must come from its own concept:
+  statistical ideas look statistical, social ones show people, sequences look like sequences.
+  Borrowing another concept's shape teaches that concept instead of this one. Watch for the lazy
+  fallbacks (`sit` + `dot` + `label`): they fit any lesson, which is exactly why they teach nothing
+  — a first pass leaned on them 16/18/14 times across 20 drafts. **If a scene would work unchanged
+  on a different lesson, it is the wrong scene.**
+- **When no combination of components can say it, build a component.** `drift` (attention leaving
+  an anchor and being brought back — the practice itself, not the failure), `two` (people of
+  unequal standing) and `ladder` (a progression you cannot skip) exist because specific lessons
+  needed them and the generic set could only gesture.
 - **A figure must show the MECHANISM, not the sensation's location.** First heartbeat figure drew
   expanding rings where the pulse is felt, on a stick figure. Hassan's correction was the design:
   the body is a balloon under building pressure and the beat *travels* from the heart to the ends.
