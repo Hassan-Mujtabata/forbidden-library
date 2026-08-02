@@ -238,6 +238,69 @@ def menu_text():
     return "\n".join("  %-9s %s\n            e.g. %s" % (a, b, c) for a, b, c in MENU)
 
 
+class Patient:
+    """A caller that waits out rate limits instead of giving up on the whole run.
+
+    gemini_pipeline.call retires a key permanently the first time it sees a 429 — correct for a
+    short cron job, ruinous here: one burst of rate limiting killed 79 of 84 lessons in seconds,
+    every one reported as "all keys exhausted". A 429 means "not this second", not "not today".
+
+    So: rotate keys, and when every key is rate-limited at once, sleep and try again rather than
+    unwinding the run. Only a 400/403/404 retires a key, because those really are broken (one of
+    Hassan's five 404s on every request). Paced by default, because the point of this tool is to
+    grind quietly for hours on a machine that is switched on anyway.
+    """
+    def __init__(self, keys, model, gap=4.0, max_wait=900):
+        import urllib.request, urllib.error
+        self.ur, self.ue = urllib.request, urllib.error
+        self.keys = list(keys); self.model = model
+        self.dead = set(); self.i = 0; self.gap = gap; self.max_wait = max_wait
+        self.calls = 0; self.waits = 0
+
+    def alive(self):
+        return [k for k in self.keys if k not in self.dead]
+
+    def __call__(self, prompt, temp=0.7, schema=None):
+        import json as _json, time as _time
+        body = _json.dumps({"contents": [{"parts": [{"text": prompt}]}],
+                            "generationConfig": {"temperature": temp,
+                                                 "responseMimeType": "application/json"}}).encode()
+        backoff = 20
+        while True:
+            live = self.alive()
+            if not live:
+                raise RuntimeError("every key is rejected outright (not rate limits) — check the keys")
+            limited = 0
+            for _ in range(len(live)):
+                k = live[self.i % len(live)]; self.i += 1
+                url = ("https://generativelanguage.googleapis.com/v1beta/models/%s:generateContent"
+                       % self.model)
+                req = self.ur.Request(url, data=body, headers={"Content-Type": "application/json",
+                                                               "x-goog-api-key": k})
+                try:
+                    with self.ur.urlopen(req, timeout=120) as r:
+                        d = _json.load(r)
+                    self.calls += 1
+                    _time.sleep(self.gap)
+                    return d["candidates"][0]["content"]["parts"][0]["text"]
+                except self.ue.HTTPError as e:
+                    if e.code == 429:
+                        limited += 1; continue          # not this second — try the next key
+                    if e.code in (400, 403, 404):
+                        self.dead.add(k); continue      # genuinely broken, stop using it
+                    _time.sleep(3)
+                except Exception:
+                    _time.sleep(3)
+            if not limited:
+                raise RuntimeError("no key could complete the request")
+            if backoff > self.max_wait:
+                raise RuntimeError("still rate limited after %ds — quota is spent for now" % self.max_wait)
+            self.waits += 1
+            print("      …all %d keys rate-limited, waiting %ds (resumes on its own)" % (len(live), backoff))
+            _time.sleep(backoff)
+            backoff = min(int(backoff * 1.8), self.max_wait)
+
+
 def draft_one(n, call, vocab, tries=2):
     text = "\n\n".join((n.get("bridge") or [])[:6])[:4000]
     p = PROMPT.format(title=n.get("title", ""), text=text, menu=menu_text())
@@ -380,6 +443,8 @@ def main():
     ap.add_argument("--track"); ap.add_argument("--n", type=int, default=0)
     ap.add_argument("--status", action="store_true"); ap.add_argument("--gallery", action="store_true")
     ap.add_argument("--apply", action="store_true"); ap.add_argument("--selftest", action="store_true")
+    ap.add_argument("--gap", type=float, default=4.0,
+                    help="seconds between calls — this is meant to run slowly and unattended")
     ap.add_argument("--verdicts", default=os.path.join(REVIEW, "figs_verdicts.json"))
     a = ap.parse_args()
 
@@ -426,6 +491,7 @@ def main():
     import gemini_pipeline as gp
     if not gp.KEYS:
         print("no Gemini keys."); return
+    call = Patient(gp.KEYS, gp.MODEL, gap=a.gap)
     vocab = library_vocab()
     todo = [n for n in graph["nodes"]
             if not n.get("stub") and not n.get("fig") and n["id"] not in drafts
@@ -436,7 +502,7 @@ def main():
     good = bad = 0
     for i, n in enumerate(todo):
         t0 = time.time()
-        d, err = draft_one(n, gp.call, vocab)
+        d, err = draft_one(n, call, vocab)
         if d:
             drafts[n["id"]] = {"fig": {"v": 1, "alt": d["alt"], "place": d.get("place", 1),
                                        "stages": d["stages"]},
@@ -449,7 +515,9 @@ def main():
             bad += 1
             print("  [%2d/%d] %-6s SKIP %-34s %s" % (i + 1, len(todo), n["id"], n.get("title", "")[:34], err))
         save_drafts(drafts)              # incremental: stop any time, resume any time
-    print("\n%d drafted, %d refused. Next: python tools/figs_pipeline.py --gallery" % (good, bad))
+    print("\n%d drafted, %d refused (%d calls, %d rate-limit waits)."
+          % (good, bad, call.calls, call.waits))
+    print("Next: python tools/figs_pipeline.py --gallery")
 
 
 if __name__ == "__main__":
