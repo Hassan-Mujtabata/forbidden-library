@@ -17,7 +17,7 @@ def die(msg):
 
 # Mirrors FIGC in index.html. If you add a component there, add it here — otherwise a spec using
 # it validates fine and then draws nothing, which is the failure mode this list exists to prevent.
-FIG_COMPONENTS = {"hand", "feet", "body", "sit", "pressure", "wash", "dot", "halo",
+FIG_COMPONENTS = {"hand", "feet", "body", "sit", "pressure", "flow", "wash", "dot", "halo",
                   "pacer", "loop", "stages", "label"}
 
 

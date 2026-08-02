@@ -192,6 +192,13 @@ prose is bad at — where attention goes, what it should feel like, in what orde
 Hassan's account of finding a heartbeat internally: fingertips, then soles, then everywhere).
 - **Specs are DATA, components are CODE.** The spec ships in `content.enc`; `FIGC` + `renderFig`
   live in `index.html`. Same split as the rest of the app. ~0.5KB a figure.
+- **A figure must show the MECHANISM, not the sensation's location.** First heartbeat figure drew
+  expanding rings where the pulse is felt, on a stick figure. Hassan's correction was the design:
+  the body is a balloon under building pressure and the beat *travels* from the heart to the ends.
+  `flow` draws the route, runs a segment along it (`pathLength="100"` normalises every route so
+  near and far stay in step) and swells the destination as it lands, staggered so distant points
+  arrive later. Reach for "what is actually happening" over "where you notice it".
+- **Stick figures cannot be under pressure.** Bodies are filled silhouettes so they can swell.
 - **Components publish anchors; layers attach to them.** `hand` exposes `fingertips`, `feet`
   exposes `soles`; `pressure` reads whatever the body before it published. Order matters —
   `pressure` alone falls back to centre. That indirection is what makes the figure teachable

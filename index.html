@@ -539,6 +539,18 @@ header .brand span{color:var(--gold)}
 /* A ring that grows outward and fades — a pulse you have to look for, not a throb. */
 @keyframes fgring{from{r:3;opacity:.85}to{r:var(--fg-max,15);opacity:0}}
 .feltfig .fg-ring{animation:fgring 1s ease-out infinite;fill:none;stroke-width:1.8}
+/* #157: pressure LEAVING the heart and ARRIVING at the ends. The dash is normalised by
+   pathLength=100, so every route runs in step regardless of how far it actually is. */
+@keyframes fgflow{from{stroke-dashoffset:14}to{stroke-dashoffset:-100}}
+.feltfig .fg-flow{stroke-dasharray:14 100;animation:fgflow 1s linear infinite;
+  stroke-linecap:round;opacity:.95}
+/* The destination swells as the pressure lands, then settles — the balloon filling, not a blink. */
+@keyframes fgarrive{0%,55%{transform:scale(.55);opacity:.30}72%{transform:scale(1.25);opacity:.95}
+  100%{transform:scale(.55);opacity:.30}}
+.feltfig .fg-arrive{animation:fgarrive 1s ease-out infinite;transform-box:fill-box;transform-origin:center}
+/* The whole body under pressure: a small, slow swell, so the silhouette reads as filling. */
+@keyframes fgswell{0%,100%{transform:scale(1)}50%{transform:scale(1.035)}}
+.feltfig .fg-swell{animation:fgswell 1s ease-in-out infinite;transform-box:fill-box;transform-origin:50% 60%}
 @keyframes fgpace{0%,100%{r:14;opacity:.55}50%{r:30;opacity:1}}
 .feltfig .fg-pace{animation:fgpace 6s ease-in-out infinite;stroke-width:2.4}
 @keyframes fgbreathe{0%,100%{transform:scale(.94)}50%{transform:scale(1.06)}}
@@ -560,6 +572,10 @@ header .brand span{color:var(--gold)}
   .feltfig svg *{animation:none!important}
   .feltfig .fg-pace{r:22}
   .feltfig .fg-ring{opacity:.5;r:11}
+  /* the route stays drawn and the destinations stay swollen — the diagram still says
+     "from the heart, outwards, arriving there" without anything moving */
+  .feltfig .fg-flow{stroke-dasharray:none;opacity:.5}
+  .feltfig .fg-arrive{opacity:.85}
 }
 
 /* ---------- top bar + nav ---------- */
@@ -3985,8 +4001,12 @@ $("btn-ach").onclick=()=>{const g=$("achgrid");g.innerHTML="";
   $("achs").classList.add("on")};
 
 /* ---------- patch notes ---------- */
-const APP_VER="3.68";
+const APP_VER="3.69";
 const PATCHES=[
+ {v:"3.69",n:"Pressure, Not Circles",d:"2 Aug 2026",items:[
+  ["new","THE HEARTBEAT FIGURE REDRAWN, AND IT'S A BETTER IDEA THAN THE ONE I HAD. It was expanding circles sitting on a stick figure — which is wrong twice over. A heartbeat doesn't happen where you feel it; it LEAVES the heart and ARRIVES there a moment later, and that travel is the thing you're being asked to notice. Now the pressure runs outward along real routes and swells as it lands, and the far ones land later than the near ones, because they do."],
+  ["new","The stick figure is gone. The body is a soft filled silhouette that swells with each beat — your image of a balloon filling under building pressure, which a stick figure can't express because a stick figure can't be under pressure at all."],
+  ["polish","Reduced motion keeps the meaning: the routes stay drawn and the ends stay swollen, so the diagram still says “from the heart, outwards, arriving there” with nothing moving."]]},
  {v:"3.68",n:"A Taste Of What's Inside",d:"2 Aug 2026",items:[
   ["fix","THE HEARTBEAT FIGURE WAS ON A LESSON YOU HAVEN'T REACHED. I put the first felt figure on Access Concentration, which is locked until you've worked through the earlier ideas — so the one thing I most wanted you to look at, you couldn't open. A locked lesson now shows its figure."],
   ["new","That turns out to be the right behaviour, not just a patch. The lock is there so the ideas arrive in order, and the lesson itself stays shut — but a diagram of how something is meant to FEEL isn't a spoiler, it's the best possible argument for coming back. Locked ideas that have a figure now show it under “a taste of what's inside”, fully steppable."],
@@ -5323,21 +5343,38 @@ const FIGC={
       `<path d="M70 66 C64 78 68 96 86 100 L110 100 C128 96 132 80 126 66"/>`+
       fingers+
       `<path d="M126 66 C136 60 141 46 133 41 C127 37 121 43 118 50"/>`,
-      anchors:{fingertips:pads.map(([x,y])=>fPt(x,y)),palm:[fPt(98,82)]}};
+      // `wrist` is where the flow enters the frame: on a hand-only stage the heart is off-screen,
+      // so the pulse arrives from below rather than starting nowhere.
+      anchors:{fingertips:pads.map(([x,y])=>fPt(x,y)),palm:[fPt(98,82)],wrist:[fPt(96,104)]}};
   },
   feet(p,A){
     const soles=[[74,74],[126,74]];
     return {svg:soles.map(([x,y])=>
       `<path d="M${x-13} ${y-26} C${x-17} ${y-6} ${x-15} ${y+16} ${x} ${y+20} C${x+15} ${y+16} ${x+17} ${y-6} ${x+13} ${y-26} C${x+6} ${y-34} ${x-6} ${y-34} ${x-13} ${y-26} Z" fill="${A}" fill-opacity=".07"/>`+
       `<path d="M${x-13} ${y-26} C${x-17} ${y-6} ${x-15} ${y+16} ${x} ${y+20} C${x+15} ${y+16} ${x+17} ${y-6} ${x+13} ${y-26} C${x+6} ${y-34} ${x-6} ${y-34} ${x-13} ${y-26} Z"/>`).join(""),
-      anchors:{soles:soles.map(([x,y])=>fPt(x,y+2))}};
+      anchors:{soles:soles.map(([x,y])=>fPt(x,y+2)),ankles:[fPt(100,20)]}};
   },
   body(p,A){
+    // Not a stick figure. A soft filled silhouette that can visibly SWELL — Hassan's own image is
+    // a balloon under building pressure, and a stick figure cannot be under pressure at all.
+    // Arms are out to the sides because the frame is landscape and because it puts the fingertips
+    // as far from the heart as the box allows, which is the entire point of the flow that follows.
+    const skin=`fill="${A}" fill-opacity=".13" stroke="${A}" stroke-width="1.6"`;
     return {svg:
-      `<circle cx="100" cy="24" r="11" fill="${A}" fill-opacity=".07"/><circle cx="100" cy="24" r="11"/>`+
-      `<path d="M100 35v44M100 44l-22 14M100 44l22 14M100 79l-13 30M100 79l13 30" />`,
-      anchors:{whole:[fPt(100,24),fPt(78,58),fPt(122,58),fPt(87,109),fPt(113,109),fPt(100,60)],
-               head:[fPt(100,24)],hands:[fPt(78,58),fPt(122,58)],chest:[fPt(100,52)]}};
+      `<g class="${p.still?"":"fg-swell"}">`+
+      `<ellipse cx="100" cy="20" rx="10.5" ry="11.5" ${skin}/>`+
+      `<path d="M100 32c-9 0-15 4-16 11l-3 22c-.5 5 1 8 4 9h30c3-1 4.5-4 4-9l-3-22c-1-7-7-11-16-11z" ${skin}/>`+
+      `<path d="M85 40c-12 2-28 6-44 11c-6 2-6 8 0 9c17 3 33 2 45 -2z" ${skin}/>`+
+      `<path d="M115 40c12 2 28 6 44 11c6 2 6 8 0 9c-17 3-33 2-45 -2z" ${skin}/>`+
+      `<path d="M89 74c-3 12-4 24-4 34c0 5 7 5 8 0c1-10 3-20 6-30z" ${skin}/>`+
+      `<path d="M111 74c3 12 4 24 4 34c0 5-7 5-8 0c-1-10-3-20-6-30z" ${skin}/>`+
+      `</g>`,
+      anchors:{heart:[fPt(97,46)],
+               hands:[fPt(41,55),fPt(159,55)],
+               feet:[fPt(88,107),fPt(112,107)],
+               head:[fPt(100,17)],
+               chest:[fPt(100,48)],
+               whole:[fPt(41,55),fPt(159,55),fPt(88,107),fPt(112,107),fPt(100,17)]}};
   },
   sit(p,A){
     return {svg:
@@ -5348,6 +5385,34 @@ const FIGC={
   },
 
   /* --- the teaching layers --- */
+  flow(p,A,scene){
+    /* The one that matters. A heartbeat is not a ripple sitting on your fingertip — it LEAVES the
+       heart and ARRIVES there a moment later, and that travel is what you are being asked to
+       notice. So: draw the route, run a bright segment along it, and swell the destination as the
+       segment lands. `pathLength="100"` normalises every route to the same dash maths, so a short
+       hop to the head and a long run to a fingertip take the same time and stay in step.
+       Delay per endpoint is deliberate — the far ones arrive later, which is true and is also
+       what makes it read as pressure rather than as blinking. */
+    const an=(scene.anchors||{});
+    const from=(an[p.from]||an.heart||an.wrist||[fPt(100,60)])[0];
+    const to=(an[p.to]||an.whole||[fPt(100,20)]);
+    const secs=(1/(p.rate||1)).toFixed(2);
+    let s="";
+    to.forEach(([x,y],i)=>{
+      const [hx,hy]=from;
+      // A gentle bow rather than a straight line: bodies do not route in straight lines, and the
+      // curve makes the direction of travel legible at a glance.
+      const mx=(hx+x)/2+(y-hy)*0.16, my=(hy+y)/2-(x-hx)*0.16;
+      const d=`M${hx} ${hy} Q${mx.toFixed(1)} ${my.toFixed(1)} ${x} ${y}`;
+      const delay=(i*0.06).toFixed(2);
+      s+=`<path d="${d}" stroke="${A}" stroke-opacity=".16" stroke-width="1.4" fill="none"/>`;
+      s+=`<path class="fg-flow" d="${d}" pathLength="100" stroke="${A}" stroke-width="3.4" fill="none"`+
+         ` style="animation-duration:${secs}s;animation-delay:${delay}s"/>`;
+      s+=`<circle class="fg-arrive" cx="${x}" cy="${y}" r="${(3.5+4*(p.strength==null?0.7:p.strength)).toFixed(1)}"`+
+         ` fill="${A}" stroke="none" style="animation-duration:${secs}s;animation-delay:${(+delay+ +secs*0.62).toFixed(2)}s"/>`;
+    });
+    return {svg:s};
+  },
   pressure(p,A,scene){
     // Sits on whichever anchor set the body component published. This is the component that does
     // the actual work in the heartbeat figure: a faint pulse you have to go looking for.
