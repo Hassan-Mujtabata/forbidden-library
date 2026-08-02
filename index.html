@@ -521,6 +521,9 @@ header .brand span{color:var(--gold)}
    and a screen reader can drive them. */
 .feltfig{margin:22px 0;padding:16px 16px 12px;background:var(--card);border:1px solid var(--line);
   border-radius:14px;cursor:pointer}
+/* #156: the same figure, shown on a locked lesson as an invitation back */
+.lockfig{margin-top:26px;text-align:left}
+#ngate .feltfig{text-align:left;max-width:var(--rw);margin-left:auto;margin-right:auto}
 .feltfig .ff-svg svg{width:100%;height:150px;display:block;overflow:visible}
 .feltfig figcaption{font-size:13.5px;line-height:1.55;color:var(--tx);margin-top:12px}
 .feltfig .ff-nav{display:flex;align-items:center;gap:7px;margin-top:11px}
@@ -3982,8 +3985,12 @@ $("btn-ach").onclick=()=>{const g=$("achgrid");g.innerHTML="";
   $("achs").classList.add("on")};
 
 /* ---------- patch notes ---------- */
-const APP_VER="3.67";
+const APP_VER="3.68";
 const PATCHES=[
+ {v:"3.68",n:"A Taste Of What's Inside",d:"2 Aug 2026",items:[
+  ["fix","THE HEARTBEAT FIGURE WAS ON A LESSON YOU HAVEN'T REACHED. I put the first felt figure on Access Concentration, which is locked until you've worked through the earlier ideas — so the one thing I most wanted you to look at, you couldn't open. A locked lesson now shows its figure."],
+  ["new","That turns out to be the right behaviour, not just a patch. The lock is there so the ideas arrive in order, and the lesson itself stays shut — but a diagram of how something is meant to FEEL isn't a spoiler, it's the best possible argument for coming back. Locked ideas that have a figure now show it under “a taste of what's inside”, fully steppable."],
+  ["polish","Checked that the lock still holds: on a locked lesson the body has zero paragraphs and the opening line is nowhere on the page. And an unlocked lesson shows its figure once, in the text where it belongs — not twice."]]},
  {v:"3.67",n:"Felt Figures",d:"1 Aug 2026",items:[
   ["new","🫀 FIGURES THAT TEACH THE FEELING, NOT JUST THE IDEA. Some things prose is bad at. “Feel your heartbeat internally” is one — nobody tells you it starts as a faint pressure at your fingertips, then the soles of your feet, then everywhere. Access Concentration now has a figure that walks you through exactly that, one stage at a time: a hand with a pulse you have to go looking for, then feet, then the whole body. Tap it to move on."],
   ["new","Two more to start: a breath pacer on Why Train the Mind — a ring that breathes so you can match it instead of counting, then a stage that asks you to stop watching it — and the cue/craving/response/reward circuit on The Habit Loop, with a second stage showing what changes when you make the cue invisible."],
@@ -5698,6 +5705,20 @@ function openNode(id){
       (n.whyreq?`<div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--line);font-size:12.5px;line-height:1.6;text-align:left"><b style="color:var(--gold)">Why this lock is real:</b><br>${esc(n.whyreq)}</div>`:"")+
       `<br><button class="ghostbtn" id="lockback">← Back to the Path</button></div>`;
     $("lockback").onclick=()=>{renderPath();show("path")};
+    // #156: a locked lesson still shows its FIGURE. The lock exists so the ideas are met in
+    // order, and the prose stays locked — but a diagram of how something is supposed to FEEL is
+    // an invitation rather than a spoiler, and it is the strongest possible argument for coming
+    // back. Found the hard way: the flagship figure shipped onto a lesson Hassan had not reached,
+    // so the one person who needed to judge it could not see it at all.
+    figReset();
+    const lockFigs=(n.fig||[]).filter(f=>f&&(f.stages||f.scene));
+    if(lockFigs.length){
+      const peek=document.createElement("div");peek.className="lockfig";
+      peek.innerHTML=`<div class="lblrow guide">A taste of what's inside</div>`;
+      gate.appendChild(peek);
+      gate.appendChild(renderFig(lockFigs[0],tagColor(trackById(n.track).accent)));
+      setTimeout(figPulse,60);
+    }
     show("node");return;
   }
   const g=document.createElement("div");g.className="lblrow guide";g.textContent="✦ Guide note — written for you";body.appendChild(g);
