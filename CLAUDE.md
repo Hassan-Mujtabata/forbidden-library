@@ -210,6 +210,13 @@ Hassan's account of finding a heartbeat internally: fingertips, then soles, then
   near and far stay in step) and swells the destination as it lands, staggered so distant points
   arrive later. Reach for "what is actually happening" over "where you notice it".
 - **Stick figures cannot be under pressure.** Bodies are filled silhouettes so they can swell.
+- **ORDER IS THE TEACHING, and it is worth measuring.** A figure showing cause and effect must
+  show the cause finishing before the effect begins — the tips were swelling at 52% while their
+  line only landed at 100%, so the destination reacted to something that had not arrived. One beat
+  is a sequence with a rest: travel 0-40%, arrive 46-70%, fade by 70%, then ~16% of silence so the
+  next beat starts from stillness rather than interrupting. Any per-item stagger must be
+  PROPORTIONAL to the beat and small enough that the last item finishes inside the cycle.
+  Verify it: read the keyframes, convert offsets to seconds, and assert `effectStart >= causeEnd`.
 - **Nothing may shrink on screen.** A contraction is as visible as an expansion, so an
   expand-then-return curve reads as deflation and undoes the meaning. Grow for the whole beat and
   reset in one frame (`fgswell` cuts between 86% and 87%), or grow and fade to zero opacity and

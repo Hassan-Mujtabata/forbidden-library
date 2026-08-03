@@ -541,20 +541,32 @@ header .brand span{color:var(--gold)}
 .feltfig .fg-ring{animation:fgring 1s ease-out infinite;fill:none;stroke-width:1.8}
 /* #160: the travelling segment leaves the far end rather than snapping back to the heart.
    Fading the tail out over the last stretch means the loop point is never seen. */
-@keyframes fgflowfade{0%,78%{opacity:.95}100%{opacity:0}}
+/* #162: the ORDER is the teaching. One beat now runs as a sequence with a rest at the end, and
+   every phase has its own slice of the cycle so nothing overlaps the phase before it:
+     0-40%   the line travels out to the tip
+     40-70%  ONLY THEN does the tip swell — it used to start at 52% while the line was still
+             only halfway there, so the destination lit up before the pressure arrived, which is
+             backwards and quietly destroys the point of the whole figure
+     70-88%  it fades away
+     88-100% quiet, so the next beat starts from stillness instead of interrupting this one
+   The stagger is proportional to the beat, so the far points still land later without the last
+   of them running past the end of the cycle. */
+@keyframes fgflowfade{0%,34%{opacity:.95}44%{opacity:0}100%{opacity:0}}
 /* #157: pressure LEAVING the heart and ARRIVING at the ends. The dash is normalised by
    pathLength=100, so every route runs in step regardless of how far it actually is. */
-@keyframes fgflow{from{stroke-dashoffset:14}to{stroke-dashoffset:-100}}
+@keyframes fgflow{0%{stroke-dashoffset:14}40%{stroke-dashoffset:-100}100%{stroke-dashoffset:-100}}
 .feltfig .fg-flow{stroke-dasharray:14 100;stroke-linecap:round;opacity:.95;
   animation:fgflow var(--fg-beat,1s) linear infinite, fgflowfade var(--fg-beat,1s) linear infinite}
 /* #160: the destination grows and FADES OUT. It used to shrink back to its starting size, and a
    contraction is just as visible as an expansion — so every beat read as "swell, deflate" instead
    of "arrive, dissipate". Now the reset happens at zero opacity, where the eye cannot follow it. */
-@keyframes fgarrive{0%,52%{transform:scale(.5);opacity:0}
-  70%{transform:scale(1.15);opacity:.95}
-  88%{transform:scale(1.4);opacity:0}
-  100%{transform:scale(.5);opacity:0}}
-.feltfig .fg-arrive{animation:fgarrive 1s ease-out infinite;transform-box:fill-box;transform-origin:center}
+@keyframes fgarrive{0%,40%{transform:scale(.45);opacity:0}
+  46%{transform:scale(.8);opacity:.95}
+  62%{transform:scale(1.3);opacity:.85}
+  70%{transform:scale(1.5);opacity:0}
+  100%{transform:scale(.45);opacity:0}}
+.feltfig .fg-arrive{animation:fgarrive var(--fg-beat,1s) ease-out infinite;
+  transform-box:fill-box;transform-origin:center}
 /* #159: the body expands FROM THE HEART, OUTWARD, in time with the wave.
    Three things were wrong before and each made it read as random: it ran on its own 1s clock
    independent of the flow, it peaked halfway through while the pressure only lands at ~62%, and
@@ -566,8 +578,8 @@ header .brand span{color:var(--gold)}
    deflates in equal measure reads as breathing, not as a pulse pushing outward. The growth now
    runs until the last point is reached (86%, the final arrival delay) and the reset takes one
    frame, so the only motion the eye ever tracks is outward. */
-@keyframes fgswell{0%{transform:scale(1)}86%{transform:scale(1.045)}
-  87%{transform:scale(1)}100%{transform:scale(1)}}
+@keyframes fgswell{0%{transform:scale(1)}40%{transform:scale(1.045)}
+  72%{transform:scale(1.045)}73%{transform:scale(1)}100%{transform:scale(1)}}
 .feltfig .fg-swell{animation:fgswell var(--fg-beat,1s) cubic-bezier(.33,.7,.5,1) infinite;
   transform-box:fill-box;transform-origin:48% 36%}
 
@@ -4048,8 +4060,11 @@ $("btn-ach").onclick=()=>{const g=$("achgrid");g.innerHTML="";
   $("achs").classList.add("on")};
 
 /* ---------- patch notes ---------- */
-const APP_VER="3.72";
+const APP_VER="3.73";
 const PATCHES=[
+ {v:"3.73",n:"Arrive, Then Expand",d:"3 Aug 2026",items:[
+  ["fix","THE TIPS WERE LIGHTING UP BEFORE THE PRESSURE GOT THERE. The travelling line finished at the end of the beat, but the swell at each tip began just past halfway — so the destination reacted to something that hadn't arrived yet, which is backwards and quietly ruins the one thing the figure exists to teach. The line now completes its journey first, and only then does the tip expand."],
+  ["fix","Slowed down, and each beat is now allowed to finish. A pulse takes 1.7 seconds instead of 1, the whole sequence — travel, arrive, swell, fade — completes, and there's a real pause before the next one starts. The far points still land later than the near ones, but they now land INSIDE their own beat instead of spilling into the next."]]},
  {v:"3.72",n:"Each Idea Its Own Shape",d:"2 Aug 2026",items:[
   ["new","THREE NEW DIAGRAMS BUILT BECAUSE PARTICULAR LESSONS NEEDED THEM. Attention drifting off the breath and being brought back — which is the actual practice, not the failure, and no combination of the existing shapes could say it. Two people of unequal standing, for every lesson about power, deference and being outshone. And a ladder of named rungs, for progressions where you genuinely cannot skip a step."],
   ["fix","The figures being drafted for the rest of your Path were falling back on the same three shapes — a seated figure, a floating dot, a text label — which fit any lesson at all and therefore teach nothing in particular. Each figure now has to take its shape from its own idea: statistical ideas look statistical, social ones show people, sequences look like sequences. A scene that would work unchanged on a different lesson is rejected as the wrong scene."]]},
@@ -5461,12 +5476,19 @@ const FIGC={
       // curve makes the direction of travel legible at a glance.
       const mx=(hx+x)/2+(y-hy)*0.16, my=(hy+y)/2-(x-hx)*0.16;
       const d=`M${hx} ${hy} Q${mx.toFixed(1)} ${my.toFixed(1)} ${x} ${y}`;
-      const delay=(i*0.06).toFixed(2);
+      // #162: the stagger scales WITH the beat instead of being a fixed 0.06s. At a slower pulse a
+      // fixed offset is imperceptible; worse, the last point used to still be fading when the next
+      // beat began. Capped so every endpoint finishes inside the cycle and the rest at the end
+      // stays a rest.
+      const delay=(i*(+secs)*0.035).toFixed(3);
       s+=`<path d="${d}" stroke="${A}" stroke-opacity=".16" stroke-width="1.4" fill="none"/>`;
       s+=`<path class="fg-flow" d="${d}" pathLength="100" stroke="${A}" stroke-width="3.4" fill="none"`+
          ` style="animation-duration:${secs}s;animation-delay:${delay}s"/>`;
       s+=`<circle class="fg-arrive" cx="${x}" cy="${y}" r="${(3.5+4*(p.strength==null?0.7:p.strength)).toFixed(1)}"`+
-         ` fill="${A}" stroke="none" style="animation-duration:${secs}s;animation-delay:${(+delay+ +secs*0.62).toFixed(2)}s"/>`;
+         // The arrival now shares the flow's delay exactly. The "wait until the line lands" offset
+         // lives in the keyframes (nothing visible before 40%), so adding a second offset here —
+         // as it did — made the tip start swelling before its own line had got there.
+         ` fill="${A}" stroke="none" style="animation-duration:${secs}s;animation-delay:${delay}s"/>`;
     });
     // Publish the beat so the body swells WITH the wave instead of on a clock of its own.
     return {svg:s,vars:{"--fg-beat":secs+"s"}};
