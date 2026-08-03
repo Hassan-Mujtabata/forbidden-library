@@ -795,6 +795,10 @@ header .brand span{color:var(--gold)}
 .feltfig .fg-base{animation:fgbase 3.6s ease-out 1 forwards}
 @keyframes fgheld{0%{opacity:0}55%{opacity:1}100%{opacity:1}}
 .feltfig .fg-held{animation:fgheld 3.6s ease-out 1 forwards}
+@keyframes fgstory{0%{opacity:0}40%{opacity:1}100%{opacity:1}}
+.feltfig .fg-story{animation:fgstory 3.4s ease-out 1 forwards}
+@keyframes fgframe{0%{opacity:0}30%{opacity:1}100%{opacity:1}}
+.feltfig .fg-frame{animation:fgframe 3.4s ease-out 1 forwards;opacity:0}
 /* Off-screen figures stop dead: an animation under the fold is heat for nothing. */
 .feltfig.ff-paused svg *{animation-play-state:paused!important}
 @media (prefers-reduced-motion:reduce){
@@ -860,6 +864,7 @@ header .brand span{color:var(--gold)}
   .feltfig .fg-sort{fill-opacity:.4}
   .feltfig .fg-you{fill-opacity:.95}
   .feltfig .fg-base,.feltfig .fg-held{opacity:1}
+  .feltfig .fg-story,.feltfig .fg-frame{opacity:1}
 }
 
 /* ---------- top bar + nav ---------- */
@@ -4294,8 +4299,12 @@ $("btn-ach").onclick=()=>{const g=$("achgrid");g.innerHTML="";
   $("achs").classList.add("on")};
 
 /* ---------- patch notes ---------- */
-const APP_VER="3.91";
+const APP_VER="3.92";
 const PATCHES=[
+ {v:"3.92",n:"Story, Or Frames",d:"4 Aug 2026",items:[
+  ["new","A FIRST DIAGRAM FOR THE INSIGHT TRACK. Ordinary attention hands you a thing — this mood, this pain, this wanting — one item, apparently solid, that arrived and is now simply here. Steady the mind and the same stretch resolves into separate arisings. Nothing was added and nothing removed: the same span, seen finely enough to show its seams. A wobbly mind sees the story; a steady mind sees the frames."],
+  ["new","The last step names the three marks against those seams without drawing anything new, because that is the actual claim: they are not extra features to hunt for, they are descriptions of what is already there once the resolution is high enough. Each one ends. None is solid enough to stand on. None of them waited for your permission."],
+  ["fix","The band deliberately occupies exactly the same width in every step. The lesson says insight is not learning new content, so a resolved version that was wider or busier would have been quietly contradicting it."]]},
  {v:"3.91",n:"The Line Moves, Not The Things",d:"4 Aug 2026",items:[
   ["new","A FIRST DIAGRAM FOR THE FRANKL TRACK. Three ordinary things — a toothbrush, working indoors, an hour nobody bothers you — sitting below the line of what counts as good, which is why you have never once been glad about them. Take almost everything away and the same three become good fortune. Frankl watched men count exactly these."],
   ["new","Then the actual point: look at what changed. The three things are precisely where they were. Only the line moved — and that line is doing this in your life right now, in both directions. Which is also why comparing your suffering to somebody worse off has never helped. You are not standing on their scale."],
@@ -6344,6 +6353,34 @@ const FIGC={
         `stroke-opacity=".35" stroke-dasharray="2 4"/>`+
         `<text class="fg-lbl fg-held" x="100" y="106" text-anchor="middle">${esc(p.n||"nothing here moved")}</text>` : "";
     return {svg:bar+items+held};
+  },
+
+  /* #162, from research (tools/figs_research/c1.md). The lesson's own closing line is the figure:
+     "a wobbly mind sees the story; a steady mind sees the frames." And its opening constraint is
+     the design rule — "insight is not learning new content" — so the band OCCUPIES THE SAME EXTENT
+     in every stage (x 24..176). Nothing is added between the story and the frames; the same
+     material is resolved more finely. If the resolved version were wider or busier it would be
+     saying new content arrived, which is precisely what the lesson denies. */
+  frames(p,A){
+    const st=p.stage||"story", X0=24, X1=176, Y=46, H=20;
+    if(st==="story")
+      return {svg:`<rect class="fg-story" x="${X0}" y="${Y}" width="${X1-X0}" height="${H}" rx="9" `+
+        `fill="${A}" fill-opacity=".45" stroke="none"/>`+
+        `<text class="fg-lbl" x="100" y="${Y+H+22}" text-anchor="middle">${esc(p.n||"one continuous thing")}</text>`};
+    const N=14, w=(X1-X0)/N;
+    let s="";
+    for(let i=0;i<N;i++)
+      s+=`<rect class="fg-frame" x="${(X0+i*w+1.2).toFixed(1)}" y="${Y}" width="${(w-2.4).toFixed(1)}" `+
+        `height="${H}" rx="2" fill="${A}" fill-opacity=".5" stroke="none" `+
+        `style="animation-delay:${(i*0.055).toFixed(2)}s"/>`;
+    if(st==="frames")
+      return {svg:s+`<text class="fg-lbl" x="100" y="${Y+H+22}" text-anchor="middle">${esc(p.n||"the same thing, seen finer")}</text>`};
+    // the three marks are read OFF the frames — nothing new is drawn, only named.
+    // NB c3, not c: `c` is the scene item's component key, so p.c is "frames".
+    return {svg:s+
+      `<text class="fg-lbl" x="${X0}" y="${Y-10}" text-anchor="start">${esc(p.a||"each one ends")}</text>`+
+      `<text class="fg-lbl" x="100" y="${Y+H+20}" text-anchor="middle">${esc(p.b||"none holds you")}</text>`+
+      `<text class="fg-lbl" x="${X1}" y="${Y-10}" text-anchor="end">${esc(p.c3||"none is yours")}</text>`};
   },
 
   pacer(p,A){

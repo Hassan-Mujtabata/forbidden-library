@@ -54,6 +54,8 @@ FIG_COMPONENTS = {
     "sorts",
     # #162: fixed items, a moving line for what counts as good
     "baseline",
+    # #162: the same span seen as one thing, then as discrete arisings
+    "frames",
 }
 
 
