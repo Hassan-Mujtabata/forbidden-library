@@ -651,6 +651,31 @@ header .brand span{color:var(--gold)}
 @keyframes fgaware{0%,60%{stroke-opacity:.16}67%{stroke-opacity:.9}84%{stroke-opacity:.16}100%{stroke-opacity:.16}}
 .feltfig .fg-aware{stroke-opacity:.16}
 .feltfig .fg-awarefire{animation:fgaware 6s ease-out infinite}
+/* #162 groove. These three RUN ONCE and stay where they end (`forwards`, no `infinite`), which is
+   a claim about the world, not a rendering choice: the gain is cumulative, and a cumulative gain
+   on a repeating timer would un-happen every eight seconds and teach the reverse of the lesson.
+   The ↺ button replays it. Each wear step lands AFTER its trip completes (20->24, 47->51, 74->78)
+   because a route is strengthened by a repetition, not during one. */
+@keyframes fgtrip{0%{stroke-dashoffset:12;opacity:0}2%{stroke-dashoffset:12;opacity:.95}
+  20%{stroke-dashoffset:-100;opacity:.95}21%{stroke-dashoffset:-100;opacity:0}
+  27%{stroke-dashoffset:12;opacity:0}29%{stroke-dashoffset:12;opacity:.95}
+  47%{stroke-dashoffset:-100;opacity:.95}48%{stroke-dashoffset:-100;opacity:0}
+  54%{stroke-dashoffset:12;opacity:0}56%{stroke-dashoffset:12;opacity:.95}
+  74%{stroke-dashoffset:-100;opacity:.95}75%{stroke-dashoffset:-100;opacity:0}
+  100%{stroke-dashoffset:-100;opacity:0}}
+.feltfig .fg-trip{animation:fgtrip 8s linear 1 forwards}
+@keyframes fgworn{0%,20%{stroke-opacity:.14;stroke-width:2}24%,47%{stroke-opacity:.4;stroke-width:3}
+  51%,74%{stroke-opacity:.62;stroke-width:4.2}78%,100%{stroke-opacity:.9;stroke-width:5.5}}
+.feltfig .fg-worn{animation:fgworn 8s ease-out 1 forwards}
+/* fades by OPACITY only and holds its width — a route falling out of use gets faint, it does not
+   get thin. Thinning would be a contraction dressed up as content. */
+@keyframes fgstarve{0%,12%{stroke-opacity:.9}88%,100%{stroke-opacity:.1}}
+.feltfig .fg-starve{animation:fgstarve 8s ease-in-out 1 forwards}
+/* the unchosen route DOES loop: it is ongoing use, not a cumulative gain, and it never stops. */
+@keyframes fgauto{0%{stroke-dashoffset:12;opacity:0}5%{stroke-dashoffset:12;opacity:.95}
+  85%{stroke-dashoffset:-100;opacity:.95}92%{stroke-dashoffset:-100;opacity:0}
+  100%{stroke-dashoffset:-100;opacity:0}}
+.feltfig .fg-auto{animation:fgauto 2.6s linear infinite}
 /* Off-screen figures stop dead: an animation under the fold is heat for nothing. */
 .feltfig.ff-paused svg *{animation-play-state:paused!important}
 @media (prefers-reduced-motion:reduce){
@@ -675,6 +700,11 @@ header .brand span{color:var(--gold)}
   .feltfig .fg-snap{opacity:1}
   .feltfig .fg-snapring{r:14;opacity:.4}
   .feltfig .fg-awarefire{stroke-opacity:.9}
+  /* #162: frozen, groove shows the state each stage ARRIVES at — worn deep, faded out, in use. */
+  .feltfig .fg-trip{opacity:0}
+  .feltfig .fg-worn{stroke-opacity:.9;stroke-width:5.5}
+  .feltfig .fg-starve{stroke-opacity:.1}
+  .feltfig .fg-auto{opacity:.7;stroke-dashoffset:-46}
 }
 
 /* ---------- top bar + nav ---------- */
@@ -4109,8 +4139,12 @@ $("btn-ach").onclick=()=>{const g=$("achgrid");g.innerHTML="";
   $("achs").classList.add("on")};
 
 /* ---------- patch notes ---------- */
-const APP_VER="3.74";
+const APP_VER="3.75";
 const PATCHES=[
+ {v:"3.75",n:"A Route Gets Worn In",d:"3 Aug 2026",items:[
+  ["fix","THE VERY FIRST FIGURE IN THE VAULT WAS TEACHING THE WRONG THING — twice over. “Why Train the Mind” never mentions breathing, yet it carried a breathing pacer telling you to breathe 6 seconds in, 6 seconds out. Worse, every meditation book in your library explicitly forbids that: Brasington says it is “extremely important to not control the breath in any way” because pacing makes it too easy to stay focused and you never build real concentration; Brahm says controlling the breath “produces only discomfort”; The Mind Illuminated says breathe naturally and be a passive observer. That figure is gone."],
+  ["new","IN ITS PLACE, THE LESSON’S ACTUAL CLAIM: what you repeatedly attend to strengthens, and what you starve fades. Attention travels a route; each completed trip leaves it a little easier than before. Stop travelling it and it goes back — the same rule running the other way. Then the turn: the routes you call your personality got thick by exactly this mechanism, worn in by repetition you never sat down and chose. “I’m just not a focused person” is a well-travelled route, not a fixed fact."],
+  ["fix","The strengthening no longer loops. A gain that resets every eight seconds would say the opposite of what the lesson says, so it runs once, ends where it ends, and waits for you to press replay."]]},
  {v:"3.74",n:"You Never Feel Yourself Leave",d:"3 Aug 2026",items:[
   ["new","THE FIRST FIGURE BUILT FROM RESEARCH INSTEAD OF INTUITION — mind-wandering, on Stabilizing Attention. Three steps. You don't drift off on purpose, you just aren't there any more, and the ring left sitting on the breath is where you still believe you are. Attention doesn't slide away in a line either — it JUMPS, thought to thought, each jump reasonable from inside the one before it. And the catch: you can only notice a distraction once it has already let go of you, and the noticing IS the return. Nothing gets dragged back."],
   ["fix","The old version of that diagram drew the return as a big arrow curving home. That is the exact opposite of what happens, and it teaches the thing that makes people quit — hauling attention back by force, treating every wander as a failure. Rebuilt from what practitioners actually report: the departure is long and unfelt, the return takes no time at all, and that lopsidedness is the entire lesson."],
@@ -5569,8 +5603,45 @@ const FIGC={
     return {svg:`<circle class="fg-breathe" cx="${p.x||100}" cy="${p.y||60}" r="${p.r||40}" `+
       `stroke="${A}" stroke-opacity=".45" stroke-dasharray="3 6"/>`};
   },
+  /* #162, from research (tools/figs_research/a1.md). NEVER use `groove` where a route is merely
+     a choice — `fork` does that. This one exists because a route here has to HAVE a property:
+     it gets easier the more it is travelled and goes back when it is not. Nothing in the menu
+     could do that; fork is static and lanes is about speed.
+     The wear steps AFTER each completed trip, never during one — strengthening follows a
+     repetition, it is not part of it. And the cumulative stages deliberately do not loop: a gain
+     that resets every eight seconds teaches the opposite of what this lesson says. */
+  groove(p,A){
+    const st=p.stage||"wear";           // "wear" | "fade" | "unchosen"
+    const UP="M34 56 C86 56 104 32 168 32", DN="M34 56 C86 56 100 90 168 90";
+    const origin=`<circle cx="34" cy="56" r="5.5" fill="${A}" stroke="none"/>`+
+      `<text class="fg-lbl" x="34" y="78" text-anchor="middle">${esc(p.who||"attention")}</text>`;
+    const route=(d,cls,op,w)=>`<path class="${cls}" d="${d}" stroke="${A}" fill="none" `+
+      `stroke-opacity="${op}" stroke-width="${w}"/>`;
+    // pathLength normalises the dash maths so one set of keyframes fits routes of any length
+    const trip=(d,cls)=>`<path class="${cls}" d="${d}" pathLength="100" stroke="${A}" fill="none" `+
+      `stroke-width="2.6" stroke-dasharray="12 100" stroke-linecap="round"/>`;
+    const lbl=(x,y,t,a)=>`<text class="fg-lbl" x="${x}" y="${y}" text-anchor="${a||"end"}">${esc(t)}</text>`;
+
+    if(st==="wear")                      // three trips; the route is stronger after each one
+      return {svg:route(UP,"fg-worn",".14","2")+trip(UP,"fg-trip")+origin+
+        lbl(192,22,p.a||"what you practise")};
+
+    if(st==="fade")                      // nobody comes any more. Opacity only — never thin it,
+      return {svg:route(UP,"fg-starve",".9","5.5")+origin+   // decay is the lesson, shrinking is a bug
+        lbl(192,22,p.a||"what you stop")};
+
+    // the route you never sat down and chose, running fast and unattended
+    return {svg:route(UP,"",".45","3.2")+route(DN,"",".85","6")+trip(DN,"fg-auto")+origin+
+      lbl(192,22,p.a||"what you chose")+lbl(192,106,p.b||"just how I am")};
+  },
+
   pacer(p,A){
     // A ring that breathes at a stated pace so the reader can match it rather than count.
+    // #162 — DO NOT USE THIS ON ANY MEDITATION NODE. Every source book in this library forbids
+    // pacing the breath: Brasington "extremely important to not control the breath in any way …
+    // it makes it too easy"; Brahm "controlling the breath produces only discomfort"; TMI
+    // "breathe naturally. Be a passive observer". It shipped on a1 for months telling readers to
+    // breathe 6 in, 6 out. Kept only for genuinely paced things outside tracks B and C.
     const s=(p.pace||6);
     return {svg:`<circle class="fg-pace" cx="100" cy="58" r="20" stroke="${A}" `+
       `style="animation-duration:${s}s"/>`+

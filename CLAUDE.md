@@ -441,3 +441,20 @@ deliberate dim baseline has not "fired" just because it is visible; and a transi
 while invisible at both ends is the cycle resetting, not motion.
 
 **One figure per cycle.** Hassan: "make one, make sure it's perfect, then on to next."
+
+**CORROBORATE — one account is not evidence.** (Hassan, 3 Aug 2026: "someone can just put random
+stuff for trolling so 1 isnt really enough.") Any claim the DESIGN RESTS ON needs **two or more
+independent sources** — different authors, different traditions or fields, not quoting each other.
+A single blog post, a single forum reply, or a single study is a lead, not a fact. Rank sources:
+published teacher > practitioner writing under their own name > anonymous forum post; and a
+finding from a different FIELD is worth more than three more voices from the same one.
+Applied, it caught real exposure in both directions:
+- b2's whole stage-3 ordering rested on Gunaratana alone. Corroborated from cognitive science —
+  Smallwood & Schooler's experience sampling finds people "unaware of their mind wandering up
+  until the time of the probe", with meta-awareness arriving after the episode "has already begun
+  or even ended". Different method, different field, same structure. Held.
+- a1's stage 2 rested on ONE 2004 paper, which is exactly what fails to replicate. Checked:
+  Driemeyer/Boyke 2008 re-ran it with more time-points ("increase during exercise, which receded
+  when exercise stopped") and Boyke 2008 found the same in an elderly cohort. Held.
+Write the corroboration pass into the sheet as its own section, and mark anything still
+single-sourced as SINGLE-SOURCED so the next session can see what is load-bearing and thin.

@@ -26,6 +26,8 @@ FIG_COMPONENTS = {
     "scale", "lanes", "gauge", "tether", "crowd", "spot", "gap", "grip", "stack", "magnet",
     # concept-shaped, added because specific lessons needed them (#161)
     "drift", "two", "ladder",
+    # #162: a route that gets easier the more it is travelled, and goes back when it isn't
+    "groove",
 }
 
 
