@@ -254,11 +254,35 @@
                                      "% quiet at the end, needs " + BEAT[n] + "%");
     });
 
+    // #162: LABELS OUTSIDE THE VIEWBOX. VA.fits() measures DOM element width, which an SVG label
+    // spilling past viewBox 0 0 200 120 never affects — the <svg> box is the same size either
+    // way, so a clipped caption passes "no overflow" silently. k1 shipped a 36-character label
+    // that ran to 220 units wide and nothing caught it. This walks every stage of every figure.
+    var labels = 0, clipped = [];
+    try {
+      clipped = JSON.parse(win.eval('(function(){' +
+        'var bad=[],n=0,host=document.createElement("div");document.body.appendChild(host);' +
+        'DATA.nodes.forEach(function(nd){(nd.fig||[]).forEach(function(spec,fi){' +
+        '  var f=renderFig(spec,"#888");host.appendChild(f);' +
+        '  var dots=f.querySelectorAll(".ff-dot"),N=Math.max(1,dots.length);' +
+        '  for(var i=0;i<N;i++){ if(dots.length)dots[i].click();' +
+        '    var svg=f.querySelector("svg");' +
+        '    [].forEach.call(svg.querySelectorAll("text"),function(e){ n++;' +
+        '      var b=e.getBBox();' +
+        '      if(b.x<-1||b.x+b.width>201||b.y<-1||b.y+b.height>121)' +
+        '        bad.push(nd.id+" fig"+fi+" stage"+(i+1)+": \\""+e.textContent+"\\" ["+' +
+        '          b.x.toFixed(0)+".."+(b.x+b.width).toFixed(0)+"]");});}' +
+        '  f.remove();});});' +
+        'host.remove();return JSON.stringify({bad:bad,n:n});})()'));
+      labels = clipped.n; clipped = clipped.bad;
+    } catch (e) { clipped = ["label sweep failed: " + (e && e.message || e)]; }
+    clipped.forEach(function (c) { fails.push("LABEL outside viewBox — " + c); });
+
     return {
-      animations: names.length, stopsChecked: checked,
+      animations: names.length, stopsChecked: checked, labelsChecked: labels,
       order: order, rest: rests,
       failed: fails.length, fails: fails,
-      VERDICT: fails.length ? "FAIL" : "PASS  no shrink · order ok · rest ok"
+      VERDICT: fails.length ? "FAIL" : "PASS  no shrink · order ok · rest ok · labels fit"
     };
   }
 
@@ -303,7 +327,7 @@
 
       try {
         var fg = figs(win);
-        out.figs = fg.animations + " anims, " + fg.stopsChecked + " stops · " + fg.VERDICT;
+        out.figs = fg.animations + " anims, " + fg.stopsChecked + " stops, " + fg.labelsChecked + " labels · " + fg.VERDICT;
         if (fg.failed) out.figFailures = fg.fails;
       } catch (e) { out.figs = "AUDIT FAILED: " + (e && e.message || e); }
 

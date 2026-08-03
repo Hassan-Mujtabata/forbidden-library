@@ -34,6 +34,8 @@ FIG_COMPONENTS = {
     "distil",
     # #162: the habit circuit plus where your attention actually is while it runs
     "reflex",
+    # #162: coherence as literal closure — a ring of few pieces closes as neatly as many
+    "closure",
 }
 
 

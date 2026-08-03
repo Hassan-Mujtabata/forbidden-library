@@ -728,6 +728,17 @@ header .brand span{color:var(--gold)}
 .feltfig .fg-late{animation:fglate 5s ease-out 1 forwards}
 @keyframes fghere{0%{stroke-opacity:.25}50%{stroke-opacity:.9}100%{stroke-opacity:.25}}
 .feltfig .fg-here{animation:fghere 3s ease-in-out infinite}
+/* #162 closure. Pieces land in sequence, and only once the ring has joined up does it glow —
+   the confidence follows the closing, which is the claim: it is the fitting-together that
+   produces the feeling, not the amount. Three pieces close as neatly as six, deliberately. */
+@keyframes fgarc{0%{opacity:0}22%{opacity:.95}100%{opacity:.95}}
+.feltfig .fg-arc{animation:fgarc 5s ease-out 1 forwards;opacity:0}
+@keyframes fgclose{0%,46%{stroke-opacity:.5}72%,100%{stroke-opacity:1}}
+.feltfig .fg-close{animation:fgclose 5s ease-out 1 forwards}
+@keyframes fgdim{0%,46%{stroke-opacity:1}80%,100%{stroke-opacity:.4}}
+.feltfig .fg-dim{animation:fgdim 5s ease-out 1 forwards}
+@keyframes fgodd{0%,52%{opacity:0}66%{opacity:.95}100%{opacity:.95}}
+.feltfig .fg-odd{animation:fgodd 5s ease-out 1 forwards}
 /* Off-screen figures stop dead: an animation under the fold is heat for nothing. */
 .feltfig.ff-paused svg *{animation-play-state:paused!important}
 @media (prefers-reduced-motion:reduce){
@@ -772,6 +783,11 @@ header .brand span{color:var(--gold)}
   .feltfig .fg-circ,.feltfig .fg-away{transform:none}
   .feltfig .fg-late{opacity:1}
   .feltfig .fg-here{stroke-opacity:.9}
+  /* #162: frozen, the ring shows its end state — assembled, and broken where it should be */
+  .feltfig .fg-arc{opacity:.95}
+  .feltfig .fg-close{stroke-opacity:1}
+  .feltfig .fg-dim{stroke-opacity:.4}
+  .feltfig .fg-odd{opacity:.95}
 }
 
 /* ---------- top bar + nav ---------- */
@@ -4206,8 +4222,12 @@ $("btn-ach").onclick=()=>{const g=$("achgrid");g.innerHTML="";
   $("achs").classList.add("on")};
 
 /* ---------- patch notes ---------- */
-const APP_VER="3.78";
+const APP_VER="3.79";
 const PATCHES=[
+ {v:"3.79",n:"It Closes Because It Is Small",d:"3 Aug 2026",items:[
+  ["new","A FIGURE FOR WHY A ONE-SIDED STORY FEELS SO COMPLETE. Coherence drawn as a ring that joins up: hear one side and the pieces fit, and that closing IS what confidence feels like. The catch is that three pieces close a ring exactly as neatly as six — fewer pieces means fewer things that can fail to meet, which is why thin evidence often feels the most certain."],
+  ["new","The middle step is the one nobody gets told. You go and find more evidence, it all agrees, the ring closes again, and you are now more confident and no more right. That was tested directly: listing further reasons FOR your answer improved calibration not at all. Only reasons you might be WRONG did — and in the original one-sided-evidence study, being asked to weigh the other side’s strength cut the bias by more than half."],
+  ["fix","Figures are now checked for labels that spill outside the drawing. One had been running 20 percent wider than the frame and getting clipped on screen — the old overflow check could not see it, because a caption hanging off an SVG does not change the size of the box it hangs off."]]},
  {v:"3.78",n:"You Arrive After It Ends",d:"3 Aug 2026",items:[
   ["fix","THE HABIT LOOP DIAGRAM WAS TRUE AND USELESS. Four labelled dots on a circle — correct names, correct order, and it would have worked unchanged on literally any four-step cycle. It drew the names of the parts and nothing you couldn’t get from reading the sentence."],
   ["new","REBUILT AROUND THE PART THAT ACTUALLY HELPS: where you are while it runs. The circuit closes in a split second with your attention somewhere else entirely — that is measured, not a phrase; in diary studies people doing something habitual were usually thinking about something unrelated, and between a third and a half of daily behaviour runs this way. Then you can count the circuit going round twice before “you” turn up to decide, which is why willpower at the moment of action keeps losing. The one place you are ahead of it is the cue."],
@@ -5847,6 +5867,45 @@ const FIGC={
     return {svg:ring+pts+lbl+
       `<circle class="fg-here" cx="${CX}" cy="${CY-R}" r="12" stroke="${A}" fill="none" stroke-width="1.8"/>`+
       `<text class="fg-lbl" x="196" y="16" text-anchor="end">${esc(p.here||"you, in time")}</text>`};
+  },
+
+  /* #162, from research (tools/figs_research/k1.md). Coherence drawn literally as CLOSURE: the
+     story "holds together" when the ring joins up. The whole of WYSIATI is that a ring of three
+     pieces closes exactly as neatly as a ring of six — fewer pieces means fewer things that can
+     fail to meet, so confidence tracks tidiness rather than evidence.
+     Brenner, Koehler & Tversky (JBDM 1996) ran this: one-sided subjects were "more confident but
+     generally less accurate", the one-sided arguments "did not include any new facts", and
+     subjects were told repeatedly that the jury saw both sides. Koriat, Lichtenstein & Fischhoff
+     (1980), independently, found overconfidence fell ONLY when people generated reasons their own
+     answer might be wrong — more supporting reasons did nothing. Hence stage two exists. */
+  closure(p,A){
+    const st=p.stage||"one", CX=100, CY=56, R=33;
+    const pt=(deg)=>{const a=(deg-90)*Math.PI/180;
+      return [(CX+R*Math.cos(a)).toFixed(1),(CY+R*Math.sin(a)).toFixed(1)];};
+    const arc=(a1,a2,cls,extra)=>{const [x1,y1]=pt(a1),[x2,y2]=pt(a2);
+      return `<path class="${cls||""}" d="M${x1} ${y1} A${R} ${R} 0 ${a2-a1>180?1:0} 1 ${x2} ${y2}" `+
+        `stroke="${A}" fill="none" stroke-width="5" stroke-linecap="round" ${extra||""}/>`;};
+    // pieces land one after another, so you watch the ring being assembled rather than appear
+    const seg=(n,from)=>{const gap=7,step=360/n,out=[];
+      for(let i=(from||0);i<n;i++) out.push(arc(i*step+gap/2,(i+1)*step-gap/2,"fg-arc",
+        `style="animation-delay:${(i*0.16).toFixed(2)}s"`));
+      return out.join("");};
+    const lbl=t=>`<text class="fg-lbl" x="${CX}" y="110" text-anchor="middle">${esc(t)}</text>`;
+
+    if(st==="one")              // three pieces, and it closes perfectly
+      return {svg:`<g class="fg-close">${seg(3)}</g>`+lbl(p.note||"one side · it holds together")};
+
+    if(st==="more")             // six pieces from the same side — it closes exactly as well
+      return {svg:`<g class="fg-close">${seg(6)}</g>`+lbl(p.note||"more of the same side")};
+
+    // The other side's piece cannot join up, and the gap it leaves is the ACCURATE state. It is
+    // drawn dashed and sitting off the ring: same facts, different side, no place in the story.
+    const gap=7, step=60;
+    const [ox,oy]=pt(gap/2), [ex,ey]=pt(step-gap/2);
+    return {svg:`<g class="fg-dim">${seg(6,1)}</g>`+
+      `<g class="fg-odd"><path d="M${ox} ${(+oy-13).toFixed(1)} A${R} ${R} 0 0 1 ${ex} ${(+ey-13).toFixed(1)}" `+
+      `stroke="${A}" fill="none" stroke-width="5" stroke-linecap="round" stroke-dasharray="6 5"/></g>`+
+      lbl(p.note||"the other side · it won't fit")};
   },
 
   pacer(p,A){
