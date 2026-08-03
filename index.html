@@ -783,6 +783,10 @@ header .brand span{color:var(--gold)}
 .feltfig .fg-tick{animation:fgtick 3.6s ease-out 1 forwards}
 @keyframes fgfill{0%{opacity:0}45%{opacity:1}100%{opacity:1}}
 .feltfig .fg-fill{animation:fgfill 3.6s ease-out 1 forwards}
+@keyframes fgenc{0%{opacity:0}40%{opacity:1}100%{opacity:1}}
+.feltfig .fg-enc{animation:fgenc 3.6s ease-out 1 forwards}
+@keyframes fgtrend{0%{stroke-dashoffset:100}75%{stroke-dashoffset:0}100%{stroke-dashoffset:0}}
+.feltfig .fg-trend{stroke-dasharray:100;animation:fgtrend 3.6s ease-out 1 forwards}
 /* Off-screen figures stop dead: an animation under the fold is heat for nothing. */
 .feltfig.ff-paused svg *{animation-play-state:paused!important}
 @media (prefers-reduced-motion:reduce){
@@ -843,6 +847,8 @@ header .brand span{color:var(--gold)}
   .feltfig .fg-beam{opacity:1}
   .feltfig .fg-mark,.feltfig .fg-crowd{opacity:1}
   .feltfig .fg-tick,.feltfig .fg-fill{opacity:1}
+  .feltfig .fg-enc{opacity:1}
+  .feltfig .fg-trend{stroke-dasharray:none;stroke-dashoffset:0}
 }
 
 /* ---------- top bar + nav ---------- */
@@ -4277,8 +4283,12 @@ $("btn-ach").onclick=()=>{const g=$("achgrid");g.innerHTML="";
   $("achs").classList.add("on")};
 
 /* ---------- patch notes ---------- */
-const APP_VER="3.88";
+const APP_VER="3.89";
 const PATCHES=[
+ {v:"3.89",n:"One Is Noise, Nine Is A Signal",d:"4 Aug 2026",items:[
+  ["new","A DIAGRAM FOR THE DEFENCE TRACK, which had none. One conversation where you came away a bit off — was that manipulation, a bad day, or you? Staring harder at that one moment will not tell you. Across 206 studies and 24,483 people, reading deception in real time came out at 54%, a coin flip, and on actual lies 47% — slightly WORSE than a coin flip."],
+  ["new","So the figure stops trying to read the moment and shows the last nine instead. Two of them were fine, because that is what noise actually looks like — but the drift is downward, and you keep leaving these smaller, guiltier or more confused than you arrived. That direction is the evidence, and unlike any single exchange it cannot be argued away."],
+  ["fix","Built on the lesson’s own defence rather than on its tactic list. A figure captioned with six named manipulation tactics would have been a labelled list — true, and teaching nothing you could not get from the sentence."]]},
  {v:"3.88",n:"Which Box Arrived Ticked",d:"4 Aug 2026",items:[
   ["new","A FOURTH SHADOW-WING DIAGRAM, on controlling the options. A form with two choices — nothing hidden, nobody pressuring you, a free choice by any normal standard. 42% agreed. Then the same form, same question, same stakes, same kind of people, with one difference: which row was already ticked when it reached you. 82%. Double, from moving a tick nobody asked you about."],
   ["fix","THE OBVIOUS VERSION OF THIS FIGURE WAS THROWN AWAY BEFORE IT WAS DRAWN. “Control the options” points straight at the decoy effect and that famous magazine-subscription story, and the numbers are reported accurately everywhere — but the effect does not hold up. One review ran 91 replication attempts across 23 product categories and only 11 worked. It survives in abstract lab set-ups and mostly vanishes with real products and real stakes. Built on defaults instead, which is registry data plus a controlled experiment."],
@@ -6219,6 +6229,40 @@ const FIGC={
         `<text class="fg-lbl" x="${BX+BW/2}" y="${BY+8}" text-anchor="middle">${esc(p.q2||"already ticked?")}</text>`};
     return {svg:form+mark+bar+
       `<text class="fg-lbl" x="${FX+FW/2}" y="100" text-anchor="middle">${esc(p.note||"")}</text>`};
+  },
+
+  /* #162, from research (tools/figs_research/f1.md). The lesson's defence is "trust the pattern
+     over the moment", and there is a large meta-analysis explaining why the moment cannot be
+     trusted: Bond & DePaulo (2006), 206 studies, 24,483 observers — 54% accuracy overall, 61% on
+     truths and 47% on LIES. Reading a single encounter is a coin flip, and on actual deception it
+     is slightly worse than one.
+     So stage one deliberately shows a single mildly-negative encounter that any honest viewer
+     would call unreadable, and the signal only appears once the run is visible. The noise is real
+     noise: two of the nine encounters are positive, because a pattern you can only see after
+     cherry-picking is not a pattern. */
+  pattern(p,A){
+    const st=p.stage||"one";
+    const V=[-6,4,-13,-2,-17,3,-21,-9,-26], MID=52, X0=26, DX=19;
+    const show=st==="one"?[3]:V.map((v,i)=>i);
+    const base=`<line x1="${X0-8}" y1="${MID}" x2="${X0+8*DX+8}" y2="${MID}" stroke="${A}" `+
+      `stroke-opacity=".3" stroke-dasharray="3 4"/>`+
+      `<text class="fg-lbl" x="${X0-10}" y="${MID-6}" text-anchor="start">${esc(p.mid||"neutral")}</text>`;
+    let marks="";
+    show.forEach(i=>{
+      const x=X0+i*DX, y=MID-V[i]*1.15;
+      marks+=`<line class="fg-enc" x1="${x}" y1="${MID}" x2="${x}" y2="${y.toFixed(1)}" `+
+        `stroke="${A}" stroke-opacity=".5" stroke-width="1.6"/>`+
+        `<circle class="fg-enc" cx="${x}" cy="${y.toFixed(1)}" r="4" fill="${A}" `+
+        `fill-opacity="${st==="one"?".9":".65"}" stroke="none"/>`;
+    });
+    // the trend only earns a line once the whole run is on screen
+    const trend=st==="trend"
+      ? `<path class="fg-trend" d="M${X0} ${(MID-V[0]*1.15).toFixed(1)} L${X0+8*DX} ${(MID-V[8]*1.15).toFixed(1)}" `+
+        `stroke="${A}" stroke-width="2.6" fill="none" pathLength="100"/>` : "";
+    const note=st==="one"?(p.n1||"one conversation")
+      :st==="run"?(p.n2||"nine of them"):(p.n3||"that's the signal");
+    return {svg:base+marks+trend+
+      `<text class="fg-lbl" x="100" y="108" text-anchor="middle">${esc(note)}</text>`};
   },
 
   pacer(p,A){

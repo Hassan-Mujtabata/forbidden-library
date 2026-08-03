@@ -48,6 +48,8 @@ FIG_COMPONENTS = {
     "nearer",
     # #162: the same form, the same stakes, and a different box already ticked
     "preset",
+    # #162: one encounter is unreadable; the run is the signal
+    "pattern",
 }
 
 
