@@ -715,6 +715,19 @@ header .brand span{color:var(--gold)}
 @keyframes fgbuzz{0%,100%{transform:translate(0,0)}25%{transform:translate(.9px,-.7px)}
   50%{transform:translate(-.8px,.6px)}75%{transform:translate(.6px,.8px)}}
 .feltfig .fg-buzz{animation:fgbuzz .18s linear infinite;transform-box:fill-box;transform-origin:center}
+/* #162 reflex. 1.4s per circuit is the claim, not a setting: the loop "is completed in a split
+   second". The deliberating marker appears at 55% of a 5s stage = 2.75s, by which point the
+   circuit has closed 1.96 times in front of you — measured, not estimated; the first draft of
+   this comment guessed "three and a half" and was wrong. Two complete circuits before "you"
+   arrive is the whole argument for why deciding harder in the moment cannot work. */
+@keyframes fgcirc{to{transform:rotate(360deg)}}
+.feltfig .fg-circ{animation:fgcirc 1.4s linear infinite}
+@keyframes fgaway{0%,100%{transform:translate(0,0)}33%{transform:translate(-9px,7px)}66%{transform:translate(6px,5px)}}
+.feltfig .fg-away{animation:fgaway 6s ease-in-out infinite;transform-box:view-box}
+@keyframes fglate{0%,55%{opacity:0}64%{opacity:1}100%{opacity:1}}
+.feltfig .fg-late{animation:fglate 5s ease-out 1 forwards}
+@keyframes fghere{0%{stroke-opacity:.25}50%{stroke-opacity:.9}100%{stroke-opacity:.25}}
+.feltfig .fg-here{animation:fghere 3s ease-in-out infinite}
 /* Off-screen figures stop dead: an animation under the fold is heat for nothing. */
 .feltfig.ff-paused svg *{animation-play-state:paused!important}
 @media (prefers-reduced-motion:reduce){
@@ -755,6 +768,10 @@ header .brand span{color:var(--gold)}
   .feltfig .fg-shed{opacity:0}
   .feltfig .fg-gain{stroke-opacity:.95;fill-opacity:.9}
   .feltfig .fg-wob,.feltfig .fg-damp,.feltfig .fg-buzz{transform:none}
+  /* #162: frozen, the habit loop still says "it already ran, you arrived after" */
+  .feltfig .fg-circ,.feltfig .fg-away{transform:none}
+  .feltfig .fg-late{opacity:1}
+  .feltfig .fg-here{stroke-opacity:.9}
 }
 
 /* ---------- top bar + nav ---------- */
@@ -4189,8 +4206,12 @@ $("btn-ach").onclick=()=>{const g=$("achgrid");g.innerHTML="";
   $("achs").classList.add("on")};
 
 /* ---------- patch notes ---------- */
-const APP_VER="3.77";
+const APP_VER="3.78";
 const PATCHES=[
+ {v:"3.78",n:"You Arrive After It Ends",d:"3 Aug 2026",items:[
+  ["fix","THE HABIT LOOP DIAGRAM WAS TRUE AND USELESS. Four labelled dots on a circle — correct names, correct order, and it would have worked unchanged on literally any four-step cycle. It drew the names of the parts and nothing you couldn’t get from reading the sentence."],
+  ["new","REBUILT AROUND THE PART THAT ACTUALLY HELPS: where you are while it runs. The circuit closes in a split second with your attention somewhere else entirely — that is measured, not a phrase; in diary studies people doing something habitual were usually thinking about something unrelated, and between a third and a half of daily behaviour runs this way. Then you can count the circuit going round twice before “you” turn up to decide, which is why willpower at the moment of action keeps losing. The one place you are ahead of it is the cue."],
+  ["fix","Found while rebuilding: the old loop animated with a mechanism that browsers do NOT stop for “reduce motion” and that the off-screen pause could not touch either. Anyone who asks their device for less motion was getting a spinning diagram anyway. The new one obeys both."]]},
  {v:"3.77",n:"Less, And Therefore More",d:"3 Aug 2026",items:[
   ["new","THE DEEPER JHĀNAS, DRAWN AS SUBTRACTION. Four rings, and at each level the outermost one is released rather than anything being added. The first still has a fine wobble in it — an involuntary movement back into the pleasure and a grasping at it. Let that go and the movement stops outright. Then the rapture itself, the buzz you were so pleased to find, reads as coarse and goes too. What is finally left is a single steady core. Happiness went up at every step and every step was a subtraction."],
   ["fix","Drawn as concentric rings rather than a ladder of rungs on purpose. A ladder would tell the accumulation story — higher means more — which is exactly the mistake this lesson exists to correct. Chasing the bigger feeling is what drops you back a level."],
@@ -5785,6 +5806,47 @@ const FIGC={
     return {svg:wrap("",       // even happiness goes; equanimity alone, and it is the brightest
       ring(22,"fg-shed",".55")+core("fg-gain"))+
       gone(p.top||"pleasure and pain",true)+held(p.base||"equanimity")};
+  },
+
+  /* #162, from research (tools/figs_research/j3.md). `loop` can draw the four-point circuit, but
+     the circuit is not the lesson — every four-step cycle looks like that, which is exactly the
+     "would work unchanged on another lesson" reject. What research says matters is WHERE YOU ARE
+     while it runs. Clear: the loop "is completed in a split second … you fall into old patterns
+     before you realize what's happening." Wood, Quinn & Kashy (JPSP 2002) measured it: 35% and
+     43% of logged daily behaviours were habitual, and during them people were "likely to think
+     about issues unrelated to their behavior" — attention demonstrably elsewhere.
+     Motion is a CSS rotation, not <animateMotion> like `loop` uses: SMIL ignores
+     `animation:none`, so `loop` keeps spinning under prefers-reduced-motion and cannot be paused
+     off-screen either. Rotation about the circle's own centre traces the same path and obeys both. */
+  reflex(p,A){
+    const st=p.stage||"fast", CX=78, CY=56, R=28;
+    const labels=(p.labels||["cue","craving","response","reward"]).slice(0,4);
+    const at=[[CX,CY-R],[CX+R,CY],[CX,CY+R],[CX-R,CY]];
+    const ring=`<circle cx="${CX}" cy="${CY}" r="${R}" stroke="${A}" stroke-opacity=".3" stroke-dasharray="5 7" fill="none"/>`;
+    const pts=at.map(([x,y],i)=>`<circle cx="${x}" cy="${y}" r="4.5" fill="${A}" stroke="none" `+
+      `fill-opacity="${st==="upstream"&&i===0?"1":".75"}"/>`).join("");
+    const lbl=`<text class="fg-lbl" x="${CX}" y="${CY-R-10}" text-anchor="middle">${esc(labels[0])}</text>`+
+      `<text class="fg-lbl" x="${CX+R+6}" y="${CY+3}" text-anchor="start">${esc(labels[1])}</text>`+
+      `<text class="fg-lbl" x="${CX}" y="${CY+R+16}" text-anchor="middle">${esc(labels[2])}</text>`+
+      `<text class="fg-lbl" x="${CX-R-6}" y="${CY+3}" text-anchor="end">${esc(labels[3])}</text>`;
+    // the traveller is a dot held at the top and spun about the circle's centre
+    const runner=cls=>`<g class="${cls}" style="transform-origin:${CX}px ${CY}px;transform-box:view-box">`+
+      `<circle cx="${CX}" cy="${CY-R}" r="5" fill="${A}" stroke="none"/></g>`;
+
+    if(st==="fast")             // it closes in a split second, and you are not there for it
+      return {svg:ring+pts+lbl+runner("fg-circ")+
+        `<circle class="fg-away" cx="168" cy="26" r="5.5" fill="${A}" fill-opacity=".5" stroke="none"/>`+
+        `<text class="fg-lbl" x="196" y="16" text-anchor="end">${esc(p.away||"your attention")}</text>`};
+
+    if(st==="late")             // deliberation shows up after several complete circuits
+      return {svg:ring+pts+lbl+runner("fg-circ")+
+        `<g class="fg-late"><circle cx="168" cy="86" r="5.5" fill="${A}" stroke="none"/>`+
+        `<text class="fg-lbl" x="196" y="104" text-anchor="end">${esc(p.late||"you, deciding")}</text></g>`};
+
+    // the one place you are ahead of it: the cue, before anything has started
+    return {svg:ring+pts+lbl+
+      `<circle class="fg-here" cx="${CX}" cy="${CY-R}" r="12" stroke="${A}" fill="none" stroke-width="1.8"/>`+
+      `<text class="fg-lbl" x="196" y="16" text-anchor="end">${esc(p.here||"you, in time")}</text>`};
   },
 
   pacer(p,A){

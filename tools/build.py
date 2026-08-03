@@ -32,6 +32,8 @@ FIG_COMPONENTS = {
     "suffuse",
     # #162: concentric factors, one shed per level, the remainder finer
     "distil",
+    # #162: the habit circuit plus where your attention actually is while it runs
+    "reflex",
 }
 
 
