@@ -791,6 +791,10 @@ header .brand span{color:var(--gold)}
 .feltfig .fg-sort{animation:fgsort 3.6s ease-out 1 forwards}
 @keyframes fgyou{0%{fill-opacity:.4}50%{fill-opacity:.95}100%{fill-opacity:.95}}
 .feltfig .fg-you{animation:fgyou 3.6s ease-out 1 forwards}
+@keyframes fgbase{0%{opacity:0}35%{opacity:1}100%{opacity:1}}
+.feltfig .fg-base{animation:fgbase 3.6s ease-out 1 forwards}
+@keyframes fgheld{0%{opacity:0}55%{opacity:1}100%{opacity:1}}
+.feltfig .fg-held{animation:fgheld 3.6s ease-out 1 forwards}
 /* Off-screen figures stop dead: an animation under the fold is heat for nothing. */
 .feltfig.ff-paused svg *{animation-play-state:paused!important}
 @media (prefers-reduced-motion:reduce){
@@ -855,6 +859,7 @@ header .brand span{color:var(--gold)}
   .feltfig .fg-trend{stroke-dasharray:none;stroke-dashoffset:0}
   .feltfig .fg-sort{fill-opacity:.4}
   .feltfig .fg-you{fill-opacity:.95}
+  .feltfig .fg-base,.feltfig .fg-held{opacity:1}
 }
 
 /* ---------- top bar + nav ---------- */
@@ -4289,8 +4294,12 @@ $("btn-ach").onclick=()=>{const g=$("achgrid");g.innerHTML="";
   $("achs").classList.add("on")};
 
 /* ---------- patch notes ---------- */
-const APP_VER="3.90";
+const APP_VER="3.91";
 const PATCHES=[
+ {v:"3.91",n:"The Line Moves, Not The Things",d:"4 Aug 2026",items:[
+  ["new","A FIRST DIAGRAM FOR THE FRANKL TRACK. Three ordinary things — a toothbrush, working indoors, an hour nobody bothers you — sitting below the line of what counts as good, which is why you have never once been glad about them. Take almost everything away and the same three become good fortune. Frankl watched men count exactly these."],
+  ["new","Then the actual point: look at what changed. The three things are precisely where they were. Only the line moved — and that line is doing this in your life right now, in both directions. Which is also why comparing your suffering to somebody worse off has never helped. You are not standing on their scale."],
+  ["fix","Frankl’s own image — that suffering behaves like a gas, filling a chamber completely and evenly no matter how big — is quoted in the note rather than drawn. It is the same theme but a different claim, and a chamber filling and a line sliding are different pictures with different morals. A figure that tries to say two things says neither."]]},
  {v:"3.90",n:"Not A Mystery, A Distribution",d:"4 Aug 2026",items:[
   ["new","A FIRST DIAGRAM FOR THE RELATIONSHIPS TRACK. The worrying about whether they are still interested, or the wanting out of something that is going perfectly fine — it arrives feeling like a fact about you specifically. That framing is the actual problem: while it is a personal defect there is nothing to study and nothing to predict."],
   ["new","Then it sorts. Take enough people and the same few shapes come back in proportions steady enough to count on — roughly 56% secure, 25% avoidant, 19% anxious. Close to the proportions found in one-year-olds decades earlier by a completely different method, which is the reason anyone believes the taxonomy at all. Nobody is added or removed between the two steps; the same twenty people simply resolve."],
@@ -6309,6 +6318,32 @@ const FIGC={
          `<text class="fg-lbl" x="${g.cx}" y="114" text-anchor="middle">${g.n===11?"55%":g.n===5?"25%":"20%"}</text>`;
     });
     return {svg:s};
+  },
+
+  /* #162, from research (tools/figs_research/l1.md). l1's claim is the SLIDING BASELINE — "what
+     you perceive as good or bad is always in comparison to your current state" — so the three
+     items sit at FIXED positions all the way through and only the line moves. That invariance is
+     the whole teaching, and it is why the items must never be re-laid-out between stages.
+     Frankl's own gas simile ("it will fill the chamber completely and evenly, no matter how big
+     the chamber") belongs to the same idea but is a different image; it is quoted in a `feel`
+     line rather than drawn, because mixing two metaphors in one frame would blur both. */
+  baseline(p,A){
+    const st=p.stage||"before";
+    const IX=62, LY=[34,54,74];
+    const line=st==="before"?26:st==="after"?84:84;
+    const items=LY.map((y,i)=>
+      `<circle cx="${IX}" cy="${y}" r="5" fill="${A}" fill-opacity="${y<line?".85":".35"}" stroke="none"/>`+
+      `<text class="fg-lbl" x="${IX+14}" y="${y+4}" text-anchor="start">`+
+      `${esc([p.a||"a toothbrush",p.b||"indoor work",p.c||"an hour alone"][i])}</text>`).join("");
+    const bar=`<line class="fg-base" x1="24" y1="${line}" x2="176" y2="${line}" stroke="${A}" `+
+      `stroke-width="2.4" stroke-dasharray="6 4"/>`+
+      `<text class="fg-lbl fg-base" x="24" y="${line-7}" text-anchor="start">${esc(p.lab||"counts as good")}</text>`;
+    // stage three keeps the moved line and marks that the items themselves never shifted
+    const held=st==="held"
+      ? `<line class="fg-held" x1="${IX}" y1="28" x2="${IX}" y2="80" stroke="${A}" `+
+        `stroke-opacity=".35" stroke-dasharray="2 4"/>`+
+        `<text class="fg-lbl fg-held" x="100" y="106" text-anchor="middle">${esc(p.n||"nothing here moved")}</text>` : "";
+    return {svg:bar+items+held};
   },
 
   pacer(p,A){

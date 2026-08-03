@@ -52,6 +52,8 @@ FIG_COMPONENTS = {
     "pattern",
     # #162: a population resolving into measured groups instead of one lonely case
     "sorts",
+    # #162: fixed items, a moving line for what counts as good
+    "baseline",
 }
 
 
