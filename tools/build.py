@@ -36,6 +36,8 @@ FIG_COMPONENTS = {
     "reflex",
     # #162: coherence as literal closure — a ring of few pieces closes as neatly as many
     "closure",
+    # #162: two attempts, talent plus luck, and the same pattern with the clock reversed
+    "regress",
 }
 
 
