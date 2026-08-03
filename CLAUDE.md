@@ -496,3 +496,11 @@ viewBox does not change the `<svg>` element's size.
 **When a number is corrected, grep for every place it appears.** j3's "1.96 circuits" was fixed in
 the code and the sheet and missed in the alt text, so screen-reader users had a different claim
 for a release.
+
+**The unused figure components are suspects, not a menu.** 24 of them are wired to nothing, and
+every one checked against the source it was named for encoded the wrong claim: `drift` drew
+mind-wandering as a smooth slide with a journey back (sources say hops, and a return with no
+duration); `pacer` taught paced breathing, which all three meditation books forbid; `curve` is
+labelled "the plateau of latent potential" in its own comment and draws a smooth catch-up when the
+lesson's claim is a threshold. Three for three. They were built from intuition about what a lesson
+probably needs, before its sources were read. Check one against the actual text before wiring it.
