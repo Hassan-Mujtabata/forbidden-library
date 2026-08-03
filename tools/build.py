@@ -58,6 +58,8 @@ FIG_COMPONENTS = {
     "frames",
     # #162: arrivals met or missed, and commentary that is always about the one behind
     "greet",
+    # #162: what a conversational stance buys and what it costs
+    "trade",
 }
 
 

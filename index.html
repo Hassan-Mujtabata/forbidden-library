@@ -803,6 +803,12 @@ header .brand span{color:var(--gold)}
 .feltfig .fg-met{animation:fgmet 3.4s ease-out 1 forwards}
 @keyframes fgtalk{0%{opacity:0}50%{opacity:1}100%{opacity:1}}
 .feltfig .fg-talk{animation:fgtalk 3.4s ease-out 1 forwards}
+@keyframes fgcrit{0%{opacity:0}40%{opacity:1}100%{opacity:1}}
+.feltfig .fg-crit{animation:fgcrit 3.4s ease-out 1 forwards}
+@keyframes fgwarm{0%{opacity:0}55%{opacity:1}100%{opacity:1}}
+.feltfig .fg-warm{animation:fgwarm 3.4s ease-out 1 forwards}
+@keyframes fgpull{0%{opacity:0}70%{opacity:1}100%{opacity:1}}
+.feltfig .fg-pull{animation:fgpull 3.4s ease-out 1 forwards}
 /* Off-screen figures stop dead: an animation under the fold is heat for nothing. */
 .feltfig.ff-paused svg *{animation-play-state:paused!important}
 @media (prefers-reduced-motion:reduce){
@@ -871,6 +877,7 @@ header .brand span{color:var(--gold)}
   .feltfig .fg-story,.feltfig .fg-frame{opacity:1}
   .feltfig .fg-met{fill-opacity:.75}
   .feltfig .fg-talk{opacity:1}
+  .feltfig .fg-crit,.feltfig .fg-warm,.feltfig .fg-pull{opacity:1}
 }
 
 /* ---------- top bar + nav ---------- */
@@ -4305,8 +4312,12 @@ $("btn-ach").onclick=()=>{const g=$("achgrid");g.innerHTML="";
   $("achs").classList.add("on")};
 
 /* ---------- patch notes ---------- */
-const APP_VER="3.93";
+const APP_VER="3.94";
 const PATCHES=[
+ {v:"3.94",n:"What Disagreeing Buys",d:"4 Aug 2026",items:[
+  ["new","EVERY TRACK IN THE VAULT NOW HAS A DIAGRAM. The last one goes to conversation, and it is not the balance-in-all-things picture you would expect. Disagreeing makes you sound sharper — that was tested, and critics were rated more intelligent, more competent and more expert than people who praised. Which is the real reason disagreement is the default setting: it pays immediately, in the currency most people are quietly anxious about."],
+  ["new","The sting is in the control condition. The POSITIVE reviews were independently judged the better writing — stronger and more forceful — and still read as less clever, simply because they were appreciative. The effect is not tracking quality. It is tracking stance."],
+  ["fix","Deliberately not drawn as a slider with a sweet spot in the middle. That picture would fit any lesson about moderation and teach nothing in particular. The point here is that the default is NOT neutral — it is pulled one way, for a reason that has nothing to do with being right."]]},
  {v:"3.93",n:"Greeting, Or Discussing",d:"4 Aug 2026",items:[
   ["new","A FIRST DIAGRAM FOR THE MINDFULNESS-IN-PRACTICE TRACK, built on the book’s own image: your mind as a host at a party, greeting each guest as they arrive. Meet each one and let it go and you are actually there for all of them. Stop to remark on one — “that was good”, a perfectly fair remark — and the next arrivals go past unmet. Not because commenting is forbidden, but because attention is finite."],
   ["new","Then the part worth keeping: look at WHERE the comment sits. It points backwards, at the guest who has already left. Commentary can only ever run a beat late — which means the remark that feels like paying close attention is made entirely out of what has already gone."]]},
@@ -6425,6 +6436,35 @@ const FIGC={
     return {svg:back+host+s+arrow+
       `<text class="fg-lbl" x="128" y="24" text-anchor="middle">`+
       `${esc(st==="stuck"?(p.n||"these arrive unmet"):(p.n||"always about the last one"))}</text>`};
+  },
+
+  /* #162, from research (tools/figs_research/g1.md). Amabile, "Brilliant but Cruel" (JESP 1983):
+     negative reviewers were rated more intelligent, competent and expert than positive ones —
+     "even when the content of the positive review was independently judged as being of higher
+     quality and greater forcefulness" — and significantly LESS likeable. That is why the lesson
+     says people assert ego through disagreement: it buys perceived intelligence.
+     NO NUMBERS ON THE AXES. The paper's means are not in hand, so the axes are unscaled and the
+     two points carry direction only. Putting tick values here would be inventing data. */
+  trade(p,A){
+    const st=p.stage||"cruel";
+    const X0=44, X1=172, YB=88, YT=32;
+    const ax=`<line x1="${X0}" y1="${YB}" x2="${X1}" y2="${YB}" stroke="${A}" stroke-opacity=".35"/>`+
+      `<line x1="${X0}" y1="${YB}" x2="${X0}" y2="${YT}" stroke="${A}" stroke-opacity=".35"/>`+
+      `<text class="fg-lbl" x="${X1}" y="${YB+14}" text-anchor="end">${esc(p.x||"liked")}</text>`+
+      `<text class="fg-lbl" x="${X0-2}" y="${YT-6}" text-anchor="start">${esc(p.y||"seen as smart")}</text>`;
+    const pt=(x,y,cls,lab,anch)=>`<circle class="${cls}" cx="${x}" cy="${y}" r="6" fill="${A}" `+
+      `fill-opacity=".85" stroke="none"/>`+
+      `<text class="fg-lbl ${cls}" x="${anch==="end"?x-10:x+10}" y="${y+4}" text-anchor="${anch}">${esc(lab)}</text>`;
+    let s=ax+pt(70,44,"fg-crit",p.a||"disagreeing","start");
+    if(st==="cruel")
+      return {svg:s+`<text class="fg-lbl" x="112" y="106" text-anchor="middle">${esc(p.n||"reads as sharper")}</text>`};
+    s+=pt(150,72,"fg-warm",p.b||"agreeing","end");
+    if(st==="both")
+      return {svg:s+`<text class="fg-lbl" x="112" y="106" text-anchor="middle">${esc(p.n||"and this one was better")}</text>`};
+    // the default is a trade nobody decided to make
+    return {svg:s+`<path class="fg-pull" d="M144 68 L78 48" stroke="${A}" stroke-opacity=".5" `+
+      `stroke-width="2" stroke-dasharray="4 4"/>`+
+      `<text class="fg-lbl" x="112" y="106" text-anchor="middle">${esc(p.n||"the pull you didn't choose")}</text>`};
   },
 
   pacer(p,A){
