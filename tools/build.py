@@ -40,6 +40,8 @@ FIG_COMPONENTS = {
     "regress",
     # #162: an experience profile over time — what was lived vs what memory keeps
     "episode",
+    # #162: a trigger feature entering a gate and running a whole prepared response
+    "tape",
 }
 
 

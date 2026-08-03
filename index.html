@@ -761,6 +761,16 @@ header .brand span{color:var(--gold)}
 .feltfig .fg-keep{animation:fgkeep 5s ease-out 1 forwards}
 @keyframes fgextra{0%,25%{opacity:0}60%{opacity:1}100%{opacity:1}}
 .feltfig .fg-extra{animation:fgextra 5s ease-out 1 forwards}
+/* #162 tape. The token travels, reaches the gate, and only THEN does the response run — the
+   trigger has to arrive before the tape plays, same cause-before-effect rule as everywhere else.
+   In the third stage the token reaches the gate and stops: nothing runs. */
+@keyframes fgtok{0%{transform:translate(0,0)}55%,100%{transform:translate(61px,0)}}
+.feltfig .fg-tok{animation:fgtok 4.5s cubic-bezier(.4,0,.3,1) 1 forwards;transform-box:view-box}
+@keyframes fgrun2{0%,58%{opacity:0}72%{opacity:1}100%{opacity:1}}
+.feltfig .fg-run2{animation:fgrun2 4.5s ease-out 1 forwards}
+@keyframes fgstop{0%{transform:translate(0,0);opacity:1}48%{transform:translate(52px,0);opacity:1}
+  60%{transform:translate(46px,0);opacity:1}100%{transform:translate(46px,0);opacity:1}}
+.feltfig .fg-stop{animation:fgstop 4.5s ease-out 1 forwards;transform-box:view-box}
 /* Off-screen figures stop dead: an animation under the fold is heat for nothing. */
 .feltfig.ff-paused svg *{animation-play-state:paused!important}
 @media (prefers-reduced-motion:reduce){
@@ -814,6 +824,9 @@ header .brand span{color:var(--gold)}
   .feltfig .fg-line{stroke-dasharray:none;stroke-dashoffset:0}
   .feltfig .fg-area,.feltfig .fg-keep,.feltfig .fg-extra{opacity:1}
   .feltfig .fg-fade{opacity:.12}
+  .feltfig .fg-tok{transform:translate(61px,0)}
+  .feltfig .fg-run2{opacity:1}
+  .feltfig .fg-stop{transform:translate(46px,0)}
 }
 
 /* ---------- top bar + nav ---------- */
@@ -4248,8 +4261,12 @@ $("btn-ach").onclick=()=>{const g=$("achgrid");g.innerHTML="";
   $("achs").classList.add("on")};
 
 /* ---------- patch notes ---------- */
-const APP_VER="3.84";
+const APP_VER="3.85";
 const PATCHES=[
+ {v:"3.85",n:"Click, And The Tape Runs",d:"3 Aug 2026",items:[
+  ["new","THE SHADOW WING HAS ITS FIRST DIAGRAM, and it is the one the whole wing hangs off. Nobody has the bandwidth to weigh every request from scratch, so a trigger arrives and a whole prepared response runs off the back of it. Asked plainly to skip a photocopier queue, 60% of people said yes. Given a real reason — “because I’m in a rush” — 94% did."],
+  ["new","THEN THE PART THAT SHOULD BOTHER YOU. The third version of that request was “because I have to make copies”, which says nothing whatsoever. It still got 93%. The word “because” was doing the work, not the reason — so the empty token is drawn exactly the same size as the real one, because from the outside they ARE the same object."],
+  ["new","And the defence, which is evidence rather than reassurance: the same experiment with a 20-page request instead of 5 pages, and only the genuine reason still worked. The tape runs on small things. So the thing to notice is when something small is being used to move you."]]},
  {v:"3.84",n:"The Description Should Match Too",d:"3 Aug 2026",items:[
   ["fix","The habit-loop figure’s screen-reader description still said the circuit closes “several times” before you arrive to decide. It closes twice — that number was measured and corrected everywhere else a release ago, and this one description got missed. Anyone using a screen reader was getting a slightly different figure from everyone else."],
   ["fix","Checked every figure sits under the right paragraph of its lesson, and every screen-reader description actually narrates the sequence rather than just naming the picture. All nine correct."]]},
@@ -6042,6 +6059,45 @@ const FIGC={
       dot(peakX,peakY,"")+dot(lendX,lendY,"fg-extra")+
       `<text class="fg-lbl" x="${peakX}" y="${peakY-11}" text-anchor="middle">${esc(p.pk||"same peak")}</text>`+
       `<text class="fg-lbl fg-extra" x="${lendX}" y="${lendY+16}" text-anchor="end">${esc(p.en2||"gentler end")}</text>`};
+  },
+
+  /* #162, from research (tools/figs_research/d1.md). The FIRST figure on the shadow wing, and its
+     hub: every tactic in that wing sits on "click, and the appropriate tape plays".
+     Langer's copier study is the whole thing — 60% complied with a bare request, 94% with a real
+     reason, and 93% with a reason that added nothing at all ("because I have to make copies").
+     The trigger is the FORM of a reason, not its content, so the empty token has the same shape
+     as the real one and the gate cannot tell them apart.
+     Stage three is the defence, and it is evidence, not editorialising: repeated with a 20-page
+     request, only the genuine reason still worked. Raise the cost and people actually read the
+     token. That is where the lesson's "defender's reading" actually lives. */
+  tape(p,A){
+    const st=p.stage||"real";
+    const GX=104, GY=54;                     // the gate the token has to pass
+    const gate=`<rect x="${GX-7}" y="${GY-20}" width="14" height="40" rx="4" stroke="${A}" `+
+      `stroke-opacity=".55" fill="none"/>`;
+    // the token: a real reason and an empty one are drawn the SAME SIZE on purpose — that
+    // indistinguishability is the finding, not a shortcut in the drawing
+    const token=(filled,cls)=>`<circle class="${cls||""}" cx="34" cy="${GY}" r="9" stroke="${A}" `+
+      `fill="${A}" fill-opacity="${filled?".85":"0"}" stroke-width="2.2"/>`;
+    const ribbon=cls=>`<rect class="${cls||""}" x="${GX+10}" y="${GY-9}" width="76" height="18" `+
+      `rx="4" fill="${A}" fill-opacity=".25" stroke="${A}" stroke-opacity=".6"/>`;
+    const lbl=(x,y,t,a)=>`<text class="fg-lbl" x="${x}" y="${y}" text-anchor="${a||"middle"}">${esc(t)}</text>`;
+
+    if(st==="real")             // a genuine reason goes in, the whole response runs
+      return {svg:gate+ribbon("fg-run2")+token(true,"fg-tok")+
+        lbl(41,30,p.tok||"a reason")+lbl(142,30,p.out||"yes")};
+
+    if(st==="empty")            // an empty one is the same shape, and runs the same tape
+      return {svg:gate+ribbon("fg-run2")+token(false,"fg-tok")+
+        lbl(41,30,p.tok||"nothing in it")+lbl(142,30,p.out||"yes, again")};
+
+    // bigger ask: the token is inspected, and an empty one no longer gets through
+    return {svg:gate+
+      `<rect x="${GX+10}" y="${GY-16}" width="76" height="32" rx="4" fill="${A}" fill-opacity=".08" `+
+      `stroke="${A}" stroke-opacity=".35" stroke-dasharray="4 4"/>`+
+      token(false,"fg-stop")+
+      `<path class="fg-stop" d="M${GX-14} ${GY-16} L${GX-14} ${GY+16}" stroke="${A}" stroke-width="2.6"/>`+
+      lbl(41,30,p.tok||"nothing in it")+lbl(142,30,p.out||"now they read it")};
   },
 
   pacer(p,A){
