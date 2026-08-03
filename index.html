@@ -526,6 +526,8 @@ header .brand span{color:var(--gold)}
 #ngate .feltfig{text-align:left;max-width:var(--rw);margin-left:auto;margin-right:auto}
 .feltfig .ff-svg svg{width:100%;height:150px;display:block;overflow:visible}
 .feltfig figcaption{font-size:13.5px;line-height:1.55;color:var(--tx);margin-top:12px}
+.feltfig .ff-feel{font-size:12.5px;line-height:1.5;color:var(--tx2);margin-top:7px}
+.feltfig .ff-feel[hidden]{display:none}
 .feltfig .ff-nav{display:flex;align-items:center;gap:7px;margin-top:11px}
 .feltfig .ff-dot{width:9px;height:9px;padding:0;border-radius:50%;border:1px solid var(--line);
   background:transparent;cursor:pointer;transition:.2s}
@@ -621,6 +623,34 @@ header .brand span{color:var(--gold)}
 .feltfig .fg-orbit{animation:fgspin 26s linear infinite;transform-box:fill-box;transform-origin:center}
 @keyframes fgwash{0%,100%{opacity:.35}50%{opacity:.85}}
 .feltfig .fg-wash{animation:fgwash 5s ease-in-out infinite}
+/* #162 mind-wandering. Every timing here is a claim from tools/figs_research/b2.md, not taste:
+   the departure is long and unmarked, the hops are fast jumps between long dwells, the grip
+   releases BEFORE awareness fires, and the return takes no time at all. Nothing anywhere
+   contracts — the travellers fade out at full size where they stand, and the only growth is a
+   ring that expands and vanishes. */
+@keyframes fgleave{0%{transform:translate(0,0);opacity:0}5%{transform:translate(0,0);opacity:.95}
+  16%{transform:translate(0,0);opacity:.95}64%{transform:translate(48px,-20px);opacity:.95}
+  80%{transform:translate(48px,-20px);opacity:.95}88%{transform:translate(48px,-20px);opacity:0}
+  100%{transform:translate(48px,-20px);opacity:0}}
+.feltfig .fg-leave{animation:fgleave 7s ease-in-out infinite;transform-box:view-box}
+@keyframes fghop{0%{transform:translate(0,0);opacity:0}4%{transform:translate(0,0);opacity:.95}
+  18%{transform:translate(0,0)}22%{transform:translate(48px,-20px)}
+  40%{transform:translate(48px,-20px)}44%{transform:translate(82px,8px)}
+  62%{transform:translate(82px,8px)}66%{transform:translate(120px,-18px)}
+  84%{transform:translate(120px,-18px);opacity:.95}88%{transform:translate(120px,-18px);opacity:0}
+  100%{transform:translate(120px,-18px);opacity:0}}
+.feltfig .fg-hop{animation:fghop 9s ease-in-out infinite;transform-box:view-box}
+@keyframes fggrip{0%,54%{stroke-opacity:.5}66%,100%{stroke-opacity:0}}
+.feltfig .fg-grip{animation:fggrip 6s ease-out infinite}
+@keyframes fgletgo{0%,54%{opacity:.85}66%,100%{opacity:0}}
+.feltfig .fg-letgo{animation:fgletgo 6s ease-out infinite}
+@keyframes fgsnap{0%,66%{opacity:0}67%,100%{opacity:1}}
+.feltfig .fg-snap{animation:fgsnap 6s step-end infinite}
+@keyframes fgsnapring{0%,66%{r:5;opacity:0}68%{opacity:.75}84%{r:19;opacity:0}100%{r:19;opacity:0}}
+.feltfig .fg-snapring{animation:fgsnapring 6s ease-out infinite}
+@keyframes fgaware{0%,60%{stroke-opacity:.16}67%{stroke-opacity:.9}84%{stroke-opacity:.16}100%{stroke-opacity:.16}}
+.feltfig .fg-aware{stroke-opacity:.16}
+.feltfig .fg-awarefire{animation:fgaware 6s ease-out infinite}
 /* Off-screen figures stop dead: an animation under the fold is heat for nothing. */
 .feltfig.ff-paused svg *{animation-play-state:paused!important}
 @media (prefers-reduced-motion:reduce){
@@ -635,6 +665,16 @@ header .brand span{color:var(--gold)}
      "from the heart, outwards, arriving there" without anything moving */
   .feltfig .fg-flow{stroke-dasharray:none;opacity:.5}
   .feltfig .fg-arrive{opacity:.85}
+  /* #162: frozen, the wander stages must still say "attention is over THERE while the belief
+     ring sits on the breath" — so the traveller is parked at its destination, not at its origin,
+     which is where the un-animated transform would otherwise leave it. */
+  .feltfig .fg-leave{transform:translate(48px,-20px)}
+  .feltfig .fg-hop{transform:translate(120px,-18px)}
+  .feltfig .fg-grip{stroke-opacity:0}
+  .feltfig .fg-letgo{opacity:0}
+  .feltfig .fg-snap{opacity:1}
+  .feltfig .fg-snapring{r:14;opacity:.4}
+  .feltfig .fg-awarefire{stroke-opacity:.9}
 }
 
 /* ---------- top bar + nav ---------- */
@@ -3046,7 +3086,11 @@ function dispatchJobs(){
   let seed=daySeed();
   const rnd=mulberry(seed);
   for(let i=sh.length-1;i>0;i--){const j=Math.floor(rnd()*(i+1));[sh[i],sh[j]]=[sh[j],sh[i]];}
-  let x=sh[0],y=sh.find(b=>b.wing!==x.wing)||sh[1]||sh[0];
+  // #162: with an empty shelf there is nobody to put in the ring. sh[0] is undefined, brief()
+  // dereferences it and the whole Dispatch throws — so every lane dies, not just the collision.
+  // Found by the selftest while verifying something unrelated; it is reachable for real whenever
+  // the visible library is empty.
+  let x=sh[0],y=x?(sh.find(b=>b.wing!==x.wing)||sh[1]||sh[0]):null;
   // Fall back to the books' own pages when a title hasn't been mined yet. Asked to compare two bare
   // titles the model hedges — "might advocate", "could clash" — which is not an argument. Real text
   // from both books forces it to name what each one actually says.
@@ -3054,7 +3098,7 @@ function dispatchJobs(){
     const hk=((HOOKS[b.id]||{}).items||[]).slice(0,4).map(h=>"- "+h.t);
     const ps=hk.length?[]:hookSample(b,2,seed).map(p=>"- "+p.text.slice(0,420));
     return `"${b.title}"${b.author?" by "+b.author:""}\n${hk.concat(ps).join("\n")||"- (nothing on file)"}`;};
-  const clash=`Two books from one reader's shelf:\n\n${brief(x)}\n\n${brief(y)}\n\n`+
+  const clash=!x?"":`Two books from one reader's shelf:\n\n${brief(x)}\n\n${brief(y)}\n\n`+
     `In TWO sentences, name one place these two books would genuinely disagree about how to live, `+
     `and say which side you would take and why. Use both titles. Be concrete about what each book `+
     `actually advises — never hedge with "might" or "could". No preamble, no markdown.`;
@@ -3108,8 +3152,13 @@ async function refreshDispatch(force){
   const spec=dispatchJobs();
   DISPATCH.day=today();saveDispatch();          // claim the day before running, as with the hooks
   try{
-    const res=await geminiParallel(spec.jobs.map(j=>Object.assign({opts:{maxKeys:2,maxModels:2}},j)));
-    const parts=res.map(r=>r.ok?demd(r.text).trim():"");
+    // #162: lanes are positional (parts[1] IS the collision), so a lane with nothing to say keeps
+    // its slot and simply is not sent — dropping it from the array would shift every later lane
+    // into the wrong section, and sending it empty would spend a key on a prompt with no content.
+    const live=spec.jobs.map((j,i)=>({j,i})).filter(o=>o.j.prompt);
+    const res=await geminiParallel(live.map(o=>Object.assign({opts:{maxKeys:2,maxModels:2}},o.j)));
+    const parts=spec.jobs.map(()=>"");
+    live.forEach((o,k)=>{const r=res[k];parts[o.i]=r&&r.ok?demd(r.text).trim():"";});
     if(parts.some(Boolean)){
       DISPATCH={day:today(),at:Date.now(),stand:parts[0],clash:parts[1],ask:parts[2],
                 fade:parts[3]||"",fadeTitle:spec.fadeTitle||"",fadeId:spec.fadeId||"",pair:spec.pair};
@@ -4060,8 +4109,13 @@ $("btn-ach").onclick=()=>{const g=$("achgrid");g.innerHTML="";
   $("achs").classList.add("on")};
 
 /* ---------- patch notes ---------- */
-const APP_VER="3.73";
+const APP_VER="3.74";
 const PATCHES=[
+ {v:"3.74",n:"You Never Feel Yourself Leave",d:"3 Aug 2026",items:[
+  ["new","THE FIRST FIGURE BUILT FROM RESEARCH INSTEAD OF INTUITION — mind-wandering, on Stabilizing Attention. Three steps. You don't drift off on purpose, you just aren't there any more, and the ring left sitting on the breath is where you still believe you are. Attention doesn't slide away in a line either — it JUMPS, thought to thought, each jump reasonable from inside the one before it. And the catch: you can only notice a distraction once it has already let go of you, and the noticing IS the return. Nothing gets dragged back."],
+  ["fix","The old version of that diagram drew the return as a big arrow curving home. That is the exact opposite of what happens, and it teaches the thing that makes people quit — hauling attention back by force, treating every wander as a failure. Rebuilt from what practitioners actually report: the departure is long and unfelt, the return takes no time at all, and that lopsidedness is the entire lesson."],
+  ["new","Figures can now carry a second line under the caption saying what the movement IS in real experience — so the animation is never mistaken for decoration."],
+  ["fix","Your Dispatch crashed outright whenever no books were visible in the library: one empty section took down all four. Every lane now stands on its own."]]},
  {v:"3.73",n:"Arrive, Then Expand",d:"3 Aug 2026",items:[
   ["fix","THE TIPS WERE LIGHTING UP BEFORE THE PRESSURE GOT THERE. The travelling line finished at the end of the beat, but the swell at each tip began just past halfway — so the destination reacted to something that hadn't arrived yet, which is backwards and quietly ruins the one thing the figure exists to teach. The line now completes its journey first, and only then does the tip expand."],
   ["fix","Slowed down, and each beat is now allowed to finish. A pulse takes 1.7 seconds instead of 1, the whole sequence — travel, arrive, swell, fade — completes, and there's a real pause before the next one starts. The far points still land later than the near ones, but they now land INSIDE their own beat instead of spilling into the next."]]},
@@ -5688,29 +5742,55 @@ const FIGC={
   },
 
   drift(p,A){
-    /* #161: the single most important figure in the whole meditation half, and the generic parts
-       could not draw it. Every beginner makes the same mistake — they try to CLAMP attention on
-       the breath, and treat each wander as a failure. The instruction in every one of these books
-       is the opposite: attention leaving is not the error, it is the rep. Noticing and returning
-       without blame IS the exercise. So the figure has to show the whole loop, including the
-       return, because the return is the part people do not know is the point. */
-    const st=p.stage||"wander";      // "hold" | "wander" | "return"
-    const anchor=`<circle cx="60" cy="66" r="13" stroke="${A}" stroke-opacity=".5" stroke-dasharray="3 4"/>`+
-      `<circle cx="60" cy="66" r="5" fill="${A}" stroke="none"/>`+
-      `<text class="fg-lbl" x="60" y="94" text-anchor="middle">${esc(p.anchor||"the breath")}</text>`;
-    if(st==="hold")
-      return {svg:anchor+`<text class="fg-lbl" x="150" y="66" text-anchor="middle">${esc(p.note||"")}</text>`};
-    if(st==="wander")
-      return {svg:anchor+
-        `<path class="fg-driftpath" d="M60 66 C92 54 118 40 152 34" stroke="${A}" stroke-opacity=".35" stroke-dasharray="2 5"/>`+
-        `<circle class="fg-drift" cx="60" cy="66" r="5" fill="${A}" fill-opacity=".8" stroke="none"/>`+
-        `<text class="fg-lbl" x="156" y="30" text-anchor="end">${esc(p.away||"a thought")}</text>`};
-    // the return: a clear arc back, drawn as the strongest thing in the frame
-    return {svg:anchor+
-      `<path class="fg-return" d="M152 34 C118 40 92 54 66 64" stroke="${A}" stroke-width="3" fill="none"/>`+
-      `<path d="M74 60l-9 5 8 6" stroke="${A}" stroke-width="3" fill="none"/>`+
-      `<circle cx="152" cy="34" r="4.5" fill="${A}" fill-opacity=".35" stroke="none"/>`+
-      `<text class="fg-lbl" x="150" y="22" text-anchor="middle">${esc(p.note||"notice — no blame")}</text>`};
+    /* #162, rebuilt from research (tools/figs_research/b2.md). The first version of this drew the
+       departure as one smooth curve and the return as a thick arrow arcing back — both are false,
+       and the second one teaches the exact error the lesson exists to remove.
+         - Wandering is not a slide. TMI: "attention usually moves from one object to the next by
+           association. When attention tires of one distraction, it moves to another." Gunaratana:
+           "It jumps and jibbers." So: discrete hops, long dwells, fast jumps.
+         - The return has NO duration. "Once you observe that you've been pulled away, you're
+           already back." Drawing a journey home teaches people to HAUL attention back, which is
+           the clamping that makes beginners quit. The dot must simply appear.
+         - You cannot catch it while it holds you: "we usually become aware of distractions only
+           when they have released their hold on us." So the grip releases BEFORE awareness fires —
+           cause completes, then effect, same rule as the heartbeat.
+       Awareness is a canopy over the whole field, not a located thing (it is described as
+       background watchfulness). It is dim in the first two stages ON PURPOSE: too weak to catch
+       anything yet is precisely TMI Stage Two, and its dimness is content, not decoration. */
+    const st=p.stage||"leave";       // "leave" | "hops" | "catch"
+    const aware=`<path class="fg-aware${st==="catch"?" fg-awarefire":""}" d="M12 30 Q100 8 188 30" `+
+      `stroke="${A}" fill="none" stroke-width="1.6"/>`+
+      `<text class="fg-lbl" x="100" y="22" text-anchor="middle">${esc(p.aware||"awareness")}</text>`;
+    // the breath: a wide quiet ring. The small dashed ghost inside it is where you still believe
+    // you are — it never moves, because the belief never updates until the catch.
+    const anchor=`<circle cx="44" cy="62" r="15" stroke="${A}" stroke-opacity=".4"/>`+
+      `<text class="fg-lbl" x="44" y="92" text-anchor="middle">${esc(p.anchor||"the breath")}</text>`;
+    const ghost=`<circle cx="44" cy="62" r="6.5" stroke="${A}" stroke-opacity=".55" stroke-dasharray="2 3" fill="none"/>`;
+    const dot=cls=>`<circle class="${cls}" cx="44" cy="62" r="5.5" fill="${A}" stroke="none"/>`;
+    const spot=(x,y)=>`<circle cx="${x}" cy="${y}" r="4" stroke="${A}" stroke-opacity=".3" fill="none"/>`;
+
+    if(st==="leave")                 // the part nobody can feel: it just stops being true
+      return {svg:aware+anchor+ghost+spot(92,42)+
+        `<text class="fg-lbl" x="92" y="28" text-anchor="middle">${esc(p.away||"a thought")}</text>`+
+        dot("fg-leave")};
+
+    if(st==="hops")                  // by association: dwell, jump, dwell, jump
+      return {svg:aware+anchor+ghost+spot(92,42)+spot(126,70)+spot(164,44)+
+        // NB t1/t2/t3, not a/b/c — `c` is the scene item's component key, so `p.c` is "drift".
+        `<text class="fg-lbl" x="92" y="28" text-anchor="middle">${esc(p.t1||"the email")}</text>`+
+        `<text class="fg-lbl" x="126" y="88" text-anchor="middle">${esc(p.t2||"a song")}</text>`+
+        `<text class="fg-lbl" x="164" y="30" text-anchor="middle">${esc(p.t3||"a regret")}</text>`+
+        dot("fg-hop")};
+
+    // the catch. The grip lets go FIRST; only then is anything known. Nothing travels home —
+    // the dot appears at full size (an overshoot-and-settle would be a shrink, and would also
+    // imply arriving with momentum, which is the journey we are refusing to draw).
+    return {svg:aware+anchor+spot(92,42)+spot(126,70)+
+      `<circle class="fg-grip" cx="164" cy="44" r="11" stroke="${A}" fill="none" stroke-dasharray="3 3"/>`+
+      `<circle class="fg-letgo" cx="164" cy="44" r="5.5" fill="${A}" stroke="none"/>`+
+      `<text class="fg-lbl" x="164" y="30" text-anchor="middle">${esc(p.t3||"a regret")}</text>`+
+      `<circle class="fg-snapring" cx="44" cy="62" r="5" stroke="${A}" fill="none" stroke-width="1.8"/>`+
+      dot("fg-snap")};
   },
 
   two(p,A){
@@ -5788,6 +5868,10 @@ function renderFig(spec,accent){
   let i=0,timer=null;
   const svgWrap=document.createElement("div");svgWrap.className="ff-svg";
   const cap=document.createElement("figcaption");
+  // #162: `feel` says what the motion IS in real experience, so the animation is never read as
+  // decoration. Hassan's own line for the heartbeat is the register: "that expanding isn't a
+  // graphic — it's literally what it's like". Optional per stage; hidden when absent.
+  const feel=document.createElement("div");feel.className="ff-feel";
   const nav=document.createElement("div");nav.className="ff-nav";
   const draw=()=>{
     const st=stages[i];
@@ -5798,6 +5882,8 @@ function renderFig(spec,accent){
       `stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="${esc(spec.alt||st.cap||"figure")}"`+
       (cssVars?` style="${cssVars}"`:"")+`>`+inner+`</svg>`;
     cap.textContent=st.cap||spec.cap||"";
+    const fl=st.feel||spec.feel||"";
+    feel.textContent=fl;feel.hidden=!fl;
     nav.querySelectorAll(".ff-dot").forEach((d,k)=>{
       d.classList.toggle("on",k===i);d.setAttribute("aria-current",k===i?"true":"false");});
   };
@@ -5824,7 +5910,7 @@ function renderFig(spec,accent){
       go(i+1);
     },(spec.dur||6)*1000);
   };
-  fig.append(svgWrap,cap,nav);
+  fig.append(svgWrap,cap,feel,nav);
   draw();
   FIG_LIVE.push({fig,start,stop});
   return fig;

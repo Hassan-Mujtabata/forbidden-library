@@ -406,3 +406,38 @@ Ship in verified batches: syntax-check → browser-test → `ship.py`. When Hass
 means work autonomously — if the task list is done, generate the next batch and start, without
 asking. Every pass, re-audit recently-touched UI for theme/contrast regressions in your own prior
 work; that's where the recurring bugs have been.
+
+## Figures: research before shape (#162, work order 6)
+
+**Books give the concept; only people give the texture.** A manual says "attend to the breath";
+it never says the pulse at the fingertips feels like a balloon filling. That sentence exists in
+first-person accounts or nowhere. So for any felt-sense figure the research sheet must hold **3+
+online first-person quotes with URLs**, not just book citations — a book-only sheet means DO NOT
+BUILD. Write down the queries that found nothing too (reddit.com is blocked to the crawler), so a
+thin evidence base is visible instead of papered over. Sheets live in `tools/figs_research/`,
+which is gitignored AND in ship.py FORBIDDEN because they quote lesson text verbatim.
+
+**Verify quotes before attributing them.** A vivid simile the whole internet attributes to TMI is
+not in our TMI text; it came from a summary site. Grep books.json before citing a book.
+
+**The research must survive contact with the drawing.** b2's three big design decisions were all
+things the sources say and intuition doesn't: wandering HOPS by association (it does not slide),
+the return has ZERO duration (recognition IS the return — drawing a journey home teaches the
+hauling that makes beginners quit), and awareness can only fire AFTER the distraction lets go.
+The pre-existing `drift` component had guessed all three wrong. Intuition produces plausible
+figures that teach the error.
+
+**`feel`** — an optional line per stage saying what the motion IS in real experience, so animation
+is never read as decoration. Gated at 200 chars, no markup.
+
+**`VV.figs()` inside `VV.all()`** now audits every `fg*` keyframe mechanically: nothing may
+contract while visible, declared causes must finish before their effects begin, declared event
+sequences must end with ≥12% rest. Two declaration tables (`CAUSE`, `BEAT`, plus `ALLOW_SHRINK`)
+each carry a written reason per entry — silencing a real fault requires writing down a lie.
+Distinctions it had to learn, all of which are real: a contraction under 2% of the cycle is the
+sanctioned CUT, not a shrink; concurrent-and-peaking-together (the body swelling as the beat
+travels) is NOT a causal pair and declaring it one demands a wrong figure; an element with a
+deliberate dim baseline has not "fired" just because it is visible; and a transition that runs
+while invisible at both ends is the cycle resetting, not motion.
+
+**One figure per cycle.** Hassan: "make one, make sure it's perfect, then on to next."

@@ -19,3 +19,6 @@ tools/graph_preview.json
 # figure drafts + review gallery quote lesson text in plaintext (#158)
 tools/figs_drafts.json
 tools/figs_review/
+
+# research sheets quote lesson text verbatim and carry the whole design record (#162)
+tools/figs_research/

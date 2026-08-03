@@ -70,6 +70,14 @@ def validate(books, graph):
                     problems.append(f"{where} stage {si}: caption is {len(cap)} chars, cap is 220")
                 if "<" in cap or "&#" in cap:
                     problems.append(f"{where} stage {si}: caption contains markup")
+                # #162: `feel` is the line that says what the motion IS in real experience. It is
+                # optional structurally, but a figure whose motion is not explained is a figure
+                # whose motion can be read as decoration — see workorder-6 step 2.
+                fl = (st.get("feel") or f.get("feel") or "")
+                if len(fl) > 200:
+                    problems.append(f"{where} stage {si}: feel line is {len(fl)} chars, cap is 200")
+                if "<" in fl or "&#" in fl:
+                    problems.append(f"{where} stage {si}: feel line contains markup")
                 if not (st.get("scene") or []):
                     problems.append(f"{where} stage {si}: empty scene")
                 for it in (st.get("scene") or []):

@@ -97,10 +97,175 @@
     return src.length;
   }
 
+  /* ---------- #162 figure timing auditor ----------
+   * Hassan corrected the heartbeat six times and every single fault was invisible to the existing
+   * suites: they check that things RENDER, never that the motion tells the truth. Three of those
+   * six are mechanically checkable straight off the live keyframes, so they are checked here once
+   * and every figure built afterwards inherits the guard for free.
+   *
+   *   SHRINK  nothing may contract while you can still see it. ("it should cut once the points
+   *           reach the end, not start shrinking")
+   *   ORDER   a cause must FINISH before its effect starts. ("the lines going to the tips should
+   *           reach first, then the dots expand") — declared per pair, because which animation
+   *           causes which is meaning, not syntax.
+   *   REST    an event sequence must end and stay ended for a beat. ("wait until the animation
+   *           finishes before starting the next one") — declared, because continuous motions
+   *           (a spin, a breath) correctly never rest.
+   *
+   * The two declaration tables are the whole maintenance cost: one line per figure that has a
+   * causal claim. ALLOW_SHRINK is for figures where contraction IS the content; each entry must
+   * carry a reason, so silencing a real fault requires writing down a lie.
+   */
+  // Deliberately NOT here: fgflow -> fgswell. The body swelling is concurrent with the beat
+  // travelling through it and peaks exactly as it lands — that is the shared clock from 3.73, not
+  // a strict before/after. Declaring it as causal made the auditor demand a wrong figure.
+  var CAUSE = [                       // [cause, effect, "what the order means"]
+    ["fgflow", "fgarrive", "pressure must land before the fingertip swells"],
+    ["fggrip", "fgsnap", "you only notice a distraction once it has let go of you"],
+    ["fggrip", "fgaware", "awareness cannot fire while the distraction still holds"],
+    ["fgletgo", "fgsnap", "the thought releases, then you are back"]
+  ];
+  var BEAT = {                        // animation -> minimum trailing rest, in % of the cycle
+    fgflow: 12, fgarrive: 12, fgswell: 12,
+    fgsnap: 12, fgsnapring: 12, fgaware: 12, fgleave: 12, fghop: 12
+  };
+  var ALLOW_SHRINK = {
+    fgelastic: "an elastic band relaxing — the contraction is the lesson",
+    fgopen: "a grip opening and closing on purpose",
+    fgpace: "a pacer ring breathing in and out; both halves are the instruction",
+    fgbreathe: "a breath cycle — an in-breath that never emptied would be the lie",
+    fgring: "a ripple that expands and restarts from zero at full transparency",
+    fgjit: "jitter around a centre point"
+  };
+
+  function keyframes(win) {
+    var out = {}, sheets = win.document.styleSheets;
+    for (var i = 0; i < sheets.length; i++) {
+      var rules; try { rules = sheets[i].cssRules; } catch (e) { continue; }
+      for (var j = 0; j < rules.length; j++) {
+        var r = rules[j];
+        if (r.type !== 7 || !/^fg/.test(r.name || "")) continue;
+        var stops = [];
+        for (var k = 0; k < r.cssRules.length; k++) {
+          var kr = r.cssRules[k], st = kr.style;
+          kr.keyText.split(",").forEach(function (s) {
+            var p = parseFloat(s);
+            if (!isNaN(p)) stops.push({ p: p, style: st, css: st.cssText });
+          });
+        }
+        stops.sort(function (a, b) { return a.p - b.p; });
+        out[r.name] = stops;
+      }
+    }
+    return out;
+  }
+
+  function num(v) { return v === "" || v == null ? null : parseFloat(v); }
+  function scaleOf(s) {
+    var t = s.style.transform || "";
+    var m = /scale[XY]?\(\s*([-\d.]+)/.exec(t);
+    return m ? parseFloat(m[1]) : null;
+  }
+  // "visible size" also covers SVG geometry animated through CSS (r on a circle).
+  function radiusOf(s) { return num(s.style.getPropertyValue("r")); }
+
+  function figs(win) {
+    win = win || VV.w;
+    var kf = keyframes(win), names = Object.keys(kf), fails = [], checked = 0;
+
+    names.forEach(function (n) {
+      var stops = kf[n], sc = null, r = null, op = 1;
+      for (var i = 0; i < stops.length; i++) {
+        var s = stops[i];
+        var nsc = scaleOf(s), nr = radiusOf(s), nop = num(s.style.opacity);
+        var nsop = num(s.style.strokeOpacity || s.style.getPropertyValue("stroke-opacity"));
+        var vis = nop != null ? nop : (nsop != null ? nsop : op);
+        checked++;
+        // A CUT is allowed; a SHRINK is not. Hassan's rule distinguishes them by duration — "it
+        // should cut once the points reach the end, not start shrinking" — so a contraction
+        // crossing <=2% of the cycle is the sanctioned snap-back and anything slower is the fault.
+        var span = i ? s.p - stops[i - 1].p : 0, cut = span <= 2;
+        if (!ALLOW_SHRINK[n] && !cut) {
+          if (nsc != null && sc != null && nsc < sc - 1e-6 && vis > 0.05)
+            fails.push(n + " @" + s.p + "%: scale " + sc + "->" + nsc + " over " + span +
+                       "% while visible (op " + vis + ")");
+          if (nr != null && r != null && nr < r - 1e-6 && vis > 0.05)
+            fails.push(n + " @" + s.p + "%: r " + r + "->" + nr + " over " + span +
+                       "% while visible (op " + vis + ")");
+        }
+        if (nsc != null) sc = nsc;
+        if (nr != null) r = nr;
+        if (nop != null || nsop != null) op = vis;
+      }
+    });
+
+    // ORDER: last stop at which the cause is still changing vs the stop at which the effect
+    // actually begins. Both read off the same 0-100% cycle, which is what makes them comparable.
+    function seen(st) {
+      var o = num(st.style.opacity), so = num(st.style.getPropertyValue("stroke-opacity"));
+      return o != null ? o : so;
+    }
+    // The last moment anything changes ON SCREEN. A transition that runs while the element is
+    // invisible at both ends is the cycle resetting, not motion — counting it as motion made this
+    // report 0% rest for fgarrive, which visibly rests for a third of its beat.
+    function lastChange(n) {
+      var s = kf[n]; if (!s) return null;
+      for (var i = s.length - 1; i > 0; i--) {
+        if (s[i].css === s[i - 1].css) continue;
+        var a = seen(s[i - 1]), b = seen(s[i]);
+        if (a != null && b != null && a <= 0.05 && b <= 0.05) continue;
+        return s[i].p;
+      }
+      return s.length ? s[s.length - 1].p : null;
+    }
+    // When does the EFFECT begin? Not "when is it first visible at all" — an element with a
+    // deliberate dim baseline (awareness: present, but too weak to catch anything yet) is visible
+    // from 0%, and reading that as its start made the auditor claim it fired before its cause.
+    // The effect begins where it rises materially above where it started.
+    function firstRise(n) {
+      var s = kf[n]; if (!s || !s.length) return null;
+      var base = seen(s[0]); if (base == null) base = 0;
+      for (var i = 0; i < s.length; i++) {
+        var v = seen(s[i]);
+        if (v != null && v > 0.05 && v >= base + 0.25) return s[i].p;
+      }
+      for (var j = 0; j < s.length; j++) if ((seen(s[j]) || 0) > 0.05) return s[j].p;
+      return s[0].p;
+    }
+    var order = [];
+    CAUSE.forEach(function (pair) {
+      if (!kf[pair[0]] || !kf[pair[1]]) return;
+      var ce = lastChange(pair[0]), es = firstRise(pair[1]);
+      if (ce == null || es == null) return;
+      order.push(pair[0] + "->" + pair[1] + " " + ce + "%/" + es + "%");
+      if (es < ce - 1e-6)
+        fails.push("ORDER " + pair[1] + " starts at " + es + "% but " + pair[0] +
+                   " is still running to " + ce + "% — " + pair[2]);
+    });
+
+    var rests = [];
+    Object.keys(BEAT).forEach(function (n) {
+      if (!kf[n]) return;
+      var lc = lastChange(n), rest = lc == null ? null : 100 - lc;
+      if (rest == null) return;
+      rests.push(n + " " + rest.toFixed(0) + "%");
+      if (rest < BEAT[n]) fails.push("REST " + n + " only " + rest.toFixed(0) +
+                                     "% quiet at the end, needs " + BEAT[n] + "%");
+    });
+
+    return {
+      animations: names.length, stopsChecked: checked,
+      order: order, rest: rests,
+      failed: fails.length, fails: fails,
+      VERDICT: fails.length ? "FAIL" : "PASS  no shrink · order ok · rest ok"
+    };
+  }
+
   window.VV = {
     frame: null, w: null, keys: 0,
 
     boot: boot,
+    figs: figs,
 
     async all(opts) {
       opts = opts || {};
@@ -135,12 +300,18 @@
         win.VA.restore();
       } catch (e) { out.audit = "LOAD FAILED: " + (e && e.message || e); }
 
+      try {
+        var fg = figs(win);
+        out.figs = fg.animations + " anims, " + fg.stopsChecked + " stops · " + fg.VERDICT;
+        if (fg.failed) out.figFailures = fg.fails;
+      } catch (e) { out.figs = "AUDIT FAILED: " + (e && e.message || e); }
+
       out.consoleErrors = win.__err.slice(0, 5);
       // One line to read at a glance; the detail is above it only when something is wrong.
       out.VERDICT = (out.selftest && out.selftest.indexOf("LOAD") < 0 &&
-                     !out.selftestFailures && !out.contrastFailures &&
+                     !out.selftestFailures && !out.contrastFailures && !out.figFailures &&
                      out.overflow === "none" && !out.consoleErrors.length)
-        ? "PASS  " + out.selftest + " · contrast clean x3 · no overflow · no console errors"
+        ? "PASS  " + out.selftest + " · contrast clean x3 · no overflow · figs clean · no console errors"
         : "FAIL  see fields above";
       return out;
     }
