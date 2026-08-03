@@ -50,6 +50,8 @@ FIG_COMPONENTS = {
     "preset",
     # #162: one encounter is unreadable; the run is the signal
     "pattern",
+    # #162: a population resolving into measured groups instead of one lonely case
+    "sorts",
 }
 
 

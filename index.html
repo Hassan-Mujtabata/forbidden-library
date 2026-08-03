@@ -787,6 +787,10 @@ header .brand span{color:var(--gold)}
 .feltfig .fg-enc{animation:fgenc 3.6s ease-out 1 forwards}
 @keyframes fgtrend{0%{stroke-dashoffset:100}75%{stroke-dashoffset:0}100%{stroke-dashoffset:0}}
 .feltfig .fg-trend{stroke-dasharray:100;animation:fgtrend 3.6s ease-out 1 forwards}
+@keyframes fgsort{0%{fill-opacity:.18}55%{fill-opacity:.4}100%{fill-opacity:.4}}
+.feltfig .fg-sort{animation:fgsort 3.6s ease-out 1 forwards}
+@keyframes fgyou{0%{fill-opacity:.4}50%{fill-opacity:.95}100%{fill-opacity:.95}}
+.feltfig .fg-you{animation:fgyou 3.6s ease-out 1 forwards}
 /* Off-screen figures stop dead: an animation under the fold is heat for nothing. */
 .feltfig.ff-paused svg *{animation-play-state:paused!important}
 @media (prefers-reduced-motion:reduce){
@@ -849,6 +853,8 @@ header .brand span{color:var(--gold)}
   .feltfig .fg-tick,.feltfig .fg-fill{opacity:1}
   .feltfig .fg-enc{opacity:1}
   .feltfig .fg-trend{stroke-dasharray:none;stroke-dashoffset:0}
+  .feltfig .fg-sort{fill-opacity:.4}
+  .feltfig .fg-you{fill-opacity:.95}
 }
 
 /* ---------- top bar + nav ---------- */
@@ -4283,8 +4289,12 @@ $("btn-ach").onclick=()=>{const g=$("achgrid");g.innerHTML="";
   $("achs").classList.add("on")};
 
 /* ---------- patch notes ---------- */
-const APP_VER="3.89";
+const APP_VER="3.90";
 const PATCHES=[
+ {v:"3.90",n:"Not A Mystery, A Distribution",d:"4 Aug 2026",items:[
+  ["new","A FIRST DIAGRAM FOR THE RELATIONSHIPS TRACK. The worrying about whether they are still interested, or the wanting out of something that is going perfectly fine — it arrives feeling like a fact about you specifically. That framing is the actual problem: while it is a personal defect there is nothing to study and nothing to predict."],
+  ["new","Then it sorts. Take enough people and the same few shapes come back in proportions steady enough to count on — roughly 56% secure, 25% avoidant, 19% anxious. Close to the proportions found in one-year-olds decades earlier by a completely different method, which is the reason anyone believes the taxonomy at all. Nobody is added or removed between the two steps; the same twenty people simply resolve."],
+  ["fix","Drawn as twenty dots at five percent each rather than a precise bar chart, because reported figures shift a few points between samples and instruments. The exact percentages appear once, in the note under the caption, where they can be attributed."]]},
  {v:"3.89",n:"One Is Noise, Nine Is A Signal",d:"4 Aug 2026",items:[
   ["new","A DIAGRAM FOR THE DEFENCE TRACK, which had none. One conversation where you came away a bit off — was that manipulation, a bad day, or you? Staring harder at that one moment will not tell you. Across 206 studies and 24,483 people, reading deception in real time came out at 54%, a coin flip, and on actual lies 47% — slightly WORSE than a coin flip."],
   ["new","So the figure stops trying to read the moment and shows the last nine instead. Two of them were fine, because that is what noise actually looks like — but the drift is downward, and you keep leaving these smaller, guiltier or more confused than you arrived. That direction is the evidence, and unlike any single exchange it cannot be argued away."],
@@ -6263,6 +6273,42 @@ const FIGC={
       :st==="run"?(p.n2||"nine of them"):(p.n3||"that's the signal");
     return {svg:base+marks+trend+
       `<text class="fg-lbl" x="100" y="108" text-anchor="middle">${esc(note)}</text>`};
+  },
+
+  /* #162, from research (tools/figs_research/i1.md). Hazan & Shaver (1987) found adults sorting
+     ~56% secure / 25% avoidant / 19% anxious — proportions close to Ainsworth's infant figures
+     from an entirely different method. 20 dots at 5% each is the honest resolution for that:
+     11/5/4 reads as 55/25/20, which is as near as twenty dots can get without implying a
+     precision the split does not have. The counts are on the drawing; the exact percentages stay
+     in the `feel` line. */
+  sorts(p,A){
+    const st=p.stage||"alone";
+    const YOU=6;                          // which dot is "you" — sits in the largest group
+    const dot=(x,y,cls,op)=>`<circle class="${cls||""}" cx="${x}" cy="${y}" r="5.5" fill="${A}" `+
+      `fill-opacity="${op}" stroke="none"/>`;
+    let s="";
+    if(st==="alone"){                     // undifferentiated: a problem that looks like only yours
+      for(let i=0;i<20;i++){
+        const x=32+(i%5)*33, y=34+Math.floor(i/5)*20;
+        s+=dot(x,y,i===YOU?"fg-you":"",i===YOU?".95":".18");
+      }
+      s+=`<text class="fg-lbl" x="100" y="108" text-anchor="middle">${esc(p.n||"just me, apparently")}</text>`;
+      return {svg:s};
+    }
+    // sorted: three groups in measured proportion, 11 / 5 / 4
+    const G=[{n:11,cx:44,lab:p.g1||"secure"},{n:5,cx:110,lab:p.g2||"avoidant"},{n:4,cx:164,lab:p.g3||"anxious"}];
+    let idx=0;
+    G.forEach(g=>{
+      for(let i=0;i<g.n;i++){
+        const x=g.cx-16+(i%3)*16, y=30+Math.floor(i/3)*17;
+        const me=(idx===YOU&&st==="which");
+        s+=dot(x,y,me?"fg-you":"fg-sort",me?".95":".4");
+        idx++;
+      }
+      s+=`<text class="fg-lbl" x="${g.cx}" y="102" text-anchor="middle">${esc(g.lab)}</text>`+
+         `<text class="fg-lbl" x="${g.cx}" y="114" text-anchor="middle">${g.n===11?"55%":g.n===5?"25%":"20%"}</text>`;
+    });
+    return {svg:s};
   },
 
   pacer(p,A){
