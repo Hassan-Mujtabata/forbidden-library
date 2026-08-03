@@ -62,6 +62,8 @@ FIG_COMPONENTS = {
     "trade",
     # #162: steady input, flat visible output, then a break at a line the input never marks
     "threshold",
+    # #162: two controls, one outcome, and which control actually moves it
+    "lever",
 }
 
 
