@@ -809,6 +809,14 @@ header .brand span{color:var(--gold)}
 .feltfig .fg-warm{animation:fgwarm 3.4s ease-out 1 forwards}
 @keyframes fgpull{0%{opacity:0}70%{opacity:1}100%{opacity:1}}
 .feltfig .fg-pull{animation:fgpull 3.4s ease-out 1 forwards}
+@keyframes fgin{0%{stroke-dashoffset:100}70%{stroke-dashoffset:0}100%{stroke-dashoffset:0}}
+.feltfig .fg-in{animation:fgin 3.6s ease-out 1 forwards}
+@keyframes fgflat{0%{stroke-dasharray:0 100}60%{stroke-dasharray:100 0}100%{stroke-dasharray:100 0}}
+.feltfig .fg-flat{animation:fgflat 3.6s linear 1 forwards}
+@keyframes fgbreak{0%{stroke-dasharray:0 100}30%{stroke-dasharray:0 100}75%{stroke-dasharray:100 0}100%{stroke-dasharray:100 0}}
+.feltfig .fg-break{animation:fgbreak 3.6s ease-out 1 forwards}
+@keyframes fgmark2{0%{opacity:0}55%{opacity:1}100%{opacity:1}}
+.feltfig .fg-mark2{animation:fgmark2 3.6s ease-out 1 forwards}
 /* Off-screen figures stop dead: an animation under the fold is heat for nothing. */
 .feltfig.ff-paused svg *{animation-play-state:paused!important}
 @media (prefers-reduced-motion:reduce){
@@ -878,6 +886,9 @@ header .brand span{color:var(--gold)}
   .feltfig .fg-met{fill-opacity:.75}
   .feltfig .fg-talk{opacity:1}
   .feltfig .fg-crit,.feltfig .fg-warm,.feltfig .fg-pull{opacity:1}
+  .feltfig .fg-in{stroke-dashoffset:0}
+  .feltfig .fg-flat,.feltfig .fg-break{stroke-dasharray:100 0}
+  .feltfig .fg-mark2{opacity:1}
 }
 
 /* ---------- top bar + nav ---------- */
@@ -4312,8 +4323,12 @@ $("btn-ach").onclick=()=>{const g=$("achgrid");g.innerHTML="";
   $("achs").classList.add("on")};
 
 /* ---------- patch notes ---------- */
-const APP_VER="3.94";
+const APP_VER="3.95";
 const PATCHES=[
+ {v:"3.95",n:"Nothing, Nothing, Then All Of It",d:"4 Aug 2026",items:[
+  ["new","THE PLATEAU OF LATENT POTENTIAL, DRAWN AS THE THRESHOLD IT ACTUALLY IS. Effort goes in at the same rate from day one. What shows from outside stays flat — for a long stretch it is genuinely indistinguishable from having done nothing. Then it breaks upward at a line that nothing in your effort marks. You did not work harder that day; the stonecutter’s hundredth blow splits the rock and takes the credit for the ninety-nine."],
+  ["fix","There was already a diagram shape sitting in the code labelled “the plateau of latent potential”, and it was wrong — it drew results smoothly catching up with effort. That says the payback arrives gradually, which is the opposite of the lesson and of the physics it borrows. Ice at 31 degrees looks exactly like ice at 25; there is no partial melting to watch."],
+  ["fix","The effort line is deliberately identical in all three steps. Nothing about what you were doing changed at the moment the result appeared, and that is the whole point of the figure."]]},
  {v:"3.94",n:"What Disagreeing Buys",d:"4 Aug 2026",items:[
   ["new","EVERY TRACK IN THE VAULT NOW HAS A DIAGRAM. The last one goes to conversation, and it is not the balance-in-all-things picture you would expect. Disagreeing makes you sound sharper — that was tested, and critics were rated more intelligent, more competent and more expert than people who praised. Which is the real reason disagreement is the default setting: it pays immediately, in the currency most people are quietly anxious about."],
   ["new","The sting is in the control condition. The POSITIVE reviews were independently judged the better writing — stronger and more forceful — and still read as less clever, simply because they were appreciative. The effect is not tracking quality. It is tracking stance."],
@@ -6465,6 +6480,37 @@ const FIGC={
     return {svg:s+`<path class="fg-pull" d="M144 68 L78 48" stroke="${A}" stroke-opacity=".5" `+
       `stroke-width="2" stroke-dasharray="4 4"/>`+
       `<text class="fg-lbl" x="112" y="106" text-anchor="middle">${esc(p.n||"the pull you didn't choose")}</text>`};
+  },
+
+  /* #162, from research (tools/figs_research/j2.md). NOT drawn with the existing `curve`
+     component, which shades a smooth lag that gradually catches up. j2's claim is a THRESHOLD —
+     "the visible change—the melting—only occurs at thirty-two degrees", "change happens all at
+     once" — and a smooth catch-up would teach gradual payback, which is the opposite of the
+     lesson and the opposite of the physics it borrows. Ice at 31 looks exactly like ice at 25.
+     The input line is straight and unbroken across all three stages: the whole point is that
+     nothing about the effort changes at the moment the result appears. */
+  threshold(p,A){
+    const st=p.stage||"input", X0=26, XT=132, X1=176, YB=88, YIN=30, YOUT=38;
+    const axis=`<line x1="${X0}" y1="${YB}" x2="${X1}" y2="${YB}" stroke="${A}" stroke-opacity=".3"/>`;
+    const input=`<path class="fg-in" d="M${X0} ${YB} L${X1} ${YIN}" stroke="${A}" stroke-width="2.4" `+
+      `fill="none" stroke-opacity=".5" stroke-dasharray="4 4" pathLength="100"/>`+
+      `<text class="fg-lbl" x="${X1}" y="${YIN-8}" text-anchor="end">${esc(p.a||"what you put in")}</text>`;
+    if(st==="input")
+      return {svg:axis+input+`<text class="fg-lbl" x="100" y="106" text-anchor="middle">${esc(p.n||"steady, from day one")}</text>`};
+    // visible output: flat on the floor, indistinguishable from doing nothing
+    const flat=`<path class="fg-flat" d="M${X0} ${YB} L${XT} ${YB}" stroke="${A}" stroke-width="3" `+
+      `fill="none" pathLength="100"/>`+
+      `<text class="fg-lbl" x="${(X0+XT)/2}" y="${YB-9}" text-anchor="middle">${esc(p.b||"what shows")}</text>`;
+    if(st==="flat")
+      return {svg:axis+input+flat+
+        `<text class="fg-lbl" x="100" y="106" text-anchor="middle">${esc(p.n||"nothing, for a long time")}</text>`};
+    // the break: vertical, at a line nothing in the effort marks
+    return {svg:axis+input+flat+
+      `<path class="fg-break" d="M${XT} ${YB} L${XT} ${YOUT} L${X1} ${YOUT}" stroke="${A}" `+
+      `stroke-width="3" fill="none" pathLength="100"/>`+
+      `<line class="fg-mark2" x1="${XT}" y1="${YB+4}" x2="${XT}" y2="${YIN-2}" stroke="${A}" `+
+      `stroke-opacity=".3" stroke-dasharray="2 4"/>`+
+      `<text class="fg-lbl" x="100" y="106" text-anchor="middle">${esc(p.n||"all at once, and late")}</text>`};
   },
 
   pacer(p,A){

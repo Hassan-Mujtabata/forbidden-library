@@ -60,6 +60,8 @@ FIG_COMPONENTS = {
     "greet",
     # #162: what a conversational stance buys and what it costs
     "trade",
+    # #162: steady input, flat visible output, then a break at a line the input never marks
+    "threshold",
 }
 
 
