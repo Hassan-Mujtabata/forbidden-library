@@ -775,6 +775,10 @@ header .brand span{color:var(--gold)}
 .feltfig .fg-sees{animation:fgsees 4s ease-out 1 forwards}
 @keyframes fgbeam{0%{opacity:0}55%,100%{opacity:1}}
 .feltfig .fg-beam{animation:fgbeam 4s ease-out 1 forwards}
+@keyframes fgmark{0%{opacity:0}45%{opacity:1}100%{opacity:1}}
+.feltfig .fg-mark{animation:fgmark 4s ease-out 1 forwards}
+@keyframes fgcrowd{0%{opacity:0}35%{opacity:1}100%{opacity:1}}
+.feltfig .fg-crowd{animation:fgcrowd 4s ease-out 1 forwards}
 /* Off-screen figures stop dead: an animation under the fold is heat for nothing. */
 .feltfig.ff-paused svg *{animation-play-state:paused!important}
 @media (prefers-reduced-motion:reduce){
@@ -833,6 +837,7 @@ header .brand span{color:var(--gold)}
   .feltfig .fg-stop{transform:translate(46px,0)}
   .feltfig .fg-sees{fill-opacity:.85}
   .feltfig .fg-beam{opacity:1}
+  .feltfig .fg-mark,.feltfig .fg-crowd{opacity:1}
 }
 
 /* ---------- top bar + nav ---------- */
@@ -4267,8 +4272,12 @@ $("btn-ach").onclick=()=>{const g=$("achgrid");g.innerHTML="";
   $("achs").classList.add("on")};
 
 /* ---------- patch notes ---------- */
-const APP_VER="3.86";
+const APP_VER="3.87";
 const PATCHES=[
+ {v:"3.87",n:"The Argument Came Last",d:"3 Aug 2026",items:[
+  ["new","A THIRD SHADOW-WING DIAGRAM, and the finding is genuinely deflating. A hotel asked guests to reuse their towels by making the environmental case — the reasoned appeal, the one that should work. 37.2% complied, and it was the WEAKEST thing they tested. Change the card to say most other guests already reuse theirs, with no new information and no better reasoning, and it goes to 44.0%."],
+  ["new","Then say it was guests who stayed in THIS ROOM. The crowd has not got bigger or wiser — only closer to you — and it reaches 49.3%, the best of the lot. There is no sensible reason the previous occupants of your particular room should count for more. Similarity is not an argument, and it works anyway."],
+  ["fix","Drawn to scale on a nought-to-sixty track, so the three results sit exactly where they really sit. The lifts are real but modest and it would have been easy — and dishonest — to draw them as a landslide. The bigger step is the first one: any crowd beats a good argument."]]},
  {v:"3.86",n:"Half As Watched As You Think",d:"3 Aug 2026",items:[
   ["new","A SECOND DIAGRAM FOR THE SHADOW WING. Trying a friendly signal on purpose feels enormously conspicuous — it seems obvious the room can see you working at it. Students made to wear a deliberately embarrassing shirt guessed 46% of the room would remember it. The real figure was 23%. Almost exactly half."],
   ["new","The two steps are drawn identically on purpose — same room, same person, same moment — and differ only in how many people are lit up and how bright the beam is, because that is exactly what the experiment found: nothing changes except the estimate. Most of the awkwardness you are managing is happening inside you, and you are grading yourself on a performance almost nobody registered."]]},
@@ -6131,6 +6140,41 @@ const FIGC={
     return {svg:cone+you+obs+
       `<text class="fg-lbl" x="148" y="20" text-anchor="middle">${esc(p.note||"the room")}</text>`+
       `<text class="fg-lbl" x="148" y="104" text-anchor="middle">${esc(p.count||"")}</text>`};
+  },
+
+  /* #162, from research (tools/figs_research/d3-*.md). Goldstein, Cialdini & Griskevicius (JCR
+     2008), hotel towel reuse: 37.2% for the environmental argument, 44.0% for "75% of guests
+     reuse", 49.3% for "75% of guests who stayed in THIS ROOM". The room card contains no better
+     argument and no new information — only a crowd that is closer to you.
+     DRAWN TO SCALE ON PURPOSE. The lifts are real but modest and the sheet says explicitly not to
+     draw them as a landslide, so the marker sits on a 0-60% track where 37/44/49 land where they
+     actually land. The bigger step is argument -> any crowd, which is the more unsettling half. */
+  nearer(p,A){
+    const st=p.stage||"argument";
+    const X0=26, X1=174, MAXP=60, Y=92;
+    const rate=st==="argument"?37.2:st==="crowd"?44.0:49.3;
+    const mx=(X0+(rate/MAXP)*(X1-X0)).toFixed(1);
+    const scale=`<line x1="${X0}" y1="${Y}" x2="${X1}" y2="${Y}" stroke="${A}" stroke-opacity=".3"/>`+
+      `<text class="fg-lbl" x="${X0}" y="${Y+15}" text-anchor="start">0</text>`+
+      `<text class="fg-lbl" x="${X1}" y="${Y+15}" text-anchor="end">60%</text>`;
+    const marker=`<circle class="fg-mark" cx="${mx}" cy="${Y}" r="6" fill="${A}" stroke="none"/>`+
+      `<text class="fg-lbl fg-mark" x="${mx}" y="${Y-12}" text-anchor="middle">${rate.toFixed(1)}%</text>`;
+    const you=`<circle cx="34" cy="42" r="8" fill="${A}" fill-opacity=".9" stroke="none"/>`+
+      `<text class="fg-lbl" x="34" y="66" text-anchor="middle">${esc(p.you||"you")}</text>`;
+    // the crowd's DISTANCE is the only variable that changes between stages two and three
+    let crowd="";
+    if(st!=="argument"){
+      const near=st==="near", bx=near?74:126;
+      for(let i=0;i<6;i++)
+        crowd+=`<circle class="fg-crowd" cx="${bx+(i%3)*17}" cy="${28+Math.floor(i/3)*22}" r="6" `+
+          `fill="${A}" fill-opacity="${near?".8":".4"}" stroke="none"/>`;
+      crowd+=`<text class="fg-lbl" x="${bx+17}" y="${near?76:76}" text-anchor="middle">`+
+        `${esc(p.who||(near?"people like you":"people"))}</text>`;
+    } else {
+      crowd=`<rect x="112" y="24" width="52" height="34" rx="4" stroke="${A}" stroke-opacity=".5" `+
+        `fill="none"/><text class="fg-lbl" x="138" y="70" text-anchor="middle">${esc(p.who||"an argument")}</text>`;
+    }
+    return {svg:scale+crowd+you+marker};
   },
 
   pacer(p,A){

@@ -44,6 +44,8 @@ FIG_COMPONENTS = {
     "tape",
     # #162: how visible you feel versus how visible you are
     "spotlight",
+    # #162: the same message with the crowd moved closer, drawn to scale
+    "nearer",
 }
 
 
