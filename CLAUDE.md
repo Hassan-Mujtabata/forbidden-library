@@ -458,3 +458,41 @@ Applied, it caught real exposure in both directions:
   when exercise stopped") and Boyke 2008 found the same in an elderly cohort. Held.
 Write the corroboration pass into the sheet as its own section, and mark anything still
 single-sourced as SINGLE-SOURCED so the next session can see what is load-bearing and thin.
+
+## Figures: what exists after #162, and the rules that came out of building them
+
+**Eleven figures, both wings.** Light: a1 groove · b2 drift · b5 (Hassan's heartbeat) · b6 suffuse
+· b7 distil · j3 reflex · k1 closure · k3 regress · k8 episode. Shadow: d1 tape · m1 spotlight.
+Every one has a research sheet in `tools/figs_research/` (gitignored + ship-blocked) with sources,
+URLs, the corroboration pass, and what was deliberately NOT claimed. `LOG.md` is the index.
+**Keep both wings covered.** Hassan asked for this explicitly. It is easy to drift into the
+meditation/psychology half because its books have better evidence; the shadow tracks (D, E, M, F)
+need figures too, and Cialdini/Gilovich material grounds as hard as anything on the light side.
+
+**Two failure modes, and a1 vs j3 are the worked examples.** A pre-protocol figure can be FALSE
+(a1 taught paced breathing, which all three meditation books forbid) or TRUE AND EMPTY (j3 was a
+correctly-labelled circle that would fit any four-step cycle). Both ship silently. Audit inherited
+figures before trusting them.
+
+**Draw only what the sources agree on.** When b7's two teachers flatly contradicted each other on
+how you move between jhānas, the figure went SILENT on transitions rather than picking a side.
+A contradiction between good sources is a signal to narrow the claim, not to choose.
+
+**Numbers on the drawing must be generated and verified, not chosen.** k3's nine scores were
+produced as talent+luck and filtered until forward AND backward group means regressed, the visible
+extremes moved in, the spread held, and some individuals still moved outward. Everything else's
+real figures (46/23, 60/94/93, 8 vs 24 minutes, 80%) stays in `feel` lines where it is attributable
+— a numbered curve you invented is a guess wearing data's clothes.
+
+**Cumulative things must not loop.** A gain that resets every eight seconds teaches the opposite of
+what it depicts. `groove`, `suffuse`, `episode`, `tape` are one-shot `forwards`; the ↺ replays.
+
+**VV.figs() guards every figure mechanically** inside VV.all: nothing contracts while visible,
+declared causes finish before effects, event sequences rest ≥12%, and every text node of every
+stage sits inside the viewBox. That last check has caught a real clipped label on three
+consecutive cycles — `VA.fits()` is structurally blind to it because an SVG label overhanging the
+viewBox does not change the `<svg>` element's size.
+
+**When a number is corrected, grep for every place it appears.** j3's "1.96 circuits" was fixed in
+the code and the sheet and missed in the alt text, so screen-reader users had a different claim
+for a release.
