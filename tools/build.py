@@ -46,6 +46,8 @@ FIG_COMPONENTS = {
     "spotlight",
     # #162: the same message with the crowd moved closer, drawn to scale
     "nearer",
+    # #162: the same form, the same stakes, and a different box already ticked
+    "preset",
 }
 
 

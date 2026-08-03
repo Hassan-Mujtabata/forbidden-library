@@ -779,6 +779,10 @@ header .brand span{color:var(--gold)}
 .feltfig .fg-mark{animation:fgmark 4s ease-out 1 forwards}
 @keyframes fgcrowd{0%{opacity:0}35%{opacity:1}100%{opacity:1}}
 .feltfig .fg-crowd{animation:fgcrowd 4s ease-out 1 forwards}
+@keyframes fgtick{0%{opacity:0}30%{opacity:1}100%{opacity:1}}
+.feltfig .fg-tick{animation:fgtick 3.6s ease-out 1 forwards}
+@keyframes fgfill{0%{opacity:0}45%{opacity:1}100%{opacity:1}}
+.feltfig .fg-fill{animation:fgfill 3.6s ease-out 1 forwards}
 /* Off-screen figures stop dead: an animation under the fold is heat for nothing. */
 .feltfig.ff-paused svg *{animation-play-state:paused!important}
 @media (prefers-reduced-motion:reduce){
@@ -838,6 +842,7 @@ header .brand span{color:var(--gold)}
   .feltfig .fg-sees{fill-opacity:.85}
   .feltfig .fg-beam{opacity:1}
   .feltfig .fg-mark,.feltfig .fg-crowd{opacity:1}
+  .feltfig .fg-tick,.feltfig .fg-fill{opacity:1}
 }
 
 /* ---------- top bar + nav ---------- */
@@ -4272,8 +4277,12 @@ $("btn-ach").onclick=()=>{const g=$("achgrid");g.innerHTML="";
   $("achs").classList.add("on")};
 
 /* ---------- patch notes ---------- */
-const APP_VER="3.87";
+const APP_VER="3.88";
 const PATCHES=[
+ {v:"3.88",n:"Which Box Arrived Ticked",d:"4 Aug 2026",items:[
+  ["new","A FOURTH SHADOW-WING DIAGRAM, on controlling the options. A form with two choices — nothing hidden, nobody pressuring you, a free choice by any normal standard. 42% agreed. Then the same form, same question, same stakes, same kind of people, with one difference: which row was already ticked when it reached you. 82%. Double, from moving a tick nobody asked you about."],
+  ["fix","THE OBVIOUS VERSION OF THIS FIGURE WAS THROWN AWAY BEFORE IT WAS DRAWN. “Control the options” points straight at the decoy effect and that famous magazine-subscription story, and the numbers are reported accurately everywhere — but the effect does not hold up. One review ran 91 replication attempts across 23 product categories and only 11 worked. It survives in abstract lab set-ups and mostly vanishes with real products and real stakes. Built on defaults instead, which is registry data plus a controlled experiment."],
+  ["new","The last step drops the numbers and leaves the question: not “which do I want” but what was already set before I got here, and what option isn’t on this form at all. You cannot feel a default — nothing is pushing — which is exactly why you have to go looking for it."]]},
  {v:"3.87",n:"The Argument Came Last",d:"3 Aug 2026",items:[
   ["new","A THIRD SHADOW-WING DIAGRAM, and the finding is genuinely deflating. A hotel asked guests to reuse their towels by making the environmental case — the reasoned appeal, the one that should work. 37.2% complied, and it was the WEAKEST thing they tested. Change the card to say most other guests already reuse theirs, with no new information and no better reasoning, and it goes to 44.0%."],
   ["new","Then say it was guests who stayed in THIS ROOM. The crowd has not got bigger or wiser — only closer to you — and it reaches 49.3%, the best of the lot. There is no sensible reason the previous occupants of your particular room should count for more. Similarity is not an argument, and it works anyway."],
@@ -6175,6 +6184,41 @@ const FIGC={
         `fill="none"/><text class="fg-lbl" x="138" y="70" text-anchor="middle">${esc(p.who||"an argument")}</text>`;
     }
     return {svg:scale+crowd+you+marker};
+  },
+
+  /* #162, from research (tools/figs_research/e2.md). NOT built on the decoy effect, which is the
+     obvious choice for "control the options" and does not replicate: Yang & Lynn (2014) ran 91
+     replication attempts across 23 product categories and only 11 produced a reliable effect.
+     Built instead on defaults — Johnson & Goldstein, Science (2003): flipping opt-in to opt-out
+     moved consent from 42% to 82% with, in their words, identical people and identical stakes.
+     Everything in the frame is identical between the two stages EXCEPT which row arrives already
+     ticked. That is the entire claim, so it has to be the only thing that moves. */
+  preset(p,A){
+    const st=p.stage||"optin";
+    const pct=st==="optin"?42:82;
+    const FX=18, FW=84, R1=42, R2=68;
+    const ticked=st==="optin"?R2:R1;      // which row was already filled in before you arrived
+    const form=`<rect x="${FX}" y="26" width="${FW}" height="60" rx="6" stroke="${A}" `+
+      `stroke-opacity=".45" fill="none"/>`+
+      [R1,R2].map(y=>`<rect x="${FX+10}" y="${y-7}" width="13" height="13" rx="3" stroke="${A}" `+
+        `stroke-opacity=".6" fill="none"/>`).join("")+
+      `<text class="fg-lbl" x="${FX+30}" y="${R1+4}" text-anchor="start">${esc(p.a||"yes")}</text>`+
+      `<text class="fg-lbl" x="${FX+30}" y="${R2+4}" text-anchor="start">${esc(p.b||"no")}</text>`;
+    const mark=`<path class="fg-tick" d="M${FX+13} ${ticked} l3.5 4 l6.5 -8" stroke="${A}" `+
+      `stroke-width="2.6" fill="none"/>`;
+    const BX=116, BW=68, BY=52;
+    const bar=`<rect x="${BX}" y="${BY}" width="${BW}" height="16" rx="4" stroke="${A}" `+
+      `stroke-opacity=".3" fill="none"/>`+
+      `<rect class="fg-fill" x="${BX}" y="${BY}" width="${(pct/100*BW).toFixed(1)}" height="16" `+
+      `rx="4" fill="${A}" fill-opacity=".55" stroke="none"/>`+
+      `<text class="fg-lbl" x="${BX+BW/2}" y="${BY-8}" text-anchor="middle">${pct}% ${esc(p.out||"agreed")}</text>`;
+
+    if(st==="ask")   // the one question that breaks a built menu
+      return {svg:form+
+        `<text class="fg-lbl" x="${BX+BW/2}" y="${BY-8}" text-anchor="middle">${esc(p.q1||"what was")}</text>`+
+        `<text class="fg-lbl" x="${BX+BW/2}" y="${BY+8}" text-anchor="middle">${esc(p.q2||"already ticked?")}</text>`};
+    return {svg:form+mark+bar+
+      `<text class="fg-lbl" x="${FX+FW/2}" y="100" text-anchor="middle">${esc(p.note||"")}</text>`};
   },
 
   pacer(p,A){
