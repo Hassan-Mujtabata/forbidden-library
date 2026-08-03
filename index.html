@@ -4248,8 +4248,11 @@ $("btn-ach").onclick=()=>{const g=$("achgrid");g.innerHTML="";
   $("achs").classList.add("on")};
 
 /* ---------- patch notes ---------- */
-const APP_VER="3.83";
+const APP_VER="3.84";
 const PATCHES=[
+ {v:"3.84",n:"The Description Should Match Too",d:"3 Aug 2026",items:[
+  ["fix","The habit-loop figure’s screen-reader description still said the circuit closes “several times” before you arrive to decide. It closes twice — that number was measured and corrected everywhere else a release ago, and this one description got missed. Anyone using a screen reader was getting a slightly different figure from everyone else."],
+  ["fix","Checked every figure sits under the right paragraph of its lesson, and every screen-reader description actually narrates the sequence rather than just naming the picture. All nine correct."]]},
  {v:"3.83",n:"Saying Only What Is True",d:"3 Aug 2026",items:[
   ["fix","A PASS OVER EVERY NOTE ON EVERY FIGURE, CHECKING EACH CLAIM AGAINST ITS SOURCE. Four were quietly saying more than the evidence does. The juggling note said the brain gain “had gone” after three months without practice; the paper says it decreased, so it now says it faded back. The first-jhāna note said “almost everyone” gives up at the flat stretch — a number neither teacher gives — and now just says people do."],
   ["fix","One note blamed falling back a jhāna on chasing the buzz; the actual warning in the book is about letting the PLEASURE get too strong, which is a different factor. Corrected. And a garbled sentence in the deepening figure now reads as English."]]},
