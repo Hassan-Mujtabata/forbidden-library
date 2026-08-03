@@ -56,6 +56,8 @@ FIG_COMPONENTS = {
     "baseline",
     # #162: the same span seen as one thing, then as discrete arisings
     "frames",
+    # #162: arrivals met or missed, and commentary that is always about the one behind
+    "greet",
 }
 
 

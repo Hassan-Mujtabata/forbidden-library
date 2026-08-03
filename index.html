@@ -799,6 +799,10 @@ header .brand span{color:var(--gold)}
 .feltfig .fg-story{animation:fgstory 3.4s ease-out 1 forwards}
 @keyframes fgframe{0%{opacity:0}30%{opacity:1}100%{opacity:1}}
 .feltfig .fg-frame{animation:fgframe 3.4s ease-out 1 forwards;opacity:0}
+@keyframes fgmet{0%{fill-opacity:.18}45%{fill-opacity:.75}100%{fill-opacity:.75}}
+.feltfig .fg-met{animation:fgmet 3.4s ease-out 1 forwards}
+@keyframes fgtalk{0%{opacity:0}50%{opacity:1}100%{opacity:1}}
+.feltfig .fg-talk{animation:fgtalk 3.4s ease-out 1 forwards}
 /* Off-screen figures stop dead: an animation under the fold is heat for nothing. */
 .feltfig.ff-paused svg *{animation-play-state:paused!important}
 @media (prefers-reduced-motion:reduce){
@@ -865,6 +869,8 @@ header .brand span{color:var(--gold)}
   .feltfig .fg-you{fill-opacity:.95}
   .feltfig .fg-base,.feltfig .fg-held{opacity:1}
   .feltfig .fg-story,.feltfig .fg-frame{opacity:1}
+  .feltfig .fg-met{fill-opacity:.75}
+  .feltfig .fg-talk{opacity:1}
 }
 
 /* ---------- top bar + nav ---------- */
@@ -4299,8 +4305,11 @@ $("btn-ach").onclick=()=>{const g=$("achgrid");g.innerHTML="";
   $("achs").classList.add("on")};
 
 /* ---------- patch notes ---------- */
-const APP_VER="3.92";
+const APP_VER="3.93";
 const PATCHES=[
+ {v:"3.93",n:"Greeting, Or Discussing",d:"4 Aug 2026",items:[
+  ["new","A FIRST DIAGRAM FOR THE MINDFULNESS-IN-PRACTICE TRACK, built on the book’s own image: your mind as a host at a party, greeting each guest as they arrive. Meet each one and let it go and you are actually there for all of them. Stop to remark on one — “that was good”, a perfectly fair remark — and the next arrivals go past unmet. Not because commenting is forbidden, but because attention is finite."],
+  ["new","Then the part worth keeping: look at WHERE the comment sits. It points backwards, at the guest who has already left. Commentary can only ever run a beat late — which means the remark that feels like paying close attention is made entirely out of what has already gone."]]},
  {v:"3.92",n:"Story, Or Frames",d:"4 Aug 2026",items:[
   ["new","A FIRST DIAGRAM FOR THE INSIGHT TRACK. Ordinary attention hands you a thing — this mood, this pain, this wanting — one item, apparently solid, that arrived and is now simply here. Steady the mind and the same stretch resolves into separate arisings. Nothing was added and nothing removed: the same span, seen finely enough to show its seams. A wobbly mind sees the story; a steady mind sees the frames."],
   ["new","The last step names the three marks against those seams without drawing anything new, because that is the actual claim: they are not extra features to hunt for, they are descriptions of what is already there once the resolution is high enough. Each one ends. None is solid enough to stand on. None of them waited for your permission."],
@@ -6381,6 +6390,41 @@ const FIGC={
       `<text class="fg-lbl" x="${X0}" y="${Y-10}" text-anchor="start">${esc(p.a||"each one ends")}</text>`+
       `<text class="fg-lbl" x="100" y="${Y+H+20}" text-anchor="middle">${esc(p.b||"none holds you")}</text>`+
       `<text class="fg-lbl" x="${X1}" y="${Y-10}" text-anchor="end">${esc(p.c3||"none is yours")}</text>`};
+  },
+
+  /* #162, from research (tools/figs_research/h2.md). The lesson's own image: "your mind as a host
+     at a party, greeting each new guest — each experience — as it arrives. If you engage in
+     conversation with one guest, you miss the next." Brahm elsewhere in the same book: "you are
+     dealing with old visitors and neglecting the new arrivals."
+     The commentary ATTACHES TO THE DEPARTED GUEST — the faint dot behind the host, never to one
+     still arriving — because the lesson's other claim is that it is "always retrospective", an
+     opinion about what has already gone past. The speech box itself has to sit high and wide
+     enough to hold the words, so it is the POINTER that carries the claim, not the box. */
+  greet(p,A){
+    const st=p.stage||"meeting", HX=64, Y=56, G=[96,120,144,168];
+    const host=`<circle cx="${HX}" cy="${Y}" r="9" fill="${A}" fill-opacity=".9" stroke="none"/>`+
+      `<text class="fg-lbl" x="${HX}" y="${Y+24}" text-anchor="middle">${esc(p.host||"you")}</text>`;
+    // stuck === busy with the one that already went past; unmet guests keep arriving anyway
+    const stuck=st!=="meeting";
+    let s="";
+    G.forEach((x,i)=>{
+      const met=st==="meeting"||i===0;
+      s+=`<circle class="${met?"fg-met":"fg-unmet"}" cx="${x}" cy="${Y}" r="6.5" fill="${A}" `+
+        `fill-opacity="${met?".75":".18"}" stroke="none"/>`;
+    });
+    const arrow=`<path d="M${G[3]+14} ${Y} l-9 -5 l0 10 Z" fill="${A}" fill-opacity=".45" stroke="none"/>`;
+    if(!stuck)
+      return {svg:host+s+arrow+
+        `<text class="fg-lbl" x="130" y="24" text-anchor="middle">${esc(p.n||"each one met, then let go")}</text>`};
+    // the pointer runs from the box down to the departed guest at x=34, behind the host
+    const back=`<circle cx="34" cy="${Y}" r="6.5" fill="${A}" fill-opacity=".3" stroke="none"/>`+
+      `<rect class="fg-talk" x="6" y="${Y-34}" width="92" height="18" rx="5" stroke="${A}" `+
+      `stroke-opacity=".6" fill="none"/>`+
+      `<text class="fg-lbl fg-talk" x="13" y="${Y-22}" text-anchor="start">${esc(p.say||"that was good")}</text>`+
+      `<path class="fg-talk" d="M30 ${Y-16} l4 8" stroke="${A}" stroke-opacity=".6" stroke-width="1.6"/>`;
+    return {svg:back+host+s+arrow+
+      `<text class="fg-lbl" x="128" y="24" text-anchor="middle">`+
+      `${esc(st==="stuck"?(p.n||"these arrive unmet"):(p.n||"always about the last one"))}</text>`};
   },
 
   pacer(p,A){
