@@ -676,6 +676,26 @@ header .brand span{color:var(--gold)}
   85%{stroke-dashoffset:-100;opacity:.95}92%{stroke-dashoffset:-100;opacity:0}
   100%{stroke-dashoffset:-100;opacity:0}}
 .feltfig .fg-auto{animation:fgauto 2.6s linear infinite}
+/* #162 suffuse. The two flat stretches are the content — they are where practice gets abandoned
+   or meddled with — so they occupy 42% of the cycle between them and must not be trimmed to make
+   the animation feel snappier. r only ever grows; the collapse in "helping" is an opacity fade at
+   held size, never a contraction. One-shot: this is one sit crossing a threshold, and a loop
+   would say it floods and un-floods every few seconds. */
+@keyframes fgsoakgo{0%,8%{r:0}18%{r:17}38%{r:17}          /* rise, then hang out */
+  46%{r:29}68%{r:29}                                       /* rise, then hang out again */
+  82%{r:132}100%{r:132}}                                   /* critical level: it takes off */
+.feltfig .fg-soakgo{animation:fgsoakgo 11s cubic-bezier(.4,0,.2,1) 1 forwards}
+@keyframes fgwait1{0%,14%{opacity:0}22%{opacity:.75}62%{opacity:.75}70%{opacity:0}100%{opacity:0}}
+.feltfig .fg-wait1{animation:fgwait1 11s ease-in-out 1 forwards}
+@keyframes fgsoakstop{0%,10%{r:0;opacity:1}26%{r:16;opacity:1}38%{r:16;opacity:1}
+  62%{r:16;opacity:0}100%{r:16;opacity:0}}
+.feltfig .fg-soakstop{animation:fgsoakstop 7s ease-out 1 forwards}
+@keyframes fgpoke{0%,30%{opacity:0}34%{opacity:.95}100%{opacity:.95}}
+.feltfig .fg-poke{animation:fgpoke 7s step-end 1 forwards}
+@keyframes fgsoakfind{0%{r:0}30%{r:9}100%{r:9}}
+.feltfig .fg-soakfind{animation:fgsoakfind 6s ease-out 1 forwards}
+@keyframes fgtoward{0%{transform:translate(0,0)}70%,100%{transform:translate(38px,-30px)}}
+.feltfig .fg-toward{animation:fgtoward 6s cubic-bezier(.4,0,.3,1) 1 forwards;transform-box:view-box}
 /* Off-screen figures stop dead: an animation under the fold is heat for nothing. */
 .feltfig.ff-paused svg *{animation-play-state:paused!important}
 @media (prefers-reduced-motion:reduce){
@@ -705,6 +725,13 @@ header .brand span{color:var(--gold)}
   .feltfig .fg-worn{stroke-opacity:.9;stroke-width:5.5}
   .feltfig .fg-starve{stroke-opacity:.1}
   .feltfig .fg-auto{opacity:.7;stroke-dashoffset:-46}
+  /* #162: frozen, each suffuse stage shows the state it arrives at — located, collapsed, flooded */
+  .feltfig .fg-soakfind{r:9}
+  .feltfig .fg-toward{transform:translate(38px,-30px)}
+  .feltfig .fg-soakstop{r:16;opacity:0}
+  .feltfig .fg-poke{opacity:.95}
+  .feltfig .fg-soakgo{r:132}
+  .feltfig .fg-wait1{opacity:0}
 }
 
 /* ---------- top bar + nav ---------- */
@@ -4139,8 +4166,12 @@ $("btn-ach").onclick=()=>{const g=$("achgrid");g.innerHTML="";
   $("achs").classList.add("on")};
 
 /* ---------- patch notes ---------- */
-const APP_VER="3.75";
+const APP_VER="3.76";
 const PATCHES=[
+ {v:"3.76",n:"Wait Through The Flat Part",d:"3 Aug 2026",items:[
+  ["new","A FIGURE FOR THE FIRST JHĀNA, and it is mostly about the boring part. Something mildly pleasant is already there once attention steadies — you don’t manufacture it, you move over to it. Leave it completely alone and it climbs in steps, with flat stretches where nothing seems to be happening, and then it crosses a line and floods the whole field. Half of that animation is deliberately flat, because the flat part is where almost everyone gives up or starts helping."],
+  ["new","The middle step shows the mistake on purpose: it lifts a little, you think “oh — is it working?”, and it’s gone. Checking is not neutral — it is itself the doing that stops it. Two teachers from different traditions say the same thing independently: helping “will only make it go away”, and silence is shy — if she hears you talking about her she vanishes."],
+  ["fix","Mild is correct, and the figure says so. Beginners expect fireworks and walk past the real thing because it was too ordinary to count."]]},
  {v:"3.75",n:"A Route Gets Worn In",d:"3 Aug 2026",items:[
   ["fix","THE VERY FIRST FIGURE IN THE VAULT WAS TEACHING THE WRONG THING — twice over. “Why Train the Mind” never mentions breathing, yet it carried a breathing pacer telling you to breathe 6 seconds in, 6 seconds out. Worse, every meditation book in your library explicitly forbids that: Brasington says it is “extremely important to not control the breath in any way” because pacing makes it too easy to stay focused and you never build real concentration; Brahm says controlling the breath “produces only discomfort”; The Mind Illuminated says breathe naturally and be a passive observer. That figure is gone."],
   ["new","IN ITS PLACE, THE LESSON’S ACTUAL CLAIM: what you repeatedly attend to strengthens, and what you starve fades. Attention travels a route; each completed trip leaves it a little easier than before. Stop travelling it and it goes back — the same rule running the other way. Then the turn: the routes you call your personality got thick by exactly this mechanism, worn in by repetition you never sat down and chose. “I’m just not a focused person” is a well-travelled route, not a fixed fact."],
@@ -5491,6 +5522,7 @@ const fRings=(A,x,y,n,rate,strength,delay)=>{
   return s;
 };
 
+let FIG_UID=0;   // unique ids for per-instance <defs> (clip paths, gradients)
 const FIGC={
   /* --- bodies. Each publishes the anchors that make `pressure` teachable. --- */
   hand(p,A){
@@ -5633,6 +5665,50 @@ const FIGC={
     // the route you never sat down and chose, running fast and unattended
     return {svg:route(UP,"",".45","3.2")+route(DN,"",".85","6")+trip(DN,"fg-auto")+origin+
       lbl(192,22,p.a||"what you chose")+lbl(192,106,p.b||"just how I am")};
+  },
+
+  /* #162, from research (tools/figs_research/b6.md). The Visuddhimagga's own simile for the first
+     jhāna is a bath-maker kneading water through soap-powder until the whole ball is saturated —
+     so this saturates a field, it does not plot a curve. A graph of intensity-over-time would be
+     accurate and cold, and would be the b2 mistake again: drawing ABOUT the thing.
+     The step-plateau-step-takeoff timing is not styling. Brasington: "this will not happen in a
+     linear way. At first, nothing happens. Then it'll grow a little bit … then hang out … and
+     then eventually, it will suddenly take off." Brahm, independently, explains why it takes off:
+     "stillness deepens pīti-sukha, and pīti-sukha increases the stillness. A self-reinforcing
+     feedback process ensues … the power will reach a critical level."
+     The saturation is CLIPPED to the field so growth reads as the field filling up rather than as
+     a circle inflating on top of it. */
+  suffuse(p,A){
+    const st=p.stage||"handsoff";        // "find" | "helping" | "handsoff"
+    // counter lives outside FIGC: a key on FIGC would answer a component lookup truthily
+    const id="fgsf"+(++FIG_UID);
+    const FIELD=`<rect x="26" y="24" width="148" height="72" rx="34"/>`;
+    // the pleasant point sits off-centre on purpose: Brasington is explicit that the LOCATION is
+    // not the point, so a neatly centred glow would be quietly making a claim the books deny
+    const px=76, py=52;
+    const defs=`<defs><clipPath id="${id}">${FIELD}</clipPath>`+
+      `<radialGradient id="${id}g"><stop offset="0" stop-color="${A}" stop-opacity=".85"/>`+
+      `<stop offset="1" stop-color="${A}" stop-opacity=".05"/></radialGradient></defs>`;
+    const frame=`<rect x="26" y="24" width="148" height="72" rx="34" stroke="${A}" `+
+      `stroke-opacity=".35" fill="none"/>`;
+    const soak=cls=>`<g clip-path="url(#${id})"><circle class="${cls}" cx="${px}" cy="${py}" `+
+      `r="0" fill="url(#${id}g)" stroke="none"/></g>`;
+    const seed=`<circle cx="${px}" cy="${py}" r="4" fill="${A}" stroke="none" fill-opacity=".9"/>`;
+
+    if(st==="find")                      // it is already there before anything is done
+      return {svg:defs+frame+soak("fg-soakfind")+seed+
+        `<circle class="fg-toward" cx="34" cy="86" r="5" fill="${A}" stroke="none"/>`+
+        `<text class="fg-lbl" x="100" y="112" text-anchor="middle">${esc(p.note||"already there")}</text>`};
+
+    if(st==="helping")                   // the check IS the doing. It lifts, you poke, it is gone.
+      return {svg:defs+frame+soak("fg-soakstop")+seed+
+        `<g class="fg-poke"><path d="M150 12 L128 40" stroke="${A}" stroke-width="2.4"/>`+
+        `<path d="M128 40 l10 -2 l-2 10" stroke="${A}" stroke-width="2.4" fill="none"/></g>`+
+        `<text class="fg-lbl fg-poke" x="196" y="10" text-anchor="end">${esc(p.ask||"is it working?")}</text>`};
+
+    // left alone: two flat stretches, then it crosses a line and floods
+    return {svg:defs+frame+soak("fg-soakgo")+seed+
+      `<text class="fg-lbl fg-wait1" x="100" y="112" text-anchor="middle">${esc(p.wait||"nothing seems to happen")}</text>`};
   },
 
   pacer(p,A){

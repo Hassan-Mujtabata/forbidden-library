@@ -28,6 +28,8 @@ FIG_COMPONENTS = {
     "drift", "two", "ladder",
     # #162: a route that gets easier the more it is travelled, and goes back when it isn't
     "groove",
+    # #162: a field saturating from an already-present point, in steps with flat stretches
+    "suffuse",
 }
 
 
