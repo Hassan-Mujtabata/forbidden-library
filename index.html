@@ -747,6 +747,20 @@ header .brand span{color:var(--gold)}
 .feltfig .fg-fwd,.feltfig .fg-back{stroke-dasharray:100;animation:fgdraw 4.5s ease-out 1 forwards}
 .feltfig .fg-back{stroke-dashoffset:-100;animation-name:fgdrawback}
 @keyframes fgdrawback{0%{stroke-dashoffset:-100}70%{stroke-dashoffset:0}100%{stroke-dashoffset:0}}
+/* #162 episode. The lived area accumulates; then it drains and only two moments remain. The
+   draining is an opacity fade at full size, never a contraction — what is lost is kept, it just
+   stops being counted. The extension in stage three ADDS area (strictly more pain) while the
+   ending gets gentler, which is the whole paradox in one frame. */
+@keyframes fgtrace{0%{stroke-dashoffset:100}75%{stroke-dashoffset:0}100%{stroke-dashoffset:0}}
+.feltfig .fg-line{stroke-dasharray:100;animation:fgtrace 5s ease-out 1 forwards}
+@keyframes fgarea{0%,10%{opacity:0}85%,100%{opacity:1}}
+.feltfig .fg-area{animation:fgarea 5s ease-out 1 forwards}
+@keyframes fgfade{0%,30%{opacity:1}75%,100%{opacity:.12}}
+.feltfig .fg-fade{animation:fgfade 5s ease-in-out 1 forwards}
+@keyframes fgkeep{0%,45%{opacity:0}62%{opacity:1}100%{opacity:1}}
+.feltfig .fg-keep{animation:fgkeep 5s ease-out 1 forwards}
+@keyframes fgextra{0%,25%{opacity:0}60%{opacity:1}100%{opacity:1}}
+.feltfig .fg-extra{animation:fgextra 5s ease-out 1 forwards}
 /* Off-screen figures stop dead: an animation under the fold is heat for nothing. */
 .feltfig.ff-paused svg *{animation-play-state:paused!important}
 @media (prefers-reduced-motion:reduce){
@@ -797,6 +811,9 @@ header .brand span{color:var(--gold)}
   .feltfig .fg-dim{stroke-opacity:.4}
   .feltfig .fg-odd{opacity:.95}
   .feltfig .fg-fwd,.feltfig .fg-back{stroke-dasharray:none;stroke-dashoffset:0}
+  .feltfig .fg-line{stroke-dasharray:none;stroke-dashoffset:0}
+  .feltfig .fg-area,.feltfig .fg-keep,.feltfig .fg-extra{opacity:1}
+  .feltfig .fg-fade{opacity:.12}
 }
 
 /* ---------- top bar + nav ---------- */
@@ -4231,8 +4248,12 @@ $("btn-ach").onclick=()=>{const g=$("achgrid");g.innerHTML="";
   $("achs").classList.add("on")};
 
 /* ---------- patch notes ---------- */
-const APP_VER="3.80";
+const APP_VER="3.81";
 const PATCHES=[
+ {v:"3.81",n:"Strictly Worse, Fondly Remembered",d:"3 Aug 2026",items:[
+  ["new","A FIGURE FOR THE GAP BETWEEN LIVING SOMETHING AND REMEMBERING IT. First an unpleasant stretch of time as it was actually lived — the whole shaded area is what you went through. Then what memory keeps: roughly the worst moment and the last moment. Everything else, including how long it went on, quietly stops counting. Two real patients had the same procedure, one for 8 minutes and one for 24, and the duration made no difference whatsoever to how badly they rated it afterwards."],
+  ["new","Then the sting. Add extra time at the end that still hurts, just less. You have now had strictly MORE pain — the longer version contains the shorter one entirely — and you remember it as better, because it finished more kindly. Offered the choice, 80% picked the longer one to repeat, volunteering for 30 seconds of pain they did not have to take."],
+  ["fix","The curve carries no numbers on purpose. Exact figures exist for the clinical study but not for a moment-by-moment profile of the other one, so a numbered curve would be a guess dressed as data. Every real number appears in the note under the caption, where it can be attributed."]]},
  {v:"3.80",n:"Run It Backwards",d:"3 Aug 2026",items:[
   ["new","A FIGURE FOR THE MOST USEFUL STATISTICAL IDEA IN THE BOOK. Nine performers, two attempts each. The ones furthest from average the first time land closer to it the second time — with nothing done to them in between. Kahneman demonstrated this to a room of flight instructors by having them throw coins at a target with their backs turned: no skill involved whatsoever, and the pattern showed up anyway."],
   ["new","Then the trap: praise your best performer and they do worse next time; shout at your worst and they improve. Both would have happened regardless. An instructor told Kahneman that praise was useless and shouting worked — his observation was correct and his conclusion was wrong. As Kahneman puts it, we are statistically punished for being nice and rewarded for being nasty."],
@@ -5967,6 +5988,50 @@ const FIGC={
     }
     return {svg:base+links+dots+cols+
       (st==="backwards"?`<text class="fg-lbl" x="100" y="16" text-anchor="middle">${esc(p.note||"same pattern, run backwards")}</text>`:"")};
+  },
+
+  /* #162, from research (tools/figs_research/k8.md). The cold-hand study's design is the argument:
+     the long trial CONTAINS the short one — the same 60 seconds plus 30 more of milder pain — so
+     it is strictly worse, and "fully 80% of the participants … opted to repeat it, thereby
+     declaring themselves willing to suffer 30 seconds of needless pain."
+     The curve is schematic and carries NO numbers on the drawing: Kahneman gives exact figures for
+     the colonoscopy patients (peak-end 7.5 vs 4.5, 8 min vs 24 min) but not a moment-by-moment
+     cold-hand profile, so inventing one and labelling it would be dressing a guess as data. The
+     real numbers live in the `feel` lines where they can be attributed. */
+  episode(p,A){
+    const st=p.stage||"lived";
+    const X0=26, X1=140, X2=174, BASE=96, TOP=28;
+    // pain over time: climbs, holds high, and for the long trial eases off without ever stopping
+    const short="M26 96 L44 42 L66 34 L92 40 L116 33 L140 44";
+    const tail=" L156 62 L174 72";
+    const peakX=116, peakY=33, endX=140, endY=44, lendX=174, lendY=72;
+    const axis=`<line x1="${X0}" y1="${BASE}" x2="${X2}" y2="${BASE}" stroke="${A}" stroke-opacity=".3"/>`+
+      `<text class="fg-lbl" x="${X0}" y="110" text-anchor="start">${esc(p.t0||"time")}</text>`;
+    const dot=(x,y,cls)=>`<circle class="${cls||""}" cx="${x}" cy="${y}" r="5" fill="${A}" stroke="none"/>`;
+
+    if(st==="lived"){          // the area under the curve is what was actually undergone
+      return {svg:axis+
+        `<path class="fg-area" d="${short} L${endX} ${BASE} L${X0} ${BASE} Z" fill="${A}" fill-opacity=".18" stroke="none"/>`+
+        `<path class="fg-line" d="${short}" stroke="${A}" stroke-width="2.6" fill="none" pathLength="100"/>`+
+        `<text class="fg-lbl" x="100" y="18" text-anchor="middle">${esc(p.note||"every moment of it")}</text>`};
+    }
+    if(st==="kept"){           // memory keeps two moments and discards the duration
+      return {svg:axis+
+        `<path class="fg-fade" d="${short} L${endX} ${BASE} L${X0} ${BASE} Z" fill="${A}" fill-opacity=".18" stroke="none"/>`+
+        `<path class="fg-fade" d="${short}" stroke="${A}" stroke-width="2.6" fill="none"/>`+
+        dot(peakX,peakY,"fg-keep")+dot(endX,endY,"fg-keep")+
+        `<text class="fg-lbl fg-keep" x="${peakX}" y="${peakY-11}" text-anchor="middle">${esc(p.pk||"peak")}</text>`+
+        `<text class="fg-lbl fg-keep" x="${endX+4}" y="${endY-11}" text-anchor="start">${esc(p.en||"end")}</text>`};
+    }
+    // the longer episode: strictly more pain, and a gentler ending
+    return {svg:axis+
+      `<path d="${short}" stroke="${A}" stroke-opacity=".45" stroke-width="2.6" fill="none"/>`+
+      `<path class="fg-extra" d="M${endX} ${endY}${tail} L${lendX} ${BASE} L${endX} ${BASE} Z" `+
+      `fill="${A}" fill-opacity=".2" stroke="none"/>`+
+      `<path class="fg-extra" d="M${endX} ${endY}${tail}" stroke="${A}" stroke-width="2.6" fill="none"/>`+
+      dot(peakX,peakY,"")+dot(lendX,lendY,"fg-extra")+
+      `<text class="fg-lbl" x="${peakX}" y="${peakY-11}" text-anchor="middle">${esc(p.pk||"same peak")}</text>`+
+      `<text class="fg-lbl fg-extra" x="${lendX}" y="${lendY+16}" text-anchor="end">${esc(p.en2||"gentler end")}</text>`};
   },
 
   pacer(p,A){

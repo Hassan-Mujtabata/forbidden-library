@@ -38,6 +38,8 @@ FIG_COMPONENTS = {
     "closure",
     # #162: two attempts, talent plus luck, and the same pattern with the clock reversed
     "regress",
+    # #162: an experience profile over time — what was lived vs what memory keeps
+    "episode",
 }
 
 
