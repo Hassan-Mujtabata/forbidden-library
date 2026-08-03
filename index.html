@@ -771,6 +771,10 @@ header .brand span{color:var(--gold)}
 @keyframes fgstop{0%{transform:translate(0,0);opacity:1}48%{transform:translate(52px,0);opacity:1}
   60%{transform:translate(46px,0);opacity:1}100%{transform:translate(46px,0);opacity:1}}
 .feltfig .fg-stop{animation:fgstop 4.5s ease-out 1 forwards;transform-box:view-box}
+@keyframes fgsees{0%{fill-opacity:.16}60%{fill-opacity:.85}100%{fill-opacity:.85}}
+.feltfig .fg-sees{animation:fgsees 4s ease-out 1 forwards}
+@keyframes fgbeam{0%{opacity:0}55%,100%{opacity:1}}
+.feltfig .fg-beam{animation:fgbeam 4s ease-out 1 forwards}
 /* Off-screen figures stop dead: an animation under the fold is heat for nothing. */
 .feltfig.ff-paused svg *{animation-play-state:paused!important}
 @media (prefers-reduced-motion:reduce){
@@ -827,6 +831,8 @@ header .brand span{color:var(--gold)}
   .feltfig .fg-tok{transform:translate(61px,0)}
   .feltfig .fg-run2{opacity:1}
   .feltfig .fg-stop{transform:translate(46px,0)}
+  .feltfig .fg-sees{fill-opacity:.85}
+  .feltfig .fg-beam{opacity:1}
 }
 
 /* ---------- top bar + nav ---------- */
@@ -4261,8 +4267,11 @@ $("btn-ach").onclick=()=>{const g=$("achgrid");g.innerHTML="";
   $("achs").classList.add("on")};
 
 /* ---------- patch notes ---------- */
-const APP_VER="3.85";
+const APP_VER="3.86";
 const PATCHES=[
+ {v:"3.86",n:"Half As Watched As You Think",d:"3 Aug 2026",items:[
+  ["new","A SECOND DIAGRAM FOR THE SHADOW WING. Trying a friendly signal on purpose feels enormously conspicuous — it seems obvious the room can see you working at it. Students made to wear a deliberately embarrassing shirt guessed 46% of the room would remember it. The real figure was 23%. Almost exactly half."],
+  ["new","The two steps are drawn identically on purpose — same room, same person, same moment — and differ only in how many people are lit up and how bright the beam is, because that is exactly what the experiment found: nothing changes except the estimate. Most of the awkwardness you are managing is happening inside you, and you are grading yourself on a performance almost nobody registered."]]},
  {v:"3.85",n:"Click, And The Tape Runs",d:"3 Aug 2026",items:[
   ["new","THE SHADOW WING HAS ITS FIRST DIAGRAM, and it is the one the whole wing hangs off. Nobody has the bandwidth to weigh every request from scratch, so a trigger arrives and a whole prepared response runs off the back of it. Asked plainly to skip a photocopier queue, 60% of people said yes. Given a real reason — “because I’m in a rush” — 94% did."],
   ["new","THEN THE PART THAT SHOULD BOTHER YOU. The third version of that request was “because I have to make copies”, which says nothing whatsoever. It still got 93%. The word “because” was doing the work, not the reason — so the empty token is drawn exactly the same size as the real one, because from the outside they ARE the same object."],
@@ -6098,6 +6107,30 @@ const FIGC={
       token(false,"fg-stop")+
       `<path class="fg-stop" d="M${GX-14} ${GY-16} L${GX-14} ${GY+16}" stroke="${A}" stroke-width="2.6"/>`+
       lbl(41,30,p.tok||"nothing in it")+lbl(142,30,p.out||"now they read it")};
+  },
+
+  /* #162, from research (tools/figs_research/m1.md). Gilovich, Medvec & Savitsky (2000): students
+     wearing an embarrassing shirt estimated 46% of the room would remember it; 23% actually did.
+     Almost exactly double. So the two stages differ ONLY in how many observers are lit and how
+     bright the beam is — same room, same person, same everything else, because the finding is
+     that nothing about the situation changed except the estimate. */
+  spotlight(p,A){
+    const st=p.stage||"felt";
+    const N=8, lit=st==="felt"?4:2;          // 4/8 vs 2/8 holds the measured 2:1 ratio
+    const beam=st==="felt"?".38":".12";
+    const you=`<circle cx="36" cy="76" r="9" fill="${A}" fill-opacity=".9" stroke="none"/>`+
+      `<text class="fg-lbl" x="36" y="100" text-anchor="middle">${esc(p.you||"you")}</text>`;
+    const cone=`<path class="fg-beam" d="M36 16 L14 72 L58 72 Z" fill="${A}" fill-opacity="${beam}" `+
+      `stroke="none"/>`;
+    let obs="";
+    for(let i=0;i<N;i++){
+      const x=88+(i%4)*30, y=i<4?44:76, on=i<lit;
+      obs+=`<circle class="${on?"fg-sees":""}" cx="${x}" cy="${y}" r="7" fill="${A}" `+
+        `fill-opacity="${on?".85":".16"}" stroke="none"/>`;
+    }
+    return {svg:cone+you+obs+
+      `<text class="fg-lbl" x="148" y="20" text-anchor="middle">${esc(p.note||"the room")}</text>`+
+      `<text class="fg-lbl" x="148" y="104" text-anchor="middle">${esc(p.count||"")}</text>`};
   },
 
   pacer(p,A){

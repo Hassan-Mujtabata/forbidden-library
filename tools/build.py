@@ -42,6 +42,8 @@ FIG_COMPONENTS = {
     "episode",
     # #162: a trigger feature entering a gate and running a whole prepared response
     "tape",
+    # #162: how visible you feel versus how visible you are
+    "spotlight",
 }
 
 
