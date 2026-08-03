@@ -696,6 +696,25 @@ header .brand span{color:var(--gold)}
 .feltfig .fg-soakfind{animation:fgsoakfind 6s ease-out 1 forwards}
 @keyframes fgtoward{0%{transform:translate(0,0)}70%,100%{transform:translate(38px,-30px)}}
 .feltfig .fg-toward{animation:fgtoward 6s cubic-bezier(.4,0,.3,1) 1 forwards;transform-box:view-box}
+/* #162 distil. The departing factor FADES OUT at full size (never shrinks), and the remainder
+   only brightens once it has completely gone — releasing comes first, the gain follows. The
+   damping must reach true zero on screen: Brahm's second jhāna is "everything stands perfectly
+   still, even the knower", and a wobble that merely slows down would be a different claim. */
+@keyframes fgshed{0%{opacity:1}40%{opacity:0}100%{opacity:0}}
+.feltfig .fg-shed{animation:fgshed 7s ease-in-out 1 forwards}
+@keyframes fggain{0%,44%{stroke-opacity:.45;fill-opacity:.5}82%,100%{stroke-opacity:.95;fill-opacity:.9}}
+.feltfig .fg-gain{animation:fggain 7s ease-out 1 forwards}
+@keyframes fgwob{0%,100%{transform:translate(-2.6px,0)}50%{transform:translate(2.6px,0)}}
+.feltfig .fg-wob{animation:fgwob 2.2s ease-in-out infinite}
+@keyframes fgdamp{0%{transform:translate(-2.6px,0)}6%{transform:translate(2.6px,0)}
+  13%{transform:translate(-2.2px,0)}20%{transform:translate(1.8px,0)}
+  27%{transform:translate(-1.3px,0)}34%{transform:translate(.9px,0)}
+  41%{transform:translate(-.5px,0)}48%{transform:translate(.2px,0)}
+  55%,100%{transform:translate(0,0)}}
+.feltfig .fg-damp{animation:fgdamp 7s linear 1 forwards}
+@keyframes fgbuzz{0%,100%{transform:translate(0,0)}25%{transform:translate(.9px,-.7px)}
+  50%{transform:translate(-.8px,.6px)}75%{transform:translate(.6px,.8px)}}
+.feltfig .fg-buzz{animation:fgbuzz .18s linear infinite;transform-box:fill-box;transform-origin:center}
 /* Off-screen figures stop dead: an animation under the fold is heat for nothing. */
 .feltfig.ff-paused svg *{animation-play-state:paused!important}
 @media (prefers-reduced-motion:reduce){
@@ -732,6 +751,10 @@ header .brand span{color:var(--gold)}
   .feltfig .fg-poke{opacity:.95}
   .feltfig .fg-soakgo{r:132}
   .feltfig .fg-wait1{opacity:0}
+  /* #162: frozen, each jhāna shows its settled state — the factor gone, the rest at full strength */
+  .feltfig .fg-shed{opacity:0}
+  .feltfig .fg-gain{stroke-opacity:.95;fill-opacity:.9}
+  .feltfig .fg-wob,.feltfig .fg-damp,.feltfig .fg-buzz{transform:none}
 }
 
 /* ---------- top bar + nav ---------- */
@@ -4166,8 +4189,12 @@ $("btn-ach").onclick=()=>{const g=$("achgrid");g.innerHTML="";
   $("achs").classList.add("on")};
 
 /* ---------- patch notes ---------- */
-const APP_VER="3.76";
+const APP_VER="3.77";
 const PATCHES=[
+ {v:"3.77",n:"Less, And Therefore More",d:"3 Aug 2026",items:[
+  ["new","THE DEEPER JHĀNAS, DRAWN AS SUBTRACTION. Four rings, and at each level the outermost one is released rather than anything being added. The first still has a fine wobble in it — an involuntary movement back into the pleasure and a grasping at it. Let that go and the movement stops outright. Then the rapture itself, the buzz you were so pleased to find, reads as coarse and goes too. What is finally left is a single steady core. Happiness went up at every step and every step was a subtraction."],
+  ["fix","Drawn as concentric rings rather than a ladder of rungs on purpose. A ladder would tell the accumulation story — higher means more — which is exactly the mistake this lesson exists to correct. Chasing the bigger feeling is what drops you back a level."],
+  ["fix","The figure deliberately does NOT show how you move between levels. The two teachers this vault draws on flatly contradict each other there — one describes steering across, the other says it cannot be done from inside — so the figure shows only what they both describe identically: what is present at each level, and what it is like."]]},
  {v:"3.76",n:"Wait Through The Flat Part",d:"3 Aug 2026",items:[
   ["new","A FIGURE FOR THE FIRST JHĀNA, and it is mostly about the boring part. Something mildly pleasant is already there once attention steadies — you don’t manufacture it, you move over to it. Leave it completely alone and it climbs in steps, with flat stretches where nothing seems to be happening, and then it crosses a line and floods the whole field. Half of that animation is deliberately flat, because the flat part is where almost everyone gives up or starts helping."],
   ["new","The middle step shows the mistake on purpose: it lifts a little, you think “oh — is it working?”, and it’s gone. Checking is not neutral — it is itself the doing that stops it. Two teachers from different traditions say the same thing independently: helping “will only make it go away”, and silence is shy — if she hears you talking about her she vanishes."],
@@ -5709,6 +5736,55 @@ const FIGC={
     // left alone: two flat stretches, then it crosses a line and floods
     return {svg:defs+frame+soak("fg-soakgo")+seed+
       `<text class="fg-lbl fg-wait1" x="100" y="112" text-anchor="middle">${esc(p.wait||"nothing seems to happen")}</text>`};
+  },
+
+  /* #162, from research (tools/figs_research/b7.md). CONCENTRIC, not a rising ladder: the lesson
+     is unification and subtraction, and a ladder of rungs would tell the accumulation story that
+     is the exact beginner error ("higher must mean more"). Each level sheds the coarsest thing
+     still present and what remains gets finer — Brasington: sukha "is a more subtle object …
+     it takes a more concentrated mind"; Brahm: "such bliss is even more pleasurable, hugely so …
+     one could not have anticipated such bliss."
+     Deliberately NOT drawn: how you get from one level to the next. Brasington says you steer
+     ("a foreground-background reversal"), Brahm says you cannot ("one cannot increase the
+     strength of letting-go momentum while inside the jhānas"). Two sources, flat contradiction,
+     so the figure stays silent on it and shows only the series, which they describe identically.
+     Also avoids "thought" for vitakka/vicāra — Brahm rejects that reading outright — and uses the
+     lesson's own word, "the steering", which is true either way. */
+  distil(p,A){
+    const st=p.stage||"first", CX=100, CY=58;
+    const ring=(r,cls,op)=>`<circle class="${cls||""}" cx="${CX}" cy="${CY}" r="${r}" stroke="${A}" `+
+      `stroke-opacity="${op}" fill="none" stroke-width="2.4"/>`;
+    const core=cls=>`<circle class="${cls||""}" cx="${CX}" cy="${CY}" r="10" fill="${A}" `+
+      `stroke="none" fill-opacity=".5"/>`;
+    // the top label leaves WITH its factor — except in the first jhāna, where nothing is leaving
+    const gone=(t,shed)=>`<text class="fg-lbl${shed?" fg-shed":""}" x="${CX}" y="15" `+
+      `text-anchor="middle">${esc(t)}</text>`;
+    const held=t=>`<text class="fg-lbl" x="${CX}" y="112" text-anchor="middle">${esc(t)}</text>`;
+    // one wrapper carries the motion so every ring shares it — the wobble is a property of the
+    // whole state, not decoration on one part of it
+    const wrap=(cls,inner)=>`<g class="${cls}" style="transform-box:view-box">${inner}</g>`;
+
+    if(st==="first")            // all factors present, and the state visibly wobbles
+      return {svg:wrap("fg-wob",
+        ring(44,"",".8")+ring(33,"",".6")+ring(22,"",".45")+core(""))+
+        gone(p.top||"the steering",false)+held(p.base||"a wobble remains")};
+
+    if(st==="second")           // the steering goes; movement stops completely
+      return {svg:wrap("fg-damp",
+        ring(44,"fg-shed",".8")+ring(33,"fg-gain",".6")+ring(22,"fg-gain",".45")+core("fg-gain"))+
+        gone(p.top||"the steering",true)+held(p.base||"perfectly still")};
+
+    if(st==="third")            // rapture — the energetic buzz — is the coarse thing now.
+      // NB the buzzing ring is wrapped: fg-shed and fg-buzz both set `animation`, so on one
+      // element the later rule would silently win and the fade would never run.
+      return {svg:wrap("",
+        `<g class="fg-shed">`+ring(33,"fg-buzz",".7")+`</g>`+
+        ring(22,"fg-gain",".5")+core("fg-gain"))+
+        gone(p.top||"the buzz",true)+held(p.base||"serene")};
+
+    return {svg:wrap("",       // even happiness goes; equanimity alone, and it is the brightest
+      ring(22,"fg-shed",".55")+core("fg-gain"))+
+      gone(p.top||"pleasure and pain",true)+held(p.base||"equanimity")};
   },
 
   pacer(p,A){

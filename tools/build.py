@@ -30,6 +30,8 @@ FIG_COMPONENTS = {
     "groove",
     # #162: a field saturating from an already-present point, in steps with flat stretches
     "suffuse",
+    # #162: concentric factors, one shed per level, the remainder finer
+    "distil",
 }
 
 

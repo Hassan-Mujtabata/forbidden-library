@@ -123,7 +123,8 @@
     ["fgflow", "fgarrive", "pressure must land before the fingertip swells"],
     ["fggrip", "fgsnap", "you only notice a distraction once it has let go of you"],
     ["fggrip", "fgaware", "awareness cannot fire while the distraction still holds"],
-    ["fgletgo", "fgsnap", "the thought releases, then you are back"]
+    ["fgletgo", "fgsnap", "the thought releases, then you are back"],
+    ["fgshed", "fggain", "the coarse factor must be gone before the remainder gets finer"]
   ];
   var BEAT = {                        // animation -> minimum trailing rest, in % of the cycle
     fgflow: 12, fgarrive: 12, fgswell: 12,
