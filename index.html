@@ -843,11 +843,15 @@ header .brand span{color:var(--gold)}
      "from the heart, outwards, arriving there" without anything moving */
   .feltfig .fg-flow{stroke-dasharray:none;opacity:.5}
   .feltfig .fg-arrive{opacity:.85}
+  .feltfig .fg-wave{opacity:1;transform:none}
   /* #162: frozen, the wander stages must still say "attention is over THERE while the belief
      ring sits on the breath" — so the traveller is parked at its destination, not at its origin,
      which is where the un-animated transform would otherwise leave it. */
-  .feltfig .fg-leave{transform:translate(48px,-20px)}
-  .feltfig .fg-hop{transform:translate(120px,-18px)}
+  /* opacity too, not just position: fgleave/fghop both START at opacity 0 and fade in, so
+     restoring only the transform left the dot parked in the right place and INVISIBLE for anyone
+     with reduce-motion on. b2 shipped that way from 3.74 until it was caught by a sweep. */
+  .feltfig .fg-leave{transform:translate(48px,-20px);opacity:.95}
+  .feltfig .fg-hop{transform:translate(120px,-18px);opacity:.95}
   .feltfig .fg-grip{stroke-opacity:0}
   .feltfig .fg-letgo{opacity:0}
   .feltfig .fg-snap{opacity:1}
@@ -4340,8 +4344,12 @@ $("btn-ach").onclick=()=>{const g=$("achgrid");g.innerHTML="";
   $("achs").classList.add("on")};
 
 /* ---------- patch notes ---------- */
-const APP_VER="3.97";
+const APP_VER="3.98";
 const PATCHES=[
+ {v:"3.98",n:"Visible Without The Motion",d:"4 Aug 2026",items:[
+  ["fix","A REAL BUG, SHIPPED SINCE 3.74 AND CAUGHT BY A BUG HUNT RATHER THAN BY LUCK. If you have “reduce motion” turned on in your phone or system settings, the mind-wandering figure had NO ATTENTION DOT in its first two steps. The dot was being parked in the right place and left completely transparent, so the figure showed a breath, some labels, and nothing moving between them. Anyone using that setting has been looking at a broken diagram for eleven releases."],
+  ["fix","Two more of the same kind found and fixed at the same time. The cause is always identical: turning animations off freezes every element at its first frame, and an element that fades IN starts invisible — so unless something explicitly puts the opacity back, it never appears at all."],
+  ["new","The figure checker now tests this automatically for every diagram: if an element starts hidden and nothing restores it for reduced motion, the build fails. It was deliberately broken once to confirm the check actually fires."]]},
  {v:"3.97",n:"Five Streams, Not One Thing",d:"4 Aug 2026",items:[
   ["new","THE FIVE AGGREGATES. Go looking for the self that is having the hard time and it presents as one solid thing — continuous, single, yours. Closer in it is five: the body and senses, the instant pleasant-or-unpleasant tone, recognising and naming, impulses and habits, and the bare knowing. Watch that they never fall into step. Each runs on its own conditions, and that is the whole of “not-self” — no one of them sits behind the others owning them."],
   ["new","The last step marks where the trouble actually attaches. Craving does not grab the body or the knowing. It grabs the TONE — the instant like-or-dislike — before you have decided anything, which is why so much practice sits on feeling. It is the one place on this diagram where the lever from the Four Noble Truths is within reach."],

@@ -278,11 +278,66 @@
     } catch (e) { clipped = ["label sweep failed: " + (e && e.message || e)]; }
     clipped.forEach(function (c) { fails.push("LABEL outside viewBox — " + c); });
 
+    /* #162 REDUCED MOTION. `.feltfig svg *{animation:none}` freezes every animation at its FIRST
+     * keyframe. Any element whose animation starts hidden — opacity 0, or r 0 — is therefore
+     * invisible for anyone with reduce-motion enabled, unless a rule inside the media block puts
+     * the property back. b2 shipped from 3.74 with its attention dot restored to the right
+     * POSITION and left at opacity 0, i.e. the figure had no dot at all for those users, and
+     * nothing caught it: the figure rendered, the labels fitted, the timings were right.
+     * Checks the same property that the first frame hides, so restoring `r` satisfies an r:0
+     * start and does not falsely satisfy an opacity:0 start. */
+    var motion = [], rm = {};
+    (function scan(rules, inRM) {
+      for (var i = 0; i < rules.length; i++) {
+        var r = rules[i];
+        if (r.type === 4) {
+          var isRM = /reduced-motion/.test(r.conditionText || (r.media && r.media.mediaText) || "");
+          scan(r.cssRules, inRM || isRM); continue;
+        }
+        if (r.type === 1 && inRM && /\.fg-/.test(r.selectorText || ""))
+          (r.selectorText.match(/\.fg-[\w-]+/g) || []).forEach(function (sel) {
+            rm[sel.slice(1)] = (rm[sel.slice(1)] || "") + ";" + r.style.cssText;
+          });
+      }
+    })((function () {
+      var all = [];
+      for (var i = 0; i < win.document.styleSheets.length; i++) {
+        try { all = all.concat([].slice.call(win.document.styleSheets[i].cssRules)); } catch (e) {}
+      }
+      return all;
+    })(), false);
+    var HIDERS = [["opacity", "opacity"], ["fill-opacity", "fill-opacity"],
+                  ["stroke-opacity", "stroke-opacity"], ["r", "r"]];
+    for (var si = 0; si < win.document.styleSheets.length; si++) {
+      var rr; try { rr = win.document.styleSheets[si].cssRules; } catch (e) { continue; }
+      for (var ri = 0; ri < rr.length; ri++) {
+        var rule = rr[ri];
+        if (rule.type !== 1 || !/\.fg-/.test(rule.selectorText || "")) continue;
+        var aname = rule.style.animationName || (rule.style.animation || "").split(/\s/)[0];
+        if (!aname || !kf[aname]) continue;
+        var first = kf[aname][0].style;
+        (rule.selectorText.match(/\.fg-[\w-]+/g) || []).forEach(function (sel) {
+          var cls = sel.slice(1);
+          HIDERS.forEach(function (h) {
+            var v = first.getPropertyValue(h[0]);
+            if (v === "" ) return;
+            var hidden = h[0] === "r" ? parseFloat(v) === 0 : parseFloat(v) <= 0.05;
+            if (!hidden) return;
+            var fix = rm[cls] || "";
+            if (fix.indexOf(h[1] + ":") < 0)
+              motion.push(cls + " starts " + h[0] + ":" + v + " in " + aname +
+                          " and reduced-motion never restores " + h[1]);
+          });
+        });
+      }
+    }
+    motion.forEach(function (m) { fails.push("REDUCED-MOTION invisible — " + m); });
+
     return {
       animations: names.length, stopsChecked: checked, labelsChecked: labels,
       order: order, rest: rests,
       failed: fails.length, fails: fails,
-      VERDICT: fails.length ? "FAIL" : "PASS  no shrink · order ok · rest ok · labels fit"
+      VERDICT: fails.length ? "FAIL" : "PASS  no shrink · order ok · rest ok · labels fit · motion-safe"
     };
   }
 
