@@ -333,11 +333,37 @@
     }
     motion.forEach(function (m) { fails.push("REDUCED-MOTION invisible — " + m); });
 
+    /* #162 AUTO-ADVANCE. renderFig steps stages on a `dur`-second timer. A one-shot animation
+     * longer than `dur` means the stage is replaced before it finishes, so the state the figure
+     * exists to show never appears — silently, and only visible to someone who sits and watches.
+     * Looping animations are exempt: they never "finish". */
+    var early = [];
+    try {
+      early = JSON.parse(win.eval(
+        '(function(){var out=[],host=document.createElement("div");document.body.appendChild(host);' +
+        'DATA.nodes.forEach(function(nd){(nd.fig||[]).forEach(function(spec){' +
+        ' var dur=spec.dur||6;' +
+        ' (spec.stages||[]).forEach(function(st,si){' +
+        '  var f=renderFig({v:1,alt:spec.alt,stages:[st]},"#888");host.appendChild(f);' +
+        '  var longest=0;' +
+        '  [].forEach.call(f.querySelectorAll("svg *"),function(e){' +
+        '   var cs=getComputedStyle(e);' +
+        '   if(!cs.animationDuration||cs.animationDuration==="0s")return;' +
+        '   if(cs.animationIterationCount!=="1")return;' +
+        '   var t=parseFloat(cs.animationDuration)+(parseFloat(cs.animationDelay)||0);' +
+        '   if(t>longest)longest=t;});' +
+        '  if(longest>dur)out.push(nd.id+" stage"+(si+1)+": one-shot runs "+longest.toFixed(1)+' +
+        '   "s but the stage advances at "+dur+"s");' +
+        '  f.remove();});});});' +
+        'host.remove();return JSON.stringify(out);})()'));
+    } catch (e) { early = ["auto-advance sweep failed: " + (e && e.message || e)]; }
+    early.forEach(function (m) { fails.push("CUT OFF — " + m); });
+
     return {
       animations: names.length, stopsChecked: checked, labelsChecked: labels,
       order: order, rest: rests,
       failed: fails.length, fails: fails,
-      VERDICT: fails.length ? "FAIL" : "PASS  no shrink · order ok · rest ok · labels fit · motion-safe"
+      VERDICT: fails.length ? "FAIL" : "PASS  no shrink · order ok · rest ok · labels fit · motion-safe · no cut-offs"
     };
   }
 
