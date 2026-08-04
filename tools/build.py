@@ -64,6 +64,8 @@ FIG_COMPONENTS = {
     "threshold",
     # #162: two controls, one outcome, and which control actually moves it
     "lever",
+    # #162: one apparent thing resolving into five streams that never sync
+    "strands",
 }
 
 

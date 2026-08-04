@@ -823,6 +823,12 @@ header .brand span{color:var(--gold)}
 .feltfig .fg-handle{animation:fghandle 3.4s ease-out 1 forwards}
 @keyframes fgroute{0%{stroke-dashoffset:100}70%{stroke-dashoffset:0}100%{stroke-dashoffset:0}}
 .feltfig .fg-route{stroke-dasharray:100;animation:fgroute 3.4s ease-out 1 forwards}
+@keyframes fgsolid{0%{opacity:0}45%{opacity:1}100%{opacity:1}}
+.feltfig .fg-solid{animation:fgsolid 3.4s ease-out 1 forwards}
+@keyframes fgstrand{0%{stroke-dashoffset:0}100%{stroke-dashoffset:-32}}
+.feltfig .fg-strand{animation:fgstrand 2.2s linear infinite}
+@keyframes fghook{0%{opacity:0}55%{opacity:1}100%{opacity:1}}
+.feltfig .fg-hook{animation:fghook 3.4s ease-out 1 forwards}
 /* Off-screen figures stop dead: an animation under the fold is heat for nothing. */
 .feltfig.ff-paused svg *{animation-play-state:paused!important}
 @media (prefers-reduced-motion:reduce){
@@ -898,6 +904,8 @@ header .brand span{color:var(--gold)}
   .feltfig .fg-gauge{opacity:1}
   .feltfig .fg-handle{fill-opacity:.9}
   .feltfig .fg-route{stroke-dasharray:none;stroke-dashoffset:0}
+  .feltfig .fg-solid,.feltfig .fg-hook{opacity:1}
+  .feltfig .fg-strand{stroke-dashoffset:0}
 }
 
 /* ---------- top bar + nav ---------- */
@@ -4332,8 +4340,12 @@ $("btn-ach").onclick=()=>{const g=$("achgrid");g.innerHTML="";
   $("achs").classList.add("on")};
 
 /* ---------- patch notes ---------- */
-const APP_VER="3.96";
+const APP_VER="3.97";
 const PATCHES=[
+ {v:"3.97",n:"Five Streams, Not One Thing",d:"4 Aug 2026",items:[
+  ["new","THE FIVE AGGREGATES. Go looking for the self that is having the hard time and it presents as one solid thing — continuous, single, yours. Closer in it is five: the body and senses, the instant pleasant-or-unpleasant tone, recognising and naming, impulses and habits, and the bare knowing. Watch that they never fall into step. Each runs on its own conditions, and that is the whole of “not-self” — no one of them sits behind the others owning them."],
+  ["new","The last step marks where the trouble actually attaches. Craving does not grab the body or the knowing. It grabs the TONE — the instant like-or-dislike — before you have decided anything, which is why so much practice sits on feeling. It is the one place on this diagram where the lever from the Four Noble Truths is within reach."],
+  ["fix","The five strands occupy exactly the same span as the single bar before them. Looking closer does not add anything; it only shows what was already running."]]},
  {v:"3.96",n:"Which Control Actually Moves It",d:"4 Aug 2026",items:[
   ["new","THE FOUR NOBLE TRUTHS, DRAWN AS THE ENGINEERING THEY CLAIM TO BE. Two controls and one gauge. Push the first as hard as you like — arrange the circumstances, get the good thing, remove the bad one — and it moves the gauge a little, only while you hold it. The diagnosis says the other control is the live one: not what happens, but the grasping at pleasant and shoving away unpleasant. That one has real travel. And the fourth truth is just the access road to it."],
   ["fix","Deliberately NOT drawn as four labelled rows. Anyone can list the four truths; almost nobody acts on the second one, which is where the entire reframe lives. A four-item chart would have been accurate and useless."],
@@ -6556,6 +6568,36 @@ const FIGC={
       `<path class="fg-route" d="M${GX+6} ${104} L${GX+GW*0.86} ${104} L${GX+GW*0.86} ${96}" `+
       `stroke="${A}" stroke-width="2" fill="none" stroke-opacity=".6" pathLength="100"/>`+
       `<text class="fg-lbl fg-route" x="14" y="${116}" text-anchor="start">${esc(p.c3||"ethics, concentration, wisdom")}</text>`};
+  },
+
+  /* #162, from research (tools/figs_research/a3.md). "Look closer and you find not a thing but a
+     process — five streams braided together." So stage one is a single solid bar occupying the
+     SAME span the five strands later occupy: nothing is added when it resolves, exactly as in c1.
+     The five strands are deliberately OUT OF PHASE with each other — that is the anattā claim
+     ("none of the five is a stable, separate owner; they arise and pass by conditions"). If they
+     pulsed together they would read as one thing again, which is the belief being dismantled.
+     Feeling is highlighted in stage three because the lesson says it is "the hinge where craving
+     grabs on", which is the same lever a2 draws. */
+  strands(p,A){
+    const st=p.stage||"solid", X0=64, X1=176, YS=[30,45,60,75,90];
+    const names=[p.n1||"form",p.n2||"feeling",p.n3||"label",p.n4||"impulse",p.n5||"knowing"];
+    if(st==="solid")
+      return {svg:`<rect class="fg-solid" x="${X0}" y="${YS[0]}" width="${X1-X0}" `+
+        `height="${YS[4]-YS[0]+8}" rx="8" fill="${A}" fill-opacity=".45" stroke="none"/>`+
+        `<text class="fg-lbl" x="58" y="${YS[2]+4}" text-anchor="end">${esc(p.self||"a self")}</text>`};
+    let s="";
+    YS.forEach((y,i)=>{
+      const hinge=(st==="hinge"&&i===1);
+      s+=`<line class="fg-strand" x1="${X0}" y1="${y}" x2="${X1}" y2="${y}" stroke="${A}" `+
+        `stroke-opacity="${hinge?".9":".45"}" stroke-width="${hinge?4:3}" stroke-dasharray="9 7" `+
+        `style="animation-delay:${(i*0.29).toFixed(2)}s"/>`+
+        `<text class="fg-lbl" x="58" y="${y+4}" text-anchor="end">${esc(names[i])}</text>`;
+    });
+    if(st==="hinge")
+      s+=`<circle class="fg-hook" cx="120" cy="${YS[1]}" r="10" stroke="${A}" fill="none" `+
+         `stroke-width="2"/>`+
+         `<text class="fg-lbl fg-hook" x="120" y="${YS[1]-15}" text-anchor="middle">${esc(p.grab||"craving grabs here")}</text>`;
+    return {svg:s};
   },
 
   pacer(p,A){
