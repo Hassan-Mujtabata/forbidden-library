@@ -4358,8 +4358,12 @@ $("btn-ach").onclick=()=>{const g=$("achgrid");g.innerHTML="";
   $("achs").classList.add("on")};
 
 /* ---------- patch notes ---------- */
-const APP_VER="3.99";
+const APP_VER="3.100";
 const PATCHES=[
+ {v:"3.100",n:"Two Books That Were Only Ever Cited",d:"4 Aug 2026",items:[
+  ["new","TWO BOOKS JOIN THE LIBRARY, and they were both already being quoted at you. Every lesson in the Attached track cited a book that had never been added — nine citations pointing at nothing. The Path of Purification was the same: twelve citations, and the PDF had been sitting in the folder unread the whole time. Both are in now, and every source reference in the vault resolves to a real book for the first time."],
+  ["new","Attached brings 101 chapters, The Path of Purification 579. The library is 24 books. The download is a little larger as a result — 6.1 MB instead of 5.2."],
+  ["fix","Re-extracting the whole library was checked against the previous copy before anything shipped: the 22 existing books drifted by 0.001%, so nothing regressed on the way in. The duplicate copy of The Mind Illuminated is gone too — confirmed byte-identical first."]]},
  {v:"3.99",n:"The Update Button Now Goes Away",d:"4 Aug 2026",items:[
   ["fix","THE UPDATE CHIP WOULD NOT LEAVE. Press Update, the page reloads, and the chip is right back — press it as many times as you like, same result. The button was a bare reload and nothing else. Reloading never made the condition that raised the chip false, because by the time you see it the new version has ALREADY been installed and taken over; the chip is a notice, not a switch. So every reload ran the same check and got the same answer."],
   ["fix","It now remembers which version you were on when you pressed it. Press once and it is gone and stays gone. A genuinely newer release can still raise it — that was checked explicitly, so this is a fix rather than just muting the thing. The chip also disappears the instant you press it now, instead of hanging around waiting for the reload."]]},

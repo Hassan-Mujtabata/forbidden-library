@@ -76,6 +76,14 @@ BOOKS = [
     dict(id="meaning", file="632ecf70b27a5-man-s-search-for-meaning.pdf",
          title="Man's Search for Meaning", author="Viktor Frankl",
          wing="light", glyph="\U0001f54a️", accent="#7f8fa6"),
+    # #164: both were cited by authored lessons but were never in the library, so those
+    # citations could not cross-link and their quotes could not be checked against anything.
+    dict(id="attached",  file='Amir_Levine,_Rachel_Heller-Attached__The_New_Science_of_Adult_Attachment_and_How_It_Can_Help_You_Find_–_and_Keep_–_Love__-Penguin_Group_USA_(2010)[1].pdf',
+         title="Attached", author="Amir Levine & Rachel Heller",
+         wing="light", glyph="💞", accent="#e08a3c"),
+    dict(id="purific",   file='PathofPurification2011.pdf',
+         title="The Path of Purification", author="Bhadantacariya Buddhaghosa",
+         wing="light", glyph="👁", accent="#2980b9"),
 ]
 
 # repair common Pali terms that lose their diacritics in extraction
