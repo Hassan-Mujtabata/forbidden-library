@@ -1638,14 +1638,28 @@ function toastUndo(msg,undo){
   setTimeout(close,6000);   // longer than a normal toast — you need a moment to notice the mistake
 }
 let _updChip=false;
+const UPD_ACK="vault_updack";
 function showUpdateChip(){
-  if(_updChip)return;_updChip=true;
+  if(_updChip)return;
+  /* #163: the chip used to be un-dismissable. Its button was a bare location.reload(), and a
+     reload does not make the conditions that raised the chip false — the service worker has
+     already activated and claimed the page by the time we show it, so after reloading the same
+     checks ran again and the chip came straight back. You could press Update all day.
+     The fix is to record WHICH version you were on when you pressed it. After a successful
+     update APP_VER differs from that mark, so a genuinely newer release can still raise the chip;
+     if the version did not change, the reload achieved nothing and we do not nag about it again. */
+  try{ if(localStorage.getItem(UPD_ACK)===APP_VER)return; }catch(e){}
+  _updChip=true;
   const c=document.createElement("div");c.id="updchip";
   // #136: the label lives in a span, not as a bare text node — the contrast audit walks
   // descendants, so text sitting directly on the chip was unmeasurable and read as a clean pass.
   c.innerHTML=`<span class="updtxt">🔄 New version ready</span> <button id="updnow">Update</button>`;
   document.body.appendChild(c);
-  document.getElementById("updnow").onclick=()=>location.reload();
+  document.getElementById("updnow").onclick=()=>{
+    try{localStorage.setItem(UPD_ACK,APP_VER);}catch(e){}
+    c.remove();_updChip=false;                 // go away immediately, don't wait for the reload
+    location.reload();
+  };
 }
 
 /* ============ crypto load ============ */
@@ -4344,8 +4358,11 @@ $("btn-ach").onclick=()=>{const g=$("achgrid");g.innerHTML="";
   $("achs").classList.add("on")};
 
 /* ---------- patch notes ---------- */
-const APP_VER="3.98";
+const APP_VER="3.99";
 const PATCHES=[
+ {v:"3.99",n:"The Update Button Now Goes Away",d:"4 Aug 2026",items:[
+  ["fix","THE UPDATE CHIP WOULD NOT LEAVE. Press Update, the page reloads, and the chip is right back — press it as many times as you like, same result. The button was a bare reload and nothing else. Reloading never made the condition that raised the chip false, because by the time you see it the new version has ALREADY been installed and taken over; the chip is a notice, not a switch. So every reload ran the same check and got the same answer."],
+  ["fix","It now remembers which version you were on when you pressed it. Press once and it is gone and stays gone. A genuinely newer release can still raise it — that was checked explicitly, so this is a fix rather than just muting the thing. The chip also disappears the instant you press it now, instead of hanging around waiting for the reload."]]},
  {v:"3.98",n:"Visible Without The Motion",d:"4 Aug 2026",items:[
   ["fix","A REAL BUG, SHIPPED SINCE 3.74 AND CAUGHT BY A BUG HUNT RATHER THAN BY LUCK. If you have “reduce motion” turned on in your phone or system settings, the mind-wandering figure had NO ATTENTION DOT in its first two steps. The dot was being parked in the right place and left completely transparent, so the figure showed a breath, some labels, and nothing moving between them. Anyone using that setting has been looking at a broken diagram for eleven releases."],
   ["fix","Two more of the same kind found and fixed at the same time. The cause is always identical: turning animations off freezes every element at its first frame, and an element that fades IN starts invisible — so unless something explicitly puts the opacity back, it never appears at all."],
