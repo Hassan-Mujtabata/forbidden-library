@@ -1,4 +1,4 @@
-const CACHE = "vault-v143";
+const CACHE = "vault-v144";
 const ASSETS = ["./", "./index.html", "./content.enc", "./manifest.json", "./icon.svg",
   "./icon-192.png", "./icon-512.png", "./apple-touch-icon.png",
   // #89: precache access/status so the visibility rules and pipeline card survive offline (they're network-first below)

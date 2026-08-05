@@ -243,7 +243,13 @@ R van der Kolk (3.116), plus N Laws of Human Nature (3.109).
 - **ALL FIVE TRACKS ARE NOW AT DEPTH** (`deepen6.py` finished P and R). Every lesson across
   N/O/P/Q/R carries: the mechanism worked down to why it must be so, a concrete case, the
   failure the reader will actually produce, the tell for it, and the edge where it stops.
-  Word counts: O 850-1519 · N 563-682 · Q 822-909 · P 706-832 · R 597-696.
+  Word counts: O 850-1519 · R 854-961 · Q 822-909 · P 706-832 · N 563-682.
+  **Revised target after Hassan's feedback is ~1,000-1,200w.** Done: R (`deepen7.py`, adds a
+  SECOND worked case per lesson — one mechanism plus one example transfers to that example
+  only; two in different settings is what makes the real one recognisable).
+  **Next, in order: N (563-682, thinnest, 7 nodes) then P (706-832) then Q (822-909).**
+  Note `deepen7.py` pops the closing clinical edge off track R's lessons and re-appends it last —
+  any future pass on R must preserve that, it is the last thing read for a reason.
 - **WHAT REMAINS IN JOB 5: figures.** 25 nodes have one; the five new tracks have two between
   them (o4 `pattern`, n1s2 `tape`). See the figure section below — authorised, owed, and the
   thing Hassan has repeatedly said makes the difference.
