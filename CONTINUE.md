@@ -63,7 +63,7 @@ When you finish a job: tick it, add what you learned to "Hard rules", and commit
   631 duplicated, 893 numbered). The remainder are genuinely unheaded in the PDFs.
 - Every lesson citation resolves to a real book (Attached and The Path of Purification were
   ingested 4 Aug; before that 21 citations pointed at nothing).
-- Path: **98 nodes, 15 tracks, 23 with figures**. Track N = first mini-path (Laws of
+- Path: **98 nodes, 15 tracks, 23 with figures**. Track O is fully deepened (3.112). Track N = first mini-path (Laws of
   Human Nature). Track O = Reading the Body (Navarro), 4 lessons, one `pattern` figure. Backup at `tools/backup/graph.pre-rebuild.json`.
 - App: **3.109 live and pushed.** The token at `C:\Users\sands\.secrets\github_token.txt` is
   still missing, so ship.py's push is intermittent — when it fails, Hassan runs
@@ -186,10 +186,26 @@ confirmation, conviction, appearance, group, blame, superiority. Note there are 
 five: the extractor folded "The Blame Bias" into the Group Bias chapter, so working from chapter
 titles alone loses one. Read the episode TEXT, never just the titles.
 
+**PHASE ORDER — Hassan, verbatim: "once u finish library this part then u can start adding
+small notes here and there for making understanding easier and figures animated or whatever
+anything u can think of that would make understanding easier."**
+So: COVER EVERY BOOK FIRST. Notes, animated figures and any other comprehension aid come after
+coverage is complete — they are not a reason to leave a book uncovered, and coverage is not a
+reason to ship a lesson that does not do its working.
+
+**DEPTH STANDARD — set by `tools/deepen.py` (o1) and `tools/deepen2.py` (o2-o4).** Every lesson
+must carry: the mechanism down to WHY it must be so; one concrete case run start to finish; the
+obvious objection raised and answered; and the edge where the idea stops holding. A lesson
+missing any of those is leaving homework. Length follows the idea — o1 needed 1,519 words,
+o2-o4 needed ~850 each. Do not pad to a budget and do not merge two ideas to fill one.
+
 **STILL UNCOVERED (no lesson, no track, no mention):**
 The Body Keeps the Score (172,208w) · How to Win Friends (79,675w) · Meditations (72,513w).
-(What Everybody Is Saying was covered by track O in 3.110.) Then the worst ratios: Seduction (240,398w / 3 lessons),
-Deception, Dark Psychology, Purification, 48 Laws.
+
+**COVERED BUT STILL AT SUMMARY DEPTH — needs the same treatment as track O:**
+Track N (Laws of Human Nature), all 7 nodes, still ~200-400 words each.
+Then the thin ratios: Seduction (240,398w / 3 lessons), Deception, Dark Psychology, Purification,
+48 Laws.
 
 **FIGURES ARE OWED ON TRACK N AND ARE NOT OPTIONAL.** Hassan: "that's why the figures are there
 for" — they are what make a step applicable, not decoration. Build them via
