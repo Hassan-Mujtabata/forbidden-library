@@ -668,7 +668,11 @@ everyone gets wrong.
 - Component: new (three steps with rising cost), or possibly `ladder` — audit it first, it is
   unused and therefore a suspect.
 
-**Cycle 4 — `q1` The Importance Deficit.** Carnegie's engine; a third of his rules reduce to it.
+**Cycle 4 — `q1` The Importance Deficit. LESSON CORRECTED 3.133, FIGURE NOT DRAWN.** The
+SCARCITY premise is UNVERIFIED and is now labelled as Carnegie's assertion. The measured chain
+(listening -> anxiety down -> defensiveness down -> attitude extremity down, 9 experiments) is in
+the lesson instead and links q1 to q2. `spotlight` reuse is DEAD - it would have drawn the
+scarcity gap. See LOG.md cycle 10. Carnegie's engine; a third of his rules reduce to it.
 - Error taught away: "appreciation is flattery, and people see through it."
 - Claim to draw: attention is SCARCE, so supplying it is disproportionate — most listening is
   waiting to reply, and the difference is detectable.
