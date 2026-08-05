@@ -70,7 +70,8 @@ When you finish a job: tick it, add what you learned to "Hard rules", and commit
   631 duplicated, 893 numbered). The remainder are genuinely unheaded in the PDFs.
 - Every lesson citation resolves to a real book (Attached and The Path of Purification were
   ingested 4 Aug; before that 21 citations pointed at nothing).
-- Path: **105 nodes, 17 tracks, 23 with figures**. Track O fully deepened (3.112);
+- Path: **109 nodes, 18 tracks, 23 with figures**. **ALL 24 BOOKS ARE COVERED** —
+  verified: zero books have no lesson citing them. Track O fully deepened (3.112);
   track P = Meditations (3.113), covered but at ~600 words/lesson — NEEDS DEEPENING to the
   track-O standard, it carries the four elements but compactly. Track N = first mini-path (Laws of
   Human Nature). Track O = Reading the Body (Navarro), 4 lessons, one `pattern` figure. Backup at `tools/backup/graph.pre-rebuild.json`.
@@ -219,9 +220,15 @@ obvious objection raised and answered; and the edge where the idea stops holding
 missing any of those is leaving homework. Length follows the idea — o1 needed 1,519 words,
 o2-o4 needed ~850 each. Do not pad to a budget and do not merge two ideas to fill one.
 
-**STILL UNCOVERED (no lesson, no track, no mention):**
-The Body Keeps the Score (172,208w) — THE LAST ONE.
-(Navarro -> track O 3.110. Meditations -> track P 3.113. Carnegie -> track Q 3.115.)
+**COVERAGE IS COMPLETE (3.116).** Every one of the 24 books now has at least one lesson.
+Verify with: for each book title, is it in any node's `sources[].book`? Answer is currently 24/24.
+Tracks added this session: O Navarro (3.110) · P Meditations (3.113) · Q Carnegie (3.115) ·
+R van der Kolk (3.116), plus N Laws of Human Nature (3.109).
+
+**WHAT REMAINS IN JOB 5 — depth, then figures.** Coverage is not the same as done:
+- Tracks P, Q, R and N are at ~450-650 words/lesson. The standard set by `tools/deepen.py` (o1,
+  1,519 words) is the target where the idea warrants it. Track O is the only fully deepened one.
+- Figures: only track O has one. See the figure section below — they are authorised and owed.
 
 **Track Q is the model for a list-shaped book.** Carnegie's 30 numbered principles were NOT
 mirrored as 30 steps — they reduce to 4 mechanisms, and the track teaches those with the
