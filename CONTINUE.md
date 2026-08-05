@@ -647,7 +647,13 @@ One command, and it may settle the lesson outright.
 claim-dense. MEDIAN LENGTH 201 WORDS.** The old tracks are STUBS, not errors. Deepening needs no
 external research (the material is in the books) and is therefore both the bigger share of the
 problem and the cheaper fix, and it batches by track.
-**DEEPENING: track M - m1, m3 (3.152), m2, m5 (3.153) done. Remaining in M: m4, m6.**
+**DEEPENING: TRACK M COMPLETE** - m1, m3 (3.152), m2, m5 (3.153), m4, m6 (3.154). 160-248w ->
+408-536w. Next batch: track B (b3, b5, b6, b9), or the three claim-dense d1/e1/c3.
+**SAFETY FINDING (batch 3), applies to the whole shadow wing:** m6's worked example was a man
+covertly engineering repeated appearances in a woman's private routine, presented approvingly.
+The source books teach techniques without ethical boundaries and several were carried across
+unexamined. **When deepening D/E/F/M, test every worked example: would it be acceptable if the
+target learned it was deliberate?** Expect more of these in E and F.
 **KEY PATTERN FROM BATCHES 1-2: the old tracks are thin partly because the EVIDENCE FOR THEIR
 CLAIMS LIVES IN OTHER TRACKS researched later.** m1 needed numbers the `spotlight` component
 already held; m5's mechanism is q1's verified listening finding; m2 is n1s4 from the other side;
