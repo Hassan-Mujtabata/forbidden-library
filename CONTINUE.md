@@ -656,7 +656,12 @@ books.json - the only matches in the library are from Kahneman). Invented precis
 lesson is worse than a wrong number: a beginner tries to HIT the ratio, which is itself the
 clumsy scaffolding the lesson warns against. Scan run: 6 lessons carry numeric claims (d1, d5,
 c3, m1, o4, q4); all but q4's are now traceable to sources in the log. **Any number added from
-here must be traceable.** **TRACK B STARTED: b3, b9 done (3.158). Remaining: b5, b6, and b1/b4/b8 untouched.**
+here must be traceable.** **TRACK B: b3, b9 (3.158), b5, b6 (3.159) done - 162-172w -> 380-428w. b1, b4, b8 untouched.**
+**METHOD FOR EXPERIENTIAL LESSONS (no external research possible): GREP books.json for what the
+source actually says about the failure mode.** For b5/b6 this produced Brahm on the checking
+questions being the hindrance of doubt, and Brasington on 'indistractability' vs the furrowed-brow
+reading of 'concentration' - both better than anything I would have written unaided. One command,
+and it is rule 3 applied through the library itself.
 Track B checked clean on invented numbers AND on breath-control language - it is thin, not wrong.
 **CROSS-WING LINKS NOW APPEARING** (Stoic worry mechanism -> Buddhist restlessness hindrance;
 implementation intentions -> jhana mastery in resolving). Earlier links were within a wing; the
