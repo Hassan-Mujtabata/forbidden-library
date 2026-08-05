@@ -664,7 +664,14 @@ account of failure feels like learning (n1s5); certainty feels like having check
 books, one mechanism, previously taught as four unrelated facts. **Add `counterfeit-comfort` to
 the concept-spine mechanism list.** **CONFIRMED across FIVE lessons in FOUR books** (b4 dullness, p2 worry, n1s5 blame, n1s2
 conviction, d4 liking - the last verified in batch 7). Still to check: d3
-enlistment-as-agreement. **TRACK D: d1 (3.156), d3 (3.149), d2+d4 (3.161) done; d6 remains.**
+enlistment-as-agreement. **TRACK D COMPLETE** (d1 3.156, d2+d4 3.161, d3 3.149, d5 3.150, d6 3.162).
+**d6 NOW CARRIES THE WING'S SYNTHESIS, evidenced from its own audits: the manipulative version
+buys the APPEARANCE, the honest version buys the THING** - DITF buys the yes not the doing (d2);
+hiding competence escapes envy by moving toward pity while warmth actually works (e1); listening
+only lowers defensiveness when it is real (q1/m5); manufactured liking gives the feeling and none
+of the instances (d4). `counterfeit-comfort` is arguably the ORGANISING mechanism of the whole
+shadow wing, not one entry on a list. Tracks done: N/O/P/Q/R audited, M/D deepened, B all but b8.
+Next: track E or F (shadow), or J/I/K (largest light-wing gaps).
 **METHOD FOR EXPERIENTIAL LESSONS (no external research possible): GREP books.json for what the
 source actually says about the failure mode.** For b5/b6 this produced Brahm on the checking
 questions being the hindrance of doubt, and Brasington on 'indistractability' vs the furrowed-brow
