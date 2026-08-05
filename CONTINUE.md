@@ -671,8 +671,14 @@ hiding competence escapes envy by moving toward pity while warmth actually works
 only lowers defensiveness when it is real (q1/m5); manufactured liking gives the feeling and none
 of the instances (d4). `counterfeit-comfort` is arguably the ORGANISING mechanism of the whole
 shadow wing, not one entry on a list. Tracks done: N/O/P/Q/R audited, M/D deepened, B all but b8.
-**TRACK E COMPLETE** (e1 3.155, e3+e5 3.163, e2+e4 3.164). **SHADOW WING COMPLETE - D, E, F, M all deepened (f2+f4 in 3.165).** Next: J/I/K, the largest
-light-wing gaps (J Atomic Habits 12 lessons, K Kahneman 10, I Attached 8).
+**TRACK E COMPLETE** (e1 3.155, e3+e5 3.163, e2+e4 3.164). **SHADOW WING COMPLETE - D, E, F, M all deepened (f2+f4 in 3.165).** **TRACK J STARTED: j4 + j8 done (3.166). Remaining: j1, j5, j6, j7, j9-j12.** Then K (10), I (8).
+Track J checked clean on numbers - NO "21 days" myth, worth noting.
+**`counterfeit-comfort` NOW HAS ITS CAUSE: the immediate-return bias (j8). The counterfeit pays
+NOW, the real thing pays LATER** - so the counterfeits are not random errors or a character
+failure, they are systematically the earlier-payout option. That reframes "I lack discipline"
+into the TIMING of the reward, and it unifies the library's practical advice (habit contracts,
+streaks, rules set in advance) as ways of moving payoff or cost forward so the immediate
+comparison stops being rigged. **The spine mechanism now has an explanation, not just instances.**
 **THE CAPSTONE f4 NOW CARRIES THE SPINE.** `counterfeit-comfort` has SEVEN instances across FIVE
 books and BOTH wings (b4 dullness, p2 worry, n1s5 fluent post-mortems, n1s2 certainty, d4
 manufactured liking, e5 reacting-as-defending, e4 acting-as-progress). That convergence - authors
