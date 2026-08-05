@@ -631,8 +631,12 @@ the reader when the tool does NOT apply. p2 done (3.144) - CONFIRMED, and the au
 because feared things mostly do not happen; and verbal worry is less vivid than imagery, so it
 functions as avoidance). Retro-justifies p3. p3 done (3.145) - TRACK P COMPLETE. Action confirmed and sharpened into if-then form
 (implementation intentions, d=.65). Track N: n1 done (3.146) - Greene's "one mechanism behind all bias" bounded to the HOT family;
-the COLD family (anchoring, availability) needs PROCEDURAL fixes, not honesty. Next: n1s3, n1s5,
-then the eleven never-audited tracks A-M.
+the COLD family (anchoring, availability) needs PROCEDURAL fixes, not honesty. n1s3 done (3.147) - halo CONFIRMED, plus two stronger findings: people report the influence in
+REVERSE when asked, and FOREWARNING DOES NOT PROTECT (so no lesson may imply vigilance works).
+Advice rewritten to procedural. Next: n1s5, then the eleven never-audited tracks A-M.
+**MY MOST REPEATED ERROR, now four times: inventing a mechanism and stating it like a finding**
+(neck/vagus, halo-as-compression, and two others). When auditing my own text, the sentence
+beginning "the reason this happens is..." is the one to distrust first.
 **THIRD CROSS-LIBRARY JOIN FOUND BY AUDITING** (q1<->q3, p1<->r2, now N<->K as hot vs cold
 families). The audit keeps producing concept-spine links as a by-product - finish the audit before
 building the spine formally.
