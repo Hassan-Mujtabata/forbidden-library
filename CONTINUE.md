@@ -232,10 +232,13 @@ R van der Kolk (3.116), plus N Laws of Human Nature (3.109).
   track Q (`deepen3.py`, 4 lessons ~500 -> ~870w).
 - **Deepened:** track N (`deepen4.py` + `deepen5.py`) — 185-276w -> 563-682w/lesson. Now carries
   failure+tell, mechanism worked down, a second case, and the edge on every step.
-- **Still thin:** track P (Meditations, 3 lessons ~600w), track R (van der Kolk, 4 lessons
-  ~460w). Both need the `deepen3`/`deepen4` treatment: the failure the reader will produce, the
-  tell, and the edge. Track R's edge is partly there already (the clinical line) but its lessons
-  have no "how you will get this wrong" at all.
+- **ALL FIVE TRACKS ARE NOW AT DEPTH** (`deepen6.py` finished P and R). Every lesson across
+  N/O/P/Q/R carries: the mechanism worked down to why it must be so, a concrete case, the
+  failure the reader will actually produce, the tell for it, and the edge where it stops.
+  Word counts: O 850-1519 · N 563-682 · Q 822-909 · P 706-832 · R 597-696.
+- **WHAT REMAINS IN JOB 5: figures.** 25 nodes have one; the five new tracks have two between
+  them (o4 `pattern`, n1s2 `tape`). See the figure section below — authorised, owed, and the
+  thing Hassan has repeatedly said makes the difference.
 - **What deepening should ADD** (deepen3.py is the model — it appends rather than rewrites):
   the second case that goes WRONG, the failure the reader will actually produce, and the tell
   that they are producing it. Agreeing with a mechanism is easy; the gap is always execution.
