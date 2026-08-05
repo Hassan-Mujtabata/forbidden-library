@@ -688,7 +688,11 @@ scarcity gap. See LOG.md cycle 10. Carnegie's engine; a third of his rules reduc
 - Only skip if BOTH lines fail replication. "Hard to source" was not a good enough reason —
   that judgement was made before looking.
 
-**Cycle 5 — `q4` A Conclusion They Reached.** The most useful thing in Carnegie and the least
+**Cycle 5 — `q4`. LESSON CORRECTED + BOUNDED 3.134, FIGURE NOT DRAWN.** Self-generated
+persuasion verified; the DURABILITY claim withdrawn (unevidenced). Found a MODERATOR that inverts
+the advice: the advantage holds only while generating feels EASY - when it is a struggle the
+difficulty is read as evidence against the idea. Figure design changed to the moderated version
+(two runs, easy vs hard, opposite endings). See LOG.md cycle 11. The most useful thing in Carnegie and the least
 intuitive.
 - Error taught away: "if they agreed, it is settled."
 - Claim to draw: compliance decays, ownership does not — an instruction sits outside the
