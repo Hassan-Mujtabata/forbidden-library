@@ -499,28 +499,47 @@ prefers-reduced-motion, for weeks.
 whose claim is THE SAME — not adjacent. Otherwise build a new one and register it in
 FIG_COMPONENTS in build.py at the same time.
 
-### FIGURES STILL TO MAKE — 81 of 109 lessons have none
+### HOW MANY FIGURES — the target is ~65 of 109, NOT one per lesson
 
-Worst-covered first. The five new tracks are the priority (they are the ones written this
-session and the ones Hassan is reading):
+Counted 5 Aug 2026. Hassan asked for this split explicitly; his guess that ~84 was the light wing
+alone was close but that number was both wings together.
 
-| track | has / total | lessons with no figure |
-|---|---|---|
-| N The Laws of Human Nature | 1/7 | n1, n1s1, n1s3, n1s4, n1s5, n1s6 |
-| O Reading the Body | 1/4 | o1, o2, o3 |
-| P Meditations | 1/3 | p1, p3 |
-| Q Dealing With People | 1/4 | q1, q3, q4 |
-| R The Body Keeps the Score | 1/4 | r1, r2, r4 |
-| J Atomic Habits | 2/12 | j1, j4-j11 |
-| I Attached | 1/8 | i2-i8 |
-| K Thinking, Fast and Slow | 3/10 | k2, k4-k7, k9, k10 |
-| B Concentration & Jhāna | 4/9 | b1, b3, b4, b8, b9 |
-| C, G, H, M | 1 each of 6 | most of each |
-| D 2/6 · E 1/5 · F 1/4 · L 1/4 · A 3/5 | | |
+| wing | lessons | have one | missing | sensible target | to build |
+|---|---|---|---|---|---|
+| **dark (shadow)** | 36 | 8 | 28 | ~24 | **16** |
+| **light** | 73 | 19 | 54 | ~41 | **22** |
+| total | 109 | 27 | 82 | ~65 | **~38** |
 
-Do NOT batch these. One cycle = one figure = one LOG entry with sources, corroboration,
-rejections and gaps. That rate is the point: the protocol exists because figures produced faster
-than this were wrong.
+**Why not 82.** A figure earns its place ONLY when it does something prose physically cannot —
+motion, staged reveal, two things changing at once, before/after. One that restates the
+paragraph beside it ADDS load: another thing to parse for no new information. Sort the lessons:
+- *mechanism* lessons (a process with moving parts — the gate that reads a reason's shape, two
+  roads out of one event, the lever that is not connected) → these want a figure, ~60% of the
+  library;
+- *distinction* lessons (this vs the thing it is confused with) → better as a contrasting case
+  in prose;
+- *practice* lessons (a drill you do) → a figure adds nothing.
+
+**DARK WING FIRST.** Hassan asked for it, and independently it is the right order: social
+mechanisms are the most figurable material here — two parties, a threshold, a trade, something
+that runs before thought. All four figures built on 5 Aug came from that wing for that reason.
+Light wing is harder because inner states resist diagramming, though `groove`, `suffuse` and
+`distil` show it is possible.
+
+**RATE.** One cycle = one figure = one LOG.md entry with sources, independent corroboration,
+rejections and gaps. ~38 figures at that rate is a long run of sessions, not one. Do not batch
+them to go faster — the figures produced faster than this are the ones that were wrong (the
+breathing pacer contradicting all three meditation books; the decoy effect that does not
+replicate).
+
+### WHICH LESSONS HAVE NO FIGURE (worst-covered first)
+
+Dark wing: N 1/7 (n1, n1s1, n1s3-n1s6) · M 1/6 (m2-m6) · D 2/6 (d2, d4, d5, d6) ·
+E 1/5 (e1, e3, e4, e5) · F 1/4 (f2, f3, f4) · O 1/4 (o1, o2, o3) · Q 1/4 (q1, q3, q4).
+
+Light wing: J 2/12 (j1, j4-j11) · I 1/8 (i2-i8) · K 3/10 (k2, k4-k7, k9, k10) ·
+B 4/9 (b1, b3, b4, b8, b9) · C 1/6 (c2-c6) · G 1/6 (g2-g6) · H 1/6 (h1, h3-h6) ·
+A 3/5 (a4, a5) · L 1/4 (l2, l3, l4) · R 1/4 (r1, r2, r4) · P 1/3 (p1, p3).
 
 ---
 
