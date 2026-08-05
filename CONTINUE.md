@@ -48,12 +48,11 @@ When you finish a job: tick it, add what you learned to "Hard rules", and commit
   631 duplicated, 893 numbered). The remainder are genuinely unheaded in the PDFs.
 - Every lesson citation resolves to a real book (Attached and The Path of Purification were
   ingested 4 Aug; before that 21 citations pointed at nothing).
-- Path: **87 nodes, 13 tracks, 22 with figures**. Backup at `tools/backup/graph.pre-rebuild.json`.
-- App: **3.104 is LIVE. 3.105 and 3.106 are COMMITTED BUT NOT PUSHED** — the token at
-  `C:\Users\sands\.secrets\github_token.txt` is gone and `git push` hangs on the `manager`
-  credential helper's GUI prompt (exit 124). Only Hassan can restore this. Then:
-  `python -c "import sys; sys.path.insert(0,'tools'); import ship; ship.push()"`
-  **3.106 is the blank-page fix — it is the most important thing waiting to go out.**
+- Path: **94 nodes, 14 tracks, 22 with figures** — track N is the first mini-path. Backup at `tools/backup/graph.pre-rebuild.json`.
+- App: **3.109 live and pushed.** The token at `C:\Users\sands\.secrets\github_token.txt` is
+  still missing, so ship.py's push is intermittent — when it fails, Hassan runs
+  `python -c "import sys; sys.path.insert(0,'tools'); import ship; ship.push()"` himself.
+- `/reset.html` clears a wedged service worker without touching progress or the key (#171).
 - `VV.all({stage:1})` passed 98/98 as of 3.102.
 - **507 book figures live**, encrypted per book under `img/<id>.enc`.
 
@@ -153,15 +152,39 @@ derivation, breaking parent-gating, counting containers — all three caught). b
 seven malformed shapes; that was tested both directions too.
 
 ### [ ] JOB 5 — Build the mini-paths, then the figures
-**Step 1 (pick the large things) is DONE and measured. Generation has NOT started.**
+**Step 1 (pick) done. First mini-path SHIPPED in 3.109. Four uncovered books remain.**
 
-Build against the JOB 4 spec above — do not redesign it.
+**READ THE TWO NEW LINES IN THE POINT BEFORE WRITING ANY LESSON.** The first draft of the
+Irrationality mini-path was a summary of Greene's chapter and was thrown away unshipped. Hassan
+has now corrected this twice. He does not need concepts explained — he has understood them for
+years. Each lesson is three things and nothing else:
+  * **THE TELL** — the sentence he actually hears in his own head when it runs, first person.
+  * **WHERE** — the specific place it will catch *him*, not a generic example.
+  * **THE MOVE** — one action small enough to do in under a minute.
+The author's claim is the floor and lives in `sources`. Quizzes test RECOGNITION IN A SITUATION,
+never recall of what the author wrote — naming the bias is the thing he already has.
 
-**THE GAP, measured 5 Aug 2026.** 87 lessons are meant to cover 2.86M words. This is exactly
-Hassan's "three lessons cannot cover 500 pages", quantified:
+**DONE — track N, The Laws of Human Nature** (`tools/path_irrationality.py`, hand-authored):
+`n1 The Law of Irrationality` on the main path with six steps beneath it (`n1s1`..`n1s6`) —
+confirmation, conviction, appearance, group, blame, superiority. Note there are SIX biases, not
+five: the extractor folded "The Blame Bias" into the Group Bias chapter, so working from chapter
+titles alone loses one. Read the episode TEXT, never just the titles.
 
-| book | words | chapters | lessons | words/lesson |
-|---|---|---|---|---|
+**STILL UNCOVERED (no lesson, no track, no mention):**
+The Body Keeps the Score (172,208w) · How to Win Friends (79,675w) · Meditations (72,513w) ·
+What Everybody Is Saying (69,836w). Then the worst ratios: Seduction (240,398w / 3 lessons),
+Deception, Dark Psychology, Purification, 48 Laws.
+
+**FIGURES ARE OWED ON TRACK N AND ARE NOT OPTIONAL.** Hassan: "that's why the figures are there
+for" — they are what make a step applicable, not decoration. Build them via
+`tools/figs_research/` (read `LOG.md` first — it records what has already been rejected and why).
+Do NOT write figure specs from intuition; that protocol exists precisely to stop that.
+
+`tools/gemini_pipeline.py:merge_minipaths()` lays a generated track out as mini-paths
+automatically (tested against build.validate in four shapes) — but Hassan asked for lessons to be
+**written directly, not generated**: "use gemini for help do the task urself for best quality."
+
+---|---|---|---|---|
 | The Laws of Human Nature | 270,396 | 232 | **0** | — |
 | The Body Keeps the Score | 172,208 | 220 | **0** | — |
 | How to Win Friends and Influence People | 79,675 | 70 | **0** | — |
