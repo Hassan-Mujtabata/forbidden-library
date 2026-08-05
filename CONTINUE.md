@@ -446,6 +446,84 @@ is another silo to reconcile later.
 
 ---
 
+## THE FIGURE RESEARCH PROTOCOL  (Fable 5's workorder-6 rules — the workorder file is gone, these are the rules)
+
+`tools/figs_research/` is GITIGNORED and ship-blocked, so the rules live here or they are lost.
+`LOG.md` in that folder is the audit trail and shows the protocol being executed; read it before
+starting a cycle. These rules are not ceremony — every one of them exists because a figure was
+shipped or nearly shipped that was wrong.
+
+**1. RESEARCH IS MANDATORY AND IT IS NOT JUST THE BOOKS.** Hassan: "please make sure it does
+research properly... this book is just basic concept... it needs to even do online research."
+The library gives you the concept. What it does not give you is the felt detail, the numbers, or
+whether the claim survived replication. Go and find those.
+
+**2. ONE SOURCE IS NEVER ENOUGH — CORROBORATE ACROSS INDEPENDENT ONES.** Hassan: "someone can
+just put random stuff for trolling so 1 isnt really enough." This has already caught a real
+error: leighb.com was used to corroborate Brasington and it IS Brasington's own site — not
+independent at all. It was discarded and replaced with Ajahn Brahm, a different lineage.
+Independence means a different author, a different method, ideally a different tradition.
+
+**3. READ THE PRIMARY SOURCE IN FULL, NOT A SUMMARY.** Cycle 2 read Draganski et al. Nature 2004
+as the PDF and got the third scan, the "transient" wording and the non-juggler control — none of
+which survives in a summary. A vivid simile widely attributed to TMI was checked against
+books.json, found NOT to be in the actual text, and dropped.
+
+**4. CHECK IT REPLICATED BEFORE YOU DRAW IT.** The decoy effect was killed before a single line
+was drawn: Yang & Lynn 2014 attempted it 91 times and it worked 11. The figure was replaced with
+one built on defaults (Johnson & Goldstein, 42% -> 82%), which holds.
+
+**5. RECORD WHAT YOU REJECTED AND WHY.** Half the value of LOG.md is the rejections. A figure
+that was considered and dropped will otherwise be re-derived by the next session — this session
+alone rejected `crowd` for n1s4 and `frames` for r2, and both took real work to rule out.
+
+**6. STATE WHAT YOU COULD NOT GET.** Cycle 1 records that reddit blocks the crawler, so there is
+no raw beginner voice in that evidence base. A gap that is stated is a limitation; a gap that is
+hidden is a claim you cannot support.
+
+**7. NO INVENTED PRECISION.** If the effect sizes are not in hand, the figure carries direction
+only and no tick values — `trade` and `routes` both do this deliberately. Putting numbers on an
+axis you did not get from the paper is fabrication that looks like rigour.
+
+**8. THE FIGURE MUST TEACH AWAY A SPECIFIC ERROR.** Every LOG entry names the "error taught
+away" first. A figure that merely restates the paragraph beside it adds load and subtracts
+nothing. If you cannot name the wrong belief it removes, do not build it.
+
+**9. AUDIT AFTER DRAWING.** `VV.figs()` in the browser checks no-shrink, cause-before-effect,
+rest, label-fit, motion-safe and no cut-offs. A reduced-motion bug hid in b2 from 3.74 because
+`fg-leave`/`fg-hop` restored transform but not opacity — invisible to everyone using
+prefers-reduced-motion, for weeks.
+
+**10. UNUSED COMPONENTS ARE SUSPECTS, NOT A MENU.** Every unused one audited so far (`drift`,
+`pacer`, `curve`) encoded the wrong claim. Prefer reusing a component whose research is done and
+whose claim is THE SAME — not adjacent. Otherwise build a new one and register it in
+FIG_COMPONENTS in build.py at the same time.
+
+### FIGURES STILL TO MAKE — 81 of 109 lessons have none
+
+Worst-covered first. The five new tracks are the priority (they are the ones written this
+session and the ones Hassan is reading):
+
+| track | has / total | lessons with no figure |
+|---|---|---|
+| N The Laws of Human Nature | 1/7 | n1, n1s1, n1s3, n1s4, n1s5, n1s6 |
+| O Reading the Body | 1/4 | o1, o2, o3 |
+| P Meditations | 1/3 | p1, p3 |
+| Q Dealing With People | 1/4 | q1, q3, q4 |
+| R The Body Keeps the Score | 1/4 | r1, r2, r4 |
+| J Atomic Habits | 2/12 | j1, j4-j11 |
+| I Attached | 1/8 | i2-i8 |
+| K Thinking, Fast and Slow | 3/10 | k2, k4-k7, k9, k10 |
+| B Concentration & Jhāna | 4/9 | b1, b3, b4, b8, b9 |
+| C, G, H, M | 1 each of 6 | most of each |
+| D 2/6 · E 1/5 · F 1/4 · L 1/4 · A 3/5 | | |
+
+Do NOT batch these. One cycle = one figure = one LOG entry with sources, corroboration,
+rejections and gaps. That rate is the point: the protocol exists because figures produced faster
+than this were wrong.
+
+---
+
 ## HOW TO ACTUALLY MAKE IT EASIER — my recommendations, not Hassan's
 
 He asked for these rather than only implementing his ideas. These are the levers that reliably
