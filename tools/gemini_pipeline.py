@@ -209,6 +209,73 @@ def next_track_id(graph):
             return c
     raise RuntimeError("out of track ids")
 
+def merge_minipaths(graph, track_meta, contents, per_path=5):
+    """#171 JOB 5 — lay a track out as MINI-PATHS instead of one flat chain.
+
+    Consecutive lessons are grouped: the first of each group stays on the main path and the rest
+    become its steps (see the mini-path spec in CONTINUE.md). Structure is still assigned here and
+    never by the model, so this cannot produce a cycle or a dangling prereq.
+
+    Two rules from the spec are enforced by construction rather than hoped for:
+      * a step NEVER lists its parent in prereq — the parent completes only when its steps do, so
+        that would deadlock. The first step of a group has no prereq at all; it is gated by its
+        parent's availability at runtime.
+      * a group with fewer than two steps is emitted FLAT. build.py rejects a mini-path of one,
+        and rightly: a container holding a single lesson is just a lesson with extra clicks.
+    """
+    import copy
+    g = copy.deepcopy(graph)
+    tid = track_meta["id"]
+    if not any(t["id"] == tid for t in g["tracks"]):
+        g["tracks"].append(track_meta)
+    existing = {n["id"] for n in g["nodes"]}
+
+    def uid(base):
+        nid = base
+        while nid in existing:
+            nid += "x"
+        existing.add(nid)
+        return nid
+
+    def body(c):
+        return {"glyph": c["glyph"], "title": c["title"], "bridge": c["bridge"],
+                "sources": c["sources"], "quiz": c["quiz"], "apply": c["apply"]}
+
+    groups = [contents[i:i + per_path] for i in range(0, len(contents), per_path)]
+    prev_parent, tier = None, 0
+    for grp in groups:
+        head, rest = grp[0], grp[1:]
+        pid = uid(f"{tid.lower()}{tier + 1}")
+        parent = {"id": pid, "track": tid, "tier": tier,
+                  "prereq": [prev_parent] if prev_parent else [], **body(head)}
+        if prev_parent:
+            parent["whyreq"] = clean_text(head.get("whyreq") or
+                                          "Follows on from the section before it.")
+        g["nodes"].append(parent)
+        tier += 1
+        if len(rest) < 2:
+            # too small to be a mini-path — keep them on the main path
+            for c in rest:
+                nid = uid(f"{tid.lower()}{tier + 1}")
+                n = {"id": nid, "track": tid, "tier": tier, "prereq": [pid], **body(c)}
+                n["whyreq"] = clean_text(c.get("whyreq") or "Continues the section before it.")
+                g["nodes"].append(n)
+                pid, tier = nid, tier + 1
+            prev_parent = pid
+            continue
+        prev_step = None
+        for si, c in enumerate(rest):
+            sid = uid(f"{pid}s{si + 1}")
+            step = {"id": sid, "track": tid, "tier": si + 1, "parent": pid,
+                    "prereq": [prev_step] if prev_step else [], **body(c)}
+            if prev_step:
+                step["whyreq"] = clean_text(c.get("whyreq") or "The step before it sets this up.")
+            g["nodes"].append(step)
+            prev_step = sid
+        prev_parent = pid
+    return g
+
+
 def merge_nodes(graph, track_meta, contents):
     """Assign structure to a list of generated CONTENTS and add a new chained track. Returns a NEW graph."""
     import copy

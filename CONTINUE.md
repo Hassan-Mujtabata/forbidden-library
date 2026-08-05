@@ -17,6 +17,17 @@ When you finish a job: tick it, add what you learned to "Hard rules", and commit
   Three lessons make that worse — you can see three lessons cannot cover 500 pages. Forty small
   steps that visibly DO cover it make it climbable. Small steps because each is ONE thing, never
   because content was cut.
+- **UNDERSTANDING IS NOT THE GOAL. APPLYING IT IS.** Hassan's words: "if I read books I should
+  not just understand concept I should be easily apply it in real life — I been understanding it
+  for years, that's why the figures are there for." He does not need a chapter explained. He
+  needs to be able to CATCH the thing happening and DO something. A lesson that recounts what the
+  author said is a summary no matter how well written, and it has now been written twice by
+  mistake. Build each lesson around: the TELL (what it feels like from the inside, in the live
+  moment), WHERE it will actually happen to him, and the MOVE (one thing small enough to
+  actually do). The author's claim is the floor, not the lesson.
+- **Figures are FOR the applying.** They exist to show the mechanism in motion so it can be
+  recognised in real life — that is why he asked for them. They are not illustrations glued onto
+  an explanation.
 - **Never trade understanding for brevity.** Longer is fine if it is clearer. The enemy is
   confusion, not length.
 - **The Path's job:** make a huge book not feel like a huge deal, and tell you where to start.

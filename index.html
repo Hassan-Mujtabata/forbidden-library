@@ -4380,8 +4380,12 @@ $("btn-ach").onclick=()=>{const g=$("achgrid");g.innerHTML="";
   $("achs").classList.add("on")};
 
 /* ---------- patch notes ---------- */
-const APP_VER="3.108";
+const APP_VER="3.109";
 const PATCHES=[
+ {v:"3.109",n:"The First Mini-Path",d:"5 Aug 2026",items:[
+  ["new","THE LAWS OF HUMAN NATURE IS ON THE PATH, AND IT IS THE FIRST THING BUILT AS STAIRS. It is the largest book in the library — 270,396 words, 232 chapters — and until now it had no lesson at all, not one. It opens with The Law of Irrationality on the main path, and underneath it six short steps, one for each of the six things your mind does to you: confirmation, conviction, appearance, group, blame, superiority. The steps are always visible under it, because being able to see that six short climbs cover the whole thing is the point."],
+  ["new","THESE ARE NOT SUMMARIES OF THE CHAPTER. Every step is built as three things and nothing else: the sentence you actually hear in your own head when it is running, the specific place it will catch you, and one move small enough to do in under a minute. Understanding these ideas was never the hard part — a summary would just hand back something already known. What was missing was being able to catch it live, so that is what each step trains, and the quizzes test recognising it in a situation rather than naming it."],
+  ["fix","A first version of this was written as a summary and thrown away rather than shipped."]]},
  {v:"3.108",n:"A Way Back In",d:"5 Aug 2026",items:[
   ["new","THERE IS NOW A RESET PAGE FOR A DEVICE THAT WILL NOT OPEN. Add /reset.html to the Vault's address and load it. It removes the background worker and the offline caches — the only two things that can wedge — and then reopens the Vault. It does NOT touch your progress, your notes or your key, which is why it is the right thing to reach for instead of the browser's 'clear site data', a setting that would delete all three."],
   ["fix","It can load on a device where the app itself cannot, and that is deliberate rather than lucky: the page is kept out of the offline store, so a wedged worker has no cached copy to hand back and the only route left to it is a real request to the server. That is what makes it usable from a phone, where there are no developer tools to unregister a worker by hand."]]},
