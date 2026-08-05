@@ -630,9 +630,12 @@ Rule 4 passes strongly: Svenson (1981) has a preregistered N=1,203 direct replic
 2021 replication. **But those establish the PHENOMENON, not the MECHANISM the lesson teaches**
 ("you see your own process and only other people's output"). Before drawing, verify the
 mechanism line — bias blind spot (Pronin, Lin & Ross 2002) and the introspection-illusion account
-(Pronin & Kugler 2007) — read, not cited from memory, replication checked. If it does not hold,
-fall back to drawing the phenomenon only (everyone above the median, which is impossible) and
-leave the mechanism as prose. Pairs with cycle 1 and explains why the whole track is
+(Pronin & Kugler 2007) — read, not cited from memory, replication checked. **MECHANISM VERIFIED AND IT CORRECTED THE LESSON (3.128):** Pronin & Kugler (2007) JESP —
+the blind spot PERSISTED even when observers were handed the other person's introspections, so it
+is a WEIGHTING asymmetry, not an information one. n1s6 rewritten (682 -> 906w). Figure still NOT
+drawn: needs the full text (this used abstract-level reporting), replication status, and class (c).
+Design implied by the finding: stage 3 shows their introspection handed over and still discounted
+— a better figure than the one planned, and it exists only because the research contradicted the plan. Pairs with cycle 1 and explains why the whole track is
 read as being about other people.
 - Error taught away: "I'm more rational than most" — held by nearly everyone, so it cannot be
   true of nearly everyone.
