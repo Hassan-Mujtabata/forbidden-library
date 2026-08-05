@@ -286,6 +286,79 @@ Generation runs through the Gemini pipeline. **Gemini may add book content only,
 
 ---
 
+## THE CONCEPT SPINE + SITUATION INDEX  (design — build this, it reshapes everything else)
+
+**The diagnosis.** Hassan has said for weeks that he understands the concepts and still cannot
+apply them, and that reading takes years to become usable. That is not a lesson-quality problem
+and writing better prose will not fix it. It is two structural faults:
+
+1. **24 books are 24 silos.** Greene's confirmation bias, Kahneman's WYSIATI, Cialdini's
+   consistency principle and Navarro's baseline discipline are THE SAME MECHANISM described by
+   four authors who never read each other. Presented separately they are four unrelated facts,
+   so learning is additive — every book makes the pile bigger. Named as one mechanism they are
+   one idea with four instances, so learning COMPOUNDS: book five makes books one to four
+   clearer instead of heavier. ~20 mechanisms generating a thousand observations is far easier
+   to hold than a thousand observations.
+2. **Everything is indexed by SOURCE, and life does not arrive by source.** When someone goes
+   quiet in a meeting, nothing in the library is reachable — you would have to already know it
+   is a Navarro problem, recall the track, find the lesson. That is not a comprehension failure,
+   it is a RETRIEVAL-PATH failure, and it is the actual reason knowledge sits inert for years.
+
+**THE FIX — three parts, in order.**
+
+**(a) Tag every lesson with the mechanism(s) it instances.** Add `mech: ["motivated-reasoning"]`
+to nodes (array — a lesson may instance more than one). Register the ids in build.py exactly the
+way FIG_COMPONENTS works, and validate against it: that mirror rule already exists and has caught
+real bugs. Unknown id = build fails.
+
+**(b) A Mechanisms view.** One screen per mechanism: the mechanism stated once, then every lesson
+across every book that instances it. This is where compounding becomes visible — four books
+agreeing is far more convincing, and far more memorable, than any one of them asserting it.
+
+**(c) A situation index — the piece that makes it apply in real life.** Tag lessons with
+`trigger` phrases in the reader's own language, and give the app an entry point that asks "what
+is happening right now?" rather than "which book?". Triggers to start from:
+"they went quiet" · "they agreed too fast" · "I'm about to decide something I already want" ·
+"I'm explaining and losing them" · "I can't stop thinking about it" · "they keep bringing it up"
+· "I said yes and regret it" · "I know what to do and I'm not doing it" · "this keeps happening
+to me" · "I feel worse after talking to them".
+Also: **spaced review currently resurfaces LESSONS; it should resurface SITUATIONS** ("you are in
+this position — what is running?"). Retrieval practice only builds the path you actually
+practise, and right now the practised path is "recall lesson", never "recognise moment".
+
+**THE MECHANISM LIST — started, not finished. Refine against the text; do not invent to fill.**
+
+| id | mechanism | books that instance it |
+|---|---|---|
+| `motivated-reasoning` | You believe what is pleasant to believe, then recruit the evidence | Greene, Kahneman, Cialdini, Navarro |
+| `appraisal-gap` | Event → judgement → response; the judgement is the only lever | Aurelius, Frankl, TMI, van der Kolk, Kahneman |
+| `automaticity` | Repetition turns behaviour into reflex that runs without you | Clear, TMI, Aurelius, Greene |
+| `ego-threat-stops-processing` | A threatened self-image ends learning and persuasion outright | Carnegie, Greene, Dark Psych, Davis |
+| `importance-deficit` | People are starved for significance; supplying it opens them | Carnegie, Schafer, Greene, Seduction |
+| `body-precedes-narrative` | Physiological response fires before, and independent of, the story | Navarro, van der Kolk, TMI |
+| `attention-is-the-control-surface` | Where attention goes decides what is learned and what is felt | TMI, Brasington, Goldstein, de Bono, Clear |
+| `baseline-and-deviation` | Signal exists only relative to that person's own normal | Navarro, Kahneman, Levine & Heller |
+| `conformity-without-pressure` | The group sets belief while no pressure is ever felt | Cialdini, Greene, Dark Psych |
+| `reciprocity-debt` | A gift creates obligation that operates below awareness | Cialdini, Greene, Schafer, Seduction |
+| `loss-looms-larger` | Losses and scarcity outweigh equivalent gains | Kahneman, Cialdini |
+| `commitment-consistency` | A small yes binds the next; self-image defends past choices | Cialdini, Clear, Greene |
+| `attachment-template` | Early relational patterns replay in adult relationships | Levine & Heller, van der Kolk, Greene |
+| `meaning-bears-load` | What can be endured is set by what it is for | Frankl, Aurelius, Buddhaghosa |
+| `impermanence-non-identification` | Experience is a stream of arisings, not a solid self | TMI, Goldstein, Brahm, Buddhaghosa, Aurelius |
+| `frame-controls-answer` | How a choice is presented determines the choice | Kahneman, Cialdini, Greene, Dark Psych |
+| `front-and-halo` | People present managed fronts; one quality implies the rest | Greene, Navarro, Seduction, 48 Laws |
+| `state-contagion` | States transfer between people below awareness | Schafer, van der Kolk, Davis, Seduction |
+| `edge-of-capacity` | Capacity grows only at the edge, and only with feedback | TMI, Clear, Brasington |
+| `suppression-rebounds` | Fighting a state feeds it; allowing it releases it | TMI, Goldstein, van der Kolk, Aurelius |
+
+**WHY THIS BEFORE MORE BOOKS.** It changes how the remaining books get written. *The Body Keeps
+the Score* written against mechanisms that already exist is a smaller job producing a better
+result than the same book written with a fresh vocabulary nobody else shares. Every book added
+after the spine exists is cheaper AND makes the existing ones clearer. Every book added before it
+is another silo to reconcile later.
+
+---
+
 ## HOW TO ACTUALLY MAKE IT EASIER — my recommendations, not Hassan's
 
 He asked for these rather than only implementing his ideas. These are the levers that reliably
