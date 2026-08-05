@@ -499,7 +499,19 @@ prefers-reduced-motion, for weeks.
 whose claim is THE SAME — not adjacent. Otherwise build a new one and register it in
 FIG_COMPONENTS in build.py at the same time.
 
-### HOW MANY FIGURES — the target is ~65 of 109, NOT one per lesson
+### HOW MANY FIGURES — ~65 of 109 is the FLOOR, not the ceiling
+
+**Hassan, 5 Aug: "im guessing those figures are critically needed. once finished with them then
+start making more to support where u think could help and research."** So the ~38 below are the
+committed set — treat them as required work, not a proposal. AFTER they are done, keep going:
+add figures wherever your own judgement says one would help, each still research-backed and each
+still logged. He is explicitly delegating the choice of the later ones, which means the
+selection rule becomes yours to apply and the protocol below is what keeps that honest.
+
+The one thing that does NOT relax: a figure still has to do something prose physically cannot.
+"More figures" is not the goal — understanding is. A decorative figure fails his first rule
+("anything makes it harder dont even bring it close") no matter how many are wanted.
+
 
 Counted 5 Aug 2026. Hassan asked for this split explicitly; his guess that ~84 was the light wing
 alone was close but that number was both wings together.
