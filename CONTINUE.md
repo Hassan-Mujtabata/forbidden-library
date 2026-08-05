@@ -17,6 +17,13 @@ When you finish a job: tick it, add what you learned to "Hard rules", and commit
   Three lessons make that worse — you can see three lessons cannot cover 500 pages. Forty small
   steps that visibly DO cover it make it climbable. Small steps because each is ONE thing, never
   because content was cut.
+- **THE ONE RULE ABOVE ALL THE OTHERS, in his words:** "UNDERSTANDING IS THE MAIN POINT.
+  ANYTHING THAT MAKES UNDERSTANDING EASIER U CAN ADD IT. ANYTHING MAKES IT HARDER DONT EVEN
+  BRING IT CLOSE — like u cut the text before, or remove images, and sumerized idea and what
+  not." Every drift this session was a breach of this wearing a different disguise: cutting
+  text, summarising the idea, treating his reading capacity as a quota to fill, then trimming
+  because volume was misread as the complaint. Before adding anything, ask only: does this make
+  it easier to understand? If yes it goes in at any length or size. If no it does not get built.
 - **LENGTH FOLLOWS THE IDEA. IT IS A CEILING, NOT A QUOTA.** He can sit 10-30 minutes with a
   single stage if the idea warrants it — "u can put 1 lesson in there if needed, not squeeze
   there 2 of them to fill time, its all about understanding." So: ONE idea per lesson, carried
@@ -210,10 +217,26 @@ Track N (Laws of Human Nature), all 7 nodes, still ~200-400 words each.
 Then the thin ratios: Seduction (240,398w / 3 lessons), Deception, Dark Psychology, Purification,
 48 Laws.
 
-**FIGURES ARE OWED ON TRACK N AND ARE NOT OPTIONAL.** Hassan: "that's why the figures are there
-for" — they are what make a step applicable, not decoration. Build them via
-`tools/figs_research/` (read `LOG.md` first — it records what has already been rejected and why).
-Do NOT write figure specs from intuition; that protocol exists precisely to stop that.
+**FIGURES + SMALL NOTES ARE AUTHORISED AND OWED — Hassan, 5 Aug: "u can add figures ... for
+dark wing and small notes (AKA MAKING UNDERSTANDING EASIER)."** Phase order still stands
+(coverage first), but figures and notes are explicitly wanted and are not decoration — they are
+the comprehension aid he has asked for repeatedly: "that's why the figures are there for."
+
+- **DARK WING first** — the `wing:"shadow"` books: 48 Laws, The Art of Seduction, Dark
+  Psychology 3-in-1, 30 Covert Tactics, The Art of Deception, Manipulation, Influence, The Laws
+  of Human Nature, What Everybody Is Saying, How to Win Friends, The Like Switch.
+- **Build figures via `tools/figs_research/` — read `LOG.md` FIRST.** It records which figures
+  were built and then killed for encoding the wrong claim. Do NOT write specs from intuition.
+- **Reuse an existing component whose research is already done where one fits.** Track O's
+  `pattern` figure is the model: it came with Bond & DePaulo (2006) — 206 studies, 24,483
+  observers, 54% accuracy on one encounter and 47% on lies — behind it, and Navarro's baseline
+  rule is the same finding from another direction. That is a correct reuse. Picking a component
+  because it looks nice is the failure this rule exists to stop.
+- **`c` is the component key — a label passed as `c` overwrites the component name. Use `c3`.**
+- Caption cap 220 chars, `feel` line cap 200, max 5 stages, `place` must index into `bridge`.
+  build.py enforces all of these; the 200-char `feel` cap already caught one overrun.
+- **Small notes**: short clarifying asides inside a lesson. Same test as everything else — only
+  if they make it easier. A note that adds a caveat nobody asked about makes it harder.
 
 `tools/gemini_pipeline.py:merge_minipaths()` lays a generated track out as mini-paths
 automatically (tested against build.validate in four shapes) — but Hassan asked for lessons to be
