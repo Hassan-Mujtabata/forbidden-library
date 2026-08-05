@@ -634,7 +634,13 @@ functions as avoidance). Retro-justifies p3. p3 done (3.145) - TRACK P COMPLETE.
 the COLD family (anchoring, availability) needs PROCEDURAL fixes, not honesty. n1s3 done (3.147) - halo CONFIRMED, plus two stronger findings: people report the influence in
 REVERSE when asked, and FOREWARNING DOES NOT PROTECT (so no lesson may imply vigilance works).
 Advice rewritten to procedural. n1s5 done (3.148). **TRACK N COMPLETE - ALL FIVE NEW TRACKS (N/O/P/Q/R) ARE NOW AUDITED.**
-Next: the eleven older tracks A-M, 76 lessons, never audited.
+Next: the eleven older tracks A-M. **87 lessons unaudited** (not 76 - counted properly).
+**TRIAGE DONE:** scanned all 87 for absolutes/statistics/mechanism words. 31 carry an absolute,
+only 5 cite any statistic - the OLD tracks are ASSERTION-HEAVY (different risk from the new ones,
+which over-explained). Highest risk first: d3 (done 3.149), d5, g5, f1, d1, c2, c1, k3, j8, h5, a2.
+**THEIR FAILURE MODE IS UNCHECKED INHERITANCE** - repeating the popular version of a classic
+study. Expect Milgram, Stanford Prison, Asch, marshmallow and priming across D/E/F/G/M, all
+needing the same treatment d3 just got.
 **CARRY THIS INTO THEM:** three lessons in track N had a motivational explanation that was only
 partial and needed a colder one added. Books about motives reach for motivational causes every
 time; roughly a third of the time the plainer expectancy/heuristic account does as much work.
