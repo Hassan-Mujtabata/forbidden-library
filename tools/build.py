@@ -76,6 +76,7 @@ def validate(books, graph):
     if len(ids) != len(set(ids)):
         die("duplicate node ids")
     idset = set(ids)
+    byid = {n["id"]: n for n in nodes}
     booktitles = {b["title"] for b in books["books"]}
 
     problems, warns = [], []
@@ -132,6 +133,29 @@ def validate(books, graph):
                 problems.append(f"{n['id']}: rel '{r}' does not exist")
             elif r == n["id"]:
                 problems.append(f"{n['id']}: rel points at itself")
+        # #169 MINI-PATHS. `parent` makes this node a STEP of another node, which turns that node
+        # into a mini-path: one intimidating block presented as a short flight of stairs. The
+        # link lives on the CHILD, exactly as `track` does, so there is one source of truth and
+        # no way for a parent's step list to disagree with the steps themselves.
+        #
+        # ONE LEVEL ONLY. A step may not itself own steps. Not a technical limit -- a tree is a
+        # worse version of the problem it is meant to fix: "open this, to find this, to find the
+        # actual lesson". A mini-path is a flight of stairs, not a filing cabinet. The rule also
+        # makes parent cycles structurally impossible, so no cycle detection is needed for it.
+        par = n.get("parent")
+        if par is not None:
+            if par == n["id"]:
+                problems.append(f"{n['id']}: parent points at itself")
+            elif par not in idset:
+                problems.append(f"{n['id']}: parent '{par}' does not exist")
+            else:
+                pn = byid[par]
+                if pn.get("parent"):
+                    problems.append(f"{n['id']}: parent '{par}' is itself a step — "
+                                    f"mini-paths are one level deep, not a tree")
+                if pn["track"] != n["track"]:
+                    problems.append(f"{n['id']}: step is in track {n['track']} but its parent "
+                                    f"'{par}' is in track {pn['track']}")
         if not n.get("stub"):
             for key in ("bridge", "sources", "quiz", "apply"):
                 if not n.get(key):
@@ -142,6 +166,29 @@ def validate(books, graph):
             for s in n.get("sources", []):
                 if s["book"] not in booktitles:
                     warns.append(f"{n['id']}: source '{s['book']}' not a library book (quarried/external — no cross-link)")
+
+    # #169: mini-path shape checks that need the whole node list.
+    kids = {}
+    for n in nodes:
+        if n.get("parent"):
+            kids.setdefault(n["parent"], []).append(n)
+    for pid, ks in kids.items():
+        if pid not in byid:
+            continue                      # already reported above
+        if len(ks) < 2:
+            problems.append(f"{pid}: has a single step '{ks[0]['id']}' — a mini-path of one is "
+                            f"just a lesson wearing a container; give it real steps or none")
+        tiers = [k.get("tier") for k in ks]
+        if len(set(tiers)) != len(tiers):
+            problems.append(f"{pid}: steps share a tier {sorted(tiers)} — tier is their order, "
+                            f"so a tie means the reader gets an arbitrary sequence")
+        # A parent's completion is DERIVED from its steps (see nodeDone in index.html). So a step
+        # that waits on its parent waits on itself: the parent can never finish until the step
+        # does. That deadlock is silent -- the step simply never unlocks -- so it is caught here.
+        for k in ks:
+            if pid in (k.get("prereq") or []):
+                problems.append(f"{k['id']}: lists its own parent '{pid}' as a prereq. A parent "
+                                f"is complete only when its steps are, so this can never unlock.")
 
     # cycle detection (DFS)
     WHITE, GRAY, BLACK = 0, 1, 2

@@ -38,7 +38,7 @@ When you finish a job: tick it, add what you learned to "Hard rules", and commit
 - Every lesson citation resolves to a real book (Attached and The Path of Purification were
   ingested 4 Aug; before that 21 citations pointed at nothing).
 - Path: **87 nodes, 13 tracks, 22 with figures**. Backup at `tools/backup/graph.pre-rebuild.json`.
-- App: 3.104 live.  `VV.all({stage:1})` passed 98/98 as of 3.102.
+- App: 3.105 live.  `VV.all({stage:1})` passed 98/98 as of 3.102.
 - **507 book figures live**, encrypted per book under `img/<id>.enc`.
 
 ---
@@ -100,14 +100,48 @@ Not done, and deliberately: no hunt for real verbatim passages. That reverses a 
 copyright decision and is Hassan's to make. `tools/quotefix.py` still generates the review file
 if he ever chooses it.
 
-### [ ] JOB 4 — The mini-path data model
-Only after 1 and 2. Parent nodes owning child steps; the graph is flat tiers today. A long
-chapter becomes a mini-path of real steps rather than "(1)…(12)". **Build the model before
-generating any content**, or everything gets regenerated twice.
+### [x] JOB 4 — The mini-path data model  — DONE, shipped 3.105
+**The model only. No lesson was split into steps — that is JOB 5.** It ships inert: with no
+`parent` in the data the rendering is byte-identical to 3.104, so nothing moved on screen.
 
-### [ ] JOB 5 — Figures on the steps
-Last. Use the research protocol in `tools/figs_research/` — read `LOG.md` first, it records what
-has already been rejected and why.
+**THE SPEC — build content against this, do not redesign it.**
+
+A node carrying `parent: "<nodeId>"` is a STEP of that node, which makes that node a mini-path.
+
+```jsonc
+{"id":"e4",    "track":"E", "tier":3, "prereq":["e3"], "title":"...", ...}      // the mini-path
+{"id":"e4s1",  "track":"E", "tier":1, "prereq":[],      "parent":"e4", ...}     // step 1
+{"id":"e4s2",  "track":"E", "tier":2, "prereq":["e4s1"],"parent":"e4", ...}     // step 2
+{"id":"e5",    "track":"E", "tier":4, "prereq":["e4"],  ...}                    // waits on the whole mini-path
+```
+
+- **The link lives on the CHILD**, like `track` does. There is no `steps:[]` on the parent, so a
+  step list can never disagree with the steps.
+- **`tier` is the step order** within the parent. Ties are rejected — a tie means the reader gets
+  an arbitrary sequence.
+- **One level deep. Enforced.** A step may not own steps. A tree is a worse version of the problem
+  mini-paths solve: "open this, to find this, to find the actual lesson."
+- **The parent is the main-path node that introduces the idea; the steps are the small ones.**
+  The parent keeps its own `bridge`/`quiz`/`apply` — opening it opens that intro.
+- **Parent completion is DERIVED, never stored:** done when every step is done. So a step must
+  NOT list its parent in `prereq` — the parent cannot finish until the step does, and that
+  deadlock is silent. build.py rejects it.
+- **A step's availability follows its parent's AVAILABILITY, not its completion.**
+- **Progress counts leaves.** A container is not counted alongside its own steps.
+- **Steps are always visible, never behind a toggle.** Seeing that eight short steps cover the
+  whole thing is the entire point; hiding them rebuilds the wall.
+
+`tools/minipath_test.py` runs the REAL functions lifted out of index.html against a synthetic
+graph — 15 assertions, wired into `ship.py` as a gate, and mutation-tested three ways (breaking
+derivation, breaking parent-gating, counting containers — all three caught). build.py rejects
+seven malformed shapes; that was tested both directions too.
+
+### [ ] JOB 5 — Build the mini-paths, then the figures
+The model is ready and specified in JOB 4 above — **build against that spec, do not redesign it.**
+1. Pick the genuinely large things and split them into steps. Each step is ONE thing. Small
+   because it is one idea, NEVER because content was cut — re-read THE POINT before starting.
+2. Then figures on the steps. Use the research protocol in `tools/figs_research/` — read `LOG.md`
+   first, it records what has already been rejected and why.
 
 ---
 
@@ -153,6 +187,10 @@ has already been rejected and why.
 - **`tools/figs_research/`, `tools/backup/`, `books.json`, `graph.json`, `key.txt` are
   ship-blocked.** Do not force-add them.
 - **access.json is Hassan's config. Never touch it, never modify it.**
+- **A test that copies the logic instead of loading it will pass forever after the code changes.**
+  `minipath_test.py` lifts the real functions out of index.html by name and would fail loudly if
+  they were renamed. Mutation-test any new gate before trusting it — all three deliberate breaks
+  were caught, which is the only reason the green run means anything.
 - **Control the matcher before believing the match rate.** "0 of 143 quotes are verbatim" is the
   same output a broken matcher gives. It was only trustworthy after 24 real book sentences were
   fed through it and all 24 were found. Any search that returns a clean 0% or 100% is suspect

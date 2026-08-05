@@ -218,6 +218,19 @@ def check_tools():
         die("cleantext selftest failed:\n" + ((p.stdout or "") + (p.stderr or "")).strip()[:600])
     ok("cleantext --selftest passed")
 
+    # #169: the mini-path model is the only place where completion is DERIVED rather than stored,
+    # and its failure mode is silent — a step that never unlocks, or progress that counts a
+    # container twice. The test runs the real functions out of index.html, so it fails loudly if
+    # they are edited or renamed.
+    mp = os.path.join(HERE, "minipath_test.py")
+    if os.path.exists(mp):
+        p = subprocess.run([sys.executable, mp], capture_output=True, text=True,
+                           encoding="utf-8", errors="replace")
+        if p.returncode != 0:
+            die("mini-path model test failed:\n"
+                + ((p.stdout or "") + (p.stderr or "")).strip()[-900:])
+        ok("mini-path model test passed")
+
 
 def check_patch_date(version):
     """A patch note dated yesterday is a small lie that ships forever. I typed one already."""

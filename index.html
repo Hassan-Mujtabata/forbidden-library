@@ -972,6 +972,16 @@ header .brand span{color:var(--gold)}
 .tnode{position:relative;display:flex;gap:11px;align-items:flex-start;width:100%;text-align:left;
   padding:12px;border-radius:13px;border:1px solid var(--line);background:var(--card);margin-bottom:20px;transition:.18s}
 .tnode:not(:last-child)::after{content:"";position:absolute;left:27px;bottom:-20px;height:20px;width:2px;background:var(--line)}
+/* #169 mini-paths: the steps sit indented under their parent, on their own rail, so the shape on
+   screen is a flight of stairs off the main line rather than another flat list. */
+.substeps{margin:14px 0 20px 26px;padding-left:16px;border-left:2px solid var(--line);
+  display:flex;flex-direction:column;gap:16px}
+.substeps .tnode{padding:9px 11px}
+.substeps .tnode .ng{font-size:17px;width:21px}
+.substeps .tnode .nt{font-size:14px}
+.substeps .tnode:not(:last-child)::after{left:21px;bottom:-16px;height:16px}
+.tnode.minipath .stg{color:var(--tacc,var(--jade))}
+@media (max-width:480px){.substeps{margin-left:14px;padding-left:11px}}
 .tnode .ng{font-size:22px;width:28px;text-align:center;flex:0 0 auto;line-height:1.1}
 .tnode .ntx{flex:1;min-width:0}
 /* #143: this measured 3.87 against a 4.5 requirement, and it was NOT opacity — it was the track
@@ -1686,7 +1696,7 @@ async function boot(){
   $("loading").style.display="none";
   if(!k){showLock();return}
   $("loading").style.display="flex";
-  try{DATA=await tryLoad(k);localStorage.setItem(LS_KEY,k);
+  try{DATA=await tryLoad(k);_STEPS=null;localStorage.setItem(LS_KEY,k);
     if(hashK)history.replaceState(null,"",location.pathname+location.search);}   // #96: strip the key out of the address bar / history
   catch(e){$("loading").style.display="none";showLock();
     // #66: a network failure isn't a wrong key — only say "doesn't fit" when we actually reached the payload
@@ -1724,7 +1734,7 @@ function initA11y(){
   const tb=$("topbar");if(tb&&!tb.getAttribute("role"))tb.setAttribute("role","banner");
 }
 $("keygo").onclick=async()=>{const k=$("keyin").value.trim();if(!k)return;
-  try{DATA=await tryLoad(k);localStorage.setItem(LS_KEY,k);await loadAccess();landing();initSync()}
+  try{DATA=await tryLoad(k);_STEPS=null;localStorage.setItem(LS_KEY,k);await loadAccess();landing();initSync()}
   catch(e){$("keyerr").textContent="That key doesn't fit this lock."}};
 
 /* ============ views ============ */
@@ -3224,6 +3234,7 @@ function loadForged(){
   if(!list.length||typeof DATA==="undefined")return;
   if(!DATA.tracks.some(t=>t.id===FORGE_TRACK.id))DATA.tracks.push(FORGE_TRACK);
   for(const n of list)if(!DATA.nodes.some(x=>x.id===n.id))DATA.nodes.push(n);
+  _STEPS=null;   // #169: forged lessons change the node list, so the step map must be rebuilt
 }
 
 function parseQuizBlock(text){
@@ -4364,8 +4375,12 @@ $("btn-ach").onclick=()=>{const g=$("achgrid");g.innerHTML="";
   $("achs").classList.add("on")};
 
 /* ---------- patch notes ---------- */
-const APP_VER="3.104";
+const APP_VER="3.105";
 const PATCHES=[
+ {v:"3.105",n:"Mini-Paths — The Machinery",d:"5 Aug 2026",items:[
+  ["new","THE PATH CAN NOW HOLD STAIRS INSIDE A STEP. Until today every lesson sat on one flat list, so anything genuinely large had to be either one intimidating block or a row of near-identical numbered pieces. A lesson can now own an ordered set of smaller steps: the lesson introduces the idea, the steps are the short single-thing climbs underneath it, and the steps are always visible rather than hidden behind a toggle — being able to SEE that eight short steps cover the whole thing is the entire point, and hiding them would rebuild the wall."],
+  ["new","Nothing on your Path looks different yet, and that is deliberate. This release is the machinery only — no lesson has been split into steps. Building the shape first means the content gets written once against a settled model instead of being written, reshaped and written again."],
+  ["fix","Three rules are enforced rather than trusted. A mini-path is one level deep, never a tree, because “open this to find this to find the actual lesson” is a worse version of the problem it fixes. A mini-path is complete only when its steps are, and that is worked out live rather than stored, so it can never disagree with the steps themselves. And progress counts real lessons, not containers — otherwise a track holding eight lessons would have cheerfully reported nine."]]},
  {v:"3.104",n:"The Quotes Stop Pretending",d:"5 Aug 2026",items:[
   ["fix","THE PASSAGES UNDER “FROM THE BOOKS” WERE NEVER QUOTATIONS. They were printed inside quotation marks, which is a claim that those are the author's exact words — and they are not. The generator that wrote them was explicitly instructed to produce a faithful close paraphrase and NEVER a verbatim sentence, for copyright reasons. The content was always honest; the quotation marks were not. They are gone, and each passage now says plainly that it carries the book's sense, not its words."],
   ["fix","The app had been labelling only some of them. It assumed lessons in tracks A–F carried real quotes and only marked the later tracks as paraphrase. That assumption was tested rather than trusted: all 143 source passages were searched against the full text of the 24 books, and ZERO appear verbatim — tracks A–F included. So the label now applies to every one of them. The search itself was checked first against 24 real sentences pulled out of the books, all 24 found, so a silent always-fails matcher could not have produced that answer."],
@@ -7141,7 +7156,33 @@ const NODE_XP=80;   // base
 function nodeXP(n){const w=[...(n.bridge||[]),...((n.sources||[]).flatMap(s=>s.quote||[]))].join(" ").split(/\s+/).length;return Math.max(60,Math.min(120,Math.round(w/15)*5));}  // #63: scale by lesson length — median lesson stays 80, spread 60–120
 const nodeById=id=>DATA.nodes.find(n=>n.id===id);
 const trackById=id=>DATA.tracks.find(t=>t.id===id);
-function nodeDone(id){return !!(DATA&&S.node[id]&&S.node[id].doneAt)}
+/* ============ #169 MINI-PATHS ============
+   A node carrying `parent` is a STEP of that node, which turns the parent into a mini-path.
+   The link lives on the child (like `track`), so a parent's step list can never disagree with
+   the steps. build.py enforces ONE LEVEL: a step never owns steps, which is what makes the
+   recursion below terminate and makes parent cycles impossible.
+   Steps are always shown, never behind a toggle — a long book stops being intimidating only if
+   you can SEE that the short steps cover it. Hiding them rebuilds the wall. */
+let _STEPS=null;
+function stepMap(){
+  if(_STEPS)return _STEPS;
+  _STEPS=new Map();
+  for(const n of (DATA&&DATA.nodes)||[]){if(!n.parent)continue;
+    if(!_STEPS.has(n.parent))_STEPS.set(n.parent,[]);_STEPS.get(n.parent).push(n);}
+  for(const v of _STEPS.values())v.sort((a,b)=>(a.tier|0)-(b.tier|0));
+  return _STEPS;
+}
+const stepsOf=id=>stepMap().get(id)||[];
+const hasSteps=id=>stepsOf(id).length>0;
+const isLeaf=n=>!hasSteps(n.id);
+/* A mini-path's completion is DERIVED, never stored: it is done when its steps are. Storing it
+   separately would let "mini-path complete" and "every step complete" drift apart, and the
+   reader would have no way to tell which one was lying. */
+function nodeDone(id){
+  const st=stepsOf(id);
+  if(st.length)return st.every(x=>nodeDone(x.id));
+  return !!(DATA&&S.node[id]&&S.node[id].doneAt);
+}
 // #33: a guest can never complete a lesson inside a hidden track, so such a prereq is treated as satisfied for them —
 // otherwise a visible track anchored onto a hidden one is permanently, un-openably locked.
 function prereqSatisfied(pid){
@@ -7149,9 +7190,15 @@ function prereqSatisfied(pid){
   if(!privileged()){const pn=nodeById(pid);if(pn&&!trackVisible(pn.track))return true;}
   return false;
 }
-function nodeAvail(id){const n=nodeById(id);return !!n&&n.prereq.every(prereqSatisfied)}
+function nodeAvail(id){const n=nodeById(id);if(!n)return false;
+  // a step is reachable only once its mini-path is. Its parent is checked for AVAILABILITY, not
+  // completion — the parent completes only when its steps do, so requiring that would deadlock.
+  if(n.parent&&!nodeAvail(n.parent))return false;
+  return (n.prereq||[]).every(prereqSatisfied);}
 function nodeStatus(id){return nodeDone(id)?"done":(nodeAvail(id)?"avail":"locked")}
-function nodesDone(){return (DATA&&DATA.nodes)?DATA.nodes.filter(n=>nodeDone(n.id)).length:0}
+// counts LEAVES only: a mini-path is a container, so counting it as well as its steps would
+// report more progress than the reader actually made.
+function nodesDone(){return (DATA&&DATA.nodes)?DATA.nodes.filter(n=>isLeaf(n)&&nodeDone(n.id)).length:0}
 function trackDone(tid){if(!DATA)return false;const ns=DATA.nodes.filter(n=>n.track===tid&&!n.stub);return ns.length>0&&ns.every(n=>nodeDone(n.id))}
 function surpriseMe(){   // open a random ready lesson
   const avail=DATA.nodes.filter(n=>!n.stub&&nodeVisible(n)&&nodeStatus(n.id)==="avail");
@@ -7209,26 +7256,43 @@ function renderPath(){
     const filtered=(PATHFILTER||"all")!=="all";
     if(filtered&&!ns.some(pfMatch))continue;   // hide tracks with nothing matching the filter
     const col=document.createElement("div");col.id="trk-"+tr.id;col.className="track"+((!filtered&&COLLAPSED.has(tr.id))?" collapsed":"");col.style.setProperty("--tacc",tr.accent);
-    const doneN=ns.filter(n=>nodeDone(n.id)).length;
-    const trDone=ns.length>0&&doneN===ns.length;   // #83: mark a fully-mastered track
-    let html=`<div class="track-h${trDone?" done":""}"><span class="tg">${tr.glyph}</span><span class="tn">${esc(tr.name)}</span><span class="tp">${doneN}/${ns.length}${trDone?" ✓":""}</span><span class="tcx">▾</span></div>
+    // #169: progress counts LEAVES. A mini-path parent is a container; counting it alongside its
+    // own steps would show 9/9 for a track holding 8 real lessons.
+    const leaves=ns.filter(isLeaf);
+    const doneN=leaves.filter(n=>nodeDone(n.id)).length;
+    const trDone=leaves.length>0&&doneN===leaves.length;   // #83: mark a fully-mastered track
+    let html=`<div class="track-h${trDone?" done":""}"><span class="tg">${tr.glyph}</span><span class="tn">${esc(tr.name)}</span><span class="tp">${doneN}/${leaves.length}${trDone?" ✓":""}</span><span class="tcx">▾</span></div>
       <div class="track-blurb">${esc(tr.blurb)}</div><div class="tnodes">`;
-    ns.forEach((n,si)=>{
+    const cardHTML=(n,label,step)=>{
       const st=nodeStatus(n.id);
       const badge=st==="done"?"✓":st==="avail"?"▸":"🔒";
+      const steps=stepsOf(n.id);
       let sub,strength="";
-      if(st==="locked"){const need=n.prereq.filter(p=>!prereqSatisfied(p)).map(p=>{const x=nodeById(p);return x?x.title:p});  // #34: don't name a lesson the guest can't see
+      if(st==="locked"){const need=(n.prereq||[]).filter(p=>!prereqSatisfied(p)).map(p=>{const x=nodeById(p);return x?x.title:p});  // #34: don't name a lesson the guest can't see
+        // a step can also be locked purely because its mini-path is not open yet
+        if(!need.length&&n.parent){const pn=nodeById(n.parent);need.push(pn?pn.title:n.parent);}
         sub=`<div class="nsub" ${n.whyreq?`title="${esc(n.whyreq)}"`:""}>needs: ${esc(need.join(", "))}</div>`;}
       else if(st==="done"){const lm=levelMeta(levelOf(n.id));
         // tutor-D #46: colour by review strength — rusty (overdue) vs solid — so you see what to shore up at a glance
         const rv=S.node[n.id]&&S.node[n.id].rv;const due=rv&&rv.due<=Date.now();strength=due?" rusty":(rv&&rv.k>=3?" strong":"");
-        sub=`<div class="nsub">${due?"🔸 due for review":(lm.e?lm.e+" "+lm.l.toLowerCase():"done")}</div>`;}
+        sub=`<div class="nsub">${steps.length?`all ${steps.length} steps done`:(due?"🔸 due for review":(lm.e?lm.e+" "+lm.l.toLowerCase():"done"))}</div>`;}
+      else if(steps.length){const dn=steps.filter(x=>nodeDone(x.id)).length;
+        // #169: say how far in you are and how many are left. The count IS the reassurance —
+        // "8 short steps" is what stops a 500-page book reading as one block.
+        sub=`<div class="nsub">${dn?`${dn} of ${steps.length} steps done`:`${steps.length} short steps`}</div>`;}
       else if(n.stub) sub=`<div class="nsub">preview · full lesson next</div>`;
       else sub=`<div class="nsub">ready — about ${nodeMin(n)} min</div>`;   // #111: makes the Short filter legible
       const just=(JUST_UNLOCKED&&JUST_UNLOCKED.includes(n.id))?" just":"";
       const pfh=(filtered&&!pfMatch(n))?" pf-hide":"";
-      html+=`<button class="tnode ${st}${just}${strength}${pfh}" data-node="${n.id}"><span class="ng">${n.glyph}</span>`+
-        `<span class="ntx"><span class="stg">STAGE ${si+1}</span><span class="nt">${esc(n.title)}</span>${sub}</span><span class="badge">${badge}</span></button>`;
+      return `<button class="tnode ${st}${just}${strength}${pfh}${step?" step":""}${steps.length?" minipath":""}" data-node="${n.id}"><span class="ng">${n.glyph}</span>`+
+        `<span class="ntx"><span class="stg">${label}</span><span class="nt">${esc(n.title)}</span>${sub}</span><span class="badge">${badge}</span></button>`;
+    };
+    ns.filter(n=>!n.parent).forEach((n,si)=>{
+      html+=cardHTML(n,`STAGE ${si+1}`,false);
+      const steps=stepsOf(n.id);
+      if(steps.length){
+        html+=`<div class="substeps">`+steps.map((k,ki)=>cardHTML(k,`STEP ${ki+1}`,true)).join("")+`</div>`;
+      }
     });
     html+=`</div>`;   // close .tnodes
     col.innerHTML=html;
@@ -7690,7 +7754,7 @@ async function bioUnlock(){
     const wk=await crypto.subtle.importKey("raw",secret,"AES-GCM",false,["decrypt"]);
     const kb=await crypto.subtle.decrypt({name:"AES-GCM",iv:b64d(rec.iv)},wk,b64d(rec.ct));
     const k=b64e(kb);
-    DATA=await tryLoad(k);localStorage.setItem(LS_KEY,k);
+    DATA=await tryLoad(k);_STEPS=null;localStorage.setItem(LS_KEY,k);
     await loadAccess();landing();checkAch();initSync();
   }catch(err){$("keyerr").textContent="Face unlock failed — use your link or key."}
 }
