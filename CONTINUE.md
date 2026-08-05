@@ -620,8 +620,12 @@ was unverified. Track O fully audited. Track R started: r1 done (3.138) - I had 
 the HPA paradox). Lesson now separates them and carries a genre warning about tidy single
 mechanisms. r2 (3.139) and r4 (3.140) done - r4 was the largest correction yet: Maier & Seligman (2016)
 RETRACTED their own mechanism, passivity is the unlearned DEFAULT and what is learned is CONTROL.
-Track R fully audited. Next: track Q (2 left), then P, then N, then the eleven never-audited
-tracks A-M.
+Track R fully audited. Track Q: q2 done (3.141) - first MAGNITUDE error rather than a
+mechanism error; direction right, but stated as a switch when the measured effects are small.
+Next: q3, then P, then N, then the eleven never-audited tracks A-M.
+**ADD TO THE AUDIT METHOD: check MAGNITUDE as well as direction.** A claim can be correctly aimed
+and still wrong by being absolute. Hunt the words "entirely", "stops", "cannot", "never" - that is
+where overstatement hides once the direction is right.
 **Note across all five audits: the ACTION in each lesson survived even where the MECHANISM did
 not** - which is why auditing mechanism sentences is safe to do quickly. Earlier: r2 (3.139) - the low-road/high-road speed story is contested (Pessoa & Adolphs); the
 observation survives, the wiring does not. Next: r4.
