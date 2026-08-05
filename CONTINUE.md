@@ -38,7 +38,7 @@ When you finish a job: tick it, add what you learned to "Hard rules", and commit
 - Every lesson citation resolves to a real book (Attached and The Path of Purification were
   ingested 4 Aug; before that 21 citations pointed at nothing).
 - Path: **87 nodes, 13 tracks, 22 with figures**. Backup at `tools/backup/graph.pre-rebuild.json`.
-- App: 3.103 live.  `VV.all({stage:1})` passed 98/98 as of 3.102.
+- App: 3.104 live.  `VV.all({stage:1})` passed 98/98 as of 3.102.
 - **507 book figures live**, encrypted per book under `img/<id>.enc`.
 
 ---
@@ -82,14 +82,23 @@ when tested on that book). Everything else was junk being adopted as a name, now
 form when the opening is a pure continuation with nothing honest to lift. Same rule as the quotes:
 derived, never invented. A missing name is a smaller failure than a wrong one.
 
-### [ ] JOB 3 — Relabel the quotes (small, do it any time)
-`sources[].quote` is rendered as a quotation but the generator was **explicitly instructed** to
-write "a faithful close paraphrase, NEVER a verbatim copyrighted sentence"
-(`tools/gemini_pipeline.py` line ~74). So they are paraphrases wearing quote marks — the content
-is honest, the framing is not.
-- Simplest honest fix: stop presenting them as quotation. Do not go find real verbatim passages
-  unless Hassan says so — that reverses a deliberate copyright decision.
-- `tools/quotefix.py` exists and generates a review file if the other route is ever chosen.
+### [x] JOB 3 — Relabel the quotes  — DONE, shipped 3.104
+The quotation marks are gone and every authored passage is labelled "in the book's sense, not its
+words". The content was always honest; the framing was not.
+
+**The app had been labelling only SOME of them, and its rule was wrong.** `aiTrack` assumed tracks
+A–F carried real quotes and only marked G+ as paraphrase. Tested instead of trusted: all **143**
+source passages searched against the full text of the 24 books, **zero appear verbatim, A–F
+included**. The matcher was positive-controlled first (24 real book sentences, 24/24 found) and
+negative-controlled, because an always-fails matcher would have produced exactly the same 0/143.
+
+**Forged lessons keep their quotation marks** — `forgeLesson()` builds sources from
+`passages[0].text`, lifted straight out of the book, so those really are verbatim. A blanket
+relabel would have been a new lie in the other direction.
+
+Not done, and deliberately: no hunt for real verbatim passages. That reverses a deliberate
+copyright decision and is Hassan's to make. `tools/quotefix.py` still generates the review file
+if he ever chooses it.
 
 ### [ ] JOB 4 — The mini-path data model
 Only after 1 and 2. Parent nodes owning child steps; the graph is flat tiers today. A long
@@ -107,8 +116,9 @@ has already been rejected and why.
 1. **Where images are stored** — inside `content.enc`, or separate encrypted files fetched per
    book. Separate is probably right (thousands of images; the app should not load all of them to
    read one book) but it changes how the reader works.
-2. **Quotes** — relabel (recommended, free, honest immediately) or actually quote short passages
-   with attribution (his copyright risk to accept, not ours to assume).
+2. **Quotes** — RESOLVED by doing the recommended half (relabelled, 3.104). Still open only if he
+   wants the other route: replacing the paraphrases with real short verbatim passages plus
+   attribution. That is his copyright risk to accept, not ours to assume. Do not start it unasked.
 
 ---
 
@@ -143,6 +153,10 @@ has already been rejected and why.
 - **`tools/figs_research/`, `tools/backup/`, `books.json`, `graph.json`, `key.txt` are
   ship-blocked.** Do not force-add them.
 - **access.json is Hassan's config. Never touch it, never modify it.**
+- **Control the matcher before believing the match rate.** "0 of 143 quotes are verbatim" is the
+  same output a broken matcher gives. It was only trustworthy after 24 real book sentences were
+  fed through it and all 24 were found. Any search that returns a clean 0% or 100% is suspect
+  until it has been run against a case whose answer is already known.
 - **`extract.py` REBUILDS books.json from the PDFs, so it wipes `ep["img"]`.** Re-run
   `tools/packimages.py` after every re-extract or the library silently loses all 505 figures.
   Order is: `extract.py` → `nameparts.py` → `packimages.py` → `build.py`.

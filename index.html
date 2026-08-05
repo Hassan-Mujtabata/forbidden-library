@@ -1014,6 +1014,7 @@ header .brand span{color:var(--gold)}
 #nbody>p:first-of-type::first-letter{font-size:3em;float:left;line-height:.85;padding:4px 8px 0 0;color:var(--gold)}
 #nbody .src{background:var(--card);border-left:3px solid var(--jade);border-radius:9px;padding:13px 16px;margin-bottom:14px}
 #nbody .src .attr{font-family:var(--sans);font-size:11px;color:var(--tx2);margin-bottom:7px;letter-spacing:.03em}
+#nbody .src .attr .para{opacity:.7;font-style:italic}
 #nbody .src p{margin-bottom:.5em;line-height:1.65;font-size:.99em}
 #nbody .src p:last-child{margin-bottom:0}
 
@@ -4363,8 +4364,12 @@ $("btn-ach").onclick=()=>{const g=$("achgrid");g.innerHTML="";
   $("achs").classList.add("on")};
 
 /* ---------- patch notes ---------- */
-const APP_VER="3.103";
+const APP_VER="3.104";
 const PATCHES=[
+ {v:"3.104",n:"The Quotes Stop Pretending",d:"5 Aug 2026",items:[
+  ["fix","THE PASSAGES UNDER “FROM THE BOOKS” WERE NEVER QUOTATIONS. They were printed inside quotation marks, which is a claim that those are the author's exact words — and they are not. The generator that wrote them was explicitly instructed to produce a faithful close paraphrase and NEVER a verbatim sentence, for copyright reasons. The content was always honest; the quotation marks were not. They are gone, and each passage now says plainly that it carries the book's sense, not its words."],
+  ["fix","The app had been labelling only some of them. It assumed lessons in tracks A–F carried real quotes and only marked the later tracks as paraphrase. That assumption was tested rather than trusted: all 143 source passages were searched against the full text of the 24 books, and ZERO appear verbatim — tracks A–F included. So the label now applies to every one of them. The search itself was checked first against 24 real sentences pulled out of the books, all 24 found, so a silent always-fails matcher could not have produced that answer."],
+  ["fix","Lessons you forge yourself are the exception and keep their quotation marks, because those passages really are lifted word for word out of the book you forged them from. Nothing was rewritten, shortened or removed — this changes only what the app claims about the words, not the words."]]},
  {v:"3.103",n:"Every Chapter Has Its Own Name",d:"5 Aug 2026",items:[
   ["fix","THE LIBRARY NO LONGER REPEATS ITSELF. A long chapter gets cut into parts, and every part used to inherit the same name with a number after it — “Step Three: Strategies Toward Bringing Out the Rational (12)”. One stretch of The Laws of Human Nature ran to 171 identical names. Twelve or a hundred and seventy-one, it is still one undifferentiated block, which is the exact thing the library exists to break up. Identical chapter names across the library: 631 → 36. The longest run of them: 171 → 3."],
   ["fix","The real cause was that chapter detection only ever recognised CAPITALS and numbered headings, so ordinary Title Case section titles were invisible to it. The Laws of Human Nature has 190 chapters and only FOUR were being found. Now 3,522 chapters carry a real name, and where a section title recurs in every chapter — Greene writes a “Keys to Human Nature” in all eighteen — it is qualified by the chapter it sits in instead of appearing eighteen times."],
@@ -7338,8 +7343,19 @@ function openNode(id){
   if(!n.stub&&n.sources){
     const sh=document.createElement("div");sh.className="lblrow books";sh.textContent="📖 From the books";body.appendChild(sh);
     for(const s of n.sources){const d=document.createElement("div");d.className="src";
-      const aiTrack=!"ABCDEF".includes(n.track);   // #57: AI tracks (G+) carry close paraphrases, not verbatim quotes — label them honestly
-      d.innerHTML=`<div class="attr">${esc(s.book)} — ${esc(s.ref)}${aiTrack?` · <span style="opacity:.65">close paraphrase</span>`:""}</div>`+s.quote.map(q=>`<p>“${esc(q)}”</p>`).join("");
+      // #168: quotation marks are a claim, and for authored lessons the claim was false. The
+      // generator was INSTRUCTED to write "a faithful close paraphrase, NEVER a verbatim
+      // copyrighted sentence" (gemini_pipeline.py ~74), so none of these are quotations. Checked
+      // rather than assumed: all 143 source passages in graph.json were searched against the
+      // library text and ZERO appear verbatim — including tracks A–F, which the old `aiTrack`
+      // test had been presenting as real quotes. The matcher was positive-controlled on 24 real
+      // book sentences (24/24 found) before that number was believed.
+      // Forged lessons are the exception and keep their quotation marks: forgeLesson() lifts
+      // passages[0].text straight out of the book, so those ARE verbatim.
+      const verbatim=!!n.forged;
+      d.innerHTML=`<div class="attr">${esc(s.book)} — ${esc(s.ref)}`
+        +(verbatim?"":` · <span class="para">in the book's sense, not its words</span>`)+`</div>`
+        +s.quote.map(q=>`<p>${verbatim?`“${esc(q)}”`:esc(q)}</p>`).join("");
       const norm=x=>x.toLowerCase().replace(/[^a-z0-9]/g,"");
       const lib=DATA.books.find(b=>b.title===s.book)||DATA.books.find(b=>norm(b.title)===norm(s.book))||DATA.books.find(b=>norm(s.book).includes(norm(b.title))&&b.title.length>8);
       if(lib){const go=document.createElement("button");go.className="srcgo";
