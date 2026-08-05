@@ -648,7 +648,11 @@ claim-dense. MEDIAN LENGTH 201 WORDS.** The old tracks are STUBS, not errors. De
 external research (the material is in the books) and is therefore both the bigger share of the
 problem and the cheaper fix, and it batches by track.
 **DEEPENING: TRACK M COMPLETE** - m1, m3 (3.152), m2, m5 (3.153), m4, m6 (3.154). 160-248w ->
-408-536w. Next batch: track B (b3, b5, b6, b9), or the three claim-dense d1/e1/c3.
+408-536w. Next batch: track B (b3, b5, b6, b9), or the remaining claim-dense d1/c3 (**e1 done 3.155**).
+**e1's ETHICAL CHECK PASSED** - it already stated the fork. Do not assume the whole shadow wing
+lacks boundaries. And its correction found something worth hunting for elsewhere: the ETHICAL
+branch was also the EFFECTIVE one (warmth, not hiding competence, is the measured route out of
+envy). Look for that alignment in the other Greene/dark-psychology lessons.
 **SAFETY FINDING (batch 3), applies to the whole shadow wing:** m6's worked example was a man
 covertly engineering repeated appearances in a woman's private routine, presented approvingly.
 The source books teach techniques without ethical boundaries and several were carried across
