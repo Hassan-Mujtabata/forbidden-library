@@ -133,42 +133,45 @@ def extract(meta):
     path = os.path.join(ROOT, meta["file"])
     doc = fitz.open(path)
     npages = len(doc)
+    # #166: blocks carry their PAGE so extracted figures can be placed in the right chapter.
+    # Word-proportional estimation was rejected: pages holding a big figure carry little text, so
+    # a word-based guess drifts most precisely where the figures are.
     blocks = []
-    for page in doc:
+    for pno, page in enumerate(doc, 1):
         for b in page.get_text("blocks"):
             if b[6] != 0:
                 continue
             t = b[4].strip()
             if t:
-                blocks.append(t)
+                blocks.append((pno, t))
     doc.close()
 
     # strip repeated headers/footers
     norm = lambda s: re.sub(r"\d+", "#", s.strip().lower())[:48]
-    freq = Counter(norm(t) for t in blocks if len(t) < 90)
+    freq = Counter(norm(t) for _, t in blocks if len(t) < 90)
     thresh = max(4, npages // 5)
-    blocks = [t for t in blocks if not (len(t) < 90 and freq[norm(t)] >= thresh)]
+    blocks = [(pg, t) for pg, t in blocks if not (len(t) < 90 and freq[norm(t)] >= thresh)]
     # strip bare page numbers / roman numerals
-    blocks = [t for t in blocks if not re.fullmatch(r"[\divxlc\s.\-–•|]+", t.strip().lower())]
+    blocks = [(pg, t) for pg, t in blocks if not re.fullmatch(r"[\divxlc\s.\-–•|]+", t.strip().lower())]
     # strip front-matter boilerplate
     junk = re.compile(r"copyright|isbn|library of congress|all rights reserved|penguin\s|viking penguin"
                       r"|z-lib|pdf room|pdfdrive|www\.|http|printed in the|first published|publishing division",
                       re.IGNORECASE)
-    blocks = [t for t in blocks if not (len(t) < 400 and junk.search(t))]
+    blocks = [(pg, t) for pg, t in blocks if not (len(t) < 400 and junk.search(t))]
 
-    paras = [p for p in (clean(t) for t in blocks) if p]
+    paras = [(pg, c) for pg, c in ((pg, clean(t)) for pg, t in blocks) if c]
 
     # some PDFs emit one block per printed line; merge fragments into real paragraphs
-    avg = sum(len(p.split()) for p in paras) / max(1, len(paras))
+    avg = sum(len(p.split()) for _, p in paras) / max(1, len(paras))
     if avg < 25:
         joined = []
-        for p in paras:
-            if (joined and not is_heading(p) and not is_heading(joined[-1])
-                    and len(joined[-1]) < 900
-                    and joined[-1][-1] not in '.!?:;"”’'):
-                joined[-1] += " " + p
+        for pg, p in paras:
+            if (joined and not is_heading(p) and not is_heading(joined[-1][1])
+                    and len(joined[-1][1]) < 900
+                    and joined[-1][1][-1] not in '.!?:;"”’'):
+                joined[-1] = (joined[-1][0], joined[-1][1] + " " + p)
             else:
-                joined.append(p)
+                joined.append((pg, p))
         paras = joined
 
     episodes = []
@@ -180,8 +183,10 @@ def extract(meta):
     # and number the parts instead.
     last_head, part = None, 0
 
+    cur_pages = []
+
     def flush():
-        nonlocal cur_title, cur_paras, words, last_head, part
+        nonlocal cur_title, cur_paras, words, last_head, part, cur_pages
         if cur_paras:
             if cur_title:
                 head = cur_title.title() if cur_title.isupper() else cur_title
@@ -192,10 +197,15 @@ def extract(meta):
                 title = f"{last_head} ({part})"
             else:
                 title = f"Episode {len(episodes) + 1}"
-            episodes.append({"t": title, "p": cur_paras})
-        cur_title, cur_paras, words = None, [], 0
+            ep = {"t": title, "p": cur_paras}
+            # #166: the printed page range this chapter came from, so a figure extracted from
+            # page N can be shown in the chapter that actually discusses it.
+            if cur_pages:
+                ep["pg"] = [min(cur_pages), max(cur_pages)]
+            episodes.append(ep)
+        cur_title, cur_paras, words, cur_pages = None, [], 0, []
 
-    for p in paras:
+    for pg, p in paras:
         if is_heading(p):
             if words > 150:
                 flush()
@@ -203,9 +213,9 @@ def extract(meta):
             elif cur_title is None and not cur_paras:
                 cur_title = p
             else:
-                cur_paras.append(p)
+                cur_paras.append(p); cur_pages.append(pg)
         else:
-            cur_paras.append(p)
+            cur_paras.append(p); cur_pages.append(pg)
             words += len(p.split())
             if words > 1400:
                 flush()

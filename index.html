@@ -519,6 +519,10 @@ header .brand span{color:var(--gold)}
    Full width and in the flow, not floated: these are read, not glanced at. The caption is real
    text so the contrast audit can measure it, and the stage buttons are real buttons so a keyboard
    and a screen reader can drive them. */
+/* #166 book figures: the publisher's own images, full width, never cropped */
+.bookfig{margin:26px auto;max-width:100%;text-align:center}
+.bookfig img{max-width:100%;height:auto;border-radius:8px;display:block;margin:0 auto;
+  background:#fff}
 .feltfig{margin:22px 0;padding:16px 16px 12px;background:var(--card);border:1px solid var(--line);
   border-radius:14px;cursor:pointer}
 /* #156: the same figure, shown on a locked lesson as an invitation back */
@@ -1998,6 +2002,7 @@ function openEp(id,e){
   ep.p.forEach((p,i)=>{const el=document.createElement(i===pull?"blockquote":"p");
     if(i===pull)el.className="pull";el.textContent=sane(p);body.appendChild(el)});
   injectFigures(body,ep,b);
+  injectBookFigures(body,ep,b);   // #166: the book's own photographs and diagrams
   $("rtime").style.display="none";
   renderEnd();show("reader");
   const sv=S.pos[id];window.scrollTo(0,sv&&sv.scroll?sv.scroll:0);
@@ -4358,8 +4363,12 @@ $("btn-ach").onclick=()=>{const g=$("achgrid");g.innerHTML="";
   $("achs").classList.add("on")};
 
 /* ---------- patch notes ---------- */
-const APP_VER="3.101";
+const APP_VER="3.102";
 const PATCHES=[
+ {v:"3.102",n:"The Books Have Their Pictures Back",d:"5 Aug 2026",items:[
+  ["new","EVERY FIGURE FROM EVERY BOOK IS NOW IN THE LIBRARY — 507 of them, and until today the app had exactly none. Text-only extraction had thrown away every diagram, chart and photograph in all 24 books. What Every Body Is Saying is a book about reading body language and you were reading it with all 97 of its photographs missing. The Mind Illuminated’s 123 diagrams, which carry its whole model of attention, were gone too."],
+  ["new","They appear inside the chapter they belong to, at full original quality — nothing was shrunk, compressed or dropped. Each book’s pictures are encrypted the same way the text is and fetched only when you open that book, so the app still starts instantly instead of downloading photographs before it can show you a word."],
+  ["fix","Two faults were caught on the way and both would have shipped silently. The first extractor reported THREE images for a 269-page book of photographs, because a bare error-catch was swallowing every failure. The second returned every one of those photographs as a colour negative — white suits on black — because they are stored as ink coverage rather than brightness. That one was only findable by rendering the real page and comparing it against the file."]]},
  {v:"3.101",n:"The Library Has Chapter Names Again",d:"5 Aug 2026",items:[
   ["fix","YOUR BOOKS WERE MOSTLY UNNAVIGABLE AND IT WAS ONE LINE. 994 of 3,489 chapters were called “Episode 137”. The Laws of Human Nature was 97% anonymous — 190 chapters, 184 of them nameless. Thinking, Fast and Slow was 92%. You could not skim, could not go back to a passage, could not tell what any chapter held without reading it. Now it is 99 of 3,489, and the ones left are genuinely unheaded in the PDF."],
   ["fix","The cause: chapters longer than about 1,400 words get split, and every slice after the first had no heading of its own, so it fell through to a numbered placeholder. Long-chaptered books came off worst, which is why Greene and Kahneman were nearly all anonymous. The real chapter name now carries across the split with a part number."],
@@ -7050,6 +7059,51 @@ const FIGURES=[
  {id:"ball",cap:"The Ball",kw:/football|soccer|\bball\b|\bsphere|\bround\b/,svg:A=>wrap(A,`<g class="an-roll"><circle cx="50" cy="50" r="26" fill="${A}" fill-opacity=".1"/><circle cx="50" cy="50" r="26"/><path d="M50 33l11 8-4 13H43l-4-13z" fill="${A}" fill-opacity=".85" stroke="none"/><path d="M50 24v9M33 43l8 6M67 43l-8 6M41 71l3-8M59 71l-3-8"/></g>`)},
 ];
 FIGURES.forEach(f=>f.kw=new RegExp(f.kw.source,"i"));
+/* #166: the books' OWN figures. Every one of these was thrown away by text-only extraction —
+   507 of them across the library, and for a book like What Every Body Is Saying the photographs
+   ARE the teaching. They ship as one AES-GCM bundle per book under img/<id>.enc rather than
+   inside content.enc: size is not a concern here but LOAD ORDER is, and folding 39MB of
+   photographs into the main payload would mean a spinner before the first word of text.
+   Fetched once, on opening a book, then cached for the session. */
+const BOOKIMG=new Map();
+async function loadBookImages(bid){
+  if(BOOKIMG.has(bid))return BOOKIMG.get(bid);
+  const p=(async()=>{
+    try{
+      const r=await fetch("img/"+bid+".enc",{cache:"default"});
+      if(!r.ok)return {};
+      const raw=await r.arrayBuffer();
+      const k=localStorage.getItem(LS_KEY);if(!k)return {};
+      const key=await crypto.subtle.importKey("raw",b64d(k),"AES-GCM",false,["decrypt"]);
+      const pt=await crypto.subtle.decrypt({name:"AES-GCM",iv:new Uint8Array(raw.slice(0,12))},key,raw.slice(12));
+      const txt=await new Response(new Response(pt).body.pipeThrough(new DecompressionStream("gzip"))).text();
+      return JSON.parse(txt);
+    }catch(e){return {};}          // a missing bundle must never break reading
+  })();
+  BOOKIMG.set(bid,p);return p;
+}
+function mimeOf(f){return f.endsWith(".png")?"image/png":f.endsWith(".webp")?"image/webp":"image/jpeg";}
+async function injectBookFigures(body,ep,b){
+  if(!ep.img||!ep.img.length)return;
+  const bank=await loadBookImages(b.id);
+  if(!bank||!Object.keys(bank).length)return;
+  if(CUR.b!==b.id||b.episodes[CUR.e]!==ep)return;   // they turned the page while it loaded
+  const ps=[...body.querySelectorAll(":scope>p,:scope>blockquote")];
+  ep.img.forEach((im,i)=>{
+    const data=bank[im.f];if(!data)return;
+    const fig=document.createElement("figure");fig.className="bookfig";
+    const el=document.createElement("img");
+    el.src="data:"+mimeOf(im.f)+";base64,"+data;
+    el.alt="Figure from "+b.title;el.loading="lazy";
+    if(im.w&&im.h)el.style.aspectRatio=im.w+"/"+im.h;
+    fig.appendChild(el);
+    // spread them through the chapter rather than stacking at the end
+    const at=Math.min(ps.length-1,Math.round((i+1)*ps.length/(ep.img.length+1)));
+    const anchor=ps[at];
+    if(anchor&&anchor.parentNode)anchor.parentNode.insertBefore(fig,anchor);
+    else body.appendChild(fig);
+  });
+}
 function injectFigures(body,ep,b){
   const ps=[...body.querySelectorAll(":scope>p")];
   if(ps.length<4)return;
