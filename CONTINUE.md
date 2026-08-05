@@ -30,14 +30,15 @@ When you finish a job: tick it, add what you learned to "Hard rules", and commit
 
 ## CURRENT STATE (verified, 5 Aug 2026)
 
-- **24 books**, 2,859,612 words, 3,489 chapters. The forbidden folder contains exactly those 24
+- **24 books**, 2,859,295 words, 3,522 chapters. The forbidden folder contains exactly those 24
   PDFs and nothing else.
 - Text extraction: **93–99% of every book**. Not a problem. Do not "fix" it.
-- Chapter names: **99 unnamed, down from 994**. The rest are genuinely unheaded in the PDFs.
+- Chapter names: **39 unnamed, 36 duplicated, 296 still numbered parts** (was 994 unnamed,
+  631 duplicated, 893 numbered). The remainder are genuinely unheaded in the PDFs.
 - Every lesson citation resolves to a real book (Attached and The Path of Purification were
   ingested 4 Aug; before that 21 citations pointed at nothing).
 - Path: **87 nodes, 13 tracks, 22 with figures**. Backup at `tools/backup/graph.pre-rebuild.json`.
-- App: 3.102 live. `VV.all({stage:1})` passes 98/98.
+- App: 3.103 live.  `VV.all({stage:1})` passed 98/98 as of 3.102.
 - **507 book figures live**, encrypted per book under `img/<id>.enc`.
 
 ---
@@ -57,13 +58,29 @@ When you finish a job: tick it, add what you learned to "Hard rules", and commit
   that discusses page N. Word-proportional estimation was REJECTED: pages holding a big figure
   carry little text, so a word-based guess drifts most exactly where the figures are.
 
-### [ ] JOB 2 — Give long chapters real names
-A chapter over ~1400 words is split into slices. Slices currently inherit the chapter name with a
-number: `Step Three: Strategies Toward Bringing Out the Rational (12)`. Twelve identical names is
-still one undifferentiated block — Hassan called this "a mess" and he is right.
-- Each slice needs its own name, derived from its own content.
-- Do NOT invent a name that overstates what the slice contains. Same rule as the quotes.
-- Done when: no book has runs of identically-named parts.
+### [x] JOB 2 — Give long chapters real names  — DONE, shipped 3.103
+**Identical chapter names across the library: 631 → 36. Longest run: 171 → 3. Numbered parts:
+893 → 296. Named chapters: 3,489 → 3,522.** Prose loss across the whole re-extract: 62
+word-occurrences of 2,859,612 (0.002%), all publisher boilerplate.
+
+Root cause was NOT the splitting. `is_heading()` only recognised ALL-CAPS and numbered headings,
+so ordinary Title Case section titles were invisible — Laws of Human Nature has 190 chapters and
+four were detected. `_titlecase_heading()` now catches them (58 real headings, 0 false positives
+when tested on that book). Everything else was junk being adopted as a name, now refused:
+- **the author's own byline** — "Viktor E. Frankl" named 19 consecutive chapters. Matched as a
+  token SUBSET, because the metadata says "Viktor Frankl" and the title page says "Viktor E.
+  Frankl" and a substring test misses that.
+- **front matter** — "Also by Daniel Kahneman" named 14.
+- **scanner noise** — "1. Rgrrr 2. Grgrrr 3. Grrrrr" named 16. Detected by internal case flips
+  (`TIlE`, `MASQlJE`), letter-digit mashes (`BORC1IAS`) and 5+ consonant runs. NOT by vowel
+  ratio — ordinary words are vowel-poor ("Stock" .20, "Self" .25) and a ratio gate deletes them.
+- **margin epigraph attributions** — "Baltasar Gracian, 1601-1658". Comma plus a digit.
+- **repeated lines** — a short line occurring verbatim 4+ times in a book is not the unique name
+  of anything. This one rule took duplicates from 521 to 36.
+
+`tools/nameparts.py` names what is left from the slice's own opening line, and KEEPS the numbered
+form when the opening is a pure continuation with nothing honest to lift. Same rule as the quotes:
+derived, never invented. A missing name is a smaller failure than a wrong one.
 
 ### [ ] JOB 3 — Relabel the quotes (small, do it any time)
 `sources[].quote` is rendered as a quotation but the generator was **explicitly instructed** to
@@ -126,6 +143,20 @@ has already been rejected and why.
 - **`tools/figs_research/`, `tools/backup/`, `books.json`, `graph.json`, `key.txt` are
   ship-blocked.** Do not force-add them.
 - **access.json is Hassan's config. Never touch it, never modify it.**
+- **`extract.py` REBUILDS books.json from the PDFs, so it wipes `ep["img"]`.** Re-run
+  `tools/packimages.py` after every re-extract or the library silently loses all 505 figures.
+  Order is: `extract.py` → `nameparts.py` → `packimages.py` → `build.py`.
+- **A rule that is good enough to distrust a line is not good enough to delete it.** The
+  running-header rule first DROPPED matching blocks and cost 1,716 words of real prose. Rewritten
+  to bar those lines from becoming names while leaving the text in the body: loss went to 62.
+  Mark, don't delete.
+- **A word-count drop is not proof of loss — diff the actual tokens.** #167 looked like it lost
+  2,119 words. The missing tokens turned out to be 170 repetitions of one boilerplate title, the
+  `(3)`/`(4)` part markers, and OCR garbage. Real prose loss was 20 occurrences of publisher
+  boilerplate. Compare old body against new body+titles as a case-insensitive multiset and READ
+  what is missing; the count alone will lie to you in both directions.
+- **Safety copies must go in `tools/backup/`.** `books.json.pre*` in `tools/` is NOT gitignored;
+  ship.py caught three of them staged for commit.
 
 ---
 
