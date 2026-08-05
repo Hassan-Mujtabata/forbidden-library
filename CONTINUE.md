@@ -671,8 +671,14 @@ hiding competence escapes envy by moving toward pity while warmth actually works
 only lowers defensiveness when it is real (q1/m5); manufactured liking gives the feeling and none
 of the instances (d4). `counterfeit-comfort` is arguably the ORGANISING mechanism of the whole
 shadow wing, not one entry on a list. Tracks done: N/O/P/Q/R audited, M/D deepened, B all but b8.
-**TRACK E COMPLETE** (e1 3.155, e3+e5 3.163, e2+e4 3.164). **Shadow wing: D, E, M complete;
-only F remains (f1-f4).** Then J/I/K (largest light-wing gaps).
+**TRACK E COMPLETE** (e1 3.155, e3+e5 3.163, e2+e4 3.164). **SHADOW WING COMPLETE - D, E, F, M all deepened (f2+f4 in 3.165).** Next: J/I/K, the largest
+light-wing gaps (J Atomic Habits 12 lessons, K Kahneman 10, I Attached 8).
+**THE CAPSTONE f4 NOW CARRIES THE SPINE.** `counterfeit-comfort` has SEVEN instances across FIVE
+books and BOTH wings (b4 dullness, p2 worry, n1s5 fluent post-mortems, n1s2 certainty, d4
+manufactured liking, e5 reacting-as-defending, e4 acting-as-progress). That convergence - authors
+who never read each other, up to two millennia apart - IS the argument for the library being one
+thing. **When the concept spine is built formally, `counterfeit-comfort` is entry one and f4 is
+its home lesson.** It emerged from auditing, not from a separate design pass.
 e2 was the FOURTH internal-supply hit - the `preset` component already held the defaults evidence
 (organ donation 42% opt-in vs 82% opt-out). Its point: the default is the strongest controlled
 option and needs NO concealment, so Greene's version is the detectable form of something that
