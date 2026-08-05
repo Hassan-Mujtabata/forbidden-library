@@ -592,8 +592,18 @@ no named wrong belief to remove should not be built. "Candidate research" is whe
 a citation — it still has to be read in full and independently corroborated (rules 2 and 3), and
 if it fails replication it gets killed before drawing (rule 4), exactly as the decoy effect did.
 
-**Cycle 1 — `n1s1` Confirmation Bias.** Highest value in the library: it is the mechanism most of
-the others sit on.
+**Cycle 1 — `n1s1` Confirmation Bias.** STARTED 5 Aug, NOT DRAWN. Full notes in
+`figs_research/LOG.md` cycle 7. **Key finding, do not lose it: Lord, Ross & Lepper (1979) reports
+TWO results and only one survives.** BIASED ASSIMILATION (each side rated the study agreeing with
+them as better conducted) is the half this figure needs. ATTITUDE POLARIZATION (mixed evidence
+makes people more extreme) FAILED TO REPLICATE — Miller et al. 1993, Kuhn & Lao 1996, Munro &
+Ditto 1997 all lost it once they measured actual pre/post opinions instead of the original's
+self-reported change; later work calls polarization "the exception, not the rule".
+**So the figure shows the two gates ONLY and must NOT show the sides moving apart afterwards** —
+that is the dead half, and drawing it would repeat the decoy-effect error exactly. Still owed
+before drawing: independent corroboration of the assimilation half from a different lab, three
+independent forum accounts of the felt asymmetry, and Lord et al. read in full.
+Highest value in the library: it is the mechanism most of the others sit on.
 - Error taught away: "I checked, and the evidence supports me." The reader believes the failure
   is not looking at the other side. It is not — they DO look.
 - Claim to draw: asymmetric SCRUTINY, not asymmetric selection. Opposing evidence is examined
