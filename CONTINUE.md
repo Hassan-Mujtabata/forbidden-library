@@ -77,7 +77,7 @@ When you finish a job: tick it, add what you learned to "Hard rules", and commit
   631 duplicated, 893 numbered). The remainder are genuinely unheaded in the PDFs.
 - Every lesson citation resolves to a real book (Attached and The Path of Purification were
   ingested 4 Aug; before that 21 citations pointed at nothing).
-- Path: **109 nodes, 18 tracks, 31 with figures**. All five new tracks have at least one. **ALL 24 BOOKS ARE COVERED** —
+- Path: **109 nodes, 18 tracks, 30 with figures** (shadow 11/33, light 19/76). All five new tracks have at least one. **ALL 24 BOOKS ARE COVERED** —
   verified: zero books have no lesson citing them. Track O fully deepened (3.112);
   track P = Meditations (3.113), covered but at ~600 words/lesson — NEEDS DEEPENING to the
   track-O standard, it carries the four elements but compactly. Track N = first mini-path (Laws of
@@ -582,6 +582,38 @@ rejections and gaps. ~38 figures at that rate is a long run of sessions, not one
 them to go faster — the figures produced faster than this are the ones that were wrong (the
 breathing pacer contradicting all three meditation books; the decoy effect that does not
 replicate).
+
+### THE SIX CYCLES ARE DONE — AND THE RESULT CHANGES THE PRIORITY
+
+Counted after cycle 12: **109 lessons, 30 with figures** (shadow 11/33, light 19/76).
+
+**THE TALLY THAT MATTERS.** Six research cycles produced **3 figures and 6 lesson corrections**.
+Every single lesson audited needed correcting, and three planned figures were killed because they
+would have drawn an overclaim. What was wrong, in order:
+1. `n1s1` — the famous source's memorable half (polarization) does not replicate; nearly drew it.
+2. `n1s6` — stated a mechanism as settled; it is disputed. Then over-corrected, then fixed again.
+3. `o2` — right order, wrong cause: the driver is threat imminence, not escalating cost.
+4. `q1` — the lesson's PREMISE (attention is scarce) is unverified; rebuilt on the measured chain.
+5. `q4` — durability claim withdrawn; found a MODERATOR that inverts the advice.
+6. `n1s4` — asserted universal cross-issue correlation; the canonical measurement found the
+   opposite for the mass public.
+
+**WHAT THIS IMPLIES, AND IT IS UNCOMFORTABLE.** Those six were written the same day, the same way,
+by the same process as the other ~100 lessons. There is no reason to think the unaudited ones are
+cleaner — the sample says roughly every lesson carries at least one claim that is overstated,
+mis-caused, or contradicted by its own best source. A confident, well-written lesson is exactly
+what a wrong claim looks like from inside.
+
+**SO THE PRIORITY CHANGES: CLAIM-AUDIT BEFORE NEW FIGURES.** A wrong claim in prose is read as
+true; a missing figure is merely absent. Auditing an existing lesson is also cheaper than a figure
+cycle — it needs rules 2–4 (corroborate, primary source, replication) but no component, no
+drawing and no class (c). Roughly: one audit per lesson, batched by track, correcting in place.
+Figures resume afterwards, built on corrected lessons rather than on the originals — which is
+also why building more figures first would have been wasted work.
+
+**AUDIT ORDER** — by how load-bearing and how confidently asserted: O (4) → R (4) → Q (2 left)
+→ P (3) → N (1 left), then the eleven older tracks A–M, which have never been audited at all and
+are the largest unknown in the library.
 
 ### THE PLAN — first six cycles, dark wing, in this order
 
