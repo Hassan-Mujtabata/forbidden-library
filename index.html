@@ -1710,7 +1710,12 @@ async function boot(){
       const watch=w=>{if(w)w.addEventListener("statechange",()=>{if(w.state==="installed"&&navigator.serviceWorker.controller)showUpdateChip();});};
       if(reg.waiting&&navigator.serviceWorker.controller)showUpdateChip();
       reg.addEventListener("updatefound",()=>watch(reg.installing));
-      setInterval(()=>reg.update().catch(()=>{}),30*60*1000);   // check every 30 min
+      // #171: ASK IMMEDIATELY, not in half an hour. Without this the only update check was the
+      // 30-minute timer below, so every visit booted from whatever the cache already held and a
+      // shipped fix could sit unseen indefinitely — a released version was live for hours while
+      // the app kept serving the previous one and looked, from the outside, like it had frozen.
+      reg.update().catch(()=>{});
+      setInterval(()=>reg.update().catch(()=>{}),30*60*1000);   // and keep checking every 30 min
     }).catch(()=>{});
   }
 }
@@ -4375,8 +4380,11 @@ $("btn-ach").onclick=()=>{const g=$("achgrid");g.innerHTML="";
   $("achs").classList.add("on")};
 
 /* ---------- patch notes ---------- */
-const APP_VER="3.106";
+const APP_VER="3.107";
 const PATCHES=[
+ {v:"3.107",n:"It Checks For Updates Now",d:"5 Aug 2026",items:[
+  ["fix","THE APP WAS NOT LOOKING FOR NEW VERSIONS WHEN YOU OPENED IT. It only checked on a timer, once every thirty minutes. So each time you opened the Vault it served whatever its offline store already held and asked about a newer version much later, if the app stayed open long enough to ask at all. A fix could be released, live and correct on the server, while your copy quietly kept showing you the old one — which from the outside is indistinguishable from the app being broken or frozen. It now asks the moment it starts, and still keeps checking every thirty minutes after that."],
+  ["fix","This is what kept the previous release from reaching you. The blank-page fix went out and the copy on your machine had no reason to go and look for it."]]},
  {v:"3.106",n:"The Blank Page",d:"5 Aug 2026",items:[
   ["fix","THE APP COULD OPEN AS A COMPLETELY BLANK PAGE, AND STAY THAT WAY. The offline layer is required to hand the browser a response for every request. In one case it handed back nothing at all — when it had no cached copy of a file AND the network request for it failed. Handing back nothing does not make the browser go and fetch the page itself; it cancels the navigation. You get a white screen with no error, no message and nothing to click, and every reload takes the same route, so it does not recover on its own."],
   ["fix","The way in was a version upgrade. Each release names a fresh offline store, fills it, and deletes the old one. Filling it deliberately tolerates failures, so that one unreachable icon cannot block an upgrade — but that means a bad moment on the network can leave the new store without the app itself in it, and the old working store was already thrown away. Now the previous store is kept until the new one is confirmed to hold the app, a failed page load falls back to any copy in any store, and every path is guaranteed to return something."],
