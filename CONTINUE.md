@@ -702,7 +702,12 @@ intuitive.
   induced and self-generated conclusions. Corroborate across two independent lines.
 - Component: new (two identical positions, different anchoring, one decaying over time).
 
-**Cycle 6 — `n1s4` The Group Bias.** Deliberately LAST of the six, and it may not be buildable.
+**Cycle 6 — `n1s4`. OVERCLAIM FOUND AND CORRECTED 3.135, FIGURE DEAD.** The lesson claimed
+universal cross-issue correlation; Converse (1964) measured exactly that and found the opposite
+for the mass public (ideological innocence), with constraint concentrated among the engaged.
+Corrected to conditional, plus the corollary that tight alignment tracks being INFORMED rather
+than sheep-like. The planned correlated-axes figure is dead - it would have drawn the overclaim.
+Any future figure here should be relief-versus-pressure. See LOG.md cycle 12. Deliberately LAST of the six, and it may not be buildable.
 - Error taught away: "my ideas are my own."
 - Claim to draw: positions arriving as a SET — correlation across unrelated issues.
 - **The risk is real but it is NOT unbuildable — that was too quick a call.** Asch and Sherif
