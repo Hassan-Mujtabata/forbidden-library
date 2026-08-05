@@ -624,7 +624,15 @@ Highest value in the library: it is the mechanism most of the others sit on.
   independent replication, NOT a summary of Lord.
 - Component: new. Nothing existing encodes two different thresholds.
 
-**Cycle 2 — `n1s6` Superiority Bias.** Pairs with cycle 1 and explains why the whole track is
+**Cycle 2 — `n1s6` Superiority Bias. RESEARCH DONE 5 Aug, NOT DRAWN** — see LOG.md cycle 8.
+Rule 4 passes strongly: Svenson (1981) has a preregistered N=1,203 direct replication (91% safer,
+93% more skilled than average), and Alicke (1985) gives an independent second line with its own
+2021 replication. **But those establish the PHENOMENON, not the MECHANISM the lesson teaches**
+("you see your own process and only other people's output"). Before drawing, verify the
+mechanism line — bias blind spot (Pronin, Lin & Ross 2002) and the introspection-illusion account
+(Pronin & Kugler 2007) — read, not cited from memory, replication checked. If it does not hold,
+fall back to drawing the phenomenon only (everyone above the median, which is impossible) and
+leave the mechanism as prose. Pairs with cycle 1 and explains why the whole track is
 read as being about other people.
 - Error taught away: "I'm more rational than most" — held by nearly everyone, so it cannot be
   true of nearly everyone.
