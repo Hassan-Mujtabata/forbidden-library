@@ -22,3 +22,6 @@ tools/figs_review/
 
 # research sheets quote lesson text verbatim and carry the whole design record (#162)
 tools/figs_research/
+
+# #165: pre-rebuild safety copies of the graph/library (contain lesson text)
+tools/backup/
