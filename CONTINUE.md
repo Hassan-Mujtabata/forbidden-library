@@ -630,8 +630,12 @@ side of an unresolved debate; bounded to a SCOPE claim, with the practical payof
 the reader when the tool does NOT apply. p2 done (3.144) - CONFIRMED, and the audit supplied the missing mechanism (worry is reinforced
 because feared things mostly do not happen; and verbal worry is less vivid than imagery, so it
 functions as avoidance). Retro-justifies p3. p3 done (3.145) - TRACK P COMPLETE. Action confirmed and sharpened into if-then form
-(implementation intentions, d=.65). Next: track N (n1, n1s3, n1s5 remain), then the eleven
-never-audited tracks A-M.
+(implementation intentions, d=.65). Track N: n1 done (3.146) - Greene's "one mechanism behind all bias" bounded to the HOT family;
+the COLD family (anchoring, availability) needs PROCEDURAL fixes, not honesty. Next: n1s3, n1s5,
+then the eleven never-audited tracks A-M.
+**THIRD CROSS-LIBRARY JOIN FOUND BY AUDITING** (q1<->q3, p1<->r2, now N<->K as hot vs cold
+families). The audit keeps producing concept-spine links as a by-product - finish the audit before
+building the spine formally.
 **NEW GENERAL RULE FOUND IN AUDIT 10: when a lesson prescribes a technique whose evidence comes
 from FACILITATED delivery, the reader is getting the weaker arm** (document g=0.277 vs interactive
 g=0.465). Say so rather than implying the full effect transfers. Applies to every 'do this
