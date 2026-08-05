@@ -648,7 +648,13 @@ claim-dense. MEDIAN LENGTH 201 WORDS.** The old tracks are STUBS, not errors. De
 external research (the material is in the books) and is therefore both the bigger share of the
 problem and the cheaper fix, and it batches by track.
 **DEEPENING: TRACK M COMPLETE** - m1, m3 (3.152), m2, m5 (3.153), m4, m6 (3.154). 160-248w ->
-408-536w. Next batch: track B (b3, b5, b6, b9), or the remaining claim-dense d1/c3 (**e1 done 3.155**).
+408-536w. Next batch: track B (b3, b5, b6, b9), or the last claim-dense lesson c3 (**e1 done 3.155,
+d1 done 3.156**). d1 needed NO external research - the `tape` component already held Langer's
+copier numbers AND the boundary condition. Third internal-supply hit after m1 and m5.
+**d1 IS THE SHADOW WING'S HUB and now states the wing's real shape: the exposure is not that you
+run shortcuts (correct and unavoidable on cheap things) but the JOIN - a large ask arriving in
+the costume of a small one. Every tactic in D/E/F/M is a version of that. Use it as the spine
+when deepening the rest of the wing.**
 **e1's ETHICAL CHECK PASSED** - it already stated the fork. Do not assume the whole shadow wing
 lacks boundaries. And its correction found something worth hunting for elsewhere: the ETHICAL
 branch was also the EFFECTIVE one (warmth, not hiding competence, is the measured route out of
