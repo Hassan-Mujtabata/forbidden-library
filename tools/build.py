@@ -66,6 +66,8 @@ FIG_COMPONENTS = {
     "lever",
     # #162: one apparent thing resolving into five streams that never sync
     "strands",
+    # #184: two routes from one event; the verbal one goes offline while the alarm gets louder
+    "routes",
 }
 
 

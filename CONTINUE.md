@@ -24,6 +24,13 @@ When you finish a job: tick it, add what you learned to "Hard rules", and commit
   text, summarising the idea, treating his reading capacity as a quota to fill, then trimming
   because volume was misread as the complaint. Before adding anything, ask only: does this make
   it easier to understand? If yes it goes in at any length or size. If no it does not get built.
+- **FIRST REAL FEEDBACK ON A FINISHED LESSON (Meditations / "Sorting What Is Actually Yours",
+  ~830w with the lever figure): "looks okayish to me... just increase its overall size a bit...
+  conceptually i cant say anything cause i dont understand the concept" yet.** Two things follow.
+  (1) Nudge lesson length UP — target ~1,000-1,200w where the idea supports it, not 830.
+  (2) He cannot validate accuracy before learning the material, so DO NOT wait on him for that.
+  Correctness has to come from the book's own text, which is why every path_*.py records the
+  exact episodes it was written against. Grounding is the check, not his review.
 - **LENGTH FOLLOWS THE IDEA. IT IS A CEILING, NOT A QUOTA.** He can sit 10-30 minutes with a
   single stage if the idea warrants it — "u can put 1 lesson in there if needed, not squeeze
   there 2 of them to fill time, its all about understanding." So: ONE idea per lesson, carried
@@ -70,7 +77,8 @@ When you finish a job: tick it, add what you learned to "Hard rules", and commit
   631 duplicated, 893 numbered). The remainder are genuinely unheaded in the PDFs.
 - Every lesson citation resolves to a real book (Attached and The Path of Purification were
   ingested 4 Aug; before that 21 citations pointed at nothing).
-- Path: **109 nodes, 18 tracks, 27 with figures**. Tracks N/O/P/Q each have one. **ALL 24 BOOKS ARE COVERED** —
+- Path: **109 nodes, 18 tracks, 28 with figures**. **All five new tracks (N/O/P/Q/R)
+  now have one.** **ALL 24 BOOKS ARE COVERED** —
   verified: zero books have no lesson citing them. Track O fully deepened (3.112);
   track P = Meditations (3.113), covered but at ~600 words/lesson — NEEDS DEEPENING to the
   track-O standard, it carries the four elements but compactly. Track N = first mini-path (Laws of
@@ -283,7 +291,10 @@ the comprehension aid he has asked for repeatedly: "that's why the figures are t
 - **REJECTED, and why:** `crowd` for n1s4 (The Group Bias). It draws social proof as DENSITY,
   and that lesson's claim is positions correlating across unrelated issues. Not the same claim,
   so not shipped. Record rejections here — the log is what stops the next session re-deriving it.
-- **TRACK R HAS NO FIGURE AND NO EXISTING COMPONENT FITS. Checked, not assumed.** Every
+- **[DONE 3.125] Track R now has its figure** — the specced `routes` component was built and
+  registered in build.py's FIG_COMPONENTS at the same time (the mirror rule). Kept below for the
+  reasoning, which still applies to every future figure:
+- **NO EXISTING COMPONENT FITTED TRACK R. Checked, not assumed.** Every
   researched component was read against r1-r4's claims and each encodes something else:
   `frames` = "a wobbly mind sees the story, a steady mind sees the frames" (meditation insight —
   and note the VALENCE IS INVERTED: there, discreteness is the truth being revealed; in r2 it is

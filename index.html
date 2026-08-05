@@ -4391,8 +4391,12 @@ $("btn-ach").onclick=()=>{const g=$("achgrid");g.innerHTML="";
   $("achs").classList.add("on")};
 
 /* ---------- patch notes ---------- */
-const APP_VER="3.124";
+const APP_VER="3.125";
 const PATCHES=[
+ {v:"3.125",n:"The Road That Goes Dark",d:"5 Aug 2026",items:[
+  ["new","EVERY TRACK NOW HAS A FIGURE. The last one went to the trauma material, and it draws the finding that reorganised that whole field. Something happens and it leaves by two roads at once — a fast one to the alarm system, a slower one to where things become words. Ordinarily both carry, which is why you can say what is wrong."],
+  ["new","THEN MAKE THE EVENT OVERWHELMING. The alarm road does not weaken; it gets louder. And the road to words goes dark. That is not a figure of speech — scans taken during flashbacks show the speech centre measurably dropping out, and van der Kolk says plainly that the effect is not necessarily different from a stroke lesion in the same region. The third stage is the consequence: “tell me what happened” is a question sent along the road that is out, which is why someone going mute is not refusing you."],
+  ["fix","The alarm road stays unbroken in all three stages, deliberately. The point is not that everything shuts down — it is that one specific route does while the other gets louder. And there are no numbers anywhere on it: the scan effect sizes are not in hand, so the roads carry direction only rather than an invented magnitude."]]},
  {v:"3.124",n:"Two Controls, One Connected",d:"5 Aug 2026",items:[
   ["new","THE STOIC SORT NOW HAS A FIGURE, and it makes the argument in a way the sentence never could. A gauge for how a situation actually goes, and two sliding controls under it. The first is the outcome — the one nearly everyone works all day, rehearsing it and worrying at it. It is pushed as far across as it will go, and the gauge barely moves. Then the second control, which is what you actually do: same gauge, same situation, nothing about the world changed, and it moves most of the way."],
   ["fix","The outcome control is deliberately NOT drawn at zero. Circumstances genuinely do matter, and a figure implying they do not would be teaching something false — it simply moves very little, and it will not stay where you put it. That distinction is the whole difference between the sort and mere resignation."],
@@ -6483,6 +6487,44 @@ const FIGC={
      would call unreadable, and the signal only appears once the run is visible. The noise is real
      noise: two of the nine encounters are positive, because a pattern you can only see after
      cherry-picking is not a pattern. */
+  /* #184, from the SOURCE BOOK's own finding, so no fresh research was needed: van der Kolk,
+     "Speechless Horror" -- scans showed Broca's area, a speech centre, going offline during a
+     flashback while the alarm pathway stayed active. Two routes leave one event: LeDoux's fast
+     "low road" to the amygdala, and the slower "high road" to the frontal lobes and speech.
+     NO NUMBERS ANYWHERE. The scan effect sizes are not in hand, so the routes carry direction
+     only -- same rule as `trade`. Inventing a magnitude here would be inventing data.
+     The alarm route is drawn UNBROKEN in every stage: the point is not that everything shuts
+     down, it is that one specific route does while the other gets louder. */
+  routes(p,A){
+    const st=p.stage||"ordinary";
+    const EX=30, EY=62, MX=104, RX=176, TOP=34, BOT=90;
+    const ev=`<circle cx="${EX}" cy="${EY}" r="9" fill="${A}" fill-opacity=".8" stroke="none"/>`+
+      `<text class="fg-lbl" x="${EX}" y="${EY+26}" text-anchor="middle">${esc(p.ev||"what happens")}</text>`;
+    // the alarm road: always present, and thicker once the event is overwhelming
+    const alarmW = st==="ordinary" ? 2 : 3.4;
+    const alarm=`<path d="M${EX+10} ${EY+4} Q${MX} ${BOT} ${RX-16} ${BOT}" stroke="${A}" `+
+      `stroke-width="${alarmW}" fill="none" stroke-opacity="${st==="ordinary"?".5":".9"}"/>`+
+      `<text class="fg-lbl" x="${RX}" y="${BOT+4}" text-anchor="end">${esc(p.lo||"alarm")}</text>`;
+    // the verbal road: solid when it carries, dashed and faint when it is offline
+    const live = st==="ordinary";
+    const verb=`<path class="${live?"fg-route":"fg-stop"}" d="M${EX+10} ${EY-4} Q${MX} ${TOP} ${RX-16} ${TOP}" `+
+      `stroke="${A}" stroke-width="${live?2.4:1.4}" fill="none" `+
+      `stroke-opacity="${live?".85":".22"}" ${live?"":'stroke-dasharray="3 5"'}/>`+
+      `<text class="fg-lbl" x="${RX}" y="${TOP+4}" text-anchor="end" `+
+      `opacity="${live?1:.35}">${esc(p.hi||"words")}</text>`;
+    if(st==="ordinary")
+      return {svg:ev+alarm+verb+
+        `<text class="fg-lbl" x="100" y="114" text-anchor="middle">${esc(p.n||"both roads carry")}</text>`};
+    if(st==="overwhelm")
+      return {svg:ev+alarm+verb+
+        `<text class="fg-lbl" x="100" y="114" text-anchor="middle">${esc(p.n||"one road goes dark")}</text>`};
+    // a question aimed at the road that is down, and nothing comes back
+    return {svg:ev+alarm+verb+
+      `<path class="fg-stop" d="M${RX-4} ${TOP+16} L${MX+16} ${TOP+16}" stroke="${A}" `+
+      `stroke-width="2" fill="none" stroke-opacity=".55" marker-end=""/>`+
+      `<text class="fg-lbl fg-stop" x="100" y="114" text-anchor="middle">${esc(p.n||"asked, and nothing comes back")}</text>`};
+  },
+
   pattern(p,A){
     const st=p.stage||"one";
     const V=[-6,4,-13,-2,-17,3,-21,-9,-26], MID=52, X0=26, DX=19;
