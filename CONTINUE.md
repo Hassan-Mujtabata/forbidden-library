@@ -671,8 +671,12 @@ hiding competence escapes envy by moving toward pity while warmth actually works
 only lowers defensiveness when it is real (q1/m5); manufactured liking gives the feeling and none
 of the instances (d4). `counterfeit-comfort` is arguably the ORGANISING mechanism of the whole
 shadow wing, not one entry on a list. Tracks done: N/O/P/Q/R audited, M/D deepened, B all but b8.
-**TRACK E: e1 (3.155), e3+e5 (3.163) done; e2, e4 remain.** Next after E: F, then J/I/K
-(largest light-wing gaps).
+**TRACK E COMPLETE** (e1 3.155, e3+e5 3.163, e2+e4 3.164). **Shadow wing: D, E, M complete;
+only F remains (f1-f4).** Then J/I/K (largest light-wing gaps).
+e2 was the FOURTH internal-supply hit - the `preset` component already held the defaults evidence
+(organ donation 42% opt-in vs 82% opt-out). Its point: the default is the strongest controlled
+option and needs NO concealment, so Greene's version is the detectable form of something that
+works better when nobody is being clever.
 **CORRECTION TO MY OWN PREDICTION: track E does NOT have unexamined ethics.** After m6 I recorded
 that E and F should be expected to contain more. Every E lesson already carries its fork. m6 was
 an isolated fault, not a pattern - do not carry that suspicion into F as though it were
