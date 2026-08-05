@@ -70,7 +70,7 @@ When you finish a job: tick it, add what you learned to "Hard rules", and commit
   631 duplicated, 893 numbered). The remainder are genuinely unheaded in the PDFs.
 - Every lesson citation resolves to a real book (Attached and The Path of Purification were
   ingested 4 Aug; before that 21 citations pointed at nothing).
-- Path: **109 nodes, 18 tracks, 23 with figures**. **ALL 24 BOOKS ARE COVERED** —
+- Path: **109 nodes, 18 tracks, 25 with figures**. **ALL 24 BOOKS ARE COVERED** —
   verified: zero books have no lesson citing them. Track O fully deepened (3.112);
   track P = Meditations (3.113), covered but at ~600 words/lesson — NEEDS DEEPENING to the
   track-O standard, it carries the four elements but compactly. Track N = first mini-path (Laws of
@@ -256,6 +256,12 @@ the comprehension aid he has asked for repeatedly: "that's why the figures are t
   observers, 54% accuracy on one encounter and 47% on lies — behind it, and Navarro's baseline
   rule is the same finding from another direction. That is a correct reuse. Picking a component
   because it looks nice is the failure this rule exists to stop.
+- **DONE SO FAR:** `pattern` -> o4 (Navarro baseline, Bond & DePaulo 2006). `tape` -> n1s2
+  (Conviction Bias, Langer copier study 60/94/93). Both are reuses of components whose research
+  was already done — the correct pattern.
+- **REJECTED, and why:** `crowd` for n1s4 (The Group Bias). It draws social proof as DENSITY,
+  and that lesson's claim is positions correlating across unrelated issues. Not the same claim,
+  so not shipped. Record rejections here — the log is what stops the next session re-deriving it.
 - **`c` is the component key — a label passed as `c` overwrites the component name. Use `c3`.**
 - Caption cap 220 chars, `feel` line cap 200, max 5 stages, `place` must index into `bridge`.
   build.py enforces all of these; the 200-char `feel` cap already caught one overrun.
