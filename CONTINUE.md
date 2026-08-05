@@ -643,6 +643,16 @@ decoy effect, which this repo ALREADY recorded as non-replicating (a figure was 
 The knowledge was in the log and the lesson asserted the opposite for months. So: BEFORE
 researching externally, grep figs_research/LOG.md and CONTINUE.md for claims already adjudicated.
 One command, and it may settle the lesson outright.
+**TRIAGE RESULT (6 Aug) - THE PLAN CHANGES. Of 84 unaudited: 61 EMPTY, 20 MIXED, only 3
+claim-dense. MEDIAN LENGTH 201 WORDS.** The old tracks are STUBS, not errors. Deepening needs no
+external research (the material is in the books) and is therefore both the bigger share of the
+problem and the cheaper fix, and it batches by track.
+**REVISED ORDER: (1) deepen the 61 empties in track batches; (2) fact-check the 3 claim-dense -
+d1, e1, c3; (3) the 20 mixed - check claim then deepen, starting m1, d2, e2-e5, j8, c5.**
+CAUTION: deepening writes NEW claims, and audits 1-15 show my invented mechanisms are wrong about
+two-thirds of the time. When deepening, stay on what the SOURCE BOOK says plus what the reader can
+check in their own experience. Do not write "the reason this happens is..." unless it is verified.
+
 **SECOND NEW FINDING (audit 16): some old lessons have NO checkable claim at all - they are
 EMPTY, not wrong.** g5 was 273 words of true-but-unusable advice with none of the five things the
 depth standard requires. For those the audit is a REWRITE to standard, needs no external research,
