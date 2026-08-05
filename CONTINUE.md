@@ -589,11 +589,17 @@ everyone gets wrong.
 - Error taught away: "appreciation is flattery, and people see through it."
 - Claim to draw: attention is SCARCE, so supplying it is disproportionate — most listening is
   waiting to reply, and the difference is detectable.
-- Candidate research: hardest to source of the six. Look for measured work on listening quality
-  and on the gap between felt and delivered attention. **If nothing solid turns up, SKIP IT** and
-  move to cycle 5 — rule 4. Do not draw a mechanism on an unsupported claim because the lesson
-  wants a picture.
-- Component: unknown until the claim is pinned.
+- Candidate research: START with Itzchakov & Kluger on high-quality listening (their work
+  measures what changes in a speaker when listening quality is manipulated — attitude
+  extremity, self-awareness, defensiveness), and with the literature on perspective-taking vs
+  actual perspective-GETTING (Eyal, Steffel & Epley) — which reports that people are markedly
+  worse at reading others than they believe, i.e. the deficit is real and unnoticed on both
+  sides. Corroborate independently; do not build on one lab.
+- Component: likely new — a gap between "attention delivered" and "attention believed
+  delivered", which is the same shape as `spotlight` (felt vs actual visibility). AUDIT
+  `spotlight` first: if its claim generalises, that is a reuse rather than a new component.
+- Only skip if BOTH lines fail replication. "Hard to source" was not a good enough reason —
+  that judgement was made before looking.
 
 **Cycle 5 — `q4` A Conclusion They Reached.** The most useful thing in Carnegie and the least
 intuitive.
@@ -608,13 +614,60 @@ intuitive.
 **Cycle 6 — `n1s4` The Group Bias.** Deliberately LAST of the six, and it may not be buildable.
 - Error taught away: "my ideas are my own."
 - Claim to draw: positions arriving as a SET — correlation across unrelated issues.
-- **Risk, stated up front:** the obvious sources (Asch, Sherif) are about PRESSURE, and this
-  lesson's claim is explicitly that no pressure is felt — only relief. Using Asch would encode a
-  different mechanism than the lesson teaches. `crowd` was already rejected here for drawing
-  social-proof density instead. If no source supports the correlated-positions claim, leave this
-  lesson without a figure and record that. A missing figure is much cheaper than a wrong one.
+- **The risk is real but it is NOT unbuildable — that was too quick a call.** Asch and Sherif
+  are the obvious sources and both measure PRESSURE, while this lesson claims the opposite: no
+  pressure is felt, only relief. Drawing Asch would teach a different mechanism.
+- The claim that DOES match is attitude CONSTRAINT — positions correlating across logically
+  unrelated issues. Start with Converse, "The Nature of Belief Systems in Mass Publics" (1964),
+  which is precisely about issue positions travelling as a bundle rather than being reasoned
+  separately, and with the later work on ideological sorting that re-measures it on modern data.
+  That is the correlated-positions claim, measured, and it is a different literature from
+  conformity-under-pressure.
+- Component: new — several unrelated axes whose positions line up once one is known. `crowd` was
+  correctly rejected (it draws social-proof density, a different claim).
+- Only abandon if constraint fails to replicate on the modern data. Check that before drawing.
 
 After these six, re-count coverage and continue down the dark wing (M, D, E, F), then light.
+
+### THE FULL BACKLOG, RANKED — and how each is built
+
+Hassan asked for the numbers and the method, 5 Aug. Ranked by gain, not by appetite.
+
+| # | work | count | needs research? |
+|---|---|---|---|
+| 1 | figures, committed floor (dark wing first) | **38** | yes, one cycle each |
+| 2 | concept spine + situation index | ~20 mechanism pages + tag 109 lessons + ~15 triggers | no |
+| 3 | contrasting cases, one per lesson | ~109 | no |
+| 4 | faded worked examples, on mechanism lessons | ~65 | no |
+| 5 | second figures on lessons carrying two mechanisms | ~7 | yes |
+| 6 | — | — | stop here |
+
+**Why it stops at ~72 figures total.** Past that you are figuring lessons whose core is a
+distinction or a drill, where a figure is one more thing to parse for no new information. That
+breaks his first rule in the direction hardest to notice, because adding looks like generosity.
+
+**2. Concept spine — how.** Design is already written above. Tag each node `mech:[...]`, register
+ids in build.py the way FIG_COMPONENTS is registered, build a Mechanisms view (one screen per
+mechanism listing every lesson across every book that instances it), then the situation index
+keyed by trigger phrases in his own words. No research — the mechanisms are already identified,
+the work is tagging and two views. **This is the largest single comprehension win available and
+it is cheaper than ten figures.**
+
+**3. Contrasting cases — how.** One paragraph appended per lesson: the near-miss beside the real
+thing, and what distinguishes them. A freeze looks like thinking; a pacifier looks like an itch;
+conviction looks like expertise. Cheapest gain per unit of work in the whole library — no
+research, no components, and it converts a definition into a discrimination, which is the skill.
+Do these in track-sized batches with a `deepen*`-style appending tool.
+
+**4. Faded worked examples — how.** After the fully worked case, add a SECOND case that stops
+halfway and hands the reader the finish: "their hand goes to their neck right after you say the
+date — what do you now know, and what do you not know?" Completing a partly-worked case builds
+transfer that reading a finished one does not. This is the difference between a library that
+explains and one that trains, and there are currently none.
+
+**5. Second figures.** Only where one lesson genuinely carries two mechanisms — `o1` is the clear
+case (limbic-vs-neocortex, and honesty-tracks-attention are two separate things sharing a page).
+Same protocol, no shortcuts.
 
 ### WHICH LESSONS HAVE NO FIGURE (worst-covered first)
 
