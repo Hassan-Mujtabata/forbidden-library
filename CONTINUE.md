@@ -618,7 +618,13 @@ self-touch a more reliable stress indicator than facial expression); only my nec
 was unverified. Track O fully audited. Track R started: r1 done (3.138) - I had conflated autonomic reactivity
 (supported) with hormonal tone (contested; resting cortisol is meta-analytically LOWER in PTSD,
 the HPA paradox). Lesson now separates them and carries a genre warning about tidy single
-mechanisms. AUDIT r2 AND r4 WITH THE SAME SUSPICION. Next: r2. Earlier note: o1 (3.136) - bounded against the deception literature; the honesty
+mechanisms. r2 done (3.139) - the low-road/high-road speed story is contested (Pessoa & Adolphs); the
+observation survives, the wiring does not. Next: r4.
+**THE AUDIT PATTERN IS NOW FOUR FOR FOUR AND SHOULD BE USED AS A METHOD: go straight at the
+MECHANISM sentence.** Every mechanism-level claim audited has been overstated (neck/vagus,
+hormones-stay-high, introspection-weighting, low-road speed) and every OBSERVATION has survived.
+That makes auditing much faster than a research cycle - find the sentence that explains WHY, and
+check only that. Earlier note: o1 (3.136) - bounded against the deception literature; the honesty
 framing and any lie-detection promise are withdrawn, mechanism intact. Notably the audit made the
 track MORE internally consistent: o3/o4 were already built on comfort/discomfort, so o1 was the
 outlier. Next: o3, then track R.**
