@@ -656,7 +656,14 @@ books.json - the only matches in the library are from Kahneman). Invented precis
 lesson is worse than a wrong number: a beginner tries to HIT the ratio, which is itself the
 clumsy scaffolding the lesson warns against. Scan run: 6 lessons carry numeric claims (d1, d5,
 c3, m1, o4, q4); all but q4's are now traceable to sources in the log. **Any number added from
-here must be traceable.** **TRACK B: b3, b9 (3.158), b5, b6 (3.159) done - 162-172w -> 380-428w. b1, b4, b8 untouched.**
+here must be traceable.** **TRACK B: b3, b9 (3.158), b5, b6 (3.159), b1, b4 (3.160) done. Only b8 left (140w, most
+specialised lesson in the library, lowest priority).**
+**FIRST NAMED SPINE MECHANISM SPANNING BOTH WINGS: "THE COUNTERFEIT FEELS BETTER THAN THE REAL
+THING."** Dullness feels calmer than stability (b4); worry feels like preparation (p2); a fluent
+account of failure feels like learning (n1s5); certainty feels like having checked (n1s2). Four
+books, one mechanism, previously taught as four unrelated facts. **Add `counterfeit-comfort` to
+the concept-spine mechanism list.** Likely also covers rapport-that-is-matching (m2) and
+enlistment-that-feels-like-agreement (d3) - check while deepening.
 **METHOD FOR EXPERIENTIAL LESSONS (no external research possible): GREP books.json for what the
 source actually says about the failure mode.** For b5/b6 this produced Brahm on the checking
 questions being the hindrance of doubt, and Brasington on 'indistractability' vs the furrowed-brow
