@@ -483,11 +483,26 @@ cycle 1's evidence base has no raw beginner voice and SAYS SO. If class (c) is u
 topic, that is a stated limitation on the figure, not something to paper over — and it is a
 reason to weaken what the figure claims, not to claim it anyway.
 
-**2. ONE SOURCE IS NEVER ENOUGH — CORROBORATE ACROSS INDEPENDENT ONES.** Hassan: "someone can
-just put random stuff for trolling so 1 isnt really enough." This has already caught a real
-error: leighb.com was used to corroborate Brasington and it IS Brasington's own site — not
-independent at all. It was discarded and replaced with Ajahn Brahm, a different lineage.
-Independence means a different author, a different method, ideally a different tradition.
+**2. NO CLAIM EVER RESTS ON A SINGLE SOURCE. THIS IS GLOBAL — IT IS NOT A FORUM RULE.**
+Hassan has said this twice, and the second time because the write-up had drifted into sounding
+like it only governed forum posts. It governs EVERY class and EVERY claim a figure makes:
+  * **One paper is not enough.** A single study is a result, not a finding — it needs
+    replication or an independent line reaching the same place. This is not pedantry: the decoy
+    effect had a famous paper and died at 11 successes in 91 attempts.
+  * **One book is not enough.** Cross-check against the other 23. A figure that satisfies its own
+    lesson can still contradict the library — the breathing pacer did exactly that, and was
+    contradicted by all three meditation books.
+  * **One forum post is worth nothing** — troll, outlier, or someone repeating the book back.
+    Three independent people, own words, ideally different communities. Three replies in one
+    thread is ONE source.
+  * **One author across two places is still one source.** leighb.com was used to corroborate
+    Brasington and IS Brasington's own site. Discarded and replaced with Ajahn Brahm — a
+    different lineage, which is what independence actually means.
+
+**Independence test, apply it every time:** different author, different method, and ideally a
+different tradition or field. If the second source could have got its claim FROM the first, it is
+not a second source. Write both into LOG.md with the link, so the independence can be checked by
+someone who does not trust you — that is what the log is for.
 
 **3. READ THE PRIMARY SOURCE IN FULL, NOT A SUMMARY.** Cycle 2 read Draganski et al. Nature 2004
 as the PDF and got the third scan, the "transient" wording and the non-juggler control — none of
