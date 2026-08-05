@@ -671,7 +671,14 @@ hiding competence escapes envy by moving toward pity while warmth actually works
 only lowers defensiveness when it is real (q1/m5); manufactured liking gives the feeling and none
 of the instances (d4). `counterfeit-comfort` is arguably the ORGANISING mechanism of the whole
 shadow wing, not one entry on a list. Tracks done: N/O/P/Q/R audited, M/D deepened, B all but b8.
-Next: track E or F (shadow), or J/I/K (largest light-wing gaps).
+**TRACK E: e1 (3.155), e3+e5 (3.163) done; e2, e4 remain.** Next after E: F, then J/I/K
+(largest light-wing gaps).
+**CORRECTION TO MY OWN PREDICTION: track E does NOT have unexamined ethics.** After m6 I recorded
+that E and F should be expected to contain more. Every E lesson already carries its fork. m6 was
+an isolated fault, not a pattern - do not carry that suspicion into F as though it were
+established.
+`counterfeit-comfort` now SIX lessons, FIVE books (b4 dullness, p2 worry, n1s5 blame, n1s2
+conviction, d4 liking, e5 reacting-feels-like-defending).
 **METHOD FOR EXPERIENTIAL LESSONS (no external research possible): GREP books.json for what the
 source actually says about the failure mode.** For b5/b6 this produced Brahm on the checking
 questions being the hindrance of doubt, and Brasington on 'indistractability' vs the furrowed-brow
