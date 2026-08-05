@@ -647,6 +647,11 @@ One command, and it may settle the lesson outright.
 claim-dense. MEDIAN LENGTH 201 WORDS.** The old tracks are STUBS, not errors. Deepening needs no
 external research (the material is in the books) and is therefore both the bigger share of the
 problem and the cheaper fix, and it batches by track.
+**DEEPENING STARTED: track M, m1 + m3 done (3.152). Remaining in M: m2, m4, m5, m6.**
+The internal cross-check paid off twice in one batch - m1 was missing numbers this repo already
+owned (the `spotlight` component's research), and m3 CONTRADICTED audit 1's conclusion that single
+nonverbal cues are timestamps not translations. **The old tracks were written independently and
+some contradict what the new tracks established - grep before deepening, every time.**
 **REVISED ORDER: (1) deepen the 61 empties in track batches; (2) fact-check the 3 claim-dense -
 d1, e1, c3; (3) the 20 mixed - check claim then deepen, starting m1, d2, e2-e5, j8, c5.**
 CAUTION: deepening writes NEW claims, and audits 1-15 show my invented mechanisms are wrong about
