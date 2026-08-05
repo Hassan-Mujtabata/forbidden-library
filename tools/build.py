@@ -70,6 +70,8 @@ FIG_COMPONENTS = {
     "routes",
     # #186: two gates at different heights -- same evidence, uneven scrutiny
     "sieve",
+    # #188: where people actually sit vs where they place themselves, against a median
+    "selfrank",
 }
 
 

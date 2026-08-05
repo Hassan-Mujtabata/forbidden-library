@@ -4391,8 +4391,12 @@ $("btn-ach").onclick=()=>{const g=$("achgrid");g.innerHTML="";
   $("achs").classList.add("on")};
 
 /* ---------- patch notes ---------- */
-const APP_VER="3.129";
+const APP_VER="3.130";
 const PATCHES=[
+ {v:"3.130",n:"Nine In Ten Cannot Be",d:"5 Aug 2026",items:[
+  ["new","SUPERIORITY BIAS NOW HAS ITS FIGURE, and it needs no argument at all. Thirty people against a median line: half above, half below, because that is what a median means. Then the same thirty asked where THEY sit — twenty-seven put themselves above the line. Asked about driving safety the real figure is 91%; asked about skill, 93%, in a preregistered replication of over a thousand people."],
+  ["new","THEN THE THIRD STAGE, WHICH IS JUST THE ARITHMETIC. Nine in ten cannot be in the top half. It is not that some of them are mistaken — the distribution itself is impossible, so most of the people in it are wrong about themselves. And you just read that and agreed with it, which costs nothing, because the one dot you cannot locate from in here is your own."],
+  ["fix","The figure shows only what is settled. It does NOT draw a cause, because the cause is genuinely disputed — the leading explanation was tested directly and did not hold up. Drawing a mechanism this library's own sources question would be the exact failure the research protocol exists to prevent."]]},
  {v:"3.129",n:"Solid Effect, Open Mechanism",d:"5 Aug 2026",items:[
   ["fix","YESTERDAY'S CORRECTION WENT TOO FAR AND HAS ITSELF BEEN CORRECTED. The Superiority Bias lesson was updated to say the cause is a weighting problem — that you count introspective evidence for yourself and behavioural evidence for everyone else. That explanation has been tested since and does not hold up as the main driver: people report leaning on behaviour for BOTH judgements, and the introspection measure barely predicts the effect once general reasoning ability is accounted for."],
   ["new","SO THE LESSON NOW SEPARATES WHAT IS SETTLED FROM WHAT IS NOT, which is more useful anyway. Settled: the effect is real, very large, reproduced in preregistered work, and shows up across every bias tested rather than a favourite few — and it behaves like a gap in self-knowledge rather than a real difference in how biased people are. Open: why. A confident story about the why would be exactly the kind of thing this lesson is about."],
@@ -6576,6 +6580,46 @@ const FIGC={
       `<line class="fg-mark2" x1="${LX+28}" y1="${BARY_LO}" x2="${RX-28}" y2="${BARY_HI}" `+
       `stroke="${A}" stroke-opacity=".35" stroke-dasharray="3 4"/>`+
       note(p.n||"same evidence, two standards")};
+  },
+
+  /* #188, from research (LOG.md cycle 8). Draws the PHENOMENON, deliberately not the mechanism.
+     Svenson (1981) replicated preregistered at N=1,203 (2023): 91% rated themselves safer than
+     average, 93% more skilled. Alicke (1985) is the independent second line, replicated 2021.
+     Scopelliti (2015) validated scale; 2024 preregistered replication d = -1.72.
+     WHY NO MECHANISM IS DRAWN: the introspection-illusion account was tested directly by JDM
+     "Hypothesized drivers of the bias blind spot" and questioned -- no crossover, r = .11, and
+     non-significant once cognitive sophistication is modelled. The effect is settled; the why is
+     not. So this figure shows only what is true: where people actually sit, and where they put
+     themselves, and that the second is impossible.
+     THE COUNTS ARE REAL: 30 dots, 15 above the median in stage one because that is what a median
+     means; 27 of 30 above in stage two, which is 90% -- the closest 30 dots get to Svenson's 91%
+     without implying a precision 30 dots do not have. */
+  selfrank(p,A){
+    const st=p.stage||"actual";
+    const X0=34, DX=4.6, N=30, MID=100, YB=76, YT=36;
+    const line=`<line x1="${X0-6}" y1="${MID}" x2="${X0+N*DX+6}" y2="${MID}" stroke="${A}" `+
+      `stroke-opacity=".45" stroke-dasharray="4 4"/>`+
+      `<text class="fg-lbl" x="${X0-8}" y="${MID+4}" text-anchor="end">${esc(p.mid||"median")}</text>`;
+    // a real spread: half genuinely above, half genuinely below
+    const actual=()=>{let s="";for(let i=0;i<N;i++){const above=i%2===0;
+      const y=above?MID-8-((i*7)%26):MID+8+((i*5)%24);
+      s+=`<circle cx="${(X0+i*DX).toFixed(1)}" cy="${y}" r="3.2" fill="${A}" fill-opacity=".55" stroke="none"/>`;}
+      return s;};
+    // where they put THEMSELVES: 27 of 30 above the line
+    const claimed=cls=>{let s="";for(let i=0;i<N;i++){const above=i<27;
+      const y=above?MID-10-((i*9)%30):MID+12+((i*6)%14);
+      s+=`<circle class="${cls||""}" cx="${(X0+i*DX).toFixed(1)}" cy="${y}" r="3.2" fill="${A}" `+
+        `fill-opacity="${above?".9":".3"}" stroke="none"/>`;}
+      return s;};
+    const note=t=>`<text class="fg-lbl" x="102" y="118" text-anchor="middle">${esc(t)}</text>`;
+    if(st==="actual")
+      return {svg:line+actual()+note(p.n||"half above, half below — that is what a median is")};
+    if(st==="claimed")
+      return {svg:line+claimed("fg-venture")+note(p.n||"where they put themselves")};
+    return {svg:line+claimed()+
+      `<line class="fg-stop" x1="${X0-6}" y1="${YT}" x2="${X0+N*DX+6}" y2="${YT}" stroke="${A}" `+
+      `stroke-width="2" stroke-opacity=".5"/>`+
+      note(p.n||"and it cannot be true of nine in ten")};
   },
 
   pattern(p,A){

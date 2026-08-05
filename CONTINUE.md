@@ -77,7 +77,7 @@ When you finish a job: tick it, add what you learned to "Hard rules", and commit
   631 duplicated, 893 numbered). The remainder are genuinely unheaded in the PDFs.
 - Every lesson citation resolves to a real book (Attached and The Path of Purification were
   ingested 4 Aug; before that 21 citations pointed at nothing).
-- Path: **109 nodes, 18 tracks, 29 with figures**. All five new tracks have at least one. **ALL 24 BOOKS ARE COVERED** —
+- Path: **109 nodes, 18 tracks, 30 with figures**. All five new tracks have at least one. **ALL 24 BOOKS ARE COVERED** —
   verified: zero books have no lesson citing them. Track O fully deepened (3.112);
   track P = Meditations (3.113), covered but at ~600 words/lesson — NEEDS DEEPENING to the
   track-O standard, it carries the four elements but compactly. Track N = first mini-path (Laws of
@@ -624,7 +624,9 @@ Highest value in the library: it is the mechanism most of the others sit on.
   independent replication, NOT a summary of Lord.
 - Component: new. Nothing existing encodes two different thresholds.
 
-**Cycle 2 — `n1s6` Superiority Bias. RESEARCH DONE 5 Aug, NOT DRAWN** — see LOG.md cycle 8.
+**Cycle 2 — `n1s6` Superiority Bias. [x] DONE, shipped 3.130** as the new `selfrank`
+component, drawing the PHENOMENON only — the recorded fallback, taken because the mechanism is
+contested. Original notes: — see LOG.md cycle 8.
 Rule 4 passes strongly: Svenson (1981) has a preregistered N=1,203 direct replication (91% safer,
 93% more skilled than average), and Alicke (1985) gives an independent second line with its own
 2021 replication. **But those establish the PHENOMENON, not the MECHANISM the lesson teaches**
