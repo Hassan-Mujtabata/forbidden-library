@@ -544,6 +544,78 @@ them to go faster — the figures produced faster than this are the ones that we
 breathing pacer contradicting all three meditation books; the decoy effect that does not
 replicate).
 
+### THE PLAN — first six cycles, dark wing, in this order
+
+Written before starting so the work is not re-derived each session. One cycle per session is the
+expected rate. Each entry states the ERROR TAUGHT AWAY first, because rule 8 says a figure with
+no named wrong belief to remove should not be built. "Candidate research" is where to START, not
+a citation — it still has to be read in full and independently corroborated (rules 2 and 3), and
+if it fails replication it gets killed before drawing (rule 4), exactly as the decoy effect did.
+
+**Cycle 1 — `n1s1` Confirmation Bias.** Highest value in the library: it is the mechanism most of
+the others sit on.
+- Error taught away: "I checked, and the evidence supports me." The reader believes the failure
+  is not looking at the other side. It is not — they DO look.
+- Claim to draw: asymmetric SCRUTINY, not asymmetric selection. Opposing evidence is examined
+  hard and a flaw is found (everything has one); supporting evidence is waved through on a
+  glance. Two gates at different heights, same evidence arriving at both.
+- Candidate research: Lord, Ross & Lepper (1979) biased assimilation — same two studies shown to
+  both sides, each rating the study agreeing with them as better conducted. Corroborate with an
+  independent replication, NOT a summary of Lord.
+- Component: new. Nothing existing encodes two different thresholds.
+
+**Cycle 2 — `n1s6` Superiority Bias.** Pairs with cycle 1 and explains why the whole track is
+read as being about other people.
+- Error taught away: "I'm more rational than most" — held by nearly everyone, so it cannot be
+  true of nearly everyone.
+- Claim to draw: you see your own PROCESS and only other people's OUTPUT. Two panels of the same
+  decision — one showing deliberation, one showing only the result.
+- Candidate research: better-than-average effect. Svenson (1981), drivers rating themselves above
+  median. Check the replication literature before drawing; parts of this area have not held.
+- Component: new (inside view vs outside view).
+
+**Cycle 3 — `o2` Freeze, Flight, Fight.** The order is the whole lesson and the order is what
+everyone gets wrong.
+- Error taught away: "fight or flight" — two responses, wrong order, and it hides the one you
+  will actually see, which looks like composure.
+- Claim to draw: escalation by COST. Freeze is nearly free and reversible; flight spends energy;
+  fight risks injury. A system trying the cheap move first is why freeze comes first.
+- Candidate research: Navarro's own text is the floor; corroborate the freeze-first ordering with
+  the defence-cascade literature (tonic immobility) from a source independent of him.
+- Component: new (three steps with rising cost), or possibly `ladder` — audit it first, it is
+  unused and therefore a suspect.
+
+**Cycle 4 — `q1` The Importance Deficit.** Carnegie's engine; a third of his rules reduce to it.
+- Error taught away: "appreciation is flattery, and people see through it."
+- Claim to draw: attention is SCARCE, so supplying it is disproportionate — most listening is
+  waiting to reply, and the difference is detectable.
+- Candidate research: hardest to source of the six. Look for measured work on listening quality
+  and on the gap between felt and delivered attention. **If nothing solid turns up, SKIP IT** and
+  move to cycle 5 — rule 4. Do not draw a mechanism on an unsupported claim because the lesson
+  wants a picture.
+- Component: unknown until the claim is pinned.
+
+**Cycle 5 — `q4` A Conclusion They Reached.** The most useful thing in Carnegie and the least
+intuitive.
+- Error taught away: "if they agreed, it is settled."
+- Claim to draw: compliance decays, ownership does not — an instruction sits outside the
+  self-image and can be dropped for free; a conclusion is defended because dropping it means
+  admitting error.
+- Candidate research: effort justification / IKEA effect, and the durability difference between
+  induced and self-generated conclusions. Corroborate across two independent lines.
+- Component: new (two identical positions, different anchoring, one decaying over time).
+
+**Cycle 6 — `n1s4` The Group Bias.** Deliberately LAST of the six, and it may not be buildable.
+- Error taught away: "my ideas are my own."
+- Claim to draw: positions arriving as a SET — correlation across unrelated issues.
+- **Risk, stated up front:** the obvious sources (Asch, Sherif) are about PRESSURE, and this
+  lesson's claim is explicitly that no pressure is felt — only relief. Using Asch would encode a
+  different mechanism than the lesson teaches. `crowd` was already rejected here for drawing
+  social-proof density instead. If no source supports the correlated-positions claim, leave this
+  lesson without a figure and record that. A missing figure is much cheaper than a wrong one.
+
+After these six, re-count coverage and continue down the dark wing (M, D, E, F), then light.
+
 ### WHICH LESSONS HAVE NO FIGURE (worst-covered first)
 
 Dark wing: N 1/7 (n1, n1s1, n1s3-n1s6) · M 1/6 (m2-m6) · D 2/6 (d2, d4, d5, d6) ·
