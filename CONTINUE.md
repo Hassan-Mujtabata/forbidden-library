@@ -286,6 +286,57 @@ Generation runs through the Gemini pipeline. **Gemini may add book content only,
 
 ---
 
+## HOW TO ACTUALLY MAKE IT EASIER — my recommendations, not Hassan's
+
+He asked for these rather than only implementing his ideas. These are the levers that reliably
+move comprehension, ordered by how much they would improve THIS library specifically. Build them
+into every lesson; none is decoration.
+
+1. **CONTRASTING CASE — the single highest-value addition, and the library has almost none.**
+   You do not understand a concept until you know what it is NOT. A freeze looks like thinking.
+   A pacifier looks like an itch. Conviction looks like expertise. Every lesson should show the
+   near-miss beside the real thing and say what distinguishes them, because the near-miss is what
+   he will actually meet. Discrimination is the skill; a definition alone does not build it.
+
+2. **PRE-EMPT THE WRONG MODEL, EARLY.** Most readers arrive with a wrong version already
+   installed ("fight or flight", "crossed arms mean defensive", "Stoicism means not caring").
+   Naming and killing it in the first paragraphs is worth more than adding correct material,
+   because the wrong model actively intercepts everything that follows. Track O lesson 2 does
+   this and it is why that lesson works.
+
+3. **FADED WORKED EXAMPLE.** Run one case fully (already the standard). Then give a second case
+   and stop halfway — "their hand goes to their neck right after you say the date; what do you
+   now know, and what do you NOT know?" Completing a partly-worked case builds transfer that
+   reading a finished one does not. This is the biggest gap between the current lessons and
+   something that actually trains a skill.
+
+4. **GENERATION BEFORE RECOGNITION.** The quizzes are all multiple choice, which tests
+   recognition — the weakest form. Add ONE free-recall prompt before the options appear ("what
+   is the tell that this is running?"). Retrieving beats recognising by a wide margin, and the
+   app already has the spaced-review machinery to schedule it.
+
+5. **CONCRETE FIRST, ABSTRACT SECOND — always.** Open with the specific situation, then name the
+   principle. Abstract-first forces him to hold an empty container until an example arrives.
+   Several existing lessons still open with the principle; invert them.
+
+6. **FIGURES: SHOW THE MECHANISM, NOT THE SUMMARY.** A figure earns its place only when it does
+   something prose physically cannot — motion, staged reveal, two things changing at once,
+   before/after. A figure restating the paragraph beside it adds load and subtracts nothing.
+   Put the label ON the thing it labels (split attention is a real cost), and cut anything
+   decorative: interesting-but-irrelevant detail measurably reduces what gets understood.
+
+7. **CROSS-LINK IDEAS THAT ARE THE SAME IDEA.** `rel` already exists and is barely used. Greene's
+   confirmation bias, Navarro's baseline discipline and Kahneman's WYSIATI are one mechanism seen
+   three times. Saying so converts three isolated facts into one structure, which is both easier
+   to hold and harder to forget.
+
+8. **STATE THE EDGE.** Already in the depth standard, and worth keeping for a reason beyond
+   honesty: an unbounded rule gets misapplied, fails, and is then discarded wholesale. Marking
+   where it stops is what stops him throwing the whole idea away the first time it does not work.
+
+
+---
+
 ## HARD RULES (learned the expensive way — do not rediscover these)
 
 - **Never propose reducing size.** See THE POINT. This has been re-litigated four times.
