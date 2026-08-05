@@ -653,7 +653,10 @@ read as being about other people.
   median. Check the replication literature before drawing; parts of this area have not held.
 - Component: new (inside view vs outside view).
 
-**Cycle 3 — `o2` Freeze, Flight, Fight.** The order is the whole lesson and the order is what
+**Cycle 3 — `o2` Freeze, Flight, Fight. LESSON CORRECTED 3.131, FIGURE NOT DRAWN.** Order
+corroborated (defence cascade / Fanselow). But the selector is THREAT IMMINENCE, not cost — so
+the planned rising-cost drawing is on the wrong axis and `ladder` does not fit. Redesign around
+distance, with a separate branch for inescapable (which links to r4). See LOG.md cycle 9. The order is the whole lesson and the order is what
 everyone gets wrong.
 - Error taught away: "fight or flight" — two responses, wrong order, and it hides the one you
   will actually see, which looks like composure.
