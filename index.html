@@ -4391,8 +4391,11 @@ $("btn-ach").onclick=()=>{const g=$("achgrid");g.innerHTML="";
   $("achs").classList.add("on")};
 
 /* ---------- patch notes ---------- */
-const APP_VER="3.117";
+const APP_VER="3.118";
 const PATCHES=[
+ {v:"3.118",n:"The Last Two Pictures",d:"5 Aug 2026",items:[
+  ["fix","EVERY FIGURE FROM EVERY BOOK IS NOW ACTUALLY REACHABLE — 507 of 507, up from 505. Two had been silently dropped. When a picture sat on a page that fell outside every chapter's range, the placement rule required it to be within two pages of one and discarded it otherwise. One image in The Art of Quiet Influence and one in How to Win Friends were far enough out to be thrown away — and since Carnegie's was that book's only picture, the book ended up with no image bundle at all."],
+  ["fix","Pictures now attach to the nearest chapter at any distance rather than being discarded. A figure shown in a slightly-off chapter is something you can see and place yourself; a figure that was dropped is one you never know existed. That trade was the wrong way round."]]},
  {v:"3.117",n:"Why Certainty Convinces You",d:"5 Aug 2026",items:[
   ["new","CONVICTION BIAS NOW HAS A FIGURE, and it carries a result that is genuinely uncomfortable. A token goes into a gate and the whole prepared response runs — a reason came in, cooperation came out. Then an identical token goes in with NOTHING in it, and the same response runs anyway. The gate never opened it. It matched on the shape of a reason, not the contents."],
   ["new","THE NUMBERS BEHIND IT: 60% of people let someone skip a photocopier queue on a bare request. 94% when a real reason was given. And 93% for “because I have to make copies”, which says nothing whatsoever — one point behind a genuine reason. That is conviction working with no content in it, which is the whole of the bias. The third stage is the defence, and it is evidence rather than advice: repeated with a much larger request, only the genuine reason still worked. Raise the cost and people actually read the token."],

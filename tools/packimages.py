@@ -48,12 +48,17 @@ def main():
                     hit = i
                     break
             if hit is None:                          # page fell in a gap (front matter, plates)
+                # #179: attach to the NEAREST chapter at any distance rather than dropping.
+                # The old rule required the page to be within 2 of a chapter range and silently
+                # discarded anything further out -- which lost two real figures, and lost How to
+                # Win Friends its only image and therefore its whole bundle. A figure shown in a
+                # slightly-off chapter is recoverable; a figure the reader never sees is not.
                 nearest = min(ranged, key=lambda r: min(abs(page - r[1][0]), abs(page - r[1][1])),
                               default=None)
-                if nearest and min(abs(page - nearest[1][0]), abs(page - nearest[1][1])) <= 2:
+                if nearest:
                     hit = nearest[0]
                 else:
-                    orphan += 1
+                    orphan += 1                      # book has no page ranges at all
                     continue
             data = open(os.path.join(IMGDIR, bid, item["f"]), "rb").read()
             ref = item["f"]

@@ -80,7 +80,9 @@ When you finish a job: tick it, add what you learned to "Hard rules", and commit
   `python -c "import sys; sys.path.insert(0,'tools'); import ship; ship.push()"` himself.
 - `/reset.html` clears a wedged service worker without touching progress or the key (#171).
 - `VV.all({stage:1})` passed 98/98 as of 3.102.
-- **507 book figures live**, encrypted per book under `img/<id>.enc`.
+- **507 book figures live and ALL 507 placed** (was 505 — two were silently dropped by an
+  over-strict placement rule; #179 attaches to the nearest chapter at any distance instead).
+  Encrypted per book under `img/<id>.enc`; 24 bundles.
 
 ---
 
