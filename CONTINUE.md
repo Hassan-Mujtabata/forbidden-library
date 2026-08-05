@@ -228,8 +228,13 @@ Tracks added this session: O Navarro (3.110) · P Meditations (3.113) · Q Carne
 R van der Kolk (3.116), plus N Laws of Human Nature (3.109).
 
 **WHAT REMAINS IN JOB 5 — depth, then figures.** Coverage is not the same as done:
-- Tracks P, Q, R and N are at ~450-650 words/lesson. The standard set by `tools/deepen.py` (o1,
-  1,519 words) is the target where the idea warrants it. Track O is the only fully deepened one.
+- **Deepened so far:** track O (`deepen.py` o1 -> 1,519w, `deepen2.py` o2-o4 -> ~850w) and
+  track Q (`deepen3.py`, 4 lessons ~500 -> ~870w).
+- **Still thin:** track N (7 nodes, ~200-400w), track P (3 lessons ~600w), track R (4 lessons
+  ~460w).
+- **What deepening should ADD** (deepen3.py is the model — it appends rather than rewrites):
+  the second case that goes WRONG, the failure the reader will actually produce, and the tell
+  that they are producing it. Agreeing with a mechanism is easy; the gap is always execution.
 - Figures: only track O has one. See the figure section below — they are authorised and owed.
 
 **Track Q is the model for a list-shaped book.** Carnegie's 30 numbered principles were NOT
