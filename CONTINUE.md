@@ -176,6 +176,61 @@ graph — 15 assertions, wired into `ship.py` as a gate, and mutation-tested thr
 derivation, breaking parent-gating, counting containers — all three caught). build.py rejects
 seven malformed shapes; that was tested both directions too.
 
+### [ ] JOB 6 — Reset controls + a book-to-path map  (Hassan asked for both, 5 Aug)
+Small, self-contained, and independent of the content work — a good job for a session that does
+not have room to write lessons.
+
+**(a) RESET.** He needs to clear progress at two levels: a SINGLE stage, and a WHOLE path.
+- State lives in `S.node[id]` — `doneAt`, `openAt`, and `rv` (the spaced-review record). Clearing
+  a stage means deleting that node's entry, not just `doneAt`, or the review scheduler keeps
+  treating it as seen.
+- **A mini-path parent has no stored state of its own — its completion is DERIVED from its
+  steps** (see the JOB 4 spec). So "reset this path" must clear every child, and resetting a
+  parent alone is a no-op. Do not add a stored flag to work around this; that reintroduces the
+  drift the derived design exists to prevent.
+- Resetting must also clear `S.lastTrack`/`S.nodePos` if they point into what was reset, or the
+  CONTINUE card will offer a lesson that no longer has state.
+- Put it behind a confirm, and make the confirm say exactly what will be lost (n lessons, and
+  whether review history goes with it). It syncs, so it is not undoable from another device.
+- Sensible placement: per-stage inside the lesson's own menu; per-path on the track header.
+
+**(b) WHICH BOOK IS IN WHICH PATH.** Currently unanswerable from inside the app, which is a real
+navigation hole — the Library shows books, the Path shows tracks, and nothing connects them.
+Build it from `sources[].book` on each node (that is exactly how the table below was produced).
+Show it both directions: on a book's page, the tracks that draw on it; on a track header, the
+books it draws from. As of 3.113 the mapping is:
+
+| book | track(s) |
+|---|---|
+| 30 Covert Emotional Manipulation Tactics | Influence & Persuasion · Defense & Clear Thinking |
+| Atomic Habits | Atomic Habits |
+| Attached | Attached |
+| Dark Psychology: 3 Books in 1 | Influence & Persuasion · Defense & Clear Thinking |
+| How to Have a Beautiful Mind | Defense & Clear Thinking · Clear Thinking |
+| **How to Win Friends and Influence People** | **NOT ON THE PATH** |
+| Influence: The Psychology of Persuasion | Influence & Persuasion |
+| Man's Search for Meaning | Man's Search for Meaning |
+| Manipulation: Dark Psychology | Defense & Clear Thinking |
+| Meditations | Meditations |
+| Mindfulness, Bliss and Beyond | Foundations · Concentration & Jhāna · Insight & Wisdom · Mindfulness in Practice |
+| Right Concentration | Foundations · Concentration & Jhāna · Insight & Wisdom · Power & Strategy |
+| The 48 Laws of Power | Influence & Persuasion · Power & Strategy · Defense & Clear Thinking |
+| The Art of Deception | Power & Strategy · Defense & Clear Thinking |
+| The Art of Quiet Influence | Influence & Persuasion · Power & Strategy · Defense & Clear Thinking |
+| The Art of Seduction | Influence & Persuasion · Power & Strategy |
+| **The Body Keeps the Score** | **NOT ON THE PATH** |
+| The Experience of Insight | Foundations · Concentration & Jhāna · Insight & Wisdom · Power & Strategy · Defense |
+| The Laws of Human Nature | The Laws of Human Nature |
+| The Like Switch | The Like Switch |
+| The Mind Illuminated | Foundations · Concentration & Jhāna · Insight & Wisdom |
+| The Path of Purification | Foundations · Concentration & Jhāna · Insight & Wisdom |
+| Thinking, Fast and Slow | Thinking, Fast and Slow |
+| What Everybody Is Saying | Reading the Body |
+
+Note what this table exposes: several tracks are built from four or five books at once, which is
+the concept spine already trying to exist informally. Building JOB 6(b) and the spine together
+would be less work than doing either twice.
+
 ### [ ] JOB 5 — Build the mini-paths, then the figures
 **Step 1 (pick) done. First mini-path SHIPPED in 3.109. Four uncovered books remain.**
 
