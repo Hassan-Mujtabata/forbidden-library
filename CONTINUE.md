@@ -17,6 +17,15 @@ When you finish a job: tick it, add what you learned to "Hard rules", and commit
   Three lessons make that worse — you can see three lessons cannot cover 500 pages. Forty small
   steps that visibly DO cover it make it climbable. Small steps because each is ONE thing, never
   because content was cut.
+- **LONG IS NOT THE PROBLEM. LEAVING HIM TO WORK IT OUT IS.** Hassan, verbatim: "if text is
+  broken by lessons and is easier to understand more then even the book id rather have that —
+  read for 5 hrs then read 2 hrs and spend a day figuring it out on my own how concept works
+  after understanding it." He will happily read MORE than the book if the reading does the work.
+  A lesson that is shorter than the book but leaves him reconstructing the mechanism has cost
+  him a day and saved him three hours. That is the trade he is refusing.
+  This has now been got wrong in BOTH directions: first by writing summaries, then by assuming
+  the complaint was volume and trimming. It is neither. Work the mechanism all the way through,
+  at whatever length that takes, and leave nothing for him to reverse-engineer.
 - **UNDERSTANDING IS NOT THE GOAL. APPLYING IT IS.** Hassan's words: "if I read books I should
   not just understand concept I should be easily apply it in real life — I been understanding it
   for years, that's why the figures are there for." He does not need a chapter explained. He
@@ -48,7 +57,8 @@ When you finish a job: tick it, add what you learned to "Hard rules", and commit
   631 duplicated, 893 numbered). The remainder are genuinely unheaded in the PDFs.
 - Every lesson citation resolves to a real book (Attached and The Path of Purification were
   ingested 4 Aug; before that 21 citations pointed at nothing).
-- Path: **94 nodes, 14 tracks, 22 with figures** — track N is the first mini-path. Backup at `tools/backup/graph.pre-rebuild.json`.
+- Path: **98 nodes, 15 tracks, 23 with figures**. Track N = first mini-path (Laws of
+  Human Nature). Track O = Reading the Body (Navarro), 4 lessons, one `pattern` figure. Backup at `tools/backup/graph.pre-rebuild.json`.
 - App: **3.109 live and pushed.** The token at `C:\Users\sands\.secrets\github_token.txt` is
   still missing, so ship.py's push is intermittent — when it fails, Hassan runs
   `python -c "import sys; sys.path.insert(0,'tools'); import ship; ship.push()"` himself.
@@ -171,8 +181,8 @@ five: the extractor folded "The Blame Bias" into the Group Bias chapter, so work
 titles alone loses one. Read the episode TEXT, never just the titles.
 
 **STILL UNCOVERED (no lesson, no track, no mention):**
-The Body Keeps the Score (172,208w) · How to Win Friends (79,675w) · Meditations (72,513w) ·
-What Everybody Is Saying (69,836w). Then the worst ratios: Seduction (240,398w / 3 lessons),
+The Body Keeps the Score (172,208w) · How to Win Friends (79,675w) · Meditations (72,513w).
+(What Everybody Is Saying was covered by track O in 3.110.) Then the worst ratios: Seduction (240,398w / 3 lessons),
 Deception, Dark Psychology, Purification, 48 Laws.
 
 **FIGURES ARE OWED ON TRACK N AND ARE NOT OPTIONAL.** Hassan: "that's why the figures are there
