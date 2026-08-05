@@ -293,6 +293,10 @@ header .brand span{color:var(--gold)}
 .bl-progtxt{font-size:12.5px;color:var(--tx2);margin-top:7px}
 .bl-actions{display:flex;gap:10px;align-items:center;margin:14px 0 4px}
 .bl-pathrow{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:6px}
+.trst{background:none;border:0;color:var(--tx2);font-size:15px;cursor:pointer;padding:0 6px;opacity:.55}
+.trst:hover{opacity:1;color:var(--err)}
+.bl-trk{display:flex;gap:6px;flex-wrap:wrap;margin:2px 0 10px}
+.bl-trk span{font-size:12px;padding:3px 9px;border-radius:999px;background:var(--card2);color:var(--tx2)}
 .bl-eps .eprow.read .t{color:var(--tx2)}
 .bl-eps .eprow .mn{color:var(--tx2);font-size:11.5px;margin-left:auto}
 .bl-q{width:100%;background:var(--bg2);border:1px solid var(--line);border-radius:10px;color:var(--tx);
@@ -1340,6 +1344,7 @@ header .brand span{color:var(--gold)}
   <div id="rtop">
     <button class="iconbtn" id="n-back" title="Path">←</button>
     <div class="bt" id="n-title"></div>
+    <button class="iconbtn" id="n-reset" title="Reset this stage">⟲</button>
     <button class="iconbtn" id="n-fminus" title="Smaller text">A−</button>
     <button class="iconbtn" id="n-fplus" title="Bigger text">A+</button>
     <button class="iconbtn" id="n-tts" title="Read aloud">🔊</button>
@@ -1859,8 +1864,14 @@ function renderBookLanding(id){
   // #36: which Path ideas this book feeds — the missing book→Path link
   const nb=x=>x.toLowerCase().replace(/[^a-z0-9]/g,"");
   const fedNodes=DATA.nodes.filter(n=>!n.stub&&(n.sources||[]).some(s=>nb(s.book)===nb(b.title))&&(privileged()||nodeVisible(n)));
+  // #176: name the PATHS as well as the ideas — "which book is in which path" was
+  // unanswerable from inside the app, because the Library listed books and the Path listed
+  // tracks with nothing joining them.
+  const trks=tracksForBook(id);
   if(fedNodes.length){const pw=bd.querySelector("#bl-path");
-    pw.innerHTML=`<div class="prsec">Feeds ${fedNodes.length} idea${fedNodes.length>1?"s":""} on your Path</div><div class="bl-pathrow"></div>`;
+    pw.innerHTML=`<div class="prsec">Feeds ${fedNodes.length} idea${fedNodes.length>1?"s":""} on your Path</div>`
+      +(trks.length?`<div class="bl-trk">${trks.map(t=>`<span>${t.glyph} ${esc(t.name)}</span>`).join("")}</div>`:"")
+      +`<div class="bl-pathrow"></div>`;
     const pr=pw.querySelector(".bl-pathrow");
     fedNodes.slice(0,8).forEach(n=>{const c=document.createElement("button");c.className="glosschip";c.innerHTML=`${n.glyph} ${esc(n.title)}${nodeDone(n.id)?" ✓":""}`;
       c.onclick=()=>{$("booklanding").classList.remove("on");openNode(n.id);};pr.appendChild(c);});}
@@ -4380,8 +4391,12 @@ $("btn-ach").onclick=()=>{const g=$("achgrid");g.innerHTML="";
   $("achs").classList.add("on")};
 
 /* ---------- patch notes ---------- */
-const APP_VER="3.113";
+const APP_VER="3.114";
 const PATCHES=[
+ {v:"3.114",n:"Reset, and Which Book Goes Where",d:"5 Aug 2026",items:[
+  ["new","YOU CAN NOW CLEAR PROGRESS — a single stage from the ⟲ button in its header, or an entire path from the ⟲ on the track. Both tell you exactly how many lessons will be cleared before doing it, and both clear the review history along with the tick, so a reset lesson genuinely returns as unseen instead of quietly staying in the review rotation."],
+  ["new","AND EVERY BOOK NOW TELLS YOU WHICH PATHS IT FEEDS. The Library listed books, the Path listed tracks, and nothing joined them — so 'which path is this book in' could not be answered from inside the app at all. A book's page now names the paths that draw on it, above the individual ideas. Several books feed four or five paths at once, which is worth being able to see."],
+  ["fix","Resetting a mini-path clears its steps. A mini-path stores no progress of its own — it is complete exactly when its steps are — so clearing the container alone would have looked like it worked and changed nothing at all."]]},
  {v:"3.113",n:"Meditations",d:"5 Aug 2026",items:[
   ["new","MEDITATIONS IS ON THE PATH — the third book to come off the list that had nothing at all. Three lessons, and none of them is a tour of Stoicism. The first is about the step between an event and your distress that you never notice taking, and why the same event lands differently on different days. The second is the sort that tells you which half of a situation you can actually affect, and why worrying about an outcome is spent instead of the work that would change it."],
   ["new","THE THIRD IS THE ONE THAT MAKES THE BOOK USABLE. Meditations repeats itself constantly, which reads as a flaw until you notice it was a private notebook nobody was meant to see. The most powerful man alive, who had studied this for decades, needed to write 'do not resent what happens' again this morning — because understanding it yesterday had not made it hold. That is not a defect in the book. It is the finding: these are reps, not ideas, and it explains exactly why reading Stoicism has never once changed how you react to anything."]]},
@@ -7222,6 +7237,51 @@ function prereqSatisfied(pid){
   if(!privileged()){const pn=nodeById(pid);if(pn&&!trackVisible(pn.track))return true;}
   return false;
 }
+/* ============ #176 JOB 6 — resetting, and which book feeds which path ============ */
+// Every track that draws on this book, via sources[].book. This is the missing half of the
+// Library<->Path link: the Library showed books, the Path showed tracks, and nothing joined them.
+function tracksForBook(bid){
+  const b=bookById(bid);
+  if(!b||!DATA||!DATA.nodes)return [];
+  const seen=new Set();
+  for(const n of DATA.nodes)for(const s of (n.sources||[]))if(s.book===b.title)seen.add(n.track);
+  return (DATA.tracks||[]).filter(t=>seen.has(t.id)&&trackVisible(t.id));
+}
+// Delete the WHOLE entry, not just doneAt: `rv` is the spaced-review record, and leaving it
+// behind means the scheduler still treats a "reset" lesson as one you have already seen.
+function clearNodeState(id){ if(S&&S.node)delete S.node[id]; }
+function afterReset(){
+  // a pointer into state we just deleted would have the CONTINUE card offering a ghost
+  if(S.nodePos&&!(S.node&&S.node[S.nodePos.id]))S.nodePos=null;
+  if(S.lastTrack&&!(DATA.nodes||[]).some(n=>n.track===S.lastTrack&&S.node[n.id]))S.lastTrack=null;
+  save();renderPath();
+}
+function resetStage(id){
+  const n=nodeById(id);if(!n)return;
+  // A mini-path parent stores nothing of its own — completion is derived from its steps — so
+  // resetting the parent alone is a no-op. Clear the children instead. (JOB 4 spec.)
+  const kids=stepsOf(id);
+  const ids=kids.length?kids.map(k=>k.id):[id];
+  const had=ids.filter(x=>S.node&&S.node[x]);
+  if(!had.length){toast("Nothing to reset here yet");return;}
+  const what=kids.length?`“${n.title}” and its ${kids.length} steps`:`“${n.title}”`;
+  if(!confirm(`Reset ${what}?
+
+This clears progress AND review history for ${had.length} lesson${had.length>1?"s":""}.
+It syncs, so it can't be undone from another device.`))return;
+  ids.forEach(clearNodeState);afterReset();toast("⟲ Reset");
+}
+function resetPath(tid){
+  const tr=trackById(tid);if(!tr)return;
+  const ns=(DATA.nodes||[]).filter(n=>n.track===tid);
+  const had=ns.filter(n=>S.node&&S.node[n.id]);
+  if(!had.length){toast("Nothing to reset in this path yet");return;}
+  if(!confirm(`Reset the whole “${tr.name}” path?
+
+This clears progress AND review history for ${had.length} lesson${had.length>1?"s":""}.
+It syncs, so it can't be undone from another device.`))return;
+  ns.forEach(n=>clearNodeState(n.id));afterReset();toast("⟲ Path reset");
+}
 function nodeAvail(id){const n=nodeById(id);if(!n)return false;
   // a step is reachable only once its mini-path is. Its parent is checked for AVAILABILITY, not
   // completion — the parent completes only when its steps do, so requiring that would deadlock.
@@ -7293,7 +7353,7 @@ function renderPath(){
     const leaves=ns.filter(isLeaf);
     const doneN=leaves.filter(n=>nodeDone(n.id)).length;
     const trDone=leaves.length>0&&doneN===leaves.length;   // #83: mark a fully-mastered track
-    let html=`<div class="track-h${trDone?" done":""}"><span class="tg">${tr.glyph}</span><span class="tn">${esc(tr.name)}</span><span class="tp">${doneN}/${leaves.length}${trDone?" ✓":""}</span><span class="tcx">▾</span></div>
+    let html=`<div class="track-h${trDone?" done":""}"><span class="tg">${tr.glyph}</span><span class="tn">${esc(tr.name)}</span><span class="tp">${doneN}/${leaves.length}${trDone?" ✓":""}</span><button class="trst" data-rst="${tr.id}" title="Reset this whole path">⟲</button><span class="tcx">▾</span></div>
       <div class="track-blurb">${esc(tr.blurb)}</div><div class="tnodes">`;
     const cardHTML=(n,label,step)=>{
       const st=nodeStatus(n.id);
@@ -7331,6 +7391,8 @@ function renderPath(){
     const hdr=col.querySelector(".track-h");   // #82: tap the header to collapse/expand
     hdr.style.cursor="pointer";
     hdr.onclick=()=>{if(COLLAPSED.has(tr.id))COLLAPSED.delete(tr.id);else COLLAPSED.add(tr.id);col.classList.toggle("collapsed");};
+    const rb=col.querySelector("[data-rst]");   // #176: must not also collapse the track
+    if(rb)rb.onclick=e=>{e.stopPropagation();resetPath(rb.dataset.rst);};
     tree.appendChild(col);
   }
   JUST_UNLOCKED=null;
@@ -7661,6 +7723,7 @@ function completeNode(n){
   if(unlocked.length)setTimeout(()=>toast(`🔓 Unlocked ${unlocked.length} new idea${unlocked.length>1?"s":""}`),400);
 }
 $("n-back").onclick=()=>{renderPath();show("path")};   // lessons always live on the Path
+$("n-reset").onclick=()=>{if(CURN)resetStage(CURN);};   // #176
 $("n-fminus").onclick=()=>{S.font=Math.max(14,S.font-1);$("nbody").style.fontSize=S.font+"px";save()};
 $("n-fplus").onclick=()=>{S.font=Math.min(24,S.font+1);$("nbody").style.fontSize=S.font+"px";save()};
 

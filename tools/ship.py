@@ -243,6 +243,15 @@ def check_tools():
                 + ((p.stdout or "") + (p.stderr or "")).strip()[-900:])
         ok("service worker test passed")
 
+    rt = os.path.join(HERE, "reset_test.py")
+    if os.path.exists(rt):
+        p = subprocess.run([sys.executable, rt], capture_output=True, text=True,
+                           encoding="utf-8", errors="replace")
+        if p.returncode != 0:
+            die("reset controls test failed:\n"
+                + ((p.stdout or "") + (p.stderr or "")).strip()[-900:])
+        ok("reset controls test passed")
+
 
 def check_patch_date(version):
     """A patch note dated yesterday is a small lie that ships forever. I typed one already."""
