@@ -4391,8 +4391,12 @@ $("btn-ach").onclick=()=>{const g=$("achgrid");g.innerHTML="";
   $("achs").classList.add("on")};
 
 /* ---------- patch notes ---------- */
-const APP_VER="3.128";
+const APP_VER="3.129";
 const PATCHES=[
+ {v:"3.129",n:"Solid Effect, Open Mechanism",d:"5 Aug 2026",items:[
+  ["fix","YESTERDAY'S CORRECTION WENT TOO FAR AND HAS ITSELF BEEN CORRECTED. The Superiority Bias lesson was updated to say the cause is a weighting problem — that you count introspective evidence for yourself and behavioural evidence for everyone else. That explanation has been tested since and does not hold up as the main driver: people report leaning on behaviour for BOTH judgements, and the introspection measure barely predicts the effect once general reasoning ability is accounted for."],
+  ["new","SO THE LESSON NOW SEPARATES WHAT IS SETTLED FROM WHAT IS NOT, which is more useful anyway. Settled: the effect is real, very large, reproduced in preregistered work, and shows up across every bias tested rather than a favourite few — and it behaves like a gap in self-knowledge rather than a real difference in how biased people are. Open: why. A confident story about the why would be exactly the kind of thing this lesson is about."],
+  ["new","AND THE ACTION DOES NOT DEPEND ON THE MECHANISM. Do not try to fix this by explaining yourself better or asking others to explain themselves — that is the missing-information story, and it was tested and failed. Assume instead that your own read on your own bias is the one piece of evidence here you cannot trust, and go and get an outside view: someone else's, or a rule you set before you were invested, or a decision written down before the result came in."]]},
  {v:"3.128",n:"It Isn't Missing Information",d:"5 Aug 2026",items:[
   ["fix","THE SUPERIORITY BIAS LESSON WAS SUBTLY WRONG AND THE RESEARCH CAUGHT IT. It said you compare your own reasoning against other people's behaviour — true, but it frames the problem as missing information, which implies that being shown someone's reasoning would close the gap. It was tested. It does not. People went on rating themselves as less biased than others even when handed the other person's own introspective account."],
   ["new","SO IT IS A WEIGHTING PROBLEM, NOT AN INFORMATION ONE. Introspective evidence counts when judging yourself; behavioural evidence counts when judging everyone else — and that weighting does not change when the missing piece is supplied. Which kills the fix you would naturally reach for: explaining yourself more, or asking them to explain themselves, does not touch it. Both of you keep marking your own homework with the generous instrument."],

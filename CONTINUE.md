@@ -630,7 +630,13 @@ Rule 4 passes strongly: Svenson (1981) has a preregistered N=1,203 direct replic
 2021 replication. **But those establish the PHENOMENON, not the MECHANISM the lesson teaches**
 ("you see your own process and only other people's output"). Before drawing, verify the
 mechanism line — bias blind spot (Pronin, Lin & Ross 2002) and the introspection-illusion account
-(Pronin & Kugler 2007) — read, not cited from memory, replication checked. **MECHANISM VERIFIED AND IT CORRECTED THE LESSON (3.128):** Pronin & Kugler (2007) JESP —
+(Pronin & Kugler 2007) — read, not cited from memory, replication checked. **MECHANISM IS CONTESTED — 3.128 OVERSTATED IT, CORRECTED IN 3.129.** The PHENOMENON is rock
+solid (Scopelliti 2015 validated scale; 2024 preregistered replication d = -1.72). The
+introspection EXPLANATION was tested directly by JDM "Hypothesized drivers of the bias blind
+spot" and questioned: no crossover, r = .11, non-significant once cognitive sophistication is in
+the model. **Protocol lesson: run rule 4 on the MECHANISM claim separately from the phenomenon —
+they replicate independently, and a figure drawn on the mechanism would have encoded something
+its own field disputes.** Earlier note: Pronin & Kugler (2007) JESP —
 the blind spot PERSISTED even when observers were handed the other person's introspections, so it
 is a WEIGHTING asymmetry, not an information one. n1s6 rewritten (682 -> 906w). Figure still NOT
 drawn: needs the full text (this used abstract-level reporting), replication status, and class (c).
