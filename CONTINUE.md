@@ -38,7 +38,12 @@ When you finish a job: tick it, add what you learned to "Hard rules", and commit
 - Every lesson citation resolves to a real book (Attached and The Path of Purification were
   ingested 4 Aug; before that 21 citations pointed at nothing).
 - Path: **87 nodes, 13 tracks, 22 with figures**. Backup at `tools/backup/graph.pre-rebuild.json`.
-- App: 3.105 live.  `VV.all({stage:1})` passed 98/98 as of 3.102.
+- App: **3.104 is LIVE. 3.105 and 3.106 are COMMITTED BUT NOT PUSHED** — the token at
+  `C:\Users\sands\.secrets\github_token.txt` is gone and `git push` hangs on the `manager`
+  credential helper's GUI prompt (exit 124). Only Hassan can restore this. Then:
+  `python -c "import sys; sys.path.insert(0,'tools'); import ship; ship.push()"`
+  **3.106 is the blank-page fix — it is the most important thing waiting to go out.**
+- `VV.all({stage:1})` passed 98/98 as of 3.102.
 - **507 book figures live**, encrypted per book under `img/<id>.enc`.
 
 ---
@@ -137,11 +142,44 @@ derivation, breaking parent-gating, counting containers — all three caught). b
 seven malformed shapes; that was tested both directions too.
 
 ### [ ] JOB 5 — Build the mini-paths, then the figures
-The model is ready and specified in JOB 4 above — **build against that spec, do not redesign it.**
-1. Pick the genuinely large things and split them into steps. Each step is ONE thing. Small
-   because it is one idea, NEVER because content was cut — re-read THE POINT before starting.
-2. Then figures on the steps. Use the research protocol in `tools/figs_research/` — read `LOG.md`
-   first, it records what has already been rejected and why.
+**Step 1 (pick the large things) is DONE and measured. Generation has NOT started.**
+
+Build against the JOB 4 spec above — do not redesign it.
+
+**THE GAP, measured 5 Aug 2026.** 87 lessons are meant to cover 2.86M words. This is exactly
+Hassan's "three lessons cannot cover 500 pages", quantified:
+
+| book | words | chapters | lessons | words/lesson |
+|---|---|---|---|---|
+| The Laws of Human Nature | 270,396 | 232 | **0** | — |
+| The Body Keeps the Score | 172,208 | 220 | **0** | — |
+| How to Win Friends and Influence People | 79,675 | 70 | **0** | — |
+| Meditations | 72,513 | 56 | **0** | — |
+| What Everybody Is Saying | 69,836 | 156 | **0** | — |
+| The Art of Seduction | 240,398 | 312 | 3 | 80,132 |
+| The Art of Deception | 118,049 | 97 | 2 | 59,024 |
+| Dark Psychology: 3 Books in 1 | 86,782 | 87 | 2 | 43,391 |
+| The Path of Purification | 421,300 | 416 | 12 | 35,108 |
+| The 48 Laws of Power | 237,215 | 270 | 9 | 26,357 |
+
+**FIVE BOOKS ARE NOT ON THE PATH AT ALL** — no track, no lesson, not even a mention in any
+lesson's text. Verified before believing it: all 19 citation strings in graph.json match a
+library title exactly, so this is a real absence and not a title-matching artefact. Note the old
+CURRENT STATE line "every lesson citation resolves to a real book" is true but says nothing about
+the reverse, which is where the hole was.
+
+**ORDER OF WORK**
+1. The five uncovered books first — a book with no lessons is the worst version of "the library
+   makes it harder", because the Path gives no way in at all.
+2. Then the worst ratios: Seduction (80k words per lesson), Deception, Dark Psychology,
+   Purification, 48 Laws.
+3. Each large book becomes mini-paths per the JOB 4 spec: a main-path node introducing the idea,
+   with the small steps beneath it. Each step is ONE thing. Small because it is one idea, NEVER
+   because content was cut — re-read THE POINT first.
+4. Only then figures on the steps, via `tools/figs_research/` — read `LOG.md` first, it records
+   what has already been rejected and why.
+
+Generation runs through the Gemini pipeline. **Gemini may add book content only, never app code.**
 
 ---
 
@@ -187,6 +225,20 @@ The model is ready and specified in JOB 4 above — **build against that spec, d
 - **`tools/figs_research/`, `tools/backup/`, `books.json`, `graph.json`, `key.txt` are
   ship-blocked.** Do not force-add them.
 - **access.json is Hassan's config. Never touch it, never modify it.**
+- **`respondWith()` must ALWAYS resolve to a Response.** #170: the service worker ended in
+  `const net = fetch(req).catch(() => hit); return hit || net;` — with nothing cached and a
+  failing fetch that resolves to `undefined`, which does NOT fall back to the network. It cancels
+  the navigation, so the whole app paints as a blank white page with no error, and every reload
+  repeats it. A version bump is the way in: each release fills a new cache and deletes the old
+  one, and filling deliberately tolerates failures, so one flaky moment leaves the new cache
+  without index.html after the working copy was already deleted. `tools/sw_test.py` pins both and
+  is a ship gate; it reports 3 failures against the pre-fix file, which is why its passing means
+  something.
+- **A blank page is not evidence that the deployment is broken.** Check the server side first:
+  every asset returned 200, live index.html was byte-identical to the commit across five fetches,
+  and live content.enc decrypted to 24 books / 87 nodes. The fault was entirely client-side.
+- **Never tell Hassan to "clear site data" to fix a stuck app.** That wipes localStorage, which
+  holds his Path progress AND his stored key. Unregistering the service worker is enough.
 - **A test that copies the logic instead of loading it will pass forever after the code changes.**
   `minipath_test.py` lifts the real functions out of index.html by name and would fail loudly if
   they were renamed. Mutation-test any new gate before trusting it — all three deliberate breaks
