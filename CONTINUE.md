@@ -671,7 +671,11 @@ hiding competence escapes envy by moving toward pity while warmth actually works
 only lowers defensiveness when it is real (q1/m5); manufactured liking gives the feeling and none
 of the instances (d4). `counterfeit-comfort` is arguably the ORGANISING mechanism of the whole
 shadow wing, not one entry on a list. Tracks done: N/O/P/Q/R audited, M/D deepened, B all but b8.
-**TRACK E COMPLETE** (e1 3.155, e3+e5 3.163, e2+e4 3.164). **SHADOW WING COMPLETE - D, E, F, M all deepened (f2+f4 in 3.165).** **TRACK J STARTED: j4 + j8 done (3.166). Remaining: j1, j5, j6, j7, j9-j12.** Then K (10), I (8).
+**TRACK E COMPLETE** (e1 3.155, e3+e5 3.163, e2+e4 3.164). **SHADOW WING COMPLETE - D, E, F, M all deepened (f2+f4 in 3.165).** **TRACK J: j4+j8 (3.166), j5+j7 (3.167) done. Remaining: j1, j6, j9, j10, j11, j12.**
+**`counterfeit-comfort` now has EIGHT instances, SIX books, a CAUSE (j8 immediate-return bias)
+and a LITERAL GROUNDING CASE (j5 supernormal stimuli).** j5 is the one that removes the
+character-failure reading from every other instance: nobody calls a bird weak-willed for
+preferring a larger painted egg - the fake is a better key for that lock. Then K (10), I (8).
 Track J checked clean on numbers - NO "21 days" myth, worth noting.
 **`counterfeit-comfort` NOW HAS ITS CAUSE: the immediate-return bias (j8). The counterfeit pays
 NOW, the real thing pays LATER** - so the counterfeits are not random errors or a character
