@@ -17,6 +17,12 @@ When you finish a job: tick it, add what you learned to "Hard rules", and commit
   Three lessons make that worse — you can see three lessons cannot cover 500 pages. Forty small
   steps that visibly DO cover it make it climbable. Small steps because each is ONE thing, never
   because content was cut.
+- **LENGTH FOLLOWS THE IDEA. IT IS A CEILING, NOT A QUOTA.** He can sit 10-30 minutes with a
+  single stage if the idea warrants it — "u can put 1 lesson in there if needed, not squeeze
+  there 2 of them to fill time, its all about understanding." So: ONE idea per lesson, carried
+  to whatever length that idea actually needs. Never pad to reach the ceiling and never weld two
+  ideas together to use up the room. A six-minute lesson that finishes its idea is correct; a
+  thirty-minute lesson containing two ideas is not.
 - **LONG IS NOT THE PROBLEM. LEAVING HIM TO WORK IT OUT IS.** Hassan, verbatim: "if text is
   broken by lessons and is easier to understand more then even the book id rather have that —
   read for 5 hrs then read 2 hrs and spend a day figuring it out on my own how concept works
