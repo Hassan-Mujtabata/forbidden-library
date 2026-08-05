@@ -70,7 +70,7 @@ When you finish a job: tick it, add what you learned to "Hard rules", and commit
   631 duplicated, 893 numbered). The remainder are genuinely unheaded in the PDFs.
 - Every lesson citation resolves to a real book (Attached and The Path of Purification were
   ingested 4 Aug; before that 21 citations pointed at nothing).
-- Path: **109 nodes, 18 tracks, 26 with figures**. **ALL 24 BOOKS ARE COVERED** —
+- Path: **109 nodes, 18 tracks, 27 with figures**. Tracks N/O/P/Q each have one. **ALL 24 BOOKS ARE COVERED** —
   verified: zero books have no lesson citing them. Track O fully deepened (3.112);
   track P = Meditations (3.113), covered but at ~600 words/lesson — NEEDS DEEPENING to the
   track-O standard, it carries the four elements but compactly. Track N = first mini-path (Laws of
@@ -272,7 +272,8 @@ the comprehension aid he has asked for repeatedly: "that's why the figures are t
   because it looks nice is the failure this rule exists to stop.
 - **DONE SO FAR:** `pattern` -> o4 (Navarro baseline, Bond & DePaulo 2006). `tape` -> n1s2
   (Conviction Bias, Langer copier 60/94/93). `trade` -> q2 (ego threat, Amabile 1983 "Brilliant
-  but Cruel"). All three are reuses of components whose research was already done — the correct
+  but Cruel"). `lever` -> p2 (the Stoic sort; its own research note says the world lever must
+  NOT be drawn as useless, which is exactly that lesson's edge). All three are reuses of components whose research was already done — the correct
   pattern, and the only one that does not require fresh research before drawing.
 - **HOW TO FIND THE NEXT ONE:** list components already used in the graph (they carry research);
   read the component's own comment block in index.html for its claim and its stage names; then
