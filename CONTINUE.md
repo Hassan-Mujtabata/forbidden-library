@@ -637,7 +637,12 @@ Advice rewritten to procedural. n1s5 done (3.148). **TRACK N COMPLETE - ALL FIVE
 Next: the eleven older tracks A-M. **87 lessons unaudited** (not 76 - counted properly).
 **TRIAGE DONE:** scanned all 87 for absolutes/statistics/mechanism words. 31 carry an absolute,
 only 5 cite any statistic - the OLD tracks are ASSERTION-HEAVY (different risk from the new ones,
-which over-explained). Highest risk first: d3 (done 3.149), d5, g5, f1, d1, c2, c1, k3, j8, h5, a2.
+which over-explained). Highest risk first: d3 (done 3.149), d5 (done 3.150), g5, f1, d1, c2, c1, k3, j8, h5, a2.
+**NEW MANDATORY FIRST STEP FOR EVERY AUDIT - the library contradicted itself.** d5 taught the
+decoy effect, which this repo ALREADY recorded as non-replicating (a figure was killed over it).
+The knowledge was in the log and the lesson asserted the opposite for months. So: BEFORE
+researching externally, grep figs_research/LOG.md and CONTINUE.md for claims already adjudicated.
+One command, and it may settle the lesson outright.
 **THEIR FAILURE MODE IS UNCHECKED INHERITANCE** - repeating the popular version of a classic
 study. Expect Milgram, Stanford Prison, Asch, marshmallow and priming across D/E/F/G/M, all
 needing the same treatment d3 just got.
