@@ -4391,8 +4391,12 @@ $("btn-ach").onclick=()=>{const g=$("achgrid");g.innerHTML="";
   $("achs").classList.add("on")};
 
 /* ---------- patch notes ---------- */
-const APP_VER="3.126";
+const APP_VER="3.127";
 const PATCHES=[
+ {v:"3.127",n:"Two Bars, One Standard Short",d:"5 Aug 2026",items:[
+  ["new","CONFIRMATION BIAS NOW HAS ITS FIGURE, and it corrects what most people think the bias is. You are NOT refusing to look at the other side — everyone looks. Two lanes, identical evidence arriving at both. In the lane that agrees with you the bar is low and it goes straight through. In the lane that disagrees the bar is high: it gets stopped, examined properly, and a flaw is found. There is always a flaw. Everything has one."],
+  ["new","THE THIRD STAGE PUTS BOTH BARS TOGETHER, which is the whole point. Each inspection was perfectly reasonable on its own — that is exactly why this is invisible from the inside. You never see the two standards side by side, only one at a time, each feeling like ordinary care. Shown the same two studies, each side rates the one agreeing with them as the better-conducted research."],
+  ["fix","What the figure deliberately does NOT show: the two sides then moving further apart. That is a separate claim from the same famous study and it does not hold up — three later teams lost it once they measured opinions before and after instead of asking people how much they thought they had changed. Half of a famous result is dead, and drawing it would have been repeating a mistake this library has already made once."]]},
  {v:"3.126",n:"A Second Case, Every Time",d:"5 Aug 2026",items:[
   ["fix","THE TRAUMA LESSONS ARE LONGER, AND THE EXTRA LENGTH IS ALL WORKED EXAMPLES. Each one now runs a SECOND real situation from start to finish, in a setting deliberately far from the first. One mechanism plus one example transfers to that one example. Two, in different settings, is what makes the third one — the real one, the one you are actually in — recognisable."],
   ["new","AND THE SECOND CASES ARE ORDINARY ON PURPOSE. Someone snapping at a colleague over a scheduling change. A song coming on and your mood dropping for no reason you can name. Someone going quiet mid-argument and you asking twice more, which reads as persistence and is pressure applied to a system that cannot answer. Someone who has stopped applying for jobs, where every available piece of advice addresses a decision — and a decision is not what is happening."],
@@ -6527,6 +6531,43 @@ const FIGC={
       `<path class="fg-stop" d="M${RX-4} ${TOP+16} L${MX+16} ${TOP+16}" stroke="${A}" `+
       `stroke-width="2" fill="none" stroke-opacity=".55" marker-end=""/>`+
       `<text class="fg-lbl fg-stop" x="100" y="114" text-anchor="middle">${esc(p.n||"asked, and nothing comes back")}</text>`};
+  },
+
+  /* #186, from research (tools/figs_research/LOG.md cycle 7). TWO GATES AT DIFFERENT HEIGHTS,
+     which is the claim that survives. Lord, Ross & Lepper (1979) found each side rated the study
+     agreeing with them as better conducted; Taber & Lodge (2006, AJPS) measured the mechanism
+     directly by thought-listing and found people counterargued incongruent arguments while
+     uncritically accepting congruent ones. Independent labs, methods and domains.
+     WHAT IS DELIBERATELY NOT DRAWN: the two sides then moving further apart. That is attitude
+     POLARIZATION, and it is contested -- Miller 1993, Kuhn & Lao 1996 and Munro & Ditto 1997 all
+     failed to replicate it once opinions were measured pre/post instead of self-reported. Drawing
+     it would be the decoy-effect error again. The gates only.
+     The tokens are IDENTICAL on purpose: the evidence is the same, only the bar moves. */
+  sieve(p,A){
+    const st=p.stage||"agree";
+    const LX=54, RX=146, TOPY=30, BARY_LO=78, BARY_HI=52, GROUND=96;
+    const lane=(x,lab)=>`<line x1="${x}" y1="${TOPY-4}" x2="${x}" y2="${GROUND}" stroke="${A}" `+
+      `stroke-opacity=".18" stroke-dasharray="2 5"/>`+
+      `<text class="fg-lbl" x="${x}" y="${GROUND+16}" text-anchor="middle">${esc(lab)}</text>`;
+    const bar=(x,y,cls)=>`<line class="${cls||""}" x1="${x-26}" y1="${y}" x2="${x+26}" y2="${y}" `+
+      `stroke="${A}" stroke-width="3" stroke-opacity=".75"/>`;
+    // identical tokens -- same evidence, only the bar differs
+    const tok=(x,y,cls)=>`<circle class="${cls||""}" cx="${x}" cy="${y}" r="7.5" fill="${A}" `+
+      `fill-opacity=".8" stroke="none"/>`;
+    const note=t=>`<text class="fg-lbl" x="100" y="114" text-anchor="middle">${esc(t)}</text>`;
+    const base=lane(LX,p.a||"agrees with me")+lane(RX,p.b||"disagrees with me");
+    if(st==="agree")           // low bar, straight through, barely looked at
+      return {svg:base+bar(LX,BARY_LO,"fg-run2")+tok(LX,GROUND-8,"fg-tok")+
+        note(p.n||"waved through on a glance")};
+    if(st==="disagree")        // same token, bar raised, stopped and inspected
+      return {svg:base+bar(LX,BARY_LO)+tok(LX,GROUND-8)+
+        bar(RX,BARY_HI,"fg-stop")+tok(RX,BARY_HI-16,"fg-stop")+
+        note(p.n||"stopped, and a flaw is found")};
+    // both bars visible together: the asymmetry is the finding, not either bar alone
+    return {svg:base+bar(LX,BARY_LO)+tok(LX,GROUND-8)+bar(RX,BARY_HI)+tok(RX,BARY_HI-16)+
+      `<line class="fg-mark2" x1="${LX+28}" y1="${BARY_LO}" x2="${RX-28}" y2="${BARY_HI}" `+
+      `stroke="${A}" stroke-opacity=".35" stroke-dasharray="3 4"/>`+
+      note(p.n||"same evidence, two standards")};
   },
 
   pattern(p,A){

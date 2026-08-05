@@ -68,6 +68,8 @@ FIG_COMPONENTS = {
     "strands",
     # #184: two routes from one event; the verbal one goes offline while the alarm gets louder
     "routes",
+    # #186: two gates at different heights -- same evidence, uneven scrutiny
+    "sieve",
 }
 
 

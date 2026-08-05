@@ -77,8 +77,7 @@ When you finish a job: tick it, add what you learned to "Hard rules", and commit
   631 duplicated, 893 numbered). The remainder are genuinely unheaded in the PDFs.
 - Every lesson citation resolves to a real book (Attached and The Path of Purification were
   ingested 4 Aug; before that 21 citations pointed at nothing).
-- Path: **109 nodes, 18 tracks, 28 with figures**. **All five new tracks (N/O/P/Q/R)
-  now have one.** **ALL 24 BOOKS ARE COVERED** —
+- Path: **109 nodes, 18 tracks, 29 with figures**. All five new tracks have at least one. **ALL 24 BOOKS ARE COVERED** —
   verified: zero books have no lesson citing them. Track O fully deepened (3.112);
   track P = Meditations (3.113), covered but at ~600 words/lesson — NEEDS DEEPENING to the
   track-O standard, it carries the four elements but compactly. Track N = first mini-path (Laws of
@@ -592,7 +591,11 @@ no named wrong belief to remove should not be built. "Candidate research" is whe
 a citation — it still has to be read in full and independently corroborated (rules 2 and 3), and
 if it fails replication it gets killed before drawing (rule 4), exactly as the decoy effect did.
 
-**Cycle 1 — `n1s1` Confirmation Bias.** STARTED 5 Aug, NOT DRAWN. Full notes in
+**Cycle 1 — `n1s1` Confirmation Bias. [x] DONE, shipped 3.127** as the new `sieve` component.
+CLASS (c) WAS NOT OBTAINED — reddit blocks the crawler and no three independent first-person
+accounts surfaced, so the `feel` lines carry MEASURED results instead of an invented lived
+voice, and the claim was weakened to what the papers support. That is rule 1b applied, and it
+is the model for what to do when a source class is unreachable. Original notes: Full notes in
 `figs_research/LOG.md` cycle 7. **Key finding, do not lose it: Lord, Ross & Lepper (1979) reports
 TWO results and only one survives.** BIASED ASSIMILATION (each side rated the study agreeing with
 them as better conducted) is the half this figure needs. ATTITUDE POLARIZATION (mixed evidence
