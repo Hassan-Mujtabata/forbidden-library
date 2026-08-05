@@ -4391,8 +4391,12 @@ $("btn-ach").onclick=()=>{const g=$("achgrid");g.innerHTML="";
   $("achs").classList.add("on")};
 
 /* ---------- patch notes ---------- */
-const APP_VER="3.131";
+const APP_VER="3.132";
 const PATCHES=[
+ {v:"3.132",n:"Four States, One Axis",d:"5 Aug 2026",items:[
+  ["new","THE THREE RESPONSES NOW HAVE A FIGURE, drawn on the axis that actually governs them: distance. A threat far off gets freezing — and freezing is drawn as loaded rather than idle, because that is what it is: flight-or-fight put on hold, options still open. As the threat closes the same system produces flight, which in a room you cannot leave becomes distancing. At contact, fight."],
+  ["new","WHICH GIVES YOU THE USEFUL CONSEQUENCE. If you are seeing fight, the threat has been closing for a while and you were already shown the other two. The argument is not where the problem is; it is where the problem surfaced, and both earlier signals were cheaper to answer."],
+  ["new","THE FOURTH STATE HANGS OFF THE LINE RATHER THAN CONTINUING IT. When escape is gone and active defence has failed, the system can drop into collapse. That is not more fear — it is a different branch, and it is the state most often mistaken for compliance or for not minding. It is also the same one behind the dogs that would not leave the open cage, which is why these two tracks are describing one machine."]]},
  {v:"3.131",n:"It Tracks Distance, Not Cost",d:"5 Aug 2026",items:[
   ["fix","THE FREEZE-FLIGHT-FIGHT LESSON HAD THE RIGHT ORDER AND THE WRONG REASON. It said the sequence runs cheapest-move-first: freezing is nearly free, fleeing costs energy, fighting risks injury. The research says otherwise — what selects the response is how CLOSE the threat is and whether escape is still available. Distant threat gets freezing, because movement is what gets you detected and you still have options. As it closes, flight. At contact, fight. It tracks distance, not a budget."],
   ["new","AND THAT CHANGES WHAT THE SIGNAL MEANS. If freezing were just the cheap first option it would tell you only that something registered. Because it is the DISTANT-threat response, it tells you this person has detected a problem and still believes there is room to manoeuvre — assessing, not resigned. That is precisely the moment a question can still change the outcome, and precisely the moment people read as the conversation going fine."],
@@ -6624,6 +6628,44 @@ const FIGC={
       `<line class="fg-stop" x1="${X0-6}" y1="${YT}" x2="${X0+N*DX+6}" y2="${YT}" stroke="${A}" `+
       `stroke-width="2" stroke-opacity=".5"/>`+
       note(p.n||"and it cannot be true of nine in ten")};
+  },
+
+  /* #189, from research (LOG.md cycle 9). THE AXIS IS DISTANCE, NOT COST. The planned version
+     drew three steps of rising cost and was scrapped: the defence-cascade literature (Fanselow's
+     predatory-imminence work; "Fear and the Defense Cascade", Harv Rev Psychiatry; "Freeze for
+     action", Phil Trans R Soc B 372:20160206) selects the response by how CLOSE the threat is and
+     whether escape remains — not by what each response costs.
+     Freeze is drawn as LOADED, not idle: in that literature it is flight-or-fight put on hold.
+     The fourth state hangs off the side rather than continuing the line, because collapse is not
+     "more fear" — it is a different branch, taken when escape is gone and active defence failed.
+     No numbers: the thresholds are ordinal in the source, so no distances are marked. */
+  imminence(p,A){
+    const st=p.stage||"far";
+    const X0=26, X1=178, Y=62, DROP=104;
+    const at={far:0.14, near:0.5, contact:0.88};
+    const axis=`<line x1="${X0}" y1="${Y}" x2="${X1}" y2="${Y}" stroke="${A}" stroke-opacity=".3"/>`+
+      `<text class="fg-lbl" x="${X0}" y="${Y+20}" text-anchor="start">${esc(p.far||"far")}</text>`+
+      `<text class="fg-lbl" x="${X1}" y="${Y+20}" text-anchor="end">${esc(p.near||"on you")}</text>`+
+      `<text class="fg-lbl" x="${(X0+X1)/2}" y="${Y+34}" text-anchor="middle" opacity=".7">${esc(p.ax||"how close it is")}</text>`;
+    const you=`<circle cx="${X0-8}" cy="${Y}" r="5" fill="${A}" fill-opacity=".35" stroke="none"/>`;
+    const threat=f=>`<circle class="fg-venture" cx="${(X0+(X1-X0)*f).toFixed(1)}" cy="${Y}" r="7" `+
+      `fill="${A}" fill-opacity=".85" stroke="none"/>`;
+    const resp=(f,lab,cls)=>`<text class="fg-lbl ${cls||""}" x="${(X0+(X1-X0)*f).toFixed(1)}" `+
+      `y="${Y-16}" text-anchor="middle">${esc(lab)}</text>`;
+    if(st==="far")      // distant: freeze, and it is loaded rather than idle
+      return {svg:axis+you+threat(at.far)+resp(at.far,p.r1||"freeze — held ready","fg-tok")};
+    if(st==="near")
+      return {svg:axis+you+threat(at.near)+resp(at.far,p.r1||"freeze",)+
+        resp(at.near,p.r2||"flight","fg-tok")};
+    if(st==="contact")
+      return {svg:axis+you+threat(at.contact)+resp(at.far,p.r1||"freeze")+resp(at.near,p.r2||"flight")+
+        resp(at.contact,p.r3||"fight","fg-tok")};
+    // the branch: escape gone, active defence failed -> collapse. Hangs off, does not continue.
+    return {svg:axis+you+threat(at.contact)+resp(at.far,p.r1||"freeze")+resp(at.near,p.r2||"flight")+
+      resp(at.contact,p.r3||"fight")+
+      `<path class="fg-stop" d="M${(X0+(X1-X0)*at.contact).toFixed(1)} ${Y+10} L${(X0+(X1-X0)*at.contact).toFixed(1)} ${DROP-12}" `+
+      `stroke="${A}" stroke-width="2" stroke-opacity=".5" stroke-dasharray="3 4" fill="none"/>`+
+      `<text class="fg-lbl fg-stop" x="${(X0+(X1-X0)*at.contact).toFixed(1)}" y="${DROP}" text-anchor="middle">${esc(p.r4||"collapse — no escape left")}</text>`};
   },
 
   pattern(p,A){

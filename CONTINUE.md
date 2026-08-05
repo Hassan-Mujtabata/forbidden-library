@@ -77,7 +77,7 @@ When you finish a job: tick it, add what you learned to "Hard rules", and commit
   631 duplicated, 893 numbered). The remainder are genuinely unheaded in the PDFs.
 - Every lesson citation resolves to a real book (Attached and The Path of Purification were
   ingested 4 Aug; before that 21 citations pointed at nothing).
-- Path: **109 nodes, 18 tracks, 30 with figures**. All five new tracks have at least one. **ALL 24 BOOKS ARE COVERED** —
+- Path: **109 nodes, 18 tracks, 31 with figures**. All five new tracks have at least one. **ALL 24 BOOKS ARE COVERED** —
   verified: zero books have no lesson citing them. Track O fully deepened (3.112);
   track P = Meditations (3.113), covered but at ~600 words/lesson — NEEDS DEEPENING to the
   track-O standard, it carries the four elements but compactly. Track N = first mini-path (Laws of
@@ -653,7 +653,8 @@ read as being about other people.
   median. Check the replication literature before drawing; parts of this area have not held.
 - Component: new (inside view vs outside view).
 
-**Cycle 3 — `o2` Freeze, Flight, Fight. LESSON CORRECTED 3.131, FIGURE NOT DRAWN.** Order
+**Cycle 3 — `o2` Freeze, Flight, Fight. [x] DONE — lesson corrected 3.131, figure shipped
+3.132** as the new `imminence` component on the distance axis. Order
 corroborated (defence cascade / Fanselow). But the selector is THREAT IMMINENCE, not cost — so
 the planned rising-cost drawing is on the wrong axis and `ladder` does not fit. Redesign around
 distance, with a separate branch for inescapable (which links to r4). See LOG.md cycle 9. The order is the whole lesson and the order is what

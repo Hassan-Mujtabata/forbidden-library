@@ -72,6 +72,8 @@ FIG_COMPONENTS = {
     "sieve",
     # #188: where people actually sit vs where they place themselves, against a median
     "selfrank",
+    # #189: defensive response selected by how close the threat is, plus the collapse branch
+    "imminence",
 }
 
 
