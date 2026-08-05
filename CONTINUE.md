@@ -283,6 +283,25 @@ the comprehension aid he has asked for repeatedly: "that's why the figures are t
 - **REJECTED, and why:** `crowd` for n1s4 (The Group Bias). It draws social proof as DENSITY,
   and that lesson's claim is positions correlating across unrelated issues. Not the same claim,
   so not shipped. Record rejections here — the log is what stops the next session re-deriving it.
+- **TRACK R HAS NO FIGURE AND NO EXISTING COMPONENT FITS. Checked, not assumed.** Every
+  researched component was read against r1-r4's claims and each encodes something else:
+  `frames` = "a wobbly mind sees the story, a steady mind sees the frames" (meditation insight —
+  and note the VALENCE IS INVERTED: there, discreteness is the truth being revealed; in r2 it is
+  a processing failure, so reusing it would teach that fragmentation is insight);
+  `closure` = WYSIATI coherence; `episode` = peak-end / the cold-hand study; `threshold` = a
+  visible break at an unmarked line; `suffuse` = jhāna saturation; `nearer` = hotel-towel social
+  proof. Adjacent is not the same claim. Do not force one of these.
+
+- **BUILD THIS INSTEAD — a new component for r3, and the research is already done because it is
+  the book's own finding.** Van der Kolk's scans show Broca's area going offline during a
+  flashback while the alarm pathway stays lit. Two routes from one event: the fast low road to
+  the amygdala, and the high road to the frontal lobes/speech. Stage 1 — ordinary event, both
+  routes carry, the verbal one produces a description. Stage 2 — overwhelming event, the alarm
+  route lights harder AND the verbal route goes dark. Stage 3 — the practical consequence: a
+  question addressed to the dark route gets nothing, which is not refusal. No numbers on it; the
+  paper's effect sizes are not in hand, and inventing ticks is the failure `trade` avoided.
+  Remember: add the name to FIG_COMPONENTS in build.py at the same time (the mirror rule), or a
+  spec using it validates and then draws nothing.
 - **`c` is the component key — a label passed as `c` overwrites the component name. Use `c3`.**
 - Caption cap 220 chars, `feel` line cap 200, max 5 stages, `place` must index into `bridge`.
   build.py enforces all of these; the 200-char `feel` cap already caught one overrun.
