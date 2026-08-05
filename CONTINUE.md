@@ -230,8 +230,10 @@ R van der Kolk (3.116), plus N Laws of Human Nature (3.109).
 **WHAT REMAINS IN JOB 5 — depth, then figures.** Coverage is not the same as done:
 - **Deepened so far:** track O (`deepen.py` o1 -> 1,519w, `deepen2.py` o2-o4 -> ~850w) and
   track Q (`deepen3.py`, 4 lessons ~500 -> ~870w).
-- **Still thin:** track N (7 nodes, ~200-400w), track P (3 lessons ~600w), track R (4 lessons
-  ~460w).
+- **Partly deepened:** track N (`deepen4.py`) — was 185-276w/lesson, now 334-427w. The FAILURE
+  + TELL additions are in; it still needs roughly another doubling (mechanism worked further
+  down, a second case, the edge) to reach the o1 standard. It is the thinnest track by far.
+- **Still thin:** track P (3 lessons ~600w), track R (4 lessons ~460w).
 - **What deepening should ADD** (deepen3.py is the model — it appends rather than rewrites):
   the second case that goes WRONG, the failure the reader will actually produce, and the tell
   that they are producing it. Agreeing with a mechanism is easy; the gap is always execution.
