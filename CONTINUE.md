@@ -611,6 +611,11 @@ drawing and no class (c). Roughly: one audit per lesson, batched by track, corre
 Figures resume afterwards, built on corrected lessons rather than on the originals — which is
 also why building more figures first would have been wasted work.
 
+**AUDIT PROGRESS: o1 done (3.136) - bounded against the deception literature; the honesty
+framing and any lie-detection promise are withdrawn, mechanism intact. Notably the audit made the
+track MORE internally consistent: o3/o4 were already built on comfort/discomfort, so o1 was the
+outlier. Next: o3, then track R.**
+
 **AUDIT ORDER** — by how load-bearing and how confidently asserted: O (4) → R (4) → Q (2 left)
 → P (3) → N (1 left), then the eleven older tracks A–M, which have never been audited at all and
 are the largest unknown in the library.
