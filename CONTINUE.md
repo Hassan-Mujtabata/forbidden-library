@@ -70,7 +70,7 @@ When you finish a job: tick it, add what you learned to "Hard rules", and commit
   631 duplicated, 893 numbered). The remainder are genuinely unheaded in the PDFs.
 - Every lesson citation resolves to a real book (Attached and The Path of Purification were
   ingested 4 Aug; before that 21 citations pointed at nothing).
-- Path: **101 nodes, 16 tracks, 23 with figures**. Track O fully deepened (3.112);
+- Path: **105 nodes, 17 tracks, 23 with figures**. Track O fully deepened (3.112);
   track P = Meditations (3.113), covered but at ~600 words/lesson — NEEDS DEEPENING to the
   track-O standard, it carries the four elements but compactly. Track N = first mini-path (Laws of
   Human Nature). Track O = Reading the Body (Navarro), 4 lessons, one `pattern` figure. Backup at `tools/backup/graph.pre-rebuild.json`.
@@ -220,7 +220,13 @@ missing any of those is leaving homework. Length follows the idea — o1 needed 
 o2-o4 needed ~850 each. Do not pad to a budget and do not merge two ideas to fill one.
 
 **STILL UNCOVERED (no lesson, no track, no mention):**
-The Body Keeps the Score (172,208w) · How to Win Friends (79,675w).
+The Body Keeps the Score (172,208w) — THE LAST ONE.
+(Navarro -> track O 3.110. Meditations -> track P 3.113. Carnegie -> track Q 3.115.)
+
+**Track Q is the model for a list-shaped book.** Carnegie's 30 numbered principles were NOT
+mirrored as 30 steps — they reduce to 4 mechanisms, and the track teaches those with the
+principles as worked instances inside them. 30 rules is 30 things to remember and generates no
+31st; 4 mechanisms generate all 30. Apply the same reduction to 48 Laws and 30 Covert Tactics.
 (What Everybody Is Saying -> track O in 3.110. Meditations -> track P in 3.113.)
 
 **COVERED BUT STILL AT SUMMARY DEPTH — needs the same treatment as track O:**
