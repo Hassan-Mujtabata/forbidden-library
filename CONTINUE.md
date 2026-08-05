@@ -662,8 +662,9 @@ specialised lesson in the library, lowest priority).**
 THING."** Dullness feels calmer than stability (b4); worry feels like preparation (p2); a fluent
 account of failure feels like learning (n1s5); certainty feels like having checked (n1s2). Four
 books, one mechanism, previously taught as four unrelated facts. **Add `counterfeit-comfort` to
-the concept-spine mechanism list.** Likely also covers rapport-that-is-matching (m2) and
-enlistment-that-feels-like-agreement (d3) - check while deepening.
+the concept-spine mechanism list.** **CONFIRMED across FIVE lessons in FOUR books** (b4 dullness, p2 worry, n1s5 blame, n1s2
+conviction, d4 liking - the last verified in batch 7). Still to check: d3
+enlistment-as-agreement. **TRACK D: d1 (3.156), d3 (3.149), d2+d4 (3.161) done; d6 remains.**
 **METHOD FOR EXPERIENTIAL LESSONS (no external research possible): GREP books.json for what the
 source actually says about the failure mode.** For b5/b6 this produced Brahm on the checking
 questions being the hindrance of doubt, and Brasington on 'indistractability' vs the furrowed-brow
