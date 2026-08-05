@@ -648,7 +648,15 @@ claim-dense. MEDIAN LENGTH 201 WORDS.** The old tracks are STUBS, not errors. De
 external research (the material is in the books) and is therefore both the bigger share of the
 problem and the cheaper fix, and it batches by track.
 **DEEPENING: TRACK M COMPLETE** - m1, m3 (3.152), m2, m5 (3.153), m4, m6 (3.154). 160-248w ->
-408-536w. Next batch: track B (b3, b5, b6, b9), or the last claim-dense lesson c3 (**e1 done 3.155,
+408-536w. **ALL THREE CLAIM-DENSE LESSONS DONE (d1 3.156, e1 3.155, c3 3.157).** Next: track B deepening
+batch (b3, b5, b6, b9).
+**NEW CHECK ADDED - RULE 7 APPLIES TO LESSON TEXT, NOT JUST FIGURES.** c3 asserted a 5%/95%
+attention split that appears NOWHERE in the three meditation books (verified by searching
+books.json - the only matches in the library are from Kahneman). Invented precision inside a
+lesson is worse than a wrong number: a beginner tries to HIT the ratio, which is itself the
+clumsy scaffolding the lesson warns against. Scan run: 6 lessons carry numeric claims (d1, d5,
+c3, m1, o4, q4); all but q4's are now traceable to sources in the log. **Any number added from
+here must be traceable.** Old batch note: track B (b3, b5, b6, b9) (**e1 done 3.155,
 d1 done 3.156**). d1 needed NO external research - the `tape` component already held Langer's
 copier numbers AND the boundary condition. Third internal-supply hit after m1 and m5.
 **d1 IS THE SHADOW WING'S HUB and now states the wing's real shape: the exposure is not that you
