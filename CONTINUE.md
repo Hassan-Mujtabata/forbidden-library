@@ -618,7 +618,12 @@ self-touch a more reliable stress indicator than facial expression); only my nec
 was unverified. Track O fully audited. Track R started: r1 done (3.138) - I had conflated autonomic reactivity
 (supported) with hormonal tone (contested; resting cortisol is meta-analytically LOWER in PTSD,
 the HPA paradox). Lesson now separates them and carries a genre warning about tidy single
-mechanisms. r2 done (3.139) - the low-road/high-road speed story is contested (Pessoa & Adolphs); the
+mechanisms. r2 (3.139) and r4 (3.140) done - r4 was the largest correction yet: Maier & Seligman (2016)
+RETRACTED their own mechanism, passivity is the unlearned DEFAULT and what is learned is CONTROL.
+Track R fully audited. Next: track Q (2 left), then P, then N, then the eleven never-audited
+tracks A-M.
+**Note across all five audits: the ACTION in each lesson survived even where the MECHANISM did
+not** - which is why auditing mechanism sentences is safe to do quickly. Earlier: r2 (3.139) - the low-road/high-road speed story is contested (Pessoa & Adolphs); the
 observation survives, the wiring does not. Next: r4.
 **THE AUDIT PATTERN IS NOW FOUR FOR FOUR AND SHOULD BE USED AS A METHOD: go straight at the
 MECHANISM sentence.** Every mechanism-level claim audited has been overstated (neck/vagus,
