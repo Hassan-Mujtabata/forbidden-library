@@ -647,7 +647,12 @@ One command, and it may settle the lesson outright.
 claim-dense. MEDIAN LENGTH 201 WORDS.** The old tracks are STUBS, not errors. Deepening needs no
 external research (the material is in the books) and is therefore both the bigger share of the
 problem and the cheaper fix, and it batches by track.
-**DEEPENING STARTED: track M, m1 + m3 done (3.152). Remaining in M: m2, m4, m5, m6.**
+**DEEPENING: track M - m1, m3 (3.152), m2, m5 (3.153) done. Remaining in M: m4, m6.**
+**KEY PATTERN FROM BATCHES 1-2: the old tracks are thin partly because the EVIDENCE FOR THEIR
+CLAIMS LIVES IN OTHER TRACKS researched later.** m1 needed numbers the `spotlight` component
+already held; m5's mechanism is q1's verified listening finding; m2 is n1s4 from the other side;
+m3 contradicted o1. So deepening is largely CONNECTING, not writing new material - cheap, safe
+(invents no mechanisms), and it builds the concept spine as a by-product.
 The internal cross-check paid off twice in one batch - m1 was missing numbers this repo already
 owned (the `spotlight` component's research), and m3 CONTRADICTED audit 1's conclusion that single
 nonverbal cues are timestamps not translations. **The old tracks were written independently and
