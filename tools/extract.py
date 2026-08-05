@@ -43,7 +43,7 @@ BOOKS = [
     dict(id="beautiful", file="How To Have A Beautiful Mind.pdf",
          title="How to Have a Beautiful Mind", author="Edward de Bono",
          wing="light", glyph="\U0001f48e", accent="#9b59b6"),
-    dict(id="tmi",       file="The Mind Illuminated - A Complete Meditation Guide Integrating Buddhist Wisdom and Brain Science ( PDFDrive.com ) (1).pdf",
+    dict(id="tmi",       file="The Mind Illuminated - A Complete Meditation Guide Integrating Buddhist Wisdom and Brain Science ( PDFDrive.com ).pdf",
          title="The Mind Illuminated", author="Culadasa (John Yates)",
          wing="light", glyph="\U0001f319", accent="#34495e"),
     dict(id="rightconc", file="right concentration a practical guide to the jhanas by leigh brasington.pdf",
@@ -173,13 +173,25 @@ def extract(meta):
 
     episodes = []
     cur_title, cur_paras, words = None, [], 0
+    # #165: a chapter longer than the 1400-word budget gets split, and every slice after the first
+    # had no heading of its own — so it fell through to "Episode 137". That is why 994 chapters
+    # across the library were unnamed and the reader was unnavigable: Laws of Human Nature was 97%
+    # anonymous purely because its chapters are long. Carry the real chapter name across the split
+    # and number the parts instead.
+    last_head, part = None, 0
 
     def flush():
-        nonlocal cur_title, cur_paras, words
+        nonlocal cur_title, cur_paras, words, last_head, part
         if cur_paras:
-            title = cur_title or f"Episode {len(episodes) + 1}"
-            if title.isupper():
-                title = title.title()
+            if cur_title:
+                head = cur_title.title() if cur_title.isupper() else cur_title
+                last_head, part = head, 1
+                title = head
+            elif last_head:
+                part += 1
+                title = f"{last_head} ({part})"
+            else:
+                title = f"Episode {len(episodes) + 1}"
             episodes.append({"t": title, "p": cur_paras})
         cur_title, cur_paras, words = None, [], 0
 

@@ -4358,8 +4358,12 @@ $("btn-ach").onclick=()=>{const g=$("achgrid");g.innerHTML="";
   $("achs").classList.add("on")};
 
 /* ---------- patch notes ---------- */
-const APP_VER="3.100";
+const APP_VER="3.101";
 const PATCHES=[
+ {v:"3.101",n:"The Library Has Chapter Names Again",d:"5 Aug 2026",items:[
+  ["fix","YOUR BOOKS WERE MOSTLY UNNAVIGABLE AND IT WAS ONE LINE. 994 of 3,489 chapters were called “Episode 137”. The Laws of Human Nature was 97% anonymous — 190 chapters, 184 of them nameless. Thinking, Fast and Slow was 92%. You could not skim, could not go back to a passage, could not tell what any chapter held without reading it. Now it is 99 of 3,489, and the ones left are genuinely unheaded in the PDF."],
+  ["fix","The cause: chapters longer than about 1,400 words get split, and every slice after the first had no heading of its own, so it fell through to a numbered placeholder. Long-chaptered books came off worst, which is why Greene and Kahneman were nearly all anonymous. The real chapter name now carries across the split with a part number."],
+  ["fix","Verified against the previous library before shipping: 24 books, 3,489 chapters, and 2,859,612 words — identical to the character. Nothing was rewritten or dropped to achieve this; the names were always in the PDFs and were being thrown away."]]},
  {v:"3.100",n:"Two Books That Were Only Ever Cited",d:"4 Aug 2026",items:[
   ["new","TWO BOOKS JOIN THE LIBRARY, and they were both already being quoted at you. Every lesson in the Attached track cited a book that had never been added — nine citations pointing at nothing. The Path of Purification was the same: twelve citations, and the PDF had been sitting in the folder unread the whole time. Both are in now, and every source reference in the vault resolves to a real book for the first time."],
   ["new","Attached brings 101 chapters, The Path of Purification 579. The library is 24 books. The download is a little larger as a result — 6.1 MB instead of 5.2."],
