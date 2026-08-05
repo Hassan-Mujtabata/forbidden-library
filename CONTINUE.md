@@ -656,7 +656,12 @@ books.json - the only matches in the library are from Kahneman). Invented precis
 lesson is worse than a wrong number: a beginner tries to HIT the ratio, which is itself the
 clumsy scaffolding the lesson warns against. Scan run: 6 lessons carry numeric claims (d1, d5,
 c3, m1, o4, q4); all but q4's are now traceable to sources in the log. **Any number added from
-here must be traceable.** Old batch note: track B (b3, b5, b6, b9) (**e1 done 3.155,
+here must be traceable.** **TRACK B STARTED: b3, b9 done (3.158). Remaining: b5, b6, and b1/b4/b8 untouched.**
+Track B checked clean on invented numbers AND on breath-control language - it is thin, not wrong.
+**CROSS-WING LINKS NOW APPEARING** (Stoic worry mechanism -> Buddhist restlessness hindrance;
+implementation intentions -> jhana mastery in resolving). Earlier links were within a wing; the
+concept spine is forming across the whole library as a by-product of the audit. Old batch note:
+track B (b5, b6) (**e1 done 3.155,
 d1 done 3.156**). d1 needed NO external research - the `tape` component already held Langer's
 copier numbers AND the boundary condition. Third internal-supply hit after m1 and m5.
 **d1 IS THE SHADOW WING'S HUB and now states the wing's real shape: the exposure is not that you
