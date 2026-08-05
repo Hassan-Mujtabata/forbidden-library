@@ -453,10 +453,35 @@ is another silo to reconcile later.
 starting a cycle. These rules are not ceremony — every one of them exists because a figure was
 shipped or nearly shipped that was wrong.
 
-**1. RESEARCH IS MANDATORY AND IT IS NOT JUST THE BOOKS.** Hassan: "please make sure it does
-research properly... this book is just basic concept... it needs to even do online research."
-The library gives you the concept. What it does not give you is the felt detail, the numbers, or
-whether the claim survived replication. Go and find those.
+**1. RESEARCH IS MANDATORY, AND IT MUST SPAN FOUR SOURCE CLASSES.** Hassan: "please make sure it
+does research properly... this book is just basic concept... it needs to even do online
+research", and later: research "on forums and research papers and other sources like that". A
+cycle that only used one class is not finished. The four:
+  a. **The library books** — the concept, and the fidelity check. A figure must not contradict
+     any book in the library, not just the one it belongs to. (The breathing pacer passed its own
+     lesson and contradicted all three meditation books.)
+  b. **Peer-reviewed papers, read in full** — the numbers, the method, the controls, and whether
+     it replicated. Never a summary. See rules 3 and 4.
+  c. **FORUMS AND FIRST-PERSON ACCOUNTS** — r/streamentry, Dharma Overground, StackExchange,
+     Hacker News, long-form comment threads, Goodreads review threads. This class supplies what
+     papers structurally cannot: what the thing actually FEELS like from inside, the words people
+     reach for, and the error they really make rather than the error the author assumed. A figure
+     built without it is accurate and inert — it will not be recognised in the moment, which is
+     the entire job.
+  d. **Practitioner / teacher prose** — the bridge between (b) and (c).
+
+**1a. THE CORROBORATION RULE BITES HARDEST ON CLASS (c).** Hassan: "someone can just put random
+stuff for trolling so 1 isnt really enough." A single forum post is worth nothing — it may be a
+troll, an outlier, or someone repeating the book back. Require **at least three independent
+people describing the same experience in their own words**, ideally across different communities.
+Independence is the test: three replies in one thread agreeing with each other is one source.
+And check the account is not just paraphrasing the book you are already citing — that is
+circular, and it is the same trap as leighb.com being Brasington's own site.
+
+**1b. RECORD WHAT THE CRAWLER CANNOT REACH.** reddit.com returns HTTP 400 to the crawler, so
+cycle 1's evidence base has no raw beginner voice and SAYS SO. If class (c) is unreachable for a
+topic, that is a stated limitation on the figure, not something to paper over — and it is a
+reason to weaken what the figure claims, not to claim it anyway.
 
 **2. ONE SOURCE IS NEVER ENOUGH — CORROBORATE ACROSS INDEPENDENT ONES.** Hassan: "someone can
 just put random stuff for trolling so 1 isnt really enough." This has already caught a real
