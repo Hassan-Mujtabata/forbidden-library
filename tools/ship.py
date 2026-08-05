@@ -231,6 +231,18 @@ def check_tools():
                 + ((p.stdout or "") + (p.stderr or "")).strip()[-900:])
         ok("mini-path model test passed")
 
+    # #170: the service worker can fail the navigation outright and paint a blank page. It is the
+    # worst failure mode the app has -- indistinguishable from "everything is gone" -- and it is
+    # invisible to node --check, because the code is valid, it just resolves undefined.
+    swt = os.path.join(HERE, "sw_test.py")
+    if os.path.exists(swt):
+        p = subprocess.run([sys.executable, swt], capture_output=True, text=True,
+                           encoding="utf-8", errors="replace")
+        if p.returncode != 0:
+            die("service worker test failed:\n"
+                + ((p.stdout or "") + (p.stderr or "")).strip()[-900:])
+        ok("service worker test passed")
+
 
 def check_patch_date(version):
     """A patch note dated yesterday is a small lie that ships forever. I typed one already."""

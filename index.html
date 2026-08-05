@@ -4375,8 +4375,12 @@ $("btn-ach").onclick=()=>{const g=$("achgrid");g.innerHTML="";
   $("achs").classList.add("on")};
 
 /* ---------- patch notes ---------- */
-const APP_VER="3.105";
+const APP_VER="3.106";
 const PATCHES=[
+ {v:"3.106",n:"The Blank Page",d:"5 Aug 2026",items:[
+  ["fix","THE APP COULD OPEN AS A COMPLETELY BLANK PAGE, AND STAY THAT WAY. The offline layer is required to hand the browser a response for every request. In one case it handed back nothing at all — when it had no cached copy of a file AND the network request for it failed. Handing back nothing does not make the browser go and fetch the page itself; it cancels the navigation. You get a white screen with no error, no message and nothing to click, and every reload takes the same route, so it does not recover on its own."],
+  ["fix","The way in was a version upgrade. Each release names a fresh offline store, fills it, and deletes the old one. Filling it deliberately tolerates failures, so that one unreachable icon cannot block an upgrade — but that means a bad moment on the network can leave the new store without the app itself in it, and the old working store was already thrown away. Now the previous store is kept until the new one is confirmed to hold the app, a failed page load falls back to any copy in any store, and every path is guaranteed to return something."],
+  ["fix","Both faults are now pinned by a test that runs the real offline layer with the network forced to fail. Run against the previous version it reports three failures, which is the only reason its passing means anything."]]},
  {v:"3.105",n:"Mini-Paths — The Machinery",d:"5 Aug 2026",items:[
   ["new","THE PATH CAN NOW HOLD STAIRS INSIDE A STEP. Until today every lesson sat on one flat list, so anything genuinely large had to be either one intimidating block or a row of near-identical numbered pieces. A lesson can now own an ordered set of smaller steps: the lesson introduces the idea, the steps are the short single-thing climbs underneath it, and the steps are always visible rather than hidden behind a toggle — being able to SEE that eight short steps cover the whole thing is the entire point, and hiding them would rebuild the wall."],
   ["new","Nothing on your Path looks different yet, and that is deliberate. This release is the machinery only — no lesson has been split into steps. Building the shape first means the content gets written once against a settled model instead of being written, reshaped and written again."],
