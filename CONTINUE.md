@@ -611,7 +611,11 @@ drawing and no class (c). Roughly: one audit per lesson, batched by track, corre
 Figures resume afterwards, built on corrected lessons rather than on the originals — which is
 also why building more figures first would have been wasted work.
 
-**AUDIT PROGRESS: o1 done (3.136) - bounded against the deception literature; the honesty
+**AUDIT PROGRESS: o1 (3.136) and o3 (3.137) done. o3 was the first audit that MOSTLY CONFIRMED
+a lesson - record that, because six corrections in a row could bias a session into assuming
+everything is wrong. Its core upgraded from assertion to measurement (cortisol RCT n=159; facial
+self-touch a more reliable stress indicator than facial expression); only my neck/vagus mechanism
+was unverified. Track O is now fully audited. Next: track R. Earlier note: o1 (3.136) - bounded against the deception literature; the honesty
 framing and any lie-detection promise are withdrawn, mechanism intact. Notably the audit made the
 track MORE internally consistent: o3/o4 were already built on comfort/discomfort, so o1 was the
 outlier. Next: o3, then track R.**
