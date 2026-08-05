@@ -627,8 +627,12 @@ invalidated the ACTION, not just the mechanism. The lesson instructed perspectiv
 experiments show does not improve accuracy and can raise confidence without it; rewritten around
 perspective-GETTING (asking). Track P started: p1 done (3.143) - the "always a judgement step" claim is the strong Lazarus
 side of an unresolved debate; bounded to a SCOPE claim, with the practical payoff that it tells
-the reader when the tool does NOT apply. Next: p2, p3, then N, then the eleven never-audited
+the reader when the tool does NOT apply. p2 done (3.144) - CONFIRMED, and the audit supplied the missing mechanism (worry is reinforced
+because feared things mostly do not happen; and verbal worry is less vivid than imagery, so it
+functions as avoidance). Retro-justifies p3. Next: p3, then N, then the eleven never-audited
 tracks A-M.
+**Audit tally so far: 7 corrections, 2 confirmations** - the base rate of error is high but not
+total, which matters: do not go in assuming every lesson is wrong.
 **NOTE: auditing keeps JOINING lessons** (q1<->q3, now p1<->r2). It is doing concept-spine work
 informally, which is an argument for finishing the audit before building the spine formally.
 **METHOD NOW HAS THREE CHECKS: mechanism, magnitude, and ACTION.** A lesson can have a correct
