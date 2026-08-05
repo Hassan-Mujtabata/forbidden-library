@@ -600,9 +600,16 @@ makes people more extreme) FAILED TO REPLICATE — Miller et al. 1993, Kuhn & La
 Ditto 1997 all lost it once they measured actual pre/post opinions instead of the original's
 self-reported change; later work calls polarization "the exception, not the rule".
 **So the figure shows the two gates ONLY and must NOT show the sides moving apart afterwards** —
-that is the dead half, and drawing it would repeat the decoy-effect error exactly. Still owed
-before drawing: independent corroboration of the assimilation half from a different lab, three
-independent forum accounts of the felt asymmetry, and Lord et al. read in full.
+that is the dead half, and drawing it would repeat the decoy-effect error exactly. **CORROBORATION DONE:** Taber & Lodge (2006) AJPS, "Motivated Skepticism" — different lab, method
+(thought-listing measures counterarguing directly) and domain; finds participants "counterargued
+the contrary arguments and uncritically accepted supporting arguments", i.e. the scrutiny
+asymmetry measured rather than inferred. Replicated in Political Behavior (2008).
+**Conflict recorded, not resolved:** Taber & Lodge DO find polarization while Miller/Kuhn/Munro do
+not, so that consequence is genuinely contested — which is exactly why the figure draws the gates
+only. Do not quietly settle it in either direction.
+**Still owed before drawing: class (c) only** — three independent first-person accounts of the
+felt asymmetry ("I read the one I disagreed with three times looking for the flaw"). Papers give
+the mechanism; forums give the words he will recognise it by.
 Highest value in the library: it is the mechanism most of the others sit on.
 - Error taught away: "I checked, and the evidence supports me." The reader believes the failure
   is not looking at the other side. It is not — they DO look.
