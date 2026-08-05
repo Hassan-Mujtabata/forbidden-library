@@ -625,7 +625,12 @@ mechanism error; direction right, but stated as a switch when the measured effec
 q3 done (3.142) - TRACK Q FULLY AUDITED. q3 was the most consequential audit yet: it
 invalidated the ACTION, not just the mechanism. The lesson instructed perspective-TAKING, which 25
 experiments show does not improve accuracy and can raise confidence without it; rewritten around
-perspective-GETTING (asking). Next: track P, then N, then the eleven never-audited tracks A-M.
+perspective-GETTING (asking). Track P started: p1 done (3.143) - the "always a judgement step" claim is the strong Lazarus
+side of an unresolved debate; bounded to a SCOPE claim, with the practical payoff that it tells
+the reader when the tool does NOT apply. Next: p2, p3, then N, then the eleven never-audited
+tracks A-M.
+**NOTE: auditing keeps JOINING lessons** (q1<->q3, now p1<->r2). It is doing concept-spine work
+informally, which is an argument for finishing the audit before building the spine formally.
 **METHOD NOW HAS THREE CHECKS: mechanism, magnitude, and ACTION.** A lesson can have a correct
 mechanism and still tell the reader to do the one thing the evidence says fails.
 **ADD TO THE AUDIT METHOD: check MAGNITUDE as well as direction.** A claim can be correctly aimed
