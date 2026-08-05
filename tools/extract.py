@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """Extract text from the vault PDFs into episode-structured books.json."""
-import fitz, json, re, os, sys, subprocess
+import fitz, json, re, os, sys, subprocess, unicodedata
 from collections import Counter
 from cleantext import clean as repair_text
 
@@ -116,8 +116,190 @@ def clean(t):
     return t.strip()
 
 
+_SMALL = {"a", "an", "the", "and", "or", "of", "in", "on", "at", "to", "for", "from", "by",
+          "with", "as", "is", "it", "its", "that", "this"}
+
+
+# #167: the author's own name, set per book by extract(). A Title Case rule accepts a byline as
+# readily as a section title, and a byline that becomes a chapter name does not stay local: it is
+# carried across every following split, so ONE stray match renames a whole book. "Viktor E.
+# Frankl" titled 19 consecutive parts of Man's Search for Meaning and "Also by Daniel Kahneman"
+# titled 14 of Thinking, Fast and Slow. Matching against the known author is exact where a
+# general "looks like a person's name" heuristic would eat real headings.
+_CUR_AUTHOR = ""
+_AUTHOR_VARIANTS = []
+# normalised running-header lines for the book being extracted; barred as chapter names
+_RUNNING_HEADERS = set()
+_NORM = lambda s: re.sub(r"\d+", "#", s.strip().lower())[:48]
+_FRONTMATTER = re.compile(
+    r"^(also by|by the same author|about the author|other books|praise for|contents|"
+    r"acknowledgment|acknowledgement|dedication|translated by|copyright)\b", re.IGNORECASE)
+
+
+def _norm_toks(s):
+    return [t for t in re.sub(r"[^a-z ]", " ", s.lower()).split() if len(t) >= 3]
+
+
+def _author_variants(author):
+    """Token sets to match a byline against, one per credited person.
+
+    Substring matching is not enough: the metadata says "Viktor Frankl" and the title page says
+    "Viktor E. Frankl", so the middle initial breaks the match and 19 chapters kept the byline.
+    Matching the author's tokens as a SUBSET tolerates initials, honorifics and reordering.
+    "Various" is a placeholder in this corpus, not a name, so it is never matched on.
+    """
+    out = []
+    for part in re.split(r"&|\band\b", author or ""):
+        toks = [t for t in _norm_toks(part) if t != "various"]
+        if toks:
+            out.append(toks)
+    return out
+
+
+def _is_byline(p):
+    if _FRONTMATTER.match(p.strip()):
+        return True
+    line = _norm_toks(p)
+    if not line:
+        return False
+    seen = set(line)
+    for toks in _AUTHOR_VARIANTS:
+        # subset match, and the line must be little more than the name itself -- otherwise a real
+        # heading that happens to mention the author would be thrown away
+        if all(t in seen for t in toks) and len(line) <= len(toks) + 3:
+            return True
+    return False
+
+
+def _titlecase_heading(p):
+    """#167: Title Case section headings.
+
+    is_heading only ever recognised ALL-CAPS lines and numbered patterns, so ordinary Title Case
+    headings were invisible to it. The Laws of Human Nature has 190 chapters and only FOUR were
+    detected — "Confirmation Bias", "The Blame Bias", "Rising Pressure" and every other section
+    title fell through, collapsing the book into one 171-part block of identical names.
+    Tested on that book before adoption: 58 real headings caught, 0 false positives across 1,072
+    body paragraphs. The comma test is what excludes epigraph attributions
+    ("—Fyodor Dostoyevsky, A Raw Youth"), and the initial-capital test excludes quotes and dashes.
+    """
+    if len(p) > 72 or len(p) < 6:
+        return False
+    if not p[0].isupper():
+        return False
+    if p.rstrip()[-1] in ".,;:?!":
+        return False
+    if "," in p:
+        return False
+    w = p.split()
+    if not (2 <= len(w) <= 8):
+        return False
+    big = [x for x in w if len(x) >= 4 and x.lower() not in _SMALL]
+    if not big:
+        return False
+    return sum(1 for x in big if x[0].isupper()) / len(big) >= 0.75
+
+
+def _is_vowel(c):
+    # accent-aware: "jhāna" and "samādhi" are words, not noise
+    return unicodedata.normalize("NFD", c)[0].lower() in "aeiouy"
+
+
+def _letterdigit(t):
+    """A word with a digit wedged inside it -- "BORC1IAS", "i89". Never a real heading word."""
+    t = t.strip(".,;:!?()[]\"'“”’—–")
+    return bool(re.search(r"[A-Za-z]\d|\d[A-Za-z]", t))
+
+
+def _garbled_token(t):
+    # hyphenated compounds are judged part by part, or "Stock-Picking" reads as one long
+    # vowel-poor run and a real heading gets thrown away
+    return any(_garbled_part(x) for x in re.split(r"[-–—]", t) if x)
+
+
+def _garbled_part(t):
+    t = t.strip(".,;:!?()[]\"'“”’—–")
+    letters = [c for c in t if c.isalpha()]
+    if len(letters) < 3:
+        return False                                   # too short to judge; roman numerals etc.
+    if any(c.isdigit() for c in t):
+        return True
+    # A case flip inside one word is the scanner confusing I/l/J. Checked per hyphen-part, so
+    # "Stock-Picking" is two ordinary words and not a flip. Only flagged when the part is mostly
+    # capitals -- an initial capital followed by lowercase is just a normal word.
+    ups = "".join("U" if c.isupper() else "l" for c in letters)
+    if ups.count("U") >= 2 and "l" in ups[1:]:
+        return True                                    # "TIlE", "MASQlJE", "COLOREIl"
+    if not any(_is_vowel(c) for c in letters):
+        return True                                    # "Rgrrr", "Grgrrr"
+    # 5+ consonants in a row. Deliberately NOT a vowel-ratio test: ordinary English words are
+    # vowel-poor ("Stock" .20, "Self" .25, "Strength" .12) and a ratio gate throws them away.
+    run = best = 0
+    for c in letters:
+        run = 0 if _is_vowel(c) else run + 1
+        best = max(best, run)
+    return best >= 5                                   # "Xuzonlcjm"
+
+
+def _looks_garbled(p):
+    """True when a heading candidate is mostly scan noise rather than words.
+
+    #167: Thinking, Fast and Slow renders its part-title pages in a decorative font that OCRs to
+    "1. Rgrrr 2. Grgrrr 3. Grrrrr" and "Xuzonlcjm Tapcerhob"; 48 Laws produces "TIIE BORC1IAS,
+    IVAN CUHJLAS". cleantext has a junk-title gate, but it runs AFTER extraction and only sees
+    the finished title -- by then the garbage has already been adopted as a chapter name and, via
+    head_level qualification, stamped onto every section beneath it. Rejecting the candidate here
+    means it never becomes a name in the first place; the text itself stays in the body either
+    way, so nothing is lost by refusing to use it as a label.
+    """
+    toks = [t for t in p.split() if any(c.isalpha() for c in t)]
+    if not toks:
+        return False
+    if any(_letterdigit(t) for t in p.split()):
+        return True
+    # An epigraph attribution from the margin: "IDRIES SHAH, 1968", "Baltasar Gracian, 1601-1658".
+    # 48 Laws sets these in caps, so they reach the ALL-CAPS branch and become chapter names for
+    # the fable beside them. A real chapter heading does not pair a comma with a date.
+    if "," in p and re.search(r"\d", p):
+        return True
+    bad = sum(_garbled_token(t) for t in toks)
+    if bad / len(toks) >= 0.33:   # one bad word in three is already scan noise
+        return True
+    # a page-header artefact like "Law 2 4 187": a keyword and a scatter of numbers
+    nums = sum(1 for t in p.split() if t.strip(".,:").isdigit())
+    return nums >= 3
+
+
+def head_level(p):
+    """2 = chapter-level heading, 1 = section-level heading.
+
+    #167: some books reuse the SAME section name in every chapter -- The Laws of Human Nature has
+    a "Keys to Human Nature" section in all eighteen -- so a section name alone is not a usable
+    chapter title, however correctly it was detected. Section headings get qualified by the
+    chapter they sit under; chapter headings stand alone.
+    """
+    # HEAD_RE's keyword list includes "key", so "Keys to Power" -- a section that recurs in every
+    # one of the 48 laws -- matched as chapter-level and became its own qualifier, leaving 25
+    # chapters with that identical name. Chapter level requires the NUMBER too ("Law 24",
+    # "CHAPTER XIV"); a bare keyword is a section, and gets qualified by the law it sits under.
+    m = HEAD_RE.match(p)
+    if m and m.group(2) and len(p.split()) <= 12:
+        return 2
+    # Caps alone DO count as chapter-level. Requiring a keyword as well was tried and reverted:
+    # it pushed duplicate names up (552 -> 589) because it demoted real caps-set chapter titles.
+    letters = [c for c in p if c.isalpha()]
+    if letters and sum(c.isupper() for c in letters) / len(letters) > 0.82 and len(letters) >= 4:
+        return 2
+    return 1
+
+
 def is_heading(p):
     if len(p) > 72 or len(p) < 3:
+        return False
+    if _is_byline(p):                      # guards the ALL-CAPS branch too ("VIKTOR E. FRANKL")
+        return False
+    if _NORM(p) in _RUNNING_HEADERS:
+        return False
+    if _looks_garbled(p):
         return False
     if p.endswith((".", ",", ";", "?", "!")) and not HEAD_RE.match(p):
         return False
@@ -126,10 +308,13 @@ def is_heading(p):
     letters = [c for c in p if c.isalpha()]
     if letters and sum(c.isupper() for c in letters) / len(letters) > 0.82 and len(letters) >= 4:
         return True
-    return False
+    return _titlecase_heading(p)
 
 
 def extract(meta):
+    global _CUR_AUTHOR, _AUTHOR_VARIANTS
+    _CUR_AUTHOR = meta.get("author", "")
+    _AUTHOR_VARIANTS = _author_variants(_CUR_AUTHOR)
     path = os.path.join(ROOT, meta["file"])
     doc = fitz.open(path)
     npages = len(doc)
@@ -151,6 +336,7 @@ def extract(meta):
     freq = Counter(norm(t) for _, t in blocks if len(t) < 90)
     thresh = max(4, npages // 5)
     blocks = [(pg, t) for pg, t in blocks if not (len(t) < 90 and freq[norm(t)] >= thresh)]
+
     # strip bare page numbers / roman numerals
     blocks = [(pg, t) for pg, t in blocks if not re.fullmatch(r"[\divxlc\s.\-–•|]+", t.strip().lower())]
     # strip front-matter boilerplate
@@ -158,6 +344,7 @@ def extract(meta):
                       r"|z-lib|pdf room|pdfdrive|www\.|http|printed in the|first published|publishing division",
                       re.IGNORECASE)
     blocks = [(pg, t) for pg, t in blocks if not (len(t) < 400 and junk.search(t))]
+
 
     paras = [(pg, c) for pg, c in ((pg, clean(t)) for pg, t in blocks) if c]
 
@@ -174,6 +361,26 @@ def extract(meta):
                 joined.append((pg, p))
         paras = joined
 
+    # #167: bar repeated lines from becoming chapter names.
+    #
+    # A book with several parts has a DIFFERENT running header per part, so each appears on only
+    # its share of the pages and slips under the npages//5 threshold used above. Worse, in The
+    # Path of Purification the header is not a block at all -- the line-join step above welds
+    # "PATH OF PURIFICATION" to "Part 3: Understanding (Paññá)", so it exists only AFTER joining
+    # and a raw-block detector cannot see it. It ended up naming 41 chapters.
+    #
+    # So the count is taken here, on the joined text, and the test is simply: a short line that
+    # occurs verbatim four or more times is not the unique name of anything. That also catches
+    # genuinely recurring section names ("KEYS TO POWER", once per law) which are equally useless
+    # as chapter names.
+    #
+    # They are BARRED FROM BEING NAMES, never deleted. An earlier version dropped these blocks
+    # outright and cost 1,716 words of real prose: the rule is good enough to distrust a line as
+    # a title, nowhere near good enough to destroy text with.
+    global _RUNNING_HEADERS
+    rep = Counter(_NORM(t) for _, t in paras if len(t) < 90)
+    _RUNNING_HEADERS = {k for k, v in rep.items() if v >= 4}
+
     episodes = []
     cur_title, cur_paras, words = None, [], 0
     # #165: a chapter longer than the 1400-word budget gets split, and every slice after the first
@@ -182,14 +389,21 @@ def extract(meta):
     # anonymous purely because its chapters are long. Carry the real chapter name across the split
     # and number the parts instead.
     last_head, part = None, 0
+    # #167: the most recent CHAPTER-level heading, used to qualify section-level ones.
+    cur_major, cur_level = None, 0
 
     cur_pages = []
 
     def flush():
-        nonlocal cur_title, cur_paras, words, last_head, part, cur_pages
+        nonlocal cur_title, cur_paras, words, last_head, part, cur_pages, cur_level
         if cur_paras:
             if cur_title:
                 head = cur_title.title() if cur_title.isupper() else cur_title
+                if (cur_level == 1 and cur_major
+                        and head.lower() not in cur_major.lower()
+                        and cur_major.lower() not in head.lower()
+                        and len(cur_major) + len(head) <= 88):
+                    head = f"{cur_major}: {head}"
                 last_head, part = head, 1
                 title = head
             elif last_head:
@@ -203,15 +417,21 @@ def extract(meta):
             if cur_pages:
                 ep["pg"] = [min(cur_pages), max(cur_pages)]
             episodes.append(ep)
-        cur_title, cur_paras, words, cur_pages = None, [], 0, []
+        cur_title, cur_paras, words, cur_pages, cur_level = None, [], 0, [], 0
+
+    def take_head(p):
+        nonlocal cur_title, cur_level, cur_major
+        cur_title, cur_level = p, head_level(p)
+        if cur_level == 2:
+            cur_major = p.title() if p.isupper() else p
 
     for pg, p in paras:
         if is_heading(p):
             if words > 150:
                 flush()
-                cur_title = p
+                take_head(p)
             elif cur_title is None and not cur_paras:
-                cur_title = p
+                take_head(p)
             else:
                 cur_paras.append(p); cur_pages.append(pg)
         else:
