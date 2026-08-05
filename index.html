@@ -4380,8 +4380,11 @@ $("btn-ach").onclick=()=>{const g=$("achgrid");g.innerHTML="";
   $("achs").classList.add("on")};
 
 /* ---------- patch notes ---------- */
-const APP_VER="3.107";
+const APP_VER="3.108";
 const PATCHES=[
+ {v:"3.108",n:"A Way Back In",d:"5 Aug 2026",items:[
+  ["new","THERE IS NOW A RESET PAGE FOR A DEVICE THAT WILL NOT OPEN. Add /reset.html to the Vault's address and load it. It removes the background worker and the offline caches — the only two things that can wedge — and then reopens the Vault. It does NOT touch your progress, your notes or your key, which is why it is the right thing to reach for instead of the browser's 'clear site data', a setting that would delete all three."],
+  ["fix","It can load on a device where the app itself cannot, and that is deliberate rather than lucky: the page is kept out of the offline store, so a wedged worker has no cached copy to hand back and the only route left to it is a real request to the server. That is what makes it usable from a phone, where there are no developer tools to unregister a worker by hand."]]},
  {v:"3.107",n:"It Checks For Updates Now",d:"5 Aug 2026",items:[
   ["fix","THE APP WAS NOT LOOKING FOR NEW VERSIONS WHEN YOU OPENED IT. It only checked on a timer, once every thirty minutes. So each time you opened the Vault it served whatever its offline store already held and asked about a newer version much later, if the app stayed open long enough to ask at all. A fix could be released, live and correct on the server, while your copy quietly kept showing you the old one — which from the outside is indistinguishable from the app being broken or frozen. It now asks the moment it starts, and still keeps checking every thirty minutes after that."],
   ["fix","This is what kept the previous release from reaching you. The blank-page fix went out and the copy on your machine had no reason to go and look for it."]]},

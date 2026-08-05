@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Reset The Vault</title>
+<!--
+  #171 ESCAPE HATCH — for a device whose service worker has wedged and shows a blank page.
+
+  WHY THIS PAGE CAN LOAD WHEN THE APP CANNOT. A broken worker still serves this file from the
+  network, because it is deliberately NOT in the worker's precache list: with no cached copy to
+  return, the only path left is a real fetch. That is what makes it reachable from a phone, where
+  there are no developer tools to unregister a worker by hand.
+
+  IT DOES NOT TOUCH localStorage. That is where Path progress and the vault key live, which is
+  exactly why "clear site data" is the wrong instruction to give. This removes service workers and
+  caches only — the two things that can wedge — and leaves everything the reader owns alone.
+-->
+<style>
+  :root{color-scheme:dark light}
+  body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;
+       background:#12100e;color:#e8e2d6;font:16px/1.6 system-ui,-apple-system,Segoe UI,sans-serif;
+       padding:24px;text-align:center}
+  .box{max-width:420px}
+  h1{font-size:20px;letter-spacing:.06em;margin:0 0 6px}
+  .k{font-size:40px;margin-bottom:10px}
+  #o{margin-top:14px;font-size:15px;color:#c9c0ae;min-height:3em}
+  .muted{font-size:13px;color:#8d8677;margin-top:18px}
+  a.btn{display:inline-block;margin-top:16px;padding:11px 20px;border-radius:9px;
+        background:#c9a227;color:#12100e;text-decoration:none;font-weight:700}
+  @media (prefers-color-scheme:light){body{background:#f6f2e9;color:#241f18}#o{color:#4a443a}}
+</style>
+</head>
+<body>
+<div class="box">
+  <div class="k">🗝️</div>
+  <h1>RESETTING THE VAULT</h1>
+  <div id="o">Working…</div>
+  <a class="btn" href="./" id="go" hidden>Open the Vault →</a>
+  <div class="muted">This clears only the offline cache and the background worker.
+    Your progress, notes and key are untouched.</div>
+</div>
+<script>
+(async function(){
+  var o=document.getElementById("o"), go=document.getElementById("go");
+  var workers=0, caches_=0, notes=[];
+  try{
+    if("serviceWorker" in navigator){
+      var regs=await navigator.serviceWorker.getRegistrations();
+      for(var i=0;i<regs.length;i++){ try{ if(await regs[i].unregister()) workers++; }catch(e){} }
+    } else notes.push("this browser has no service workers");
+  }catch(e){ notes.push("worker cleanup failed: "+e.message); }
+  try{
+    if(window.caches){
+      var keys=await caches.keys();
+      for(var j=0;j<keys.length;j++){ try{ if(await caches.delete(keys[j])) caches_++; }catch(e){} }
+    }
+  }catch(e){ notes.push("cache cleanup failed: "+e.message); }
+  // localStorage is deliberately NOT cleared — progress and the key live there.
+  o.textContent="Removed "+workers+" background worker"+(workers===1?"":"s")+
+                " and "+caches_+" offline cache"+(caches_===1?"":"s")+"."+
+                (notes.length?" ("+notes.join("; ")+")":"")+
+                " Opening the Vault…";
+  go.hidden=false;
+  setTimeout(function(){ location.replace("./?fresh="+Date.now()); }, 1500);
+})();
+</script>
+</body>
+</html>
