@@ -622,7 +622,12 @@ mechanisms. r2 (3.139) and r4 (3.140) done - r4 was the largest correction yet: 
 RETRACTED their own mechanism, passivity is the unlearned DEFAULT and what is learned is CONTROL.
 Track R fully audited. Track Q: q2 done (3.141) - first MAGNITUDE error rather than a
 mechanism error; direction right, but stated as a switch when the measured effects are small.
-Next: q3, then P, then N, then the eleven never-audited tracks A-M.
+q3 done (3.142) - TRACK Q FULLY AUDITED. q3 was the most consequential audit yet: it
+invalidated the ACTION, not just the mechanism. The lesson instructed perspective-TAKING, which 25
+experiments show does not improve accuracy and can raise confidence without it; rewritten around
+perspective-GETTING (asking). Next: track P, then N, then the eleven never-audited tracks A-M.
+**METHOD NOW HAS THREE CHECKS: mechanism, magnitude, and ACTION.** A lesson can have a correct
+mechanism and still tell the reader to do the one thing the evidence says fails.
 **ADD TO THE AUDIT METHOD: check MAGNITUDE as well as direction.** A claim can be correctly aimed
 and still wrong by being absolute. Hunt the words "entirely", "stops", "cannot", "never" - that is
 where overstatement hides once the direction is right.
