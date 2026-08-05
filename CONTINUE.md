@@ -633,7 +633,12 @@ functions as avoidance). Retro-justifies p3. p3 done (3.145) - TRACK P COMPLETE.
 (implementation intentions, d=.65). Track N: n1 done (3.146) - Greene's "one mechanism behind all bias" bounded to the HOT family;
 the COLD family (anchoring, availability) needs PROCEDURAL fixes, not honesty. n1s3 done (3.147) - halo CONFIRMED, plus two stronger findings: people report the influence in
 REVERSE when asked, and FOREWARNING DOES NOT PROTECT (so no lesson may imply vigilance works).
-Advice rewritten to procedural. Next: n1s5, then the eleven never-audited tracks A-M.
+Advice rewritten to procedural. n1s5 done (3.148). **TRACK N COMPLETE - ALL FIVE NEW TRACKS (N/O/P/Q/R) ARE NOW AUDITED.**
+Next: the eleven older tracks A-M, 76 lessons, never audited.
+**CARRY THIS INTO THEM:** three lessons in track N had a motivational explanation that was only
+partial and needed a colder one added. Books about motives reach for motivational causes every
+time; roughly a third of the time the plainer expectancy/heuristic account does as much work.
+Expect the same in E (Power & Strategy) and M (The Like Switch).
 **MY MOST REPEATED ERROR, now four times: inventing a mechanism and stating it like a finding**
 (neck/vagus, halo-as-compression, and two others). When auditing my own text, the sentence
 beginning "the reason this happens is..." is the one to distrust first.
