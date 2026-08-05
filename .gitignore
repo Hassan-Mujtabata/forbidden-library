@@ -25,3 +25,6 @@ tools/figs_research/
 
 # #165: pre-rebuild safety copies of the graph/library (contain lesson text)
 tools/backup/
+
+# #166: figures extracted from the book PDFs — copyrighted images, never commit
+tools/bookimg/

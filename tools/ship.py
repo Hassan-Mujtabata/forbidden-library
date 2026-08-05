@@ -52,6 +52,8 @@ FORBIDDEN = [
     # #162: the research sheets quote lesson text verbatim (step 1a of the figure protocol).
     # Same reasoning as integrate_report: a document about the graph is the graph.
     re.compile(r"(^|/)figs_research/"),
+    # #166: extracted book figures are the publishers' images. Same rule as books.json.
+    re.compile(r"(^|/)bookimg/"),
     re.compile(r"\.pdf$", re.I),
     re.compile(r"github_token"),
 ]
