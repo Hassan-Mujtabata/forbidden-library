@@ -37,24 +37,25 @@ When you finish a job: tick it, add what you learned to "Hard rules", and commit
 - Every lesson citation resolves to a real book (Attached and The Path of Purification were
   ingested 4 Aug; before that 21 citations pointed at nothing).
 - Path: **87 nodes, 13 tracks, 22 with figures**. Backup at `tools/backup/graph.pre-rebuild.json`.
-- App: 3.101 live. `VV.all({stage:1})` passes 98/98.
+- App: 3.102 live. `VV.all({stage:1})` passes 98/98.
+- **507 book figures live**, encrypted per book under `img/<id>.enc`.
 
 ---
 
 ## JOB QUEUE — do these in order
 
-### [ ] JOB 1 — Extract every image from all 24 books
-Currently **0% of book images are in the app.** This is the biggest gap. TMI alone has 123 real
-figures; What Everybody Is Saying has ~99 and is a book about reading body language, so its
-photos ARE the content.
-- Extraction is proven working (PyMuPDF, `page.get_images(full=True)` → `fitz.Pixmap`).
-- **Filter needed:** drop images repeating on 4+ pages (page furniture) and anything under
-  ~180x140. The 48 Laws reports 956 images and they are almost all a repeating footer. TMI by
-  contrast had zero furniture — 123 of 128 were real.
-- PNG is the wrong format: TMI's 123 figures are 19.5MB as PNG, roughly 3MB as WebP.
-- **DECISION NEEDED FROM HASSAN** (see below) on where they are stored.
-- Done when: every book's real figures are extracted, converted, stored, and render in the reader
-  at the right place in the text.
+### [x] JOB 1 — Extract every image from all 24 books  — DONE, shipped 3.102
+**507 figures extracted, 505 placed in their correct chapter, 2 orphans.** Tools:
+`tools/bookimages.py` (extract + filter), `tools/packimages.py` (place + encrypt).
+- Raw files land in `tools/bookimg/` — gitignored AND ship-blocked (publishers' images, plaintext).
+- Shipped as one AES-GCM bundle per book at `img/<id>.enc`, fetched when that book is opened.
+  NOT inside content.enc — not for size (size never matters here) but for LOAD ORDER: 34MB of
+  photographs in the main payload means a spinner before the first word of text.
+- Reader: `injectBookFigures()` in index.html decrypts, caches per session, and spreads the
+  figures through the chapter.
+- Chapters now carry `pg` (their printed page range) so a figure from page N lands in the chapter
+  that discusses page N. Word-proportional estimation was REJECTED: pages holding a big figure
+  carry little text, so a word-based guess drifts most exactly where the figures are.
 
 ### [ ] JOB 2 — Give long chapters real names
 A chapter over ~1400 words is split into slices. Slices currently inherit the chapter name with a
@@ -107,6 +108,15 @@ has already been rejected and why.
 - **A re-extract must be diffed against the previous library before shipping.** Compare total
   words AND book count — a book vanishing shows as zero per-book drift if you only compare books
   present in both files.
+- **A bare `except: continue` will hide a catastrophe.** The first image extractor reported THREE
+  images for a 269-page book of photographs because fitz.Pixmap() throws on ordinary encodings
+  (JPX, JBIG2, masked images) and the bare except swallowed every failure. Count failures, print
+  them, never discard silently. Prefer doc.extract_image() and keep Pixmap as the fallback.
+- **Images in a Separation colourspace are stored as INK, not brightness — they come out inverted.**
+  Every photograph in What Every Body Is Saying extracted as a colour negative. THE TRAP: comparing
+  extract_image() against fitz.Pixmap() shows NO difference, because both skip the conversion the
+  page-draw applies. Only rendering the actual page reveals it. Invert when cs-name contains
+  "Separation".
 - **Unused figure components are suspects, not a menu.** Every one checked against its source
   encoded the wrong claim (`drift`, `pacer`, `curve`). 24 remain unaudited.
 - **`c` is the scene item's component key.** A label passed as `c` overwrites the component name.
