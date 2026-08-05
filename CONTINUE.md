@@ -63,7 +63,9 @@ When you finish a job: tick it, add what you learned to "Hard rules", and commit
   631 duplicated, 893 numbered). The remainder are genuinely unheaded in the PDFs.
 - Every lesson citation resolves to a real book (Attached and The Path of Purification were
   ingested 4 Aug; before that 21 citations pointed at nothing).
-- Path: **98 nodes, 15 tracks, 23 with figures**. Track O is fully deepened (3.112). Track N = first mini-path (Laws of
+- Path: **101 nodes, 16 tracks, 23 with figures**. Track O fully deepened (3.112);
+  track P = Meditations (3.113), covered but at ~600 words/lesson — NEEDS DEEPENING to the
+  track-O standard, it carries the four elements but compactly. Track N = first mini-path (Laws of
   Human Nature). Track O = Reading the Body (Navarro), 4 lessons, one `pattern` figure. Backup at `tools/backup/graph.pre-rebuild.json`.
 - App: **3.109 live and pushed.** The token at `C:\Users\sands\.secrets\github_token.txt` is
   still missing, so ship.py's push is intermittent — when it fails, Hassan runs
@@ -200,7 +202,8 @@ missing any of those is leaving homework. Length follows the idea — o1 needed 
 o2-o4 needed ~850 each. Do not pad to a budget and do not merge two ideas to fill one.
 
 **STILL UNCOVERED (no lesson, no track, no mention):**
-The Body Keeps the Score (172,208w) · How to Win Friends (79,675w) · Meditations (72,513w).
+The Body Keeps the Score (172,208w) · How to Win Friends (79,675w).
+(What Everybody Is Saying -> track O in 3.110. Meditations -> track P in 3.113.)
 
 **COVERED BUT STILL AT SUMMARY DEPTH — needs the same treatment as track O:**
 Track N (Laws of Human Nature), all 7 nodes, still ~200-400 words each.
