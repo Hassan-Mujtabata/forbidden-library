@@ -698,7 +698,15 @@ the line the library already drew at o4/k4 - benefit of the doubt to INSTANCES, 
 NOTE: track I needed FOUR safety bounds (i2 dials, i5 cruelty line, i6 need-vs-preference, i8
 instance-vs-pattern) - more than any track so far. Relationship-advice books earn that scrutiny;
 apply the same suspicion to any remaining track that tells the reader how to treat a person.
-**NEXT: C, G, H, A, L; plus b8, j2/j3.**
+**TRACK C STARTED (3.177): c1, c4, c5. Remaining in C: c2, c6.** Then G, H, A, L; plus b8, j2/j3.
+**NEW SPINE ENTRY - `unfalsifiable-persistence`.** A frame that reinterprets its own disconfirming
+evidence as a reason to continue. THREE instances found so far, in three unrelated books:
+  - i5  "my secure presence will change them" - bad treatment becomes proof more patience is needed
+  - i8  "assume they mean well" - the fortieth instance becomes another benefit of the doubt
+  - c5  the insight map - distress IS progress, so getting worse confirms the map
+The fix is the same in all three and should be reused: install a CHECKPOINT or EXIT decided in
+advance, because the frame will never generate one from inside. Watch for this in G, H, A, L -
+any lesson whose advice cannot be contradicted by an outcome is a candidate.
 **Then C, G, H, A, L; plus b8, j2/j3.**
 NOTE FOR WHOEVER PICKS UP I: the dials-not-boxes correction applies to the whole track. If i3/i4
 still speak of "anxious people" and "avoidant people" as kinds of person, convert them to
