@@ -683,7 +683,15 @@ feedback, power posing all absent), and one self-contradiction caught by the int
 **k2/k9/k10 ARE NOW TAUGHT AS ONE FAMILY** - fluency, availability and recognition all read a
 property of RETRIEVAL and report it as a property of the WORLD. If another track has a lesson
 about ease standing in for evidence, join it to this family rather than restating it.
-**NEXT: track I (8 lessons), then C, G, H, A, L; plus b8, j2/j3.**
+**TRACK I STARTED (3.174): i2 + i5, the two that can actually hurt someone.** i2 now says the
+types are DIALS not boxes and that infancy does not set adult relationships; i5 is labelled
+in-text as the most dangerous idea in the book, given a six-month checkpoint set in advance, and
+bounded with a non-negotiable line - this applies to insecurity, NOT to cruelty.
+Remaining in I: i3, i4, i6, i7, i8 (i1 has a figure).
+**Then C, G, H, A, L; plus b8, j2/j3.**
+NOTE FOR WHOEVER PICKS UP I: the dials-not-boxes correction applies to the whole track. If i3/i4
+still speak of "anxious people" and "avoidant people" as kinds of person, convert them to
+positions - it is the same fix, and it is what makes the advice actionable.
 **k2 TURNS THE FLUENCY FINDING ON THE VAULT ITSELF** - if ease produces the feeling of truth, then
 clean diagrams and well-organised lessons raise confidence without touching accuracy. The library
 should not exempt itself from a mechanism it teaches, and the lesson now says so explicitly.
