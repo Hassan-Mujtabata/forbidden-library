@@ -687,7 +687,12 @@ about ease standing in for evidence, join it to this family rather than restatin
 types are DIALS not boxes and that infancy does not set adult relationships; i5 is labelled
 in-text as the most dangerous idea in the book, given a six-month checkpoint set in advance, and
 bounded with a non-negotiable line - this applies to insecurity, NOT to cruelty.
-Remaining in I: i3, i4, i6, i7, i8 (i1 has a figure).
+i3/i4/i7 done (3.175) - i3 has the ALARM ASYMMETRY argument (false alarm cheap, miss catastrophic,
+so it fires early and reports certainty), i4 has the physiological/self-report dissociation in
+avoidance (the need didn't go, THE REPORT of it did - so read behaviour, not feelings), i7 makes
+directness mechanical (protest is an encoded message with three failure points) and a FILTER as
+much as a repair. Dials-not-boxes conversion applied across all three.
+**Remaining in I: i6, i8 (i1 has a figure).**
 **Then C, G, H, A, L; plus b8, j2/j3.**
 NOTE FOR WHOEVER PICKS UP I: the dials-not-boxes correction applies to the whole track. If i3/i4
 still speak of "anxious people" and "avoidant people" as kinds of person, convert them to
