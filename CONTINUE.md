@@ -675,7 +675,12 @@ shadow wing, not one entry on a list. Tracks done: N/O/P/Q/R audited, M/D deepen
 figures and were not thin. Ten lessons deepened, now 447-533 words - J was the library's largest
 track.
 **Tracks fully worked: N O P Q R (audited) + M D E F (shadow) + B (bar b8) + J (bar j2/j3).
-**TRACK K STARTED: k5+k6 (3.171). Remaining in K: k2, k4, k7, k9, k10 (k1/k3/k8 have figures).**
+**TRACK K: k5+k6 (3.171), k2+k4 (3.172). Remaining: k7, k9, k10.**
+**k2 TURNS THE FLUENCY FINDING ON THE VAULT ITSELF** - if ease produces the feeling of truth, then
+clean diagrams and well-organised lessons raise confidence without touching accuracy. The library
+should not exempt itself from a mechanism it teaches, and the lesson now says so explicitly.
+Consider whether other lessons need the same self-application. `counterfeit-comfort`: NINE
+instances, SEVEN books.
 Then I (8), C, G, H, A, L.
 **K RISK-SCANNED CLEAN** - no priming, ego depletion, marshmallow, facial feedback or power posing
 anywhere in the track, despite Thinking Fast and Slow carrying several claims that later failed.
