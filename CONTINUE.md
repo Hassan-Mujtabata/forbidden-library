@@ -671,7 +671,11 @@ hiding competence escapes envy by moving toward pity while warmth actually works
 only lowers defensiveness when it is real (q1/m5); manufactured liking gives the feeling and none
 of the instances (d4). `counterfeit-comfort` is arguably the ORGANISING mechanism of the whole
 shadow wing, not one entry on a list. Tracks done: N/O/P/Q/R audited, M/D deepened, B all but b8.
-**TRACK E COMPLETE** (e1 3.155, e3+e5 3.163, e2+e4 3.164). **SHADOW WING COMPLETE - D, E, F, M all deepened (f2+f4 in 3.165).** **TRACK J: j4+j8 (3.166), j5+j7 (3.167), j11+j12 (3.168), j1+j10 (3.169) done. **Remaining: j6, j9 only.**
+**TRACK E COMPLETE** (e1 3.155, e3+e5 3.163, e2+e4 3.164). **SHADOW WING COMPLETE - D, E, F, M all deepened (f2+f4 in 3.165).** **TRACK J: j4+j8 (3.166), j5+j7 (3.167), j11+j12 (3.168), j1+j10 (3.169), j6+j9 (3.170) done. **TRACK J COMPLETE** except j2/j3, which already carry
+figures and were not thin. Ten lessons deepened, now 447-533 words - J was the library's largest
+track.
+**Tracks fully worked: N O P Q R (audited) + M D E F (shadow) + B (bar b8) + J (bar j2/j3).
+Remaining: K (10), I (8), C, G, H, A, L.**
 j1 imported q4's MODERATOR and it fixed the sequencing everyone gets backwards: an identity claim
 only works while it comes EASILY, so do the thing badly a few times FIRST and let the sentence be
 merely true rather than aspirational. The when-X-I-will-do-Y structure has now appeared SIX times
