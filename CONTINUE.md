@@ -671,7 +671,12 @@ hiding competence escapes envy by moving toward pity while warmth actually works
 only lowers defensiveness when it is real (q1/m5); manufactured liking gives the feeling and none
 of the instances (d4). `counterfeit-comfort` is arguably the ORGANISING mechanism of the whole
 shadow wing, not one entry on a list. Tracks done: N/O/P/Q/R audited, M/D deepened, B all but b8.
-**TRACK E COMPLETE** (e1 3.155, e3+e5 3.163, e2+e4 3.164). **SHADOW WING COMPLETE - D, E, F, M all deepened (f2+f4 in 3.165).** **TRACK J: j4+j8 (3.166), j5+j7 (3.167), j11+j12 (3.168) done. Remaining: j1, j6, j9, j10.**
+**TRACK E COMPLETE** (e1 3.155, e3+e5 3.163, e2+e4 3.164). **SHADOW WING COMPLETE - D, E, F, M all deepened (f2+f4 in 3.165).** **TRACK J: j4+j8 (3.166), j5+j7 (3.167), j11+j12 (3.168), j1+j10 (3.169) done. **Remaining: j6, j9 only.**
+j1 imported q4's MODERATOR and it fixed the sequencing everyone gets backwards: an identity claim
+only works while it comes EASILY, so do the thing badly a few times FIRST and let the sentence be
+merely true rather than aspirational. The when-X-I-will-do-Y structure has now appeared SIX times
+across the library (habit stacking, meditation setup, jhana resolve, not-replying rule, patience
+condition, professional schedule) - it is the single most reused verified finding here.**
 **THE SPINE IS NOW COMPLETE AS AN ACCOUNT:** the counterfeit is more comfortable (8 instances,
 6 books) BECAUSE it pays sooner (j8) and specifically because it is optimised for the system that
 INITIATES action rather than the one that DELIVERS satisfaction (j11 wanting vs liking). You
