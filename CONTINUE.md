@@ -698,7 +698,13 @@ the line the library already drew at o4/k4 - benefit of the doubt to INSTANCES, 
 NOTE: track I needed FOUR safety bounds (i2 dials, i5 cruelty line, i6 need-vs-preference, i8
 instance-vs-pattern) - more than any track so far. Relationship-advice books earn that scrutiny;
 apply the same suspicion to any remaining track that tells the reader how to treat a person.
-**TRACK C STARTED (3.177): c1, c4, c5. Remaining in C: c2, c6.** Then G, H, A, L; plus b8, j2/j3.
+**TRACK C COMPLETE (3.177, 3.178).** c1-c6 all deepened. c6 carries the TENTH `counterfeit-comfort`
+instance and arguably its most consequential - NUMBNESS standing in for EQUANIMITY, backed with the
+measured costs of expressive suppression, and diagnosed on RESPONSIVENESS rather than calm since
+calm is what both states share.
+**NEXT: G, H, A, L; plus b8, j2/j3.** Track A is the thinnest in the library (127-150 words across
+5 lessons, 3 of which already carry figures) - it needs the most new material per lesson, so budget
+for it rather than leaving it last by accident.
 **NEW SPINE ENTRY - `unfalsifiable-persistence`.** A frame that reinterprets its own disconfirming
 evidence as a reason to continue. THREE instances found so far, in three unrelated books:
   - i5  "my secure presence will change them" - bad treatment becomes proof more patience is needed
