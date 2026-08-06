@@ -692,7 +692,13 @@ so it fires early and reports certainty), i4 has the physiological/self-report d
 avoidance (the need didn't go, THE REPORT of it did - so read behaviour, not feelings), i7 makes
 directness mechanical (protest is an encoded message with three failure points) and a FILTER as
 much as a repair. Dials-not-boxes conversion applied across all three.
-**Remaining in I: i6, i8 (i1 has a figure).**
+**TRACK I COMPLETE (3.174-3.176).** i1 figure + i2-i8 all deepened. i6 separates adjusting on a
+PREFERENCE from adjusting on a NEED and installs a review; i8 resolves "assume they mean well" with
+the line the library already drew at o4/k4 - benefit of the doubt to INSTANCES, none to PATTERNS.
+NOTE: track I needed FOUR safety bounds (i2 dials, i5 cruelty line, i6 need-vs-preference, i8
+instance-vs-pattern) - more than any track so far. Relationship-advice books earn that scrutiny;
+apply the same suspicion to any remaining track that tells the reader how to treat a person.
+**NEXT: C, G, H, A, L; plus b8, j2/j3.**
 **Then C, G, H, A, L; plus b8, j2/j3.**
 NOTE FOR WHOEVER PICKS UP I: the dials-not-boxes correction applies to the whole track. If i3/i4
 still speak of "anxious people" and "avoidant people" as kinds of person, convert them to
