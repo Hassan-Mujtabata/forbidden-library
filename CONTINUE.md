@@ -675,7 +675,15 @@ shadow wing, not one entry on a list. Tracks done: N/O/P/Q/R audited, M/D deepen
 figures and were not thin. Ten lessons deepened, now 447-533 words - J was the library's largest
 track.
 **Tracks fully worked: N O P Q R (audited) + M D E F (shadow) + B (bar b8) + J (bar j2/j3).
-**TRACK K: k5+k6 (3.171), k2+k4 (3.172). Remaining: k7, k9, k10.**
+**TRACK K COMPLETE (3.171, 3.172, 3.173).** All 10 lessons: k1/k3/k8 carry figures,
+k2/k4/k5/k6/k7/k9/k10 deepened. The library's highest-risk track is finished. Two results worth
+keeping: ZERO replication-crisis claims found in it (priming, ego depletion, marshmallow, facial
+feedback, power posing all absent), and one self-contradiction caught by the internal cross-check
+(k6 rested on loss aversion that d5 had already bounded as contested).
+**k2/k9/k10 ARE NOW TAUGHT AS ONE FAMILY** - fluency, availability and recognition all read a
+property of RETRIEVAL and report it as a property of the WORLD. If another track has a lesson
+about ease standing in for evidence, join it to this family rather than restating it.
+**NEXT: track I (8 lessons), then C, G, H, A, L; plus b8, j2/j3.**
 **k2 TURNS THE FLUENCY FINDING ON THE VAULT ITSELF** - if ease produces the feeling of truth, then
 clean diagrams and well-organised lessons raise confidence without touching accuracy. The library
 should not exempt itself from a mechanism it teaches, and the lesson now says so explicitly.
