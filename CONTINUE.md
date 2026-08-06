@@ -675,7 +675,13 @@ shadow wing, not one entry on a list. Tracks done: N/O/P/Q/R audited, M/D deepen
 figures and were not thin. Ten lessons deepened, now 447-533 words - J was the library's largest
 track.
 **Tracks fully worked: N O P Q R (audited) + M D E F (shadow) + B (bar b8) + J (bar j2/j3).
-Remaining: K (10), I (8), C, G, H, A, L.**
+**TRACK K STARTED: k5+k6 (3.171). Remaining in K: k2, k4, k7, k9, k10 (k1/k3/k8 have figures).**
+Then I (8), C, G, H, A, L.
+**K RISK-SCANNED CLEAN** - no priming, ego depletion, marshmallow, facial feedback or power posing
+anywhere in the track, despite Thinking Fast and Slow carrying several claims that later failed.
+**But the cross-check caught the library CONTRADICTING ITSELF**: k6 rested on loss aversion as
+established while d5 bounds it as contested. Fixed. Keep running that check - a claim bounded in
+one lesson may still be asserted in another.
 j1 imported q4's MODERATOR and it fixed the sequencing everyone gets backwards: an identity claim
 only works while it comes EASILY, so do the thing badly a few times FIRST and let the sentence be
 merely true rather than aspirational. The when-X-I-will-do-Y structure has now appeared SIX times
