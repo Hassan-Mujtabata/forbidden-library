@@ -702,6 +702,11 @@ apply the same suspicion to any remaining track that tells the reader how to tre
 instance and arguably its most consequential - NUMBNESS standing in for EQUANIMITY, backed with the
 measured costs of expressive suppression, and diagnosed on RESPONSIVENESS rather than calm since
 calm is what both states share.
+**TRACK G STARTED (3.179): g1, g4, g6. Remaining in G: g2, g3.** Then H, A, L; plus b8, j2/j3.
+g4 was a genuine CORRECTION, not a deepening - "never accept good enough" is the maximising
+disposition, which buys better outcomes at the price of satisfaction. Now bounded by whether the
+thing REPEATS OR SCALES. De Bono is the softest source in the library; expect assertion where the
+other tracks have findings, and mark it as assertion where it stays that way (done in g1).
 **NEXT: G, H, A, L; plus b8, j2/j3.** Track A is the thinnest in the library (127-150 words across
 5 lessons, 3 of which already carry figures) - it needs the most new material per lesson, so budget
 for it rather than leaving it last by accident.
